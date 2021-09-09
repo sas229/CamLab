@@ -1,0 +1,36 @@
+QLineEdit:disabled {{
+    color: {QTMATERIAL_SECONDARYTEXTCOLOR};
+    background-color: {QTMATERIAL_SECONDARYCOLOR};
+}}
+
+QGroupBox {{
+    background-color: {QTMATERIAL_SECONDARYLIGHTCOLOR};
+}}
+
+/* QTableView:item {{
+  padding: 5px;
+  min-height: 25px;
+  color: {QTMATERIAL_PRIMARYCOLOR};
+}}
+
+QTableView::item:selected {{
+  color: {QTMATERIAL_PRIMARYCOLOR};
+}}
+
+QTableView::item:disabled {{
+  color: {QTMATERIAL_PRIMARYCOLOR};
+}}
+
+QTableView QLineEdit,
+QListView QLineEdit {{
+  color: {QTMATERIAL_PRIMARYCOLOR};
+  background-color: {{secondaryColor}};
+  border: 1px solid unset;
+  border-radius: unset;
+  padding: unset;
+  padding-left: unset;
+  height: unset;
+  border-width: unset;
+  border-top-left-radius: unset;
+  border-top-right-radius: unset;
+}} */
