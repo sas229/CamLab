@@ -1,15 +1,19 @@
-2021-09-09 22:57:42,821 - __main__ - <module> - INFO - Log file created.
-2021-09-09 22:57:42,912 - camlab.devices - __init__ - INFO - Finding previous YAML file location from QSettings.
-2021-09-09 22:57:42,912 - camlab.devices - findConfigurationPath - INFO - Configuration file path found at /home/sam/Documents/Academia/Research/Code/CamLabWidgets/Test.yaml
-2021-09-09 22:57:42,912 - camlab.devices - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLabWidgets/Test.yaml and saving location to QSettings.
-2021-09-09 22:57:42,927 - camlab.devices - loadConfiguration - INFO - Configuration file parsed.
-2021-09-09 22:57:42,968 - camlab.devices - loadDevicesFromConfiguration - INFO - Configuration loaded.
-2021-09-09 22:57:42,969 - camlab.devices - __init__ - INFO - Device instantiated.
-2021-09-09 22:57:42,969 - camlab.devices - __init__ - INFO - Thread created.
-2021-09-09 22:57:42,969 - camlab.devices - __init__ - INFO - Thread started.
-2021-09-09 22:57:43,032 - __main__ - __init__ - INFO - Assembling UI.
-2021-09-09 22:57:43,131 - camlab.devices - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLabWidgets/Test.yaml and saving location to QSettings.
-2021-09-09 22:57:43,146 - camlab.devices - loadConfiguration - INFO - Configuration file parsed.
-2021-09-09 22:57:43,240 - camlab.devices - loadDevicesFromConfiguration - INFO - Configuration loaded.
-2021-09-09 22:57:43,298 - __main__ - <module> - INFO - Timer instantiated.
-2021-09-09 23:11:39,646 - __main__ - closeEvent - INFO - Closing CamLab.
+2021-09-09 23:29:21,994 - __main__ - <module> - INFO - Log file created.
+2021-09-09 23:29:22,099 - camlab.devices - __init__ - INFO - Finding previous YAML file location from QSettings.
+2021-09-09 23:29:22,099 - camlab.devices - findConfigurationPath - INFO - Configuration file path found at /home/sam/Documents/Academia/Research/Code/CamLabWidgets/Test.yaml
+2021-09-09 23:29:22,099 - camlab.devices - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLabWidgets/Test.yaml and saving location to QSettings.
+2021-09-09 23:29:22,114 - camlab.devices - loadConfiguration - INFO - Configuration file parsed.
+2021-09-09 23:29:22,156 - camlab.devices - loadDevicesFromConfiguration - INFO - Configuration loaded.
+2021-09-09 23:29:22,157 - camlab.devices - __init__ - INFO - Device instantiated.
+2021-09-09 23:29:22,157 - camlab.devices - __init__ - INFO - Thread created.
+2021-09-09 23:29:22,157 - camlab.devices - __init__ - INFO - Thread started.
+2021-09-09 23:29:22,212 - __main__ - __init__ - INFO - Assembling UI.
+2021-09-09 23:29:22,362 - camlab.devices - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLabWidgets/Test.yaml and saving location to QSettings.
+2021-09-09 23:29:22,385 - camlab.devices - loadConfiguration - INFO - Configuration file parsed.
+2021-09-09 23:29:22,476 - camlab.devices - loadDevicesFromConfiguration - INFO - Configuration loaded.
+2021-09-09 23:29:22,536 - __main__ - <module> - INFO - Timer instantiated.
+2021-09-09 23:29:27,143 - camlab.widgets.CamLabToolBar - changeMode - INFO - Configuration mode enabled
+2021-09-09 23:29:27,150 - camlab.devices - run - INFO - Started acquisition and control.
+2021-09-09 23:29:28,839 - camlab.widgets.CamLabToolBar - changeMode - INFO - Acquisition and control mode enabled.
+2021-09-09 23:29:28,847 - camlab.devices - configure - INFO - Configuring devices.
+2021-09-09 23:29:30,847 - __main__ - closeEvent - INFO - Closing CamLab.
