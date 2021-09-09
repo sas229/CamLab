@@ -1,7 +1,6 @@
-import os
-from PySide6.QtWidgets import QToolBar, QWidget, QSizePolicy, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QCheckBox, QTabWidget, QLabel, QLineEdit, QGridLayout, QFrame, QFileDialog, QComboBox, QSlider
-from PySide6.QtGui import QIcon, QAction, QCursor, QDoubleValidator, QIntValidator, QFont
-from PySide6.QtCore import Signal, Slot, Qt, QTime, QDate
+from PySide6.QtWidgets import QGroupBox, QLabel, QGridLayout
+from PySide6.QtGui import QFont
+from PySide6.QtCore import Qt, QDate
 import logging
 from datetime import datetime
 

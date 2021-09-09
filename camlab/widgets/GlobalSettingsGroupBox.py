@@ -1,16 +1,7 @@
-import os
-from PySide6.QtWidgets import QToolBar, QWidget, QSizePolicy, QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QCheckBox, QTabWidget, QLabel, QLineEdit, QGridLayout, QFrame, QFileDialog, QComboBox, QSlider
-from PySide6.QtGui import QIcon, QAction, QCursor, QDoubleValidator, QIntValidator, QFont
-from PySide6.QtCore import Signal, Slot, Qt, QTime, QDate
-from qt_material import apply_stylesheet, QtStyleTools
-from camlab.models import ChannelsTableModel, ColourPickerTableModel
-from camlab.views import ChannelsTableView, ColourPickerTableView
-from camlab.dialogs import ColourPickerDialog
+from PySide6.QtWidgets import QPushButton, QVBoxLayout, QHBoxLayout, QGroupBox, QLabel, QLineEdit, QGridLayout, QFrame, QFileDialog
+from PySide6.QtGui import QDoubleValidator, QIntValidator
+from PySide6.QtCore import Signal, Slot
 import logging
-import pyqtgraph as pg
-import numpy as np
-from datetime import datetime
-from qtrangeslider import QRangeSlider
 
 log = logging.getLogger(__name__)
 
