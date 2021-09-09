@@ -534,7 +534,6 @@ class PlotWindow(QWidget, QtStyleTools):
         self.colourPickerDialog.selectedColour.connect(self.setColour)
 
         self.commonChannelComboBox.currentIndexChanged.connect(self.setCommonChannel)
-        # self.plot.getPlotItem().sigRangeChanged.connect()
 
     def fillCommonChannelComboBox(self):
         numChannels = len(self.channelsModel._data)
