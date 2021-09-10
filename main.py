@@ -3,7 +3,7 @@ from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, Q
 from PySide6.QtGui import QIcon, QDoubleValidator, QCursor
 from PySide6.QtCore import Signal, Slot, Qt, QObject, QAbstractTableModel, QModelIndex, QLocale, QPoint, QThread, QTimer
 from qt_material import apply_stylesheet, QtStyleTools
-from camlab.widgets import CamLabToolBar, StatusGroupBox, GlobalSettingsGroupBox, PlotWindow
+from camlab.widgets import CamLabToolBar, StatusGroupBox, GlobalSettingsGroupBox, DevicesGroupBox, PlotWindow
 from camlab.devices import Devices
 from camlab.models import DeviceTableModel, AcquisitionTableModel
 from camlab.views import DeviceTableView, AcquisitionTableView
@@ -55,15 +55,10 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.mainWindowLayout.addWidget(self.globalSettingsGroupBox)
 
         # Device table groupbox.
-        self.deviceTable = DeviceTableView(self.devices.configuration)
-
-        self.devicesGroupBox = QGroupBox()
-        self.devicesGroupBox.setFixedHeight(175)
-        layout = QVBoxLayout()
-        layout.addWidget(self.deviceTable)
-        self.devicesGroupBox.setLayout(layout)
-        self.devicesGroupBox.setTitle("Devices")
+        self.devicesGroupBox = DevicesGroupBox(self.configuration)
         self.mainWindowLayout.addWidget(self.devicesGroupBox)
+        self.devicesGroupBox.deviceTableView.setModel(self.devices.deviceTableModel) 
+
 
         # Acquisition groupbox.
         self.acquisitionTabWidget = QTabWidget()
@@ -80,8 +75,6 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.centralWidget = QWidget()
         self.centralWidget.setLayout(self.mainWindowLayout)
         self.setCentralWidget(self.centralWidget)   
-
-        self.deviceTable.setModel(self.devices.deviceTableModel) 
 
         self.channelsData = [   
             {"plot": False, "name": "Time", "device": "[ALL]", "colour": "#35e3e3", "value": "0.00", "unit": "s"},
@@ -213,8 +206,8 @@ class MainWindow(QMainWindow, QtStyleTools):
     
     def updateTableIcons(self):
         # Workaround to change icon style in device table delegates.
-        self.deviceTable.connectionIconDelegate.setIcon(self.darkMode)
-        self.deviceTable.statusIconDelegate.setIcon(self.darkMode)    
+        self.devicesGroupBox.deviceTableView.connectionIconDelegate.setIcon(self.darkMode)
+        self.devicesGroupBox.deviceTableView.statusIconDelegate.setIcon(self.darkMode)    
 
     def addPlot(self):
         channelsData = copy.deepcopy(self.channelsData)
