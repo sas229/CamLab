@@ -130,6 +130,7 @@ class MainWindow(QMainWindow, QtStyleTools):
 
         self.devices.startTimers.connect(self.start)
         self.devices.endTimers.connect(self.end)
+        self.devices.device.samplesCount.connect(self.statusGroupBox.updateSamplesCount)
 
         self.toolbar.clearPlotsButton.triggered.connect(self.devices.device.clearPlotData)
         self.toolbar.autozeroButton.triggered.connect(self.devices.device.autozero)
@@ -191,7 +192,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.acquisitionGroupBox.setVisible(not self.acquisitionGroupBox.isVisible()) 
         if self.statusGroupBox.isVisible() == True:
             self.height = 300
-            self.width = 600
+            self.width = 800
         else:
             self.height = 850
             self.width = 800

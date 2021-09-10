@@ -12,17 +12,21 @@ log = logging.getLogger(__name__)
 
 class Device(QObject):
     plotDataChanged = Signal(np.ndarray)
+    samplesCount = Signal(int)
 
     def __init__(self):
         super().__init__()
         self.plotData = np.zeros(9)
         self.time = 0.00
+        self.count = 0
         self.offsets = np.asarray((-0.1, -0.2, -0.3, -0.4, 0.1, 0.2, 0.3, 0.4))
 
     def updatePlotData(self):
         timesteps = np.linspace(0, 0.25, 25)
         timesteps += self.time
-        self.newData = np.random.rand(25,8)*0.1
+        self.newData = np.random.rand(25,8)*0.1 
+        self.count += np.shape(self.newData)[0]
+        self.samplesCount.emit(self.count)
         newLine = np.column_stack((timesteps, self.newData+self.offsets))
         self.plotData = np.vstack((self.plotData, newLine)) 
         self.plotDataChanged.emit(self.plotData)
@@ -33,7 +37,6 @@ class Device(QObject):
 
     def autozero(self):
         self.offsets = np.average(self.newData, axis=0)
-
 
 class Devices(QObject):
     updateUI = Signal(dict)
