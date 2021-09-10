@@ -27,12 +27,6 @@ class GlobalSettingsGroupBox(QGroupBox):
         self.setFilenameLineEdit = QLineEdit()
         self.setFilenameLineEdit.setText(self.configuration["global"]["filename"])
 
-        # Set path layout.
-        self.setPathLayout = QHBoxLayout()
-        self.setPathLayout.addWidget(self.setPathButton)
-        self.setPathLayout.addWidget(self.setPathAddressLabel, 4)
-        self.setPathLayout.addWidget(self.setFilenameLineEdit)
-
         # Control rate input and validator.
         self.controlRateLabel = QLabel("Control Rate (Hz)")
         self.controlRateLineEdit = QLineEdit()
@@ -54,15 +48,6 @@ class GlobalSettingsGroupBox(QGroupBox):
         self.averageSamplesLineEdit.setValidator(self.averageSamplesValidator)
         self.averageSamplesLineEdit.setText(str(self.configuration["global"]["averageSamples"]))
 
-        # Rates layout.
-        self.ratesLayout = QGridLayout()
-        self.ratesLayout.addWidget(self.controlRateLabel, 0, 0)
-        self.ratesLayout.addWidget(self.controlRateLineEdit, 1, 0)
-        self.ratesLayout.addWidget(self.acquisitionRateLabel, 0, 1)
-        self.ratesLayout.addWidget(self.acquisitionRateLineEdit, 1, 1)
-        self.ratesLayout.addWidget(self.averageSamplesLabel, 0, 2)
-        self.ratesLayout.addWidget(self.averageSamplesLineEdit, 1, 2)
-
         # Horizontal separator.
         self.horizontalSeparator = QFrame()
         self.horizontalSeparator.setFrameShape(QFrame.HLine)
@@ -74,6 +59,21 @@ class GlobalSettingsGroupBox(QGroupBox):
         self.verticalSeparator.setFrameShape(QFrame.VLine)
         self.verticalSeparator.setFixedHeight(2)
         self.verticalSeparator.setFrameShadow(QFrame.Sunken)
+
+        # Assemble path layout.
+        self.setPathLayout = QHBoxLayout()
+        self.setPathLayout.addWidget(self.setPathButton)
+        self.setPathLayout.addWidget(self.setPathAddressLabel, 4)
+        self.setPathLayout.addWidget(self.setFilenameLineEdit)
+
+        # Assemble rates layout.
+        self.ratesLayout = QGridLayout()
+        self.ratesLayout.addWidget(self.controlRateLabel, 0, 0)
+        self.ratesLayout.addWidget(self.controlRateLineEdit, 1, 0)
+        self.ratesLayout.addWidget(self.acquisitionRateLabel, 0, 1)
+        self.ratesLayout.addWidget(self.acquisitionRateLineEdit, 1, 1)
+        self.ratesLayout.addWidget(self.averageSamplesLabel, 0, 2)
+        self.ratesLayout.addWidget(self.averageSamplesLineEdit, 1, 2)
         
         # Assemble nested layouts.
         self.globalSettingsVLayout = QVBoxLayout()
@@ -94,31 +94,36 @@ class GlobalSettingsGroupBox(QGroupBox):
     
     @Slot()
     def updateUI(self, newConfiguration):
+        # Method to update UI after configuration changes.
         self.configuration = newConfiguration
         self.acquisitionRateLineEdit.setText(str(self.configuration["global"]["acquisitionRate"]))
         self.controlRateLineEdit.setText(str(self.configuration["global"]["controlRate"]))
         self.averageSamplesLineEdit.setText(str(self.configuration["global"]["averageSamples"]))
         self.setPathAddressLabel.setText(self.configuration["global"]["path"])
         self.setFilenameLineEdit.setText(self.configuration["global"]["filename"])
-        # log.info("Updated global settings in UI.")
 
     def emitAcquisitionRate(self):
+        # Method to emit the new acquisition rate.
         newAcquisitionRate =self.acquisitionRateLineEdit.text()
         self.acquisitionRateChanged.emit(newAcquisitionRate)
 
     def emitControlRate(self):
+        # Method to emit the new control rate.
         newControlRate =self.controlRateLineEdit.text()
         self.controlRateChanged.emit(newControlRate)
     
     def emitAverageSamples(self):
+        # Method to emit the new number of samples to average.
         newAverageSamples =self.averageSamplesLineEdit.text()
         self.averageSamplesChanged.emit(newAverageSamples)
 
     def emitPath(self):
+        # Method to emit the new path.
         loadPath = QFileDialog.getExistingDirectory(self, 'Select the directory in which to save data')
         self.setPathAddressLabel.setText(loadPath)
         self.pathChanged.emit(loadPath)
 
     def emitFilename(self):
+        # Method to emit the new filename.
         newFilename =self.setFilenameLineEdit.text()
         self.filenameChanged.emit(newFilename)
