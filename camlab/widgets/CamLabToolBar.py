@@ -80,6 +80,13 @@ class CamLabToolBar(QToolBar):
         self.clearConfigButton.setVisible(True)
         self.addAction(self.clearConfigButton)
 
+        # Add calculated variable QAction.
+        self.addCalculatedVariableButton = QAction()
+        self.addCalculatedVariableButton.setIcon(QIcon("assets/calculate_white_24dp.svg" if self.darkMode else "assets/calculate_black_24dp.svg"))
+        self.addCalculatedVariableButton.setToolTip("Click to add a calculated variable.")
+        self.addCalculatedVariableButton.setVisible(True)
+        self.addAction(self.addCalculatedVariableButton)
+
         # New file QAction.
         self.newFileButton = QAction()
         self.newFileButton.setIcon(QIcon("assets/restore_page_white_24dp.svg" if self.darkMode else "assets/restore_page_black_24dp.svg"))
@@ -131,6 +138,7 @@ class CamLabToolBar(QToolBar):
         self.loadConfigButton.setVisible(not self.loadConfigButton.isVisible())
         self.saveConfigButton.setVisible(not self.saveConfigButton.isVisible())
         self.clearConfigButton.setVisible(not self.clearConfigButton.isVisible())
+        self.addCalculatedVariableButton.setVisible(not self.addCalculatedVariableButton.isVisible())
         self.newFileButton.setVisible(not self.newFileButton.isVisible())
         self.autozeroButton.setVisible(not self.autozeroButton.isVisible())
         self.clearPlotsButton.setVisible(not self.clearPlotsButton.isVisible())
@@ -150,21 +158,24 @@ class CamLabToolBar(QToolBar):
         self.newFileButton.setIcon(QIcon("assets/restore_page_white_24dp.svg" if self.darkMode else "assets/restore_page_black_24dp.svg"))
         self.autozeroButton.setIcon(QIcon("assets/exposure_zero_white_24dp.svg" if self.darkMode else "assets/exposure_zero_black_24dp.svg"))
         self.clearPlotsButton.setIcon(QIcon("assets/clear_all_white_24dp.svg" if self.darkMode else "assets/clear_all_black_24dp.svg"))
+        self.addCalculatedVariableButton.setIcon(QIcon("assets/calculate_white_24dp.svg" if self.darkMode else "assets/calculate_black_24dp.svg"))
         self.refreshButton.setIcon(QIcon("assets/restart_alt_white_24dp.svg" if self.darkMode else "assets/restart_alt_black_24dp.svg"))
         self.loadConfigButton.setIcon(QIcon("assets/file_upload_white_24dp.svg" if self.darkMode else "assets/file_upload_black_24dp.svg"))
         self.saveConfigButton.setIcon(QIcon("assets/file_download_white_24dp.svg" if self.darkMode else "assets/file_download_black_24dp.svg"))
         self.clearConfigButton.setIcon(QIcon("assets/clear_white_24dp.svg" if self.darkMode else "assets/clear_black_24dp.svg"))
         self.darkModeButton.setIcon(QIcon("assets/light_mode_white_24dp.svg" if self.darkMode else "assets/dark_mode_black_24dp.svg"))
         self.darkModeButton.setToolTip("Click for light mode." if self.darkMode else "Click for dark mode.")
-        # log.info("Dark mode enabled." if self.darkMode else "Light mode enabled")
 
     def emitLoadConfiguration(self):
+        # Method to select a configuration file to load and emit it as a signal.
         filename, _ = QFileDialog.getOpenFileName(self,"Open CamLab configuration file", "","Yaml files (*.yaml)")
         self.loadConfiguration.emit(filename)
 
     def emitSaveConfiguration(self):
+        # Method to select a configuration file to save to and emit it as a signal.
         filename, _ = QFileDialog.getSaveFileName(self,"Save CamLab configuration file", "","Yaml files (*.yaml)")
         self.saveConfiguration.emit(filename)
 
     def emitDarkModeChanged(self):
+        # Method to emit a signal indicating that the dark mode boolean has been toggled.
         self.darkModeChanged.emit(not self.darkMode)
