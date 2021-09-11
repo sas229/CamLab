@@ -1,23 +1,25 @@
-2021-09-11 15:23:25,513 - __main__ - <module> - INFO - Log file created.
-2021-09-11 15:23:25,589 - camlab.manager - __init__ - INFO - Finding previous YAML file location from QSettings.
-2021-09-11 15:23:25,589 - camlab.manager - findConfigurationPath - INFO - Configuration file path found at /home/sam/Documents/Academia/Research/Code/CamLabWidgets/Test.yaml
-2021-09-11 15:23:25,589 - camlab.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLabWidgets/Test.yaml and saving location to QSettings.
-2021-09-11 15:23:25,603 - camlab.manager - loadConfiguration - INFO - Configuration file parsed.
-2021-09-11 15:23:25,652 - camlab.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
-2021-09-11 15:23:25,653 - camlab.manager - __init__ - INFO - Assembly thread instantiated.
-2021-09-11 15:23:25,653 - camlab.manager - __init__ - INFO - Assembly thread created.
-2021-09-11 15:23:25,653 - camlab.manager - __init__ - INFO - Assembly thread started.
-2021-09-11 15:23:25,670 - camlab.device - openConnection - INFO - Connected to BEN.
-2021-09-11 15:23:27,680 - camlab.device - loadLua - INFO - Lua script loaded.
-2021-09-11 15:23:27,691 - camlab.device - executeLua - INFO - Lua script executed.
-2021-09-11 15:23:27,691 - camlab.manager - __init__ - INFO - Device instance instantiated.
-2021-09-11 15:23:27,692 - camlab.manager - __init__ - INFO - Device thread created.
-2021-09-11 15:23:27,692 - camlab.manager - __init__ - INFO - Device thread started.
-2021-09-11 15:23:27,743 - __main__ - __init__ - INFO - Assembling UI.
-2021-09-11 15:23:27,858 - camlab.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLabWidgets/Test.yaml and saving location to QSettings.
-2021-09-11 15:23:27,873 - camlab.manager - loadConfiguration - INFO - Configuration file parsed.
-2021-09-11 15:23:27,923 - camlab.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
-2021-09-11 15:23:28,001 - __main__ - <module> - INFO - Timer instantiated.
-2021-09-11 15:23:41,953 - camlab.widgets.CamLabToolBar - changeMode - INFO - Configuration mode enabled
-2021-09-11 15:23:41,959 - camlab.manager - run - INFO - Started acquisition and control.
-2021-09-11 15:24:13,374 - __main__ - closeEvent - INFO - Closing CamLab.
+2021-09-11 16:19:54,366 - __main__ - <module> - INFO - Log file created.
+2021-09-11 16:19:54,437 - camlab.manager - __init__ - INFO - Finding previous YAML file location from QSettings.
+2021-09-11 16:19:54,438 - camlab.manager - findConfigurationPath - INFO - Configuration file path found at /home/sam/Documents/Academia/Research/Code/CamLabWidgets/Test.yaml
+2021-09-11 16:19:54,438 - camlab.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLabWidgets/Test.yaml and saving location to QSettings.
+2021-09-11 16:19:54,452 - camlab.manager - loadConfiguration - INFO - Configuration file parsed.
+2021-09-11 16:19:54,502 - camlab.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
+2021-09-11 16:19:54,502 - camlab.manager - __init__ - INFO - Assembly thread instantiated.
+2021-09-11 16:19:54,502 - camlab.manager - __init__ - INFO - Assembly thread created.
+2021-09-11 16:19:54,503 - camlab.manager - __init__ - INFO - Assembly thread started.
+2021-09-11 16:19:54,515 - camlab.device - openConnection - INFO - Connected to BEN.
+2021-09-11 16:19:56,525 - camlab.device - loadLua - INFO - Lua script loaded.
+2021-09-11 16:19:56,535 - camlab.device - executeLua - INFO - Lua script executed.
+2021-09-11 16:19:56,536 - camlab.manager - __init__ - INFO - Device instance instantiated.
+2021-09-11 16:19:56,536 - camlab.manager - __init__ - INFO - Device thread created.
+2021-09-11 16:19:56,536 - camlab.manager - __init__ - INFO - Device thread started.
+2021-09-11 16:19:56,588 - __main__ - __init__ - INFO - Assembling UI.
+2021-09-11 16:19:56,707 - camlab.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLabWidgets/Test.yaml and saving location to QSettings.
+2021-09-11 16:19:56,726 - camlab.manager - loadConfiguration - INFO - Configuration file parsed.
+2021-09-11 16:19:56,778 - camlab.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
+2021-09-11 16:19:56,837 - __main__ - <module> - INFO - Timer instantiated.
+2021-09-11 16:20:00,105 - camlab.widgets.CamLabToolBar - changeMode - INFO - Configuration mode enabled
+2021-09-11 16:20:00,114 - camlab.manager - run - INFO - Started acquisition and control.
+2021-09-11 16:20:03,230 - camlab.widgets.CamLabToolBar - changeMode - INFO - Acquisition and control mode enabled.
+2021-09-11 16:20:03,236 - camlab.manager - configure - INFO - Configuring devices.
+2021-09-11 16:20:05,678 - __main__ - closeEvent - INFO - Closing CamLab.

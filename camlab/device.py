@@ -11,8 +11,11 @@ log = logging.getLogger(__name__)
 class Device(QObject):
     emitData = Signal(np.ndarray)
 
-    def __init__(self, id, connection):
+    def __init__(self, id, connection, addresses, dataTypes):
         super().__init__()
+        self.aAddresses = addresses
+        self.aDataTypes = dataTypes
+        self.numFrames = len(self.aAddresses)
         self.id = id 
         self.connection = connection
         self.script = "camlab/acquire.lua"
@@ -101,11 +104,7 @@ class Device(QObject):
         try:
             # Read from the device.
             self.handle = ljm.open(7, self.connection, self.id)
-            numFrames = 8
-            aAddresses = [46000, 46002, 46004, 46006, 46008, 46010, 46012, 46014]
-            dt = ljm.constants.FLOAT32
-            aDataTypes = [dt, dt, dt, dt, dt, dt, dt, dt]
-            data = np.asarray(ljm.eReadAddresses(self.handle, numFrames, aAddresses, aDataTypes))
+            data = np.asarray(ljm.eReadAddresses(self.handle, self.numFrames, self.aAddresses, self.aDataTypes))
             self.emitData.emit(data)
         except ljm.LJMError:
             # Otherwise log the exception.

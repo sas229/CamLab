@@ -20,44 +20,40 @@ class Assembly(QObject):
         self.plotData = []
         self.time = 0.00
         self.count = 0
-        self.offsets = np.asarray((-0.1, -0.2, -0.3, -0.4, 0.1, 0.2, 0.3, 0.4))
+        self.offsets = np.asarray((0, 0, 0, 0, 0, 0, 0, 0))
         self.newData = []
 
-    
     @Slot(np.ndarray)
     def updateNewData(self, data):
         if np.shape(self.newData)[0] > 0:
             self.newData = np.vstack((self.newData, data))
         else:
             self.newData = data
-        # print(np.shape(self.newData)[0])
 
     def updatePlotData(self):
         if np.shape(self.newData)[0] > 0: 
             dt = 0.001
             newData = self.newData
-            # print(np.shape(newData)[0])
             self.newData = []
             numTimesteps = np.shape(newData)[0]
             timesteps = np.linspace(0, (numTimesteps-1)*dt, numTimesteps)
             timesteps += self.time
-            # print(timesteps)
             self.count += numTimesteps
             self.samplesCount.emit(self.count)
-            newLines = np.column_stack((timesteps, newData+self.offsets))
+            newLines = np.column_stack((timesteps, newData-self.offsets))
             if np.shape(self.plotData)[0] > 0:
                 self.plotData = np.vstack((self.plotData, newLines)) 
             else: 
                 self.plotData = newLines
             self.plotDataChanged.emit(self.plotData)
             self.time += numTimesteps*dt 
-            # print(self.time)
 
     def clearPlotData(self):
         self.plotData = self.plotData[-1,:]
 
     def autozero(self):
-        self.offsets = np.average(self.newData, axis=0)
+        self.offsets = np.average(self.plotData[-10:,1:], axis=0)
+        print(self.offsets)
 
 class Manager(QObject):
     updateUI = Signal(dict)
@@ -108,7 +104,10 @@ class Manager(QObject):
         log.info("Assembly thread started.")
 
         # Create device thread.
-        self.device = Device(470019449, 1)
+        aAddresses = [46000, 46002, 46004, 46006, 46008, 46010, 46012, 46014]
+        dt = ljm.constants.FLOAT32
+        aDataTypes = [dt, dt, dt, dt, dt, dt, dt, dt]
+        self.device = Device(470019449, 1, aAddresses, aDataTypes)
         log.info("Device instance instantiated.")
         self.deviceThread = QThread()
         log.info("Device thread created.")
