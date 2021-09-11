@@ -3,8 +3,8 @@ from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, Q
 from PySide6.QtGui import QIcon, QDoubleValidator, QCursor
 from PySide6.QtCore import Signal, Slot, Qt, QObject, QAbstractTableModel, QModelIndex, QLocale, QPoint, QThread, QTimer
 from qt_material import apply_stylesheet, QtStyleTools
+from camlab.manager import Manager
 from camlab.widgets import CamLabToolBar, StatusGroupBox, GlobalSettingsGroupBox, DevicesGroupBox, PlotWindow
-from camlab.devices import Devices
 from camlab.models import DeviceTableModel, AcquisitionTableModel
 from camlab.views import DeviceTableView, AcquisitionTableView
 from camlab.log import init_log
@@ -25,14 +25,14 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.plotWindows = []
         
         
-        # Instantiate the devices object and thread.
-        self.devices = Devices()
-        self.devicesThread = QThread()
-        self.devices.moveToThread(self.devicesThread)
-        self.devicesThread.start()
+        # Instantiate the manager object and thread.
+        self.manager = Manager()
+        self.managerThread = QThread()
+        self.manager.moveToThread(self.managerThread)
+        self.managerThread.start()
 
         # Extract the configuration to generate initial UI setup.
-        self.configuration = self.devices.configuration
+        self.configuration = self.manager.configuration
 
         # Set dark mode.
         self.darkMode = self.configuration["global"]["darkMode"]
@@ -57,8 +57,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         # Device table groupbox.
         self.devicesGroupBox = DevicesGroupBox(self.configuration)
         self.mainWindowLayout.addWidget(self.devicesGroupBox)
-        self.devicesGroupBox.deviceTableView.setModel(self.devices.deviceTableModel) 
-
+        self.devicesGroupBox.deviceTableView.setModel(self.manager.deviceTableModel) 
 
         # Acquisition groupbox.
         self.acquisitionTabWidget = QTabWidget()
@@ -88,61 +87,64 @@ class MainWindow(QMainWindow, QtStyleTools):
             {"plot": False, "name": "HDisp", "device": "[EVE]", "colour": "#cab2d6", "value": "25.64", "unit": "V"}      
         ]
 
+        # Timers.
         self.plotTimer = QTimer()
-        self.plotTimer.timeout.connect(self.devices.device.updatePlotData)
-
         self.displayTimer = QTimer()
-        self.displayTimer.timeout.connect(self.statusGroupBox.updateTimes)
+        self.sampleTimer = QTimer()
+
         
         # Connections.
         self.toolbar.modeButton.triggered.connect(self.toggleMode)
-        self.toolbar.refreshButton.triggered.connect(self.devices.refreshDevices)
-        self.toolbar.loadConfiguration.connect(self.devices.loadConfiguration)
-        self.toolbar.saveConfiguration.connect(self.devices.saveConfiguration)
-        self.toolbar.clearConfigButton.triggered.connect(self.devices.clearConfiguration)
-        self.toolbar.darkModeChanged.connect(self.devices.updateDarkMode)
-
-        self.toolbar.configure.connect(self.devices.configure)
-        self.toolbar.run.connect(self.devices.run)
+        self.toolbar.refreshButton.triggered.connect(self.manager.refreshDevices)
+        self.toolbar.loadConfiguration.connect(self.manager.loadConfiguration)
+        self.toolbar.saveConfiguration.connect(self.manager.saveConfiguration)
+        self.toolbar.clearConfigButton.triggered.connect(self.manager.clearConfiguration)
+        self.toolbar.darkModeChanged.connect(self.manager.updateDarkMode)
+        self.toolbar.configure.connect(self.manager.configure)
+        self.toolbar.run.connect(self.manager.run)
         self.toolbar.addPlotButton.triggered.connect(self.addPlot)
         self.toolbar.run.connect(self.statusGroupBox.setInitialTime)
+        self.toolbar.clearPlotsButton.triggered.connect(self.manager.assembly.clearPlotData)
+        self.toolbar.autozeroButton.triggered.connect(self.manager.assembly.autozero)
 
-        self.globalSettingsGroupBox.acquisitionRateChanged.connect(self.devices.updateAcquisitionRate)
-        self.globalSettingsGroupBox.controlRateChanged.connect(self.devices.updateControlRate)
-        self.globalSettingsGroupBox.averageSamplesChanged.connect(self.devices.updateAverageSamples)
-        self.globalSettingsGroupBox.pathChanged.connect(self.devices.updatePath)
-        self.globalSettingsGroupBox.filenameChanged.connect(self.devices.updateFilename)
+        self.globalSettingsGroupBox.acquisitionRateChanged.connect(self.manager.updateAcquisitionRate)
+        self.globalSettingsGroupBox.controlRateChanged.connect(self.manager.updateControlRate)
+        self.globalSettingsGroupBox.averageSamplesChanged.connect(self.manager.updateAverageSamples)
+        self.globalSettingsGroupBox.pathChanged.connect(self.manager.updatePath)
+        self.globalSettingsGroupBox.filenameChanged.connect(self.manager.updateFilename)
         
-        self.devices.updateUI.connect(self.updateUI)
-        self.devices.configurationChanged.connect(self.updateUI)
-        self.devices.configurationChanged.connect(self.globalSettingsGroupBox.updateUI)
-        self.devices.addAcquisitionTable.connect(self.addAcquisitionTable)
-        self.devices.clearAcquisitionTabs.connect(self.clearAcquisitionTabs)
-        self.devices.updateAcquisitionTabs.connect(self.updateAcquisitionTabs)
-        self.devices.deviceTableModel.deviceConnectStatusUpdated.connect(self.updateAcquisitionTabs)
+        self.manager.updateUI.connect(self.updateUI)
+        self.manager.configurationChanged.connect(self.updateUI)
+        self.manager.configurationChanged.connect(self.globalSettingsGroupBox.updateUI)
+        self.manager.addAcquisitionTable.connect(self.addAcquisitionTable)
+        self.manager.clearAcquisitionTabs.connect(self.clearAcquisitionTabs)
+        self.manager.updateAcquisitionTabs.connect(self.updateAcquisitionTabs)
+        self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.updateAcquisitionTabs)
+        self.manager.startTimers.connect(self.start)
+        self.manager.endTimers.connect(self.end)
+        self.manager.assembly.samplesCount.connect(self.statusGroupBox.updateSamplesCount)
 
-        self.devices.startTimers.connect(self.start)
-        self.devices.endTimers.connect(self.end)
-        self.devices.device.samplesCount.connect(self.statusGroupBox.updateSamplesCount)
+        self.plotTimer.timeout.connect(self.manager.assembly.updatePlotData)
+        self.displayTimer.timeout.connect(self.statusGroupBox.updateTimes)
+        self.sampleTimer.timeout.connect(self.manager.device.readAIN)
 
-        self.toolbar.clearPlotsButton.triggered.connect(self.devices.device.clearPlotData)
-        self.toolbar.autozeroButton.triggered.connect(self.devices.device.autozero)
-    
     @Slot()
     def start(self):
         self.plotTimer.start(250)
         self.displayTimer.start(1000)
+        self.sampleTimer.start(1)
 
     @Slot()
     def end(self):
         self.plotTimer.stop()
         self.displayTimer.stop()
+        self.sampleTimer.stop()
 
     @Slot(str)
     def addAcquisitionTable(self, name):
         # Add acquisition table to dict and update the TabWidget.
         self.acquisitionTables[name] = AcquisitionTableView()
-        self.acquisitionTables[name].setModel(self.devices.acquisitionModels[name])
+        self.acquisitionTables[name].setModel(self.manager.acquisitionModels[name])
     
     @Slot()
     def clearAcquisitionTabs(self):
@@ -154,7 +156,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         # Clear the acqusition table TabWidget.
         self.acquisitionTabWidget.clear()
         # Get a list of enabled devices and current status.
-        enabledDevices = self.devices.deviceTableModel.enabledDevices()
+        enabledDevices = self.manager.deviceTableModel.enabledDevices()
         # If enabled and available, add the TabWidget.
         for device in enabledDevices:
             connect = device["connect"]
@@ -217,16 +219,17 @@ class MainWindow(QMainWindow, QtStyleTools):
         plotWindow.show()
         
         # Connections.
-        self.devices.configurationChanged.connect(self.plotWindows[plotNumber].updateUI)
-        self.devices.device.plotDataChanged.connect(self.plotWindows[plotNumber].updateLines)
+        self.manager.configurationChanged.connect(self.plotWindows[plotNumber].updateUI)
+        self.manager.assembly.plotDataChanged.connect(self.plotWindows[plotNumber].updateLines)
         self.plotWindows[plotNumber].plotWindowClosed.connect(self.removePlot)
 
     def removePlot(self, plotNumber):
         self.plotWindows.pop(plotNumber)
 
     def closeEvent(self, event):
-        self.devicesThread.quit()
-        self.devices.deviceThread.quit()
+        self.managerThread.quit()
+        self.manager.assemblyThread.quit()
+        self.manager.deviceThread.quit()
         log.info('Closing CamLab.')
         for plot in self.plotWindows:
             plot.close()
@@ -248,8 +251,8 @@ if __name__ == '__main__':
     # Execute main window.
     main = MainWindow()
     main.show()
-    configurationPath = main.devices.configurationPath
-    main.devices.loadConfiguration(configurationPath)
+    configurationPath = main.manager.configurationPath
+    main.manager.loadConfiguration(configurationPath)
     log.info("Timer instantiated.")
     sys.exit(app.exec())
     

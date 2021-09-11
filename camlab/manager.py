@@ -1,5 +1,6 @@
 from PySide6.QtCore import QObject, Signal, Slot, QSettings, QTimer, QThread
 from camlab.models import DeviceTableModel, AcquisitionTableModel
+from camlab.device import Device
 import copy
 import logging
 import ruamel.yaml
@@ -10,27 +11,47 @@ import numpy as np
 
 log = logging.getLogger(__name__)
 
-class Device(QObject):
+class Assembly(QObject):
     plotDataChanged = Signal(np.ndarray)
     samplesCount = Signal(int)
 
     def __init__(self):
         super().__init__()
-        self.plotData = np.zeros(9)
+        self.plotData = []
         self.time = 0.00
         self.count = 0
         self.offsets = np.asarray((-0.1, -0.2, -0.3, -0.4, 0.1, 0.2, 0.3, 0.4))
+        self.newData = []
+
+    
+    @Slot(np.ndarray)
+    def updateNewData(self, data):
+        if np.shape(self.newData)[0] > 0:
+            self.newData = np.vstack((self.newData, data))
+        else:
+            self.newData = data
+        # print(np.shape(self.newData)[0])
 
     def updatePlotData(self):
-        timesteps = np.linspace(0, 0.25, 25)
-        timesteps += self.time
-        self.newData = np.random.rand(25,8)*0.1 
-        self.count += np.shape(self.newData)[0]
-        self.samplesCount.emit(self.count)
-        newLine = np.column_stack((timesteps, self.newData+self.offsets))
-        self.plotData = np.vstack((self.plotData, newLine)) 
-        self.plotDataChanged.emit(self.plotData)
-        self.time += 0.25
+        if np.shape(self.newData)[0] > 0: 
+            dt = 0.001
+            newData = self.newData
+            # print(np.shape(newData)[0])
+            self.newData = []
+            numTimesteps = np.shape(newData)[0]
+            timesteps = np.linspace(0, (numTimesteps-1)*dt, numTimesteps)
+            timesteps += self.time
+            # print(timesteps)
+            self.count += numTimesteps
+            self.samplesCount.emit(self.count)
+            newLines = np.column_stack((timesteps, newData+self.offsets))
+            if np.shape(self.plotData)[0] > 0:
+                self.plotData = np.vstack((self.plotData, newLines)) 
+            else: 
+                self.plotData = newLines
+            self.plotDataChanged.emit(self.plotData)
+            self.time += numTimesteps*dt 
+            # print(self.time)
 
     def clearPlotData(self):
         self.plotData = self.plotData[-1,:]
@@ -38,7 +59,7 @@ class Device(QObject):
     def autozero(self):
         self.offsets = np.average(self.newData, axis=0)
 
-class Devices(QObject):
+class Manager(QObject):
     updateUI = Signal(dict)
     configurationChanged = Signal(dict)
     addAcquisitionTable = Signal(str)
@@ -77,15 +98,26 @@ class Devices(QObject):
         else:
             self.initialiseDefaultConfiguration()
 
-        # Create threads for each device.
-        self.device = Device()
-        log.info("Device instantiated.")
+        # Create assembly thread.
+        self.assembly = Assembly()
+        log.info("Assembly thread instantiated.")
+        self.assemblyThread = QThread()
+        log.info("Assembly thread created.")
+        self.assembly.moveToThread(self.assemblyThread)
+        self.assemblyThread.start()
+        log.info("Assembly thread started.")
+
+        # Create device thread.
+        self.device = Device(470019449, 1)
+        log.info("Device instance instantiated.")
         self.deviceThread = QThread()
-        log.info("Thread created.")
+        log.info("Device thread created.")
         self.device.moveToThread(self.deviceThread)
         self.deviceThread.start()
-        log.info("Thread started.")
+        log.info("Device thread started.")
 
+        # Connections.
+        self.device.emitData.connect(self.assembly.updateNewData)
 
     def loadDevicesFromConfiguration(self):
         # Find all devices listed in the configuration file.
@@ -108,10 +140,10 @@ class Devices(QObject):
                 except ljm.LJMError:
                     # Otherwise log the exception and set the device status to false.
                     ljme = sys.exc_info()[1]
-                    log.info(ljme) 
+                    log.warning(ljme) 
                 except Exception:
                     e = sys.exc_info()[1]
-                    log.info(e)
+                    log.warning(e)
                 self.deviceTableModel.appendRow(deviceInformation)
                 self.acquisitionModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
                 self.addAcquisitionTable.emit(name)

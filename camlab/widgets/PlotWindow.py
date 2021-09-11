@@ -248,7 +248,7 @@ class PlotWindow(QWidget, QtStyleTools):
     def autoRange(self):
         if self.autoRadio.checkState() == Qt.Checked:
             self.plot.enableAutoRange()
-            self.manualRadio.setCheckState(Qt.Unchecked)
+            # self.manualRadio.setCheckState(Qt.Unchecked)
 
     def setXRange(self):
         self.plot.getPlotItem().setXRange(1,4)

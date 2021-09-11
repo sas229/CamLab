@@ -57,7 +57,7 @@ class StatusGroupBox(QGroupBox):
         self.samplesLabel = QLabel()
         self.samplesLabel.setText("Samples:")
         self.samples = QLabel()
-        self.samples.setFont(QFont("Arial", 15))
+        self.samples.setFont(QFont("Arial", 25))
         self.samples.setText(str(self.count))
 
         # Assemble layout.
@@ -91,9 +91,9 @@ class StatusGroupBox(QGroupBox):
 
     @Slot(int)
     def updateSamplesCount(self, count):
-        # Method to update the number of samples. If less than 1e6 samples present as an integer, otherwise present in scientific notation.
+        # Method to update the number of samples. If less than 1e4 samples present as an integer, otherwise present in scientific notation.
         self.count = count
-        if self.count < 1e6:
+        if self.count < 1e4:
             self.samples.setText("{count}".format(count=self.count))
         else:
             self.samples.setText("{count:.3E}".format(count=self.count))
