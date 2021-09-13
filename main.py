@@ -23,7 +23,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.setFixedHeight(self.height)
         self.refreshing = False
 
-        self.acquisitionTables = {}
+        self.acquisitionTableViews = {}
         self.plotWindows = []
 
         # Timers.
@@ -69,17 +69,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.acquisitionGroupBox = AcquisitionGroupBox()
         self.mainWindowLayout.addWidget(self.acquisitionGroupBox)
 
-        # self.acquisitionTabWidget = QTabWidget()
-        # self.acquisitionTabWidget.setTabPosition(QTabWidget.TabPosition(0))
-        # layout = QVBoxLayout()
-        # layout.addWidget(self.acquisitionTabWidget)
-         
-        # self.acquisitionGroupBox = QGroupBox()
-        # self.acquisitionGroupBox.setFixedHeight(335)
-        # self.acquisitionGroupBox.setLayout(layout)
-        # self.acquisitionGroupBox.setTitle("Acquisition")
-        # self.mainWindowLayout.addWidget(self.acquisitionGroupBox)
-
+        # Set the central widget of the main window.
         self.centralWidget = QWidget()
         self.centralWidget.setLayout(self.mainWindowLayout)
         self.setCentralWidget(self.centralWidget)   
@@ -151,8 +141,8 @@ class MainWindow(QMainWindow, QtStyleTools):
     @Slot(str)
     def addAcquisitionTable(self, name):
         # Add acquisition table to dict and update the TabWidget.
-        self.acquisitionTables[name] = AcquisitionTableView()
-        self.acquisitionTables[name].setModel(self.manager.acquisitionModels[name])
+        self.acquisitionTableViews[name] = AcquisitionTableView()
+        self.acquisitionTableViews[name].setModel(self.manager.acquisitionModels[name])
     
     @Slot()
     def clearAcquisitionTabs(self):
@@ -170,12 +160,12 @@ class MainWindow(QMainWindow, QtStyleTools):
             connect = device["connect"]
             name = device["name"]
             status = device["status"]
-            if status == True and connect == True and name in self.acquisitionTables:
-                self.acquisitionGroupBox.acquisitionTabWidget.addTab(self.acquisitionTables[name], name)
+            if status == True and connect == True and name in self.acquisitionTableViews:
+                self.acquisitionGroupBox.acquisitionTabWidget.addTab(self.acquisitionTableViews[name], name)
 
     @Slot(str)
     def removeAcquisitionTable(self, name):
-        index = self.acquisitionGroupBox.acquisitionTabWidget.indexOf(self.acquisitionTables[name])
+        index = self.acquisitionGroupBox.acquisitionTabWidget.indexOf(self.acquisitionTableViews[name])
         self.acquisitionGroupBox.acquisitionTabWidget.removeTab(index)
 
     @Slot(dict)

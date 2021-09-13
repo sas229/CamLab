@@ -1,24 +1,26 @@
-2021-09-13 13:31:48,619 - __main__ - <module> - INFO - Log file created.
-2021-09-13 13:31:48,721 - src.manager - __init__ - INFO - Finding previous YAML file location from QSettings.
-2021-09-13 13:31:48,721 - src.manager - findConfigurationPath - INFO - Configuration file path found at /home/sam/Documents/Academia/Research/Code/CamLabWidgets/Test.yaml
-2021-09-13 13:31:48,721 - src.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLabWidgets/Test.yaml and saving location to QSettings.
-2021-09-13 13:31:48,730 - src.manager - loadConfiguration - INFO - Configuration file parsed.
-2021-09-13 13:31:48,768 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
-2021-09-13 13:31:48,768 - src.manager - __init__ - INFO - Assembly thread instantiated.
-2021-09-13 13:31:48,768 - src.manager - __init__ - INFO - Assembly thread created.
-2021-09-13 13:31:48,768 - src.manager - __init__ - INFO - Assembly thread started.
-2021-09-13 13:31:48,805 - __main__ - __init__ - INFO - Assembling UI.
-2021-09-13 13:31:48,912 - src.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLabWidgets/Test.yaml and saving location to QSettings.
-2021-09-13 13:31:48,919 - src.manager - loadConfiguration - INFO - Configuration file parsed.
-2021-09-13 13:31:48,980 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
-2021-09-13 13:31:49,044 - __main__ - <module> - INFO - Timer instantiated.
-2021-09-13 13:31:50,418 - src.manager - refreshDevices - INFO - Refreshing devices.
-2021-09-13 13:31:50,437 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
-2021-09-13 13:31:50,440 - src.manager - findDevices - INFO - Scanning for additional USB devices.
-2021-09-13 13:31:50,514 - src.manager - findDevices - INFO - Found 2 USB device(s).
-2021-09-13 13:31:50,519 - src.manager - findDevices - INFO - Scanning for TCP devices.
-2021-09-13 13:31:51,233 - __main__ - closeEvent - INFO - Waiting for manager thread to finish refreshing the device list.
-2021-09-13 13:31:56,330 - src.manager - findDevices - INFO - Found 0 TCP device(s).
-2021-09-13 13:31:57,237 - __main__ - closeEvent - INFO - Assembly thread stopped.
-2021-09-13 13:31:57,238 - __main__ - closeEvent - INFO - Manager thread stopped.
-2021-09-13 13:31:57,238 - __main__ - closeEvent - INFO - Closing CamLab.
+2021-09-13 13:42:15,121 - __main__ - <module> - INFO - Log file created.
+2021-09-13 13:42:15,185 - src.manager - __init__ - INFO - Finding previous YAML file location from QSettings.
+2021-09-13 13:42:15,186 - src.manager - findConfigurationPath - INFO - Configuration file path found at /home/sam/Documents/Academia/Research/Code/CamLabWidgets/Test.yaml
+2021-09-13 13:42:15,186 - src.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLabWidgets/Test.yaml and saving location to QSettings.
+2021-09-13 13:42:15,194 - src.manager - loadConfiguration - INFO - Configuration file parsed.
+2021-09-13 13:42:15,235 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
+2021-09-13 13:42:15,236 - src.manager - __init__ - INFO - Assembly thread instantiated.
+2021-09-13 13:42:15,236 - src.manager - __init__ - INFO - Assembly thread created.
+2021-09-13 13:42:15,236 - src.manager - __init__ - INFO - Assembly thread started.
+2021-09-13 13:42:15,285 - __main__ - __init__ - INFO - Assembling UI.
+2021-09-13 13:42:15,401 - src.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLabWidgets/Test.yaml and saving location to QSettings.
+2021-09-13 13:42:15,409 - src.manager - loadConfiguration - INFO - Configuration file parsed.
+2021-09-13 13:42:15,473 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
+2021-09-13 13:42:15,541 - __main__ - <module> - INFO - Timer instantiated.
+2021-09-13 13:42:19,052 - src.widgets.CamLabToolBar - changeMode - INFO - Configuration mode enabled
+2021-09-13 13:42:19,086 - src.device - openConnection - INFO - Connected to BEN.
+2021-09-13 13:42:21,097 - src.device - loadLua - INFO - Lua script loaded.
+2021-09-13 13:42:21,107 - src.device - executeLua - INFO - Lua script executed.
+2021-09-13 13:42:21,108 - src.manager - createDeviceThreads - INFO - Device instance instantiated for device named BEN.
+2021-09-13 13:42:21,109 - src.manager - createDeviceThreads - INFO - Device thread created for device named BEN.
+2021-09-13 13:42:21,109 - src.manager - createDeviceThreads - INFO - Device thread started for device named BEN.
+2021-09-13 13:42:21,110 - src.manager - run - INFO - Started acquisition and control.
+2021-09-13 13:42:23,978 - __main__ - closeEvent - INFO - Thread for BEN stopped.
+2021-09-13 13:42:23,979 - __main__ - closeEvent - INFO - Assembly thread stopped.
+2021-09-13 13:42:23,979 - __main__ - closeEvent - INFO - Manager thread stopped.
+2021-09-13 13:42:23,979 - __main__ - closeEvent - INFO - Closing CamLab.
