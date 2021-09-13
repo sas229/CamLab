@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QGroupBox, QVBoxLayout
-from camlab.views import DeviceTableView
+from src.views import DeviceTableView
 import logging
 from datetime import datetime
 
