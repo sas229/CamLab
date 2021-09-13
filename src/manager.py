@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 class Assembly(QObject):
     plotDataChanged = Signal(np.ndarray)
     samplesCount = Signal(int)
-
+    
     def __init__(self):
         super().__init__()
         self.plotData = []
@@ -69,6 +69,9 @@ class Manager(QObject):
         self.configuration = {}
         self.acquisitionModels = {}
         self.acquisitionTables = {}
+        self.devices = {}
+        self.deviceThread = {}
+        self.refreshing = False
 
         self.defaultAcquisitionTable = [
             {"channel": "AIN0", "name": "Ch_1", "unit": "V", "slope": 1.0, "offset": 0.00, "connect": False, "autozero": True},
@@ -97,7 +100,7 @@ class Manager(QObject):
         # Create assembly thread.
         self.assembly = Assembly()
         log.info("Assembly thread instantiated.")
-        self.assemblyThread = QThread()
+        self.assemblyThread = QThread(parent=self)
         log.info("Assembly thread created.")
         self.assembly.moveToThread(self.assemblyThread)
         self.assemblyThread.start()
@@ -120,7 +123,7 @@ class Manager(QObject):
 
             self.devices[name] = Device(id, connection, aAddresses, aDataTypes)
             log.info("Device instance instantiated for device named " + name + ".")
-            self.deviceThread[name] = QThread()
+            self.deviceThread[name] = QThread(parent=self)
             log.info("Device thread created for device named " + name + ".")
             self.devices[name].moveToThread(self.deviceThread[name])
             self.deviceThread[name].start()
@@ -169,7 +172,10 @@ class Manager(QObject):
     def findDevices(self):
         """Method to find all available devices and return an array of connection properties.
         USB connections are prioritised over Ethernet and WiFi connections to minimise jitter."""
-        
+
+        # Boolean to indicate that the device list is refreshing.
+        self.refreshing = True
+
         # Clear all tables and re-load the current configuration.
         self.deviceTableModel.clearData()
         self.acquisitionModels = {}
@@ -225,7 +231,7 @@ class Manager(QObject):
                 self.addAcquisitionTable.emit(name)
                 self.updateAcquisitionTabs.emit()
                 self.updateUI.emit(self.configuration)
-        log.info("Found " + str(devicesUSB) + " additional USB device(s).")
+        log.info("Found " + str(devicesUSB) + " USB device(s).")
 
         # Check TCP and add to list if not already in available device list.
         log.info("Scanning for TCP devices.")
@@ -272,14 +278,27 @@ class Manager(QObject):
                 self.addAcquisitionTable.emit(name)
                 self.updateAcquisitionTabs.emit()
                 self.updateUI.emit(self.configuration)
-        log.info("Found " + str(numDevicesTCP) + " additional TCP device(s).")
+        log.info("Found " + str(numDevicesTCP) + " TCP device(s).")
+
+        # Boolean to indicate that the device list has finished refreshing.
+        self.refreshing = False
 
     def configure(self):
+        # Stop acquisition.
         self.endTimers.emit()
+
+        # Close device threads.
+        for name in self.deviceThread:
+            self.deviceThread[name].quit()
+            log.info("Thread for " + name + " stopped.")
+
         log.info("Configuring devices.")
 
     def run(self):
+        # Create device threads.
         self.createDeviceThreads()
+
+        # Start acquisition.
         self.startTimers.emit()
         log.info("Started acquisition and control.")
 

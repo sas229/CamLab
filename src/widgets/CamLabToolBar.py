@@ -150,7 +150,10 @@ class CamLabToolBar(QToolBar):
     def updateIcons(self, darkMode):
         # Change appearance between light and dark modes.
         self.darkMode = darkMode
-        self.modeButton.setIcon(QIcon("assets/play_circle_white_24dp.svg" if self.darkMode else "assets/play_circle_black_24dp.svg"))
+        if self.running == True:
+            self.modeButton.setIcon(QIcon("assets/settings_white_24px.svg" if self.running else "assets/settings_black_24dp.svg"))
+        else:
+            self.modeButton.setIcon(QIcon("assets/play_circle_white_24dp.svg" if self.darkMode else "assets/play_circle_black_24dp.svg"))
         self.addPlotButton.setIcon(QIcon("assets/stacked_line_chart_white_24dp.svg" if self.darkMode else "assets/stacked_line_chart_black_24dp.svg"))
         self.controlPanelButton.setIcon(QIcon("assets/videogame_asset_white_24dp.svg" if self.darkMode else "assets/videogame_asset_black_24dp.svg"))
         self.cameraButton.setIcon(QIcon("assets/camera_white_24dp.svg" if self.darkMode else "assets/camera_black_24dp.svg"))

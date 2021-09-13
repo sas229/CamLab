@@ -1,7 +1,6 @@
 from PySide6.QtWidgets import QGroupBox, QVBoxLayout
 from src.views import DeviceTableView
 import logging
-from datetime import datetime
 
 log = logging.getLogger(__name__)
 

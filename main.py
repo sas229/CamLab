@@ -4,13 +4,14 @@ from PySide6.QtGui import QIcon, QDoubleValidator, QCursor
 from PySide6.QtCore import Signal, Slot, Qt, QObject, QAbstractTableModel, QModelIndex, QLocale, QPoint, QThread, QTimer
 from qt_material import apply_stylesheet, QtStyleTools
 from src.manager import Manager
-from src.widgets import CamLabToolBar, StatusGroupBox, GlobalSettingsGroupBox, DevicesGroupBox, PlotWindow
+from src.widgets import CamLabToolBar, StatusGroupBox, GlobalSettingsGroupBox, DevicesGroupBox, AcquisitionGroupBox, PlotWindow
 from src.models import DeviceTableModel, AcquisitionTableModel
 from src.views import DeviceTableView, AcquisitionTableView
 from src.log import init_log
 from src.dialogs import RefreshDevicesDialog
 import logging
 import copy 
+from time import sleep
 
 class MainWindow(QMainWindow, QtStyleTools):
     def __init__(self):
@@ -20,6 +21,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.height = 850
         self.setFixedWidth(self.width)
         self.setFixedHeight(self.height)
+        self.refreshing = False
 
         self.acquisitionTables = {}
         self.plotWindows = []
@@ -31,7 +33,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         
         # Instantiate the manager object and thread.
         self.manager = Manager()
-        self.managerThread = QThread()
+        self.managerThread = QThread(parent=self)
         self.manager.moveToThread(self.managerThread)
         self.managerThread.start()
 
@@ -64,16 +66,19 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.devicesGroupBox.deviceTableView.setModel(self.manager.deviceTableModel) 
 
         # Acquisition groupbox.
-        self.acquisitionTabWidget = QTabWidget()
-        self.acquisitionTabWidget.setTabPosition(QTabWidget.TabPosition(0))
-        layout = QVBoxLayout()
-        layout.addWidget(self.acquisitionTabWidget)
-         
-        self.acquisitionGroupBox = QGroupBox()
-        self.acquisitionGroupBox.setFixedHeight(335)
-        self.acquisitionGroupBox.setLayout(layout)
-        self.acquisitionGroupBox.setTitle("Acquisition")
+        self.acquisitionGroupBox = AcquisitionGroupBox()
         self.mainWindowLayout.addWidget(self.acquisitionGroupBox)
+
+        # self.acquisitionTabWidget = QTabWidget()
+        # self.acquisitionTabWidget.setTabPosition(QTabWidget.TabPosition(0))
+        # layout = QVBoxLayout()
+        # layout.addWidget(self.acquisitionTabWidget)
+         
+        # self.acquisitionGroupBox = QGroupBox()
+        # self.acquisitionGroupBox.setFixedHeight(335)
+        # self.acquisitionGroupBox.setLayout(layout)
+        # self.acquisitionGroupBox.setTitle("Acquisition")
+        # self.mainWindowLayout.addWidget(self.acquisitionGroupBox)
 
         self.centralWidget = QWidget()
         self.centralWidget.setLayout(self.mainWindowLayout)
@@ -125,7 +130,7 @@ class MainWindow(QMainWindow, QtStyleTools):
 
         self.plotTimer.timeout.connect(self.manager.assembly.updatePlotData)
         self.displayTimer.timeout.connect(self.statusGroupBox.updateTimes)
-        
+
 
     @Slot(str)
     def connectSampleTimerToDevice(self, name):
@@ -152,12 +157,12 @@ class MainWindow(QMainWindow, QtStyleTools):
     @Slot()
     def clearAcquisitionTabs(self):
         # Clear the acqusition table TabWidget.
-        self.acquisitionTabWidget.clear()
+        self.acquisitionGroupBox.acquisitionTabWidget.clear()
         
     @Slot()
     def updateAcquisitionTabs(self):
         # Clear the acqusition table TabWidget.
-        self.acquisitionTabWidget.clear()
+        self.acquisitionGroupBox.acquisitionTabWidget.clear()
         # Get a list of enabled devices and current status.
         enabledDevices = self.manager.deviceTableModel.enabledDevices()
         # If enabled and available, add the TabWidget.
@@ -166,12 +171,12 @@ class MainWindow(QMainWindow, QtStyleTools):
             name = device["name"]
             status = device["status"]
             if status == True and connect == True and name in self.acquisitionTables:
-                self.acquisitionTabWidget.addTab(self.acquisitionTables[name], name)
+                self.acquisitionGroupBox.acquisitionTabWidget.addTab(self.acquisitionTables[name], name)
 
     @Slot(str)
     def removeAcquisitionTable(self, name):
-        index = self.acquisitionTabWidget.indexOf(self.acquisitionTables[name])
-        self.acquisitionTabWidget.removeTab(index)
+        index = self.acquisitionGroupBox.acquisitionTabWidget.indexOf(self.acquisitionTables[name])
+        self.acquisitionGroupBox.acquisitionTabWidget.removeTab(index)
 
     @Slot(dict)
     def updateUI(self, newConfiguration):
@@ -231,15 +236,27 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.plotWindows.pop(plotNumber)
 
     def closeEvent(self, event):
-        # Quit all threads and plots and then close.
-        self.managerThread.quit()
-        self.manager.assemblyThread.quit()
-        for name in self.manager.deviceThread:
-            self.manager.deviceThread[name].quit()
-        log.info('Closing CamLab.')
+        # Close all plots.
         for plot in self.plotWindows:
             plot.close()
 
+        # In the event the device list is refreshing, wait until complete before quitting all threads otherwise an error is shown, but hide the window in the meantime.
+        self.setVisible(False)
+        if self.manager.refreshing == True:
+            log.info("Waiting for manager thread to finish refreshing the device list before closing.")
+            while self.manager.refreshing == True:
+                sleep(1.0)
+
+        # Quit all threads and plots and then close.
+        for name in self.manager.deviceThread:
+            self.manager.deviceThread[name].quit()
+            log.info("Thread for " + name + " stopped.")
+        self.manager.assemblyThread.quit()
+        log.info("Assembly thread stopped.")
+        self.managerThread.quit()
+        log.info("Manager thread stopped.")
+        log.info('Closing CamLab.')
+        
 
 if __name__ == '__main__':
     # Create log file instance.
