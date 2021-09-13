@@ -3,12 +3,12 @@ from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, Q
 from PySide6.QtGui import QIcon, QDoubleValidator, QCursor
 from PySide6.QtCore import Signal, Slot, Qt, QObject, QAbstractTableModel, QModelIndex, QLocale, QPoint, QThread, QTimer
 from qt_material import apply_stylesheet, QtStyleTools
-from camlab.manager import Manager
-from camlab.widgets import CamLabToolBar, StatusGroupBox, GlobalSettingsGroupBox, DevicesGroupBox, PlotWindow
-from camlab.models import DeviceTableModel, AcquisitionTableModel
-from camlab.views import DeviceTableView, AcquisitionTableView
-from camlab.log import init_log
-from camlab.dialogs import RefreshDevicesDialog
+from src.manager import Manager
+from src.widgets import CamLabToolBar, StatusGroupBox, GlobalSettingsGroupBox, DevicesGroupBox, PlotWindow
+from src.models import DeviceTableModel, AcquisitionTableModel
+from src.views import DeviceTableView, AcquisitionTableView
+from src.log import init_log
+from src.dialogs import RefreshDevicesDialog
 import logging
 import copy 
 
@@ -23,7 +23,11 @@ class MainWindow(QMainWindow, QtStyleTools):
 
         self.acquisitionTables = {}
         self.plotWindows = []
-        
+
+        # Timers.
+        self.plotTimer = QTimer()
+        self.displayTimer = QTimer()
+        self.sampleTimer = QTimer()
         
         # Instantiate the manager object and thread.
         self.manager = Manager()
@@ -86,12 +90,6 @@ class MainWindow(QMainWindow, QtStyleTools):
             {"plot": False, "name": "VDisp", "device": "[EVE]", "colour": "#cc9245", "value": "100.35", "unit": "V"},
             {"plot": False, "name": "HDisp", "device": "[EVE]", "colour": "#cab2d6", "value": "25.64", "unit": "V"}      
         ]
-
-        # Timers.
-        self.plotTimer = QTimer()
-        self.displayTimer = QTimer()
-        self.sampleTimer = QTimer()
-
         
         # Connections.
         self.toolbar.modeButton.triggered.connect(self.toggleMode)
@@ -123,10 +121,15 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.manager.startTimers.connect(self.start)
         self.manager.endTimers.connect(self.end)
         self.manager.assembly.samplesCount.connect(self.statusGroupBox.updateSamplesCount)
+        self.manager.connectSampleTimer.connect(self.connectSampleTimerToDevice)
 
         self.plotTimer.timeout.connect(self.manager.assembly.updatePlotData)
         self.displayTimer.timeout.connect(self.statusGroupBox.updateTimes)
-        self.sampleTimer.timeout.connect(self.manager.device.readAIN)
+        
+
+    @Slot(str)
+    def connectSampleTimerToDevice(self, name):
+        self.sampleTimer.timeout.connect(self.manager.devices[name].readValues)
 
     @Slot()
     def start(self):
@@ -212,6 +215,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.devicesGroupBox.deviceTableView.statusIconDelegate.setIcon(self.darkMode)    
 
     def addPlot(self):
+        # Function required here to generate the channelsData object, or load it from the configuration...
         channelsData = copy.deepcopy(self.channelsData)
         plotNumber = len(self.plotWindows)
         plotWindow = PlotWindow(plotNumber, self.darkMode, channelsData)
@@ -227,9 +231,11 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.plotWindows.pop(plotNumber)
 
     def closeEvent(self, event):
+        # Quit all threads and plots and then close.
         self.managerThread.quit()
         self.manager.assemblyThread.quit()
-        self.manager.deviceThread.quit()
+        for name in self.manager.deviceThread:
+            self.manager.deviceThread[name].quit()
         log.info('Closing CamLab.')
         for plot in self.plotWindows:
             plot.close()

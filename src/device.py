@@ -18,7 +18,7 @@ class Device(QObject):
         self.numFrames = len(self.aAddresses)
         self.id = id 
         self.connection = connection
-        self.script = "camlab/acquire.lua"
+        self.script = "src/acquire.lua"
         self.openConnection()
         self.initialiseSettings()
         self.loadLua()
@@ -99,8 +99,8 @@ class Device(QObject):
             e = sys.exc_info()[1]
             log.warning(e)
 
-    def readAIN(self):
-        # Method to read AIN registers on device.
+    def readValues(self):
+        # Method to read registers on device.
         try:
             # Read from the device.
             self.handle = ljm.open(7, self.connection, self.id)

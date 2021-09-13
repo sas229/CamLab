@@ -11,7 +11,7 @@ class DeviceTableModel(QAbstractTableModel):
         data = sorted(data, key=operator.itemgetter(0))
         self._data = data
         self._column_name = [
-            "name",
+            "Name",
             "ID",
             "Connection",
             "Address",
@@ -106,10 +106,10 @@ class DeviceTableModel(QAbstractTableModel):
         self.dataChanged.emit(index_begin, index_end, [])
 
 class AcquisitionTableModel(QAbstractTableModel):
+
     def __init__(self, data, parent=None):
         super(AcquisitionTableModel, self).__init__(parent)
         self._data = data
-        """ self._data format: a list of channel dicts"""
         if self._data != None:
             self._column_name = [
                 "Channel",
@@ -192,6 +192,7 @@ class AcquisitionTableModel(QAbstractTableModel):
             return Qt.ItemIsEnabled | Qt.ItemIsEditable
 
 class ChannelsTableModel(QAbstractTableModel):
+
     def __init__(self, data, parent=None):
         super(ChannelsTableModel, self).__init__(parent)
         self._data = data
@@ -265,6 +266,7 @@ class ChannelsTableModel(QAbstractTableModel):
 
 
 class ColourPickerTableModel(QAbstractTableModel):
+
     def __init__(self, data=None, parent=None):
         super(ColourPickerTableModel, self).__init__(parent)
         self._data = [

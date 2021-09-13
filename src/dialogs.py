@@ -1,8 +1,8 @@
 from PySide6.QtWidgets import QDialog, QProgressDialog, QVBoxLayout, QLabel
 from PySide6.QtGui import QCursor
 from PySide6.QtCore import Signal, QSize, QModelIndex, Qt
-from camlab.models import ColourPickerTableModel
-from camlab.views import ColourPickerTableView
+from src.models import ColourPickerTableModel
+from src.views import ColourPickerTableView
 import logging
 
 log = logging.getLogger(__name__)

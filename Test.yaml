@@ -6,67 +6,6 @@ global:
   path: /data
   filename: junk
 devices:
-  AMY:
-    id: 470020169
-    connection: 1
-    address: N/A
-    acquisition:
-    - channel: AIN0
-      name: Ch_1
-      unit: V
-      slope: 1.0
-      offset: 0.0
-      connect: false
-      autozero: true
-    - channel: AIN1
-      name: Ch_2
-      unit: V
-      slope: 1.0
-      offset: 0.0
-      connect: false
-      autozero: true
-    - channel: AIN2
-      name: Ch_3
-      unit: V
-      slope: 1.0
-      offset: 0.0
-      connect: false
-      autozero: true
-    - channel: AIN3
-      name: Ch_4
-      unit: V
-      slope: 1.0
-      offset: 0.0
-      connect: false
-      autozero: true
-    - channel: AIN4
-      name: Ch_5
-      unit: V
-      slope: 1.0
-      offset: 0.0
-      connect: false
-      autozero: true
-    - channel: AIN5
-      name: Ch_6
-      unit: V
-      slope: 1.0
-      offset: 0.0
-      connect: false
-      autozero: true
-    - channel: AIN6
-      name: Ch_7
-      unit: V
-      slope: 1.0
-      offset: 0.0
-      connect: false
-      autozero: true
-    - channel: AIN7
-      name: Ch_8
-      unit: V
-      slope: 1.0
-      offset: 0.0
-      connect: false
-      autozero: true
   BEN:
     id: 470019449
     connection: 1
