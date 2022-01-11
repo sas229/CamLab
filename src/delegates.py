@@ -1,15 +1,17 @@
-from PySide6.QtWidgets import QItemDelegate, QStyledItemDelegate, QStyle, QLineEdit
+from PySide6.QtWidgets import QItemDelegate, QStyledItemDelegate, QStyle, QLineEdit, QListWidget, QListWidgetItem, \
+    QComboBox, QApplication, QAbstractItemView
 from PySide6.QtGui import QIcon, QDoubleValidator, QPixmap, QColor
-from PySide6.QtCore import Qt, QEvent, QRect, QLocale
+from PySide6.QtCore import Qt, QEvent, QRect, QLocale, Signal
 
 
 class CheckBoxDelegate(QItemDelegate):
     """
     A delegate that places a fully functioning QCheckBox cell into the column to which it's applied.
     """
-    def __init__(self, key=None):
+    def __init__(self, key = None):
         super().__init__()
         self._key = key
+
 
     def createEditor(self, parent, option, index):
         """
@@ -21,7 +23,7 @@ class CheckBoxDelegate(QItemDelegate):
         """
         Paint a checkbox with a label and adjust the lateral positioning.
         """
-        if self._key == None: 
+        if self._key == None:
             # If no key is supplied then draw a centred checkbox.
             self.drawCheck(painter, option, option.rect, Qt.Unchecked if index.data() == False else Qt.Checked)
         else:
@@ -30,7 +32,7 @@ class CheckBoxDelegate(QItemDelegate):
             adjRect = QRect()
             adjRect.setCoords(x1, y1, x2, y2)
             dx = -25
-            adjRect.adjust(dx,0,dx,0)    
+            adjRect.adjust(dx,0,dx,0)
             self.drawCheck(painter, option, adjRect, Qt.Unchecked if index.data() == False else Qt.Checked)
             model = index.model()
             item = model._data[index.row()]
@@ -38,7 +40,7 @@ class CheckBoxDelegate(QItemDelegate):
             adjRect = QRect()
             adjRect.setCoords(x1, y1, x2, y2)
             dx = -int((x1-x2)/2)-10
-            adjRect.adjust(dx,0,dx,0)    
+            adjRect.adjust(dx,0,dx,0)
             self.drawDisplay(painter, option, adjRect, string)
 
     def editorEvent(self, event, model, option, index):
@@ -61,7 +63,7 @@ class CheckBoxDelegate(QItemDelegate):
         Change the underlying data model.
         '''
         model.setData(index, not index.data(), Qt.EditRole)
-        
+
 class ConnectionIconDelegate(QStyledItemDelegate):
     """
     Show the appropriate connection icon.
@@ -163,3 +165,46 @@ class StringDelegate(QItemDelegate):
             model = index.model()
             value = model.data(index)
         model.setData(index, value, Qt.EditRole)
+
+class ComboBoxDelegate(QStyledItemDelegate):
+    def __init__(self, items):
+        super().__init__()
+
+        self.items = items
+
+    def createEditor(self, parent, option, index):
+        #print('CreateEditor')
+        editor = QComboBox(parent)
+        editor.currentIndexChanged.connect(self.commit_editor)
+        editor.addItems(self.items)
+        return editor
+
+    def commit_editor(self):
+        editor = self.sender()
+        self.commitData.emit(editor)
+
+    # def setEditorData(self, editor, index):
+    #     value = index.model().data(index)
+
+        # if value:
+        #     editor.setCurrentIndex(value)
+        #     print('SetEditorData', value)
+
+    def setModelData(self, editor, model, index):
+        #print('modelSet', editor.currentIndex())
+        model.setData(index, editor.currentIndex(), Qt.EditRole)
+
+    def updateEditorGeometry(self, editor, option, index):
+        editor.setGeometry(option.rect)
+
+    def paint(self, painter, option, index):
+        value = index.model().data(index)
+        # if value > len(self.items)-1:
+        #     value = len(self.items)-1
+        text = self.items[value]
+        option.text = text
+        QApplication.style().drawControl(QStyle.CE_ItemViewItem, option, painter)
+
+
+
+

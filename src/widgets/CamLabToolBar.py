@@ -32,7 +32,7 @@ class CamLabToolBar(QToolBar):
         self.addPlotButton.setToolTip("Click to add plot.")
         self.addAction(self.addPlotButton)
 
-        # Open control pannel  QAction.
+        # Open control panel  QAction.
         self.controlPanelButton = QAction()
         self.controlPanelButton.setIcon(QIcon("assets/videogame_asset_white_24dp.svg" if self.darkMode else "assets/videogame_asset_black_24dp.svg"))
         self.controlPanelButton.setToolTip("Click to open control panel.")

@@ -54,7 +54,7 @@ class GlobalSettingsGroupBox(QGroupBox):
         self.horizontalSeparator.setFixedHeight(4)
         self.horizontalSeparator.setFrameShadow(QFrame.Sunken)
 
-        # Verical separator.
+        # Vertical separator.
         self.verticalSeparator = QFrame()
         self.verticalSeparator.setFrameShape(QFrame.VLine)
         self.verticalSeparator.setFixedHeight(2)

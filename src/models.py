@@ -4,7 +4,7 @@ import operator
 
 class DeviceTableModel(QAbstractTableModel):
     """Methods for data and setData also emit signals to add and remove tabs from the acquisition tab widget when enabled or disabled."""
-    deviceConnectStatusUpdated = Signal()
+    deviceConnectStatusUpdated = Signal(str, bool)
 
     def __init__(self, data=[], parent=None):
         super(DeviceTableModel, self).__init__(parent)
@@ -45,7 +45,6 @@ class DeviceTableModel(QAbstractTableModel):
                         return item["address"]
                     elif index.column() == 4:
                         return item["status"]
-
         elif role == Qt.CheckStateRole and index.column()==0:
             if index.isValid():
                 item = self._data[index.row()]
@@ -56,7 +55,7 @@ class DeviceTableModel(QAbstractTableModel):
             item = self._data[index.row()]
             if index.column() == 0:
                 item["connect"] = value
-                self.deviceConnectStatusUpdated.emit()
+                self.deviceConnectStatusUpdated.emit(item['name'], item['connect'])
             elif index.column() == 4:
                 item["status"] = value
             self.dataChanged.emit(index, index, [])
@@ -107,7 +106,10 @@ class DeviceTableModel(QAbstractTableModel):
 
 class AcquisitionTableModel(QAbstractTableModel):
 
-    def __init__(self, data, parent=None):
+    acquisitionChannelTableUpdated = Signal()
+    channelIndexToggled = Signal(int)
+
+    def __init__(self, data=[], parent=None):
         super(AcquisitionTableModel, self).__init__(parent)
         self._data = data
         if self._data != None:
@@ -163,12 +165,20 @@ class AcquisitionTableModel(QAbstractTableModel):
     def setData(self, index, value, role=Qt.EditRole):
         if index.isValid():
             item = self._data[index.row()]
+            self.index = index.row()
             if index.column() == 0:
                 item["connect"] = value
+                # Emit a custom signal here to notify that the enabled channels have changed.
+                self.acquisitionChannelTableUpdated.emit()
+                self.channelIndexToggled.emit(index.row())
             elif index.column() == 1:
                 item["name"] = value
+                # Emit a custom signal here to notify that the enabled channels have changed.
+                self.acquisitionChannelTableUpdated.emit()
             elif index.column() == 2:
                 item["unit"] = value
+                # Emit a custom signal here to notify that the enabled channels have changed.
+                self.acquisitionChannelTableUpdated.emit()
             elif index.column() == 3:
                 item["slope"] = value
             elif index.column() == 4:
@@ -191,12 +201,23 @@ class AcquisitionTableModel(QAbstractTableModel):
         if index.isValid():
             return Qt.ItemIsEnabled | Qt.ItemIsEditable
 
+    def enabledChannels(self):
+        """Return two lists containing enabled channel names and units."""
+        enabledChannels = []
+        enabledUnits = []
+        for channel in self._data:
+            if channel["connect"] == True:
+                enabledChannels.append(channel["name"])
+                enabledUnits.append(channel["unit"])
+        return enabledChannels, enabledUnits
+
+
 class ChannelsTableModel(QAbstractTableModel):
 
-    def __init__(self, data, parent=None):
+    def __init__(self, data = [], parent=None):
         super(ChannelsTableModel, self).__init__(parent)
-        self._data = data
-
+        self._data = data #channeltablemodel._data to read all the data
+        #print(self._data)
     def rowCount(self, parent=QModelIndex()):
         if parent.isValid():
             return 0
@@ -208,9 +229,13 @@ class ChannelsTableModel(QAbstractTableModel):
     def columnCount(self, parent=QModelIndex()):
         if parent.isValid():
             return 0
-        return len(self._data[0])
+        if  len(self._data) == 0:
+            return 0
+        else:
+            return len(self._data[0])
 
     def data(self, index, role=Qt.DisplayRole):
+
         if role == Qt.TextAlignmentRole:
             return Qt.AlignLeft
         elif role == Qt.DisplayRole:
@@ -238,6 +263,7 @@ class ChannelsTableModel(QAbstractTableModel):
                     return Qt.Checked if item["plot"] else Qt.Unchecked
 
     def setData(self, index, value, role=Qt.EditRole):
+
         if index.isValid():
             item = self._data[index.row()]
             if index.column() == 0:
@@ -263,7 +289,6 @@ class ChannelsTableModel(QAbstractTableModel):
                 return Qt.ItemIsEnabled | Qt.ItemIsEditable
             else:
                 return Qt.ItemIsEnabled
-
 
 class ColourPickerTableModel(QAbstractTableModel):
 
@@ -305,3 +330,82 @@ class ColourPickerTableModel(QAbstractTableModel):
     def flags(self, index):
         if index.isValid():
             return Qt.ItemIsEnabled
+
+
+class ControlTableModel(QAbstractTableModel):
+
+    #typeComboBoxUpdated = Signal(int)
+    def __init__(self, data=[], parent=None):
+        super(ControlTableModel, self).__init__(parent)
+        self._data = data
+
+        if self._data != None:
+            self._column_name = [
+                "Channel",
+                "Type",
+                "Control",
+                "Feedback"
+            ]
+
+    def rowCount(self, parent=QModelIndex()):
+        if parent.isValid():
+            return 0
+        elif self._data == None:
+            return 0
+        else:
+            return len(self._data)
+
+    def columnCount(self, parent=QModelIndex()):
+        if parent.isValid():
+            return 0
+        return len(self._data[0])-1
+
+    def data(self, index, role=Qt.DisplayRole):
+        if role == Qt.TextAlignmentRole:
+            return Qt.AlignCenter
+        elif role == Qt.DisplayRole:
+            if index.isValid():
+                item = self._data[index.row()]
+                if index.column() == 0:
+                    return item["enable"]
+                elif index.column() == 1:
+                    return item["type"]
+                elif index.column() == 2:
+                    return item["control"]
+                elif index.column() == 3:
+                    return item["feedback"]
+        elif role == Qt.CheckStateRole:
+            if index.isValid():
+                if index.column()==0:
+                    item = self._data[index.row()]
+                    return Qt.Checked if item["enable"] else Qt.Unchecked
+
+    def setData(self, index, value, role=Qt.EditRole):
+        if index.isValid():
+            item = self._data[index.row()]
+            self.index = index.row()
+            if index.column() == 0:
+                item["enable"] = value
+            elif index.column() == 1:
+                item["type"] = value
+                #self.typeComboBoxUpdated.emit(item["type"])
+            elif index.column() == 2:
+                item["control"] = value
+            elif index.column() == 3:
+                item["feedback"] = value
+            self.dataChanged.emit(index, index, [])
+            return True
+        else:
+            return False
+
+    def headerData(self, section, orientation, role):
+        if role == Qt.DisplayRole:
+            if orientation == Qt.Horizontal:
+                return self._column_name[section]
+            elif orientation == Qt.Vertical:
+                return self._row_name[section]
+
+    def flags(self, index):
+        if index.isValid():
+            return Qt.ItemIsEnabled | Qt.ItemIsEditable
+

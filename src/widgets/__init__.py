@@ -4,3 +4,5 @@ from .GlobalSettingsGroupBox import GlobalSettingsGroupBox
 from .PlotWindow import PlotWindow
 from .DevicesGroupBox import DevicesGroupBox
 from .AcquisitionGroupBox import AcquisitionGroupBox
+from .ControlGroupBox import ControlGroupBox
+from .DeviceConfigurationGroupBox import DeviceConfigurationGroupBox
