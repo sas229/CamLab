@@ -4,17 +4,17 @@ import logging
 
 log = logging.getLogger(__name__)
 
-class AcquisitionGroupBox(QGroupBox):
+class DeviceConfigurationGroupBox(QGroupBox):
 
     def __init__(self):
         super().__init__()
-        self.setFixedHeight(200) #95
-        self.setTitle("Acquisition")
+        self.setFixedHeight(550)
+        self.setTitle("Device Configuration")
 
         # Create TabWidget for acquisition tables.
-        self.acquisitionTabWidget = QTabWidget()
-        self.acquisitionTabWidget.setTabPosition(QTabWidget.TabPosition(0))
+        self.deviceConfigurationTabWidget = QTabWidget()
+        self.deviceConfigurationTabWidget.setTabPosition(QTabWidget.TabPosition(0))
         layout = QVBoxLayout()
-        layout.addWidget(self.acquisitionTabWidget)
+        layout.addWidget(self.deviceConfigurationTabWidget)
         self.setLayout(layout)
 

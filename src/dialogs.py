@@ -26,6 +26,7 @@ class RefreshDevicesDialog(QProgressDialog):
 class ColourPickerDialog(QDialog):
     selectedColour = Signal(QModelIndex, str)
 
+
     def __init__(self, parent=None):
         super(ColourPickerDialog, self).__init__(parent)
         self.colourPickerTableModel = ColourPickerTableModel()
@@ -40,6 +41,7 @@ class ColourPickerDialog(QDialog):
 
         self.colourPickerTableView.clicked.connect(self.colourSelected)
 
+    #index of colour table
     def colourSelected(self, index):
         model = index.model()
         colour = model._data[index.column()][index.row()]
@@ -59,6 +61,7 @@ class ColourPickerDialog(QDialog):
         else:
             super(ColourPickerDialog, self).keyPressEvent(event)
 
+    #Index channel I clicked
     def setTargetIndex(self, index):
         self.targetIndex = index
 

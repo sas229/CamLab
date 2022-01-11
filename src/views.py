@@ -1,5 +1,9 @@
-from PySide6.QtWidgets import QTableView, QHeaderView
-from src.delegates import CheckBoxDelegate, ConnectionIconDelegate, StatusIconDelegate, FloatValidatorDelegate, StringDelegate
+from PySide6.QtGui import QStandardItemModel, QStandardItem
+from PySide6.QtWidgets import QTableView, QHeaderView, QAbstractItemView
+from PySide6.QtCore import QModelIndex
+from src.delegates import CheckBoxDelegate, ConnectionIconDelegate, StatusIconDelegate, FloatValidatorDelegate, StringDelegate, ComboBoxDelegate
+
+
 
 class DeviceTableView(QTableView):
 
@@ -82,6 +86,7 @@ class ColourPickerTableView(QTableView):
         super(ColourPickerTableView, self).__init__(parent)
         self.setSelectionMode(self.SingleSelection)
         self.setShowGrid(False)
+
         
         verticalHeader = self.verticalHeader()
         verticalHeader.hide()
@@ -91,8 +96,55 @@ class ColourPickerTableView(QTableView):
         horizontalHeader.setDefaultSectionSize(25)
 
 
+class ControlTableView(QTableView):
+
+    def __init__(self, item1, item2, item3, parent = None):
+        super(ControlTableView, self).__init__(parent)
+        self.setSelectionMode(self.SingleSelection)
+        self.setShowGrid(False)
+        self.setAlternatingRowColors(True)
+
+        verticalHeader = self.verticalHeader()
+        verticalHeader.hide()
+        verticalHeader.setDefaultSectionSize(25)
+        horizontalHeader = self.horizontalHeader()
+        horizontalHeader.setSectionResizeMode(QHeaderView.Stretch)
+
+        self.checkBoxDelegate = CheckBoxDelegate("channel")
+        self.stringDelegate = StringDelegate()
+        self.floatValidatorDelegate = FloatValidatorDelegate()
+        #self.checkBoxDelegate = CheckBoxDelegate()
+
+        # item1 = ['Analog', 'Digital']
+        # item2 = ['Linear Actuator', 'Rotary Actuator','Pressure Pump']
+        # item3 = ['No Channels Selected']
+        #self.comboBoxDelegate1.setItems(item1)
+        #self.comboBoxDelegate2.setItems(item2_1)
+        #self.comboBoxDelegate3.setItems(defeault_item3)
+
+        self.comboBoxDelegate1 = ComboBoxDelegate(item1)
+        self.comboBoxDelegate2 = ComboBoxDelegate(item2)
+        self.comboBoxDelegate3 = ComboBoxDelegate(item3)
+
+        self.setItemDelegateForColumn(0, self.checkBoxDelegate)
+        self.setItemDelegateForColumn(1, self.comboBoxDelegate1)
+        self.setItemDelegateForColumn(2, self.comboBoxDelegate2)
+        self.setItemDelegateForColumn(3, self.comboBoxDelegate3)
+
+    def persistentEditorOpen(self):
+        self.openPersistentEditor(self.model().index(0, 1))
+        self.openPersistentEditor(self.model().index(0, 2))
+        self.openPersistentEditor(self.model().index(0, 3))
+        self.openPersistentEditor(self.model().index(1, 1))
+        self.openPersistentEditor(self.model().index(1, 2))
+        self.openPersistentEditor(self.model().index(1, 3))
+
+    def persistentEditorClose(self):
+        self.closePersistentEditor(self.model().index(0, 1))
+        self.closePersistentEditor(self.model().index(0, 2))
+        self.closePersistentEditor(self.model().index(0, 3))
+        self.closePersistentEditor(self.model().index(1, 1))
+        self.closePersistentEditor(self.model().index(1, 2))
+        self.closePersistentEditor(self.model().index(1, 3))
 
 
-
-
-        
