@@ -135,7 +135,7 @@ class AcquisitionTableModel(QAbstractTableModel):
             return 0
         return len(self._data[0])-1
 
-    def data(self, index, role=Qt.DisplayRole):
+    def data(self, index, role):
         if role == Qt.TextAlignmentRole:
             return Qt.AlignCenter
         elif role == Qt.DisplayRole:
@@ -216,8 +216,8 @@ class ChannelsTableModel(QAbstractTableModel):
 
     def __init__(self, data = [], parent=None):
         super(ChannelsTableModel, self).__init__(parent)
-        self._data = data #channeltablemodel._data to read all the data
-        #print(self._data)
+        self._data = data
+
     def rowCount(self, parent=QModelIndex()):
         if parent.isValid():
             return 0
@@ -235,7 +235,6 @@ class ChannelsTableModel(QAbstractTableModel):
             return len(self._data[0])
 
     def data(self, index, role=Qt.DisplayRole):
-
         if role == Qt.TextAlignmentRole:
             return Qt.AlignLeft
         elif role == Qt.DisplayRole:
@@ -263,7 +262,6 @@ class ChannelsTableModel(QAbstractTableModel):
                     return Qt.Checked if item["plot"] else Qt.Unchecked
 
     def setData(self, index, value, role=Qt.EditRole):
-
         if index.isValid():
             item = self._data[index.row()]
             if index.column() == 0:

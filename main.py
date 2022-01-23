@@ -1,8 +1,7 @@
 import sys, os
-from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QDialog, \
-    QPushButton, QLabel, QTableView, QHeaderView, QTabWidget, QGridLayout, QLineEdit, QFrame, QCheckBox, QColorDialog
-from PySide6.QtGui import QIcon, QDoubleValidator, QCursor
-from PySide6.QtCore import Signal, Slot, Qt, QObject, QAbstractTableModel, QModelIndex, QLocale, QPoint, QThread, QTimer
+from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QLabel
+from PySide6.QtGui import QIcon
+from PySide6.QtCore import Slot, Qt, QModelIndex, QPoint, QThread, QTimer
 from qt_material import apply_stylesheet, QtStyleTools
 from src.manager import Manager
 from src.widgets import CamLabToolBar, StatusGroupBox, GlobalSettingsGroupBox, DevicesGroupBox, AcquisitionGroupBox, \
@@ -29,6 +28,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.setFixedHeight(self.height)
         self.refreshing = False
 
+        # Empty dicts for storage. 
         self.deviceConfigurationLayout = {}
         self.deviceConfigurationWidget = {}
         self.acquisitionTableViews = {}
@@ -38,7 +38,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         # Timers.
         self.plotTimer = QTimer()
         self.displayTimer = QTimer()
-        self.sampleTimer = QTimer()
+        # self.sampleTimer = QTimer()
 
         # Instantiate the manager object and thread.
         self.manager = Manager()
@@ -48,10 +48,6 @@ class MainWindow(QMainWindow, QtStyleTools):
 
         # Extract the configuration to generate initial UI setup.
         self.configuration = self.manager.configuration
-
-        # Set dark mode.
-        self.darkMode = self.configuration["global"]["darkMode"]
-        self.setDarkMode()
 
         # Main window layout.
         log.info("Assembling UI.")
@@ -91,7 +87,11 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.centralWidget.setLayout(self.mainWindowLayout)
         self.setCentralWidget(self.centralWidget)
 
-        # Connections.
+        # Set dark mode (always do this last to ensure all GUI objects are displayed correctly).
+        self.darkMode = self.configuration["global"]["darkMode"]
+        self.setDarkMode()
+
+        # Toolbar connections.
         self.toolbar.modeButton.triggered.connect(self.toggleMode)
         self.toolbar.refreshButton.triggered.connect(self.manager.refreshDevices)
         self.toolbar.loadConfiguration.connect(self.manager.loadConfiguration)
@@ -99,18 +99,23 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.toolbar.clearConfigButton.triggered.connect(self.manager.clearConfiguration)
         self.toolbar.darkModeChanged.connect(self.manager.updateDarkMode)
         self.toolbar.configure.connect(self.manager.configure)
+        self.toolbar.configure.connect(self.manager.timing.stop)
+        self.toolbar.configure.connect(self.end)
         self.toolbar.run.connect(self.manager.run)
+        self.toolbar.run.connect(self.start)
+        self.toolbar.run.connect(self.statusGroupBox.setInitialTimeDate)
         self.toolbar.addPlotButton.triggered.connect(self.addPlot)
-        self.toolbar.run.connect(self.statusGroupBox.setInitialTime)
         self.toolbar.clearPlotsButton.triggered.connect(self.manager.assembly.clearPlotData)
         self.toolbar.autozeroButton.triggered.connect(self.manager.assembly.autozero)
 
+        # Global settings connections.
         self.globalSettingsGroupBox.acquisitionRateChanged.connect(self.manager.updateAcquisitionRate)
         self.globalSettingsGroupBox.controlRateChanged.connect(self.manager.updateControlRate)
         self.globalSettingsGroupBox.averageSamplesChanged.connect(self.manager.updateAverageSamples)
         self.globalSettingsGroupBox.pathChanged.connect(self.manager.updatePath)
         self.globalSettingsGroupBox.filenameChanged.connect(self.manager.updateFilename)
 
+        # Manager connections.
         self.manager.updateUI.connect(self.updateUI)
         self.manager.configurationChanged.connect(self.updateUI)
         self.manager.configurationChanged.connect(self.globalSettingsGroupBox.updateUI)
@@ -127,34 +132,26 @@ class MainWindow(QMainWindow, QtStyleTools):
         #self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.updateControlTabs)
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.updateDeviceConfigurationTabs)
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.manager.updatePlotWindowChannelsData)
-        self.manager.startTimers.connect(self.start)
-        self.manager.endTimers.connect(self.end)
-        self.manager.assembly.samplesCount.connect(self.statusGroupBox.updateSamplesCount)
-        self.manager.connectSampleTimer.connect(self.connectSampleTimerToDevice)
+        self.manager.timing.actualRate.connect(self.statusGroupBox.update)
         self.manager.plotWindowChannelsUpdated.connect(self.updatePlotWindows)
         self.manager.existingPlotFound.connect(self.createExistingPlot)
         #self.acquisitionGroupBox.acquisitionTabWidget.currentChanged.connect(self.updateControlTabs)
         #self.controlGroupBox.controlTabWidget.currentChanged.connect(self.updateAcquisitionTabs)
 
-
+        # Timer connections.
         self.plotTimer.timeout.connect(self.manager.assembly.updatePlotData)
-        self.displayTimer.timeout.connect(self.statusGroupBox.updateTimes)
-
-    @Slot(str)
-    def connectSampleTimerToDevice(self, name):
-        self.sampleTimer.timeout.connect(self.manager.devices[name].readValues)
+        # self.displayTimer.timeout.connect(self.statusGroupBox.updateTimes)
 
     @Slot()
     def start(self):
         self.plotTimer.start(250)
         self.displayTimer.start(1000)
-        self.sampleTimer.start(1)
-
+        
     @Slot()
     def end(self):
         self.plotTimer.stop()
         self.displayTimer.stop()
-        self.sampleTimer.stop()
+        self.statusGroupBox.reset()
 
     @Slot(str, list)
     def addDeviceConfiguration(self, name, item3):
@@ -426,16 +423,18 @@ class MainWindow(QMainWindow, QtStyleTools):
             while self.manager.refreshing == True:
                 sleep(1.0)
 
-        # Quit all threads and plots and then close.
+        # Stop and quit all threads and plots and then close.
         for name in self.manager.deviceThread:
             self.manager.deviceThread[name].quit()
             log.info("Thread for " + name + " stopped.")
         self.manager.assemblyThread.quit()
         log.info("Assembly thread stopped.")
+        self.manager.timing.stop()
+        self.manager.timingThread.quit()
+        log.info("Timing thread stopped.")
         self.managerThread.quit()
         log.info("Manager thread stopped.")
         log.info('Closing CamLab.')
-
 
 if __name__ == '__main__':
     # Create log file instance.

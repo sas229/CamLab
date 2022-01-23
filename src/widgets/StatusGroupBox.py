@@ -14,18 +14,15 @@ class StatusGroupBox(QGroupBox):
         self.setVisible(False)
         self.count = 0
 
+        # Acquire initial time and calculate a nullref.
+        self.setInitialTimeDate()
+        self.nullRef = datetime(self.initialTime.year, self.initialTime.month, self.initialTime.day, 0, 0, 0)
+
         # Set layout.
         self.layout = QGridLayout()
         self.layout.setColumnStretch(0, 5)
         self.layout.setColumnStretch(1, 4)
         self.layout.setColumnStretch(2, 4)
-
-        # Acquire time and date.
-        self.initialTime = datetime.now()
-        self.currentTime = datetime.now()
-        date = QDate.currentDate()
-        nullRef = datetime(self.initialTime.year, self.initialTime.month, self.initialTime.day, 0, 0, 0)
-        elapsed =  nullRef + (self.currentTime - self.initialTime)
 
         # Create UI objects.
         self.dateLabel = QLabel()
@@ -36,29 +33,22 @@ class StatusGroupBox(QGroupBox):
         self.elapsedLabel.setText("Elapsed time:")
         self.date = QLabel()
         self.date.setFont(QFont("Arial", 25))
-        self.date.setText(date.toString(Qt.ISODate))
+        self.date.setText(self.initialDate.toString(Qt.ISODate))
         self.clock = QLabel()
         self.clock.setFont(QFont("Arial", 25))
-        self.clock.setText(
-            "{hours:02}:{minutes:02}:{seconds:02}".format(hours=self.initialTime.hour, minutes=self.initialTime.minute, seconds=self.initialTime.second)
-        )
         self.outputLabel = QLabel()
         self.outputLabel.setText("Output:")
         self.output = QLabel()
         self.output.setFont(QFont("Arial", 15))
-        self.output.setText(
-            "{path}/{date}_{hours:02}:{minutes:02}:{seconds:02}.txt".format(path="/home/data", date=date.toString(Qt.ISODate), hours=self.initialTime.hour, minutes=self.initialTime.minute, seconds=self.initialTime.second)
-        )
+        
         self.elapsed = QLabel()
         self.elapsed.setFont(QFont("Arial", 25))
-        self.elapsed.setText(
-            "{hours:02}:{minutes:02}:{seconds:02}".format(hours=elapsed.hour, minutes=elapsed.minute, seconds=elapsed.second)
-        )
-        self.samplesLabel = QLabel()
-        self.samplesLabel.setText("Samples:")
-        self.samples = QLabel()
-        self.samples.setFont(QFont("Arial", 25))
-        self.samples.setText(str(self.count))
+        
+        self.rateLabel = QLabel()
+        self.rateLabel.setText("Rate (Hz):")
+        self.rate = QLabel()
+        self.rate.setFont(QFont("Arial", 25))
+        self.rate.setText("-")
 
         # Assemble layout.
         self.layout.addWidget(self.dateLabel, 0, 0)
@@ -69,31 +59,63 @@ class StatusGroupBox(QGroupBox):
         self.layout.addWidget(self.outputLabel, 2, 0, 1, 3)
         self.layout.addWidget(self.output, 3, 0, 1, 3)
         self.layout.addWidget(self.elapsed, 1, 2)
-        self.layout.addWidget(self.samplesLabel, 0, 3)
-        self.layout.addWidget(self.samples, 1, 3)
+        self.layout.addWidget(self.rateLabel, 0, 3)
+        self.layout.addWidget(self.rate, 1, 3)
         self.setLayout(self.layout)
 
-    @Slot()
-    def setInitialTime(self):
-        # Method to set initial time.
-        self.initialTime = datetime.now()
+        # Output text.
+        self.output.setText(
+            "{path}/{date}_{hours:02}:{minutes:02}:{seconds:02}.txt".format(path="/home/data", date=self.initialDate.toString(Qt.ISODate), hours=self.initialTime.hour, minutes=self.initialTime.minute, seconds=self.initialTime.second)
+        )
+    
+    def update(self, actualRate):
+        # Store actual rate.
+        self.actualRate = actualRate
 
-    @Slot()
-    def updateTimes(self):
-        # Method to update times being displayed.
+        # Acquire time now and calculate time elapsed.
         self.currentTime = datetime.now()
-        nullRef = datetime(self.initialTime.year, self.initialTime.month, self.initialTime.day, 0, 0, 0)
-        elapsed =  nullRef + (self.currentTime - self.initialTime)
+        self.elapsedTime =  self.nullRef + (self.currentTime - self.initialTime)
+        
+        # Update clock text.
         self.clock.setText(
             "{hours:02}:{minutes:02}:{seconds:02}".format(hours=self.initialTime.hour, minutes=self.initialTime.minute, seconds=self.initialTime.second)
         )
-        self.elapsed.setText("{hours:02}:{minutes:02}:{seconds:02}".format(hours=elapsed.hour, minutes=elapsed.minute, seconds=elapsed.second))
 
-    @Slot(int)
-    def updateSamplesCount(self, count):
-        # Method to update the number of samples. If less than 1e4 samples present as an integer, otherwise present in scientific notation.
-        self.count = count
-        if self.count < 1e4:
-            self.samples.setText("{count}".format(count=self.count))
-        else:
-            self.samples.setText("{count:.3E}".format(count=self.count))
+        # Update elapsed time text.
+        self.elapsed.setText(
+            "{hours:02}:{minutes:02}:{seconds:02}".format(hours=self.elapsedTime.hour, minutes=self.elapsedTime.minute, seconds=self.elapsedTime.second)
+        )
+
+        # Update rate text.
+        self.rate.setText("{actualRate:.2f}".format(actualRate=self.actualRate))
+
+    @Slot()
+    def reset(self):
+        # Reset initial time and date.
+        self.setInitialTimeDate()
+
+        # Reset output text.
+        self.output.setText(
+            "{path}/{date}_{hours:02}:{minutes:02}:{seconds:02}.txt".format(path="/home/data", date=self.initialDate.toString(Qt.ISODate), hours=self.initialTime.hour, minutes=self.initialTime.minute, seconds=self.initialTime.second)
+        )
+
+        # Reset clock text.
+        self.clock.setText(
+            "{hours:02}:{minutes:02}:{seconds:02}".format(hours=self.initialTime.hour, minutes=self.initialTime.minute, seconds=self.initialTime.second)
+        )
+
+        # Reset elapsed time text.
+        self.elapsed.setText(
+            "{hours:02}:{minutes:02}:{seconds:02}".format(hours=self.elapsedTime.hour, minutes=self.elapsedTime.minute, seconds=self.elapsedTime.second)
+        )
+
+        # Reset rate text.
+        self.rate.setText("-")
+
+    @Slot()
+    def setInitialTimeDate(self):
+        # Method to set initial time and date.
+        self.initialTime = datetime.now()
+        self.initialDate = QDate.currentDate()
+        
+        

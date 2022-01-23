@@ -30,14 +30,14 @@ class GlobalSettingsGroupBox(QGroupBox):
         # Control rate input and validator.
         self.controlRateLabel = QLabel("Control Rate (Hz)")
         self.controlRateLineEdit = QLineEdit()
-        self.controlRateValidator = QDoubleValidator(bottom = 0.10, top = 1000.00, decimals=2)
+        self.controlRateValidator = QDoubleValidator(bottom = 0.10, top = 2000.00, decimals=2)
         self.controlRateLineEdit.setValidator(self.controlRateValidator)
         self.controlRateLineEdit.setText(str(self.configuration["global"]["controlRate"]))
 
         # Acquisition rate input and validator.
         self.acquisitionRateLabel = QLabel("Acquisition Rate (Hz)")
         self.acquisitionRateLineEdit = QLineEdit()
-        self.acquisitionRateValidator = QDoubleValidator(bottom = 0.01, top = 100.00, decimals=2)
+        self.acquisitionRateValidator = QDoubleValidator(bottom = 0.01, top = 2000.00, decimals=2)
         self.acquisitionRateLineEdit.setValidator(self.acquisitionRateValidator)
         self.acquisitionRateLineEdit.setText(str(self.configuration["global"]["acquisitionRate"]))
 

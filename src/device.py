@@ -3,26 +3,28 @@ import logging
 import ruamel.yaml
 from labjack import ljm
 import numpy as np
-from time import sleep
+import time
 import sys
 
 log = logging.getLogger(__name__)
 
 class Device(QObject):
-    emitData = Signal(np.ndarray)
+    emitData = Signal(str, np.ndarray)
 
-    def __init__(self, id, connection, addresses, dataTypes):
+    def __init__(self, name, id, connection, addresses, dataTypes, controlRate):
         super().__init__()
+        self.name = name
+        self.id = id 
+        self.connection = connection
         self.aAddresses = addresses
         self.aDataTypes = dataTypes
         self.numFrames = len(self.aAddresses)
-        self.id = id 
-        self.connection = connection
-        self.script = "src/acquire.lua"
+        self.controlRate = controlRate
         self.openConnection()
         self.initialiseSettings()
-        self.loadLua()
-        self.executeLua()
+        # self.script = "src/acquire.lua"
+        # self.loadLua()
+        # self.executeLua()
 
     def openConnection(self):
         # Method to open a device connection
@@ -38,12 +40,10 @@ class Device(QObject):
             log.warning(e)
 
     def initialiseSettings(self):
-        # Method to initialise teh device.
+        # Method to initialise the device.
         try:
-            # Set the control loop interval at address 46180 in microseconds.
-            ljm.eWriteAddress(self.handle, 46180, 0, 1000)
             # Set the ADC settings.
-            names = ["AIN_ALL_RANGE", "AIN0_RESOLUTION_INDEX", "AIN_ALL_SETTLING_US"]
+            names = ["AIN_ALL_RANGE", "AIN_ALL_RESOLUTION_INDEX", "AIN_ALL_SETTLING_US"]
             aValues = [10, 2, 0] # No amplification; 16.5 effective bits; auto settling time.
             numFrames = len(names)
             ljm.eWriteNames(self.handle, numFrames, names, aValues) 
@@ -78,6 +78,9 @@ class Device(QObject):
             ljm.eWriteName(self.handle, "LUA_DEBUG_ENABLE", 1)
             ljm.eWriteName(self.handle, "LUA_DEBUG_ENABLE_DEFAULT", 1)
             log.info("Lua script loaded.")
+
+            # Set the control loop interval at address 46180 in microseconds.
+            ljm.eWriteAddress(self.handle, 46180, 0, int((1/self.controlRate)*1000000))
         except ljm.LJMError:
             # Otherwise log the exception.
             ljme = sys.exc_info()[1]
@@ -98,14 +101,14 @@ class Device(QObject):
         except Exception:
             e = sys.exc_info()[1]
             log.warning(e)
-
+        
     def readValues(self):
         # Method to read registers on device.
         try:
             # Read from the device.
             self.handle = ljm.open(7, self.connection, self.id)
             data = np.asarray(ljm.eReadAddresses(self.handle, self.numFrames, self.aAddresses, self.aDataTypes))
-            self.emitData.emit(data)
+            self.emitData.emit(self.name, data)
         except ljm.LJMError:
             # Otherwise log the exception.
             ljme = sys.exc_info()[1]
@@ -113,4 +116,5 @@ class Device(QObject):
         except Exception:
             e = sys.exc_info()[1]
             log.warning(e)
+
         

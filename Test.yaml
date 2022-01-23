@@ -1,13 +1,13 @@
 global:
   darkMode: true
-  controlRate: 1000.0
-  acquisitionRate: 100.0
+  controlRate: 100.0
+  acquisitionRate: 10.0
   averageSamples: 10
   path: /data
   filename: junk
 devices:
-  DON:
-    id: 470019437
+  BOB:
+    id: 470019430
     connection: 1
     address: N/A
     acquisition:
@@ -16,7 +16,7 @@ devices:
       unit: V
       slope: 1.0
       offset: 0.0
-      connect: true
+      connect: false
       autozero: true
     - channel: AIN1
       name: Ch_2
@@ -30,21 +30,21 @@ devices:
       unit: V
       slope: 1.0
       offset: 0.0
-      connect: false
+      connect: true
       autozero: true
     - channel: AIN3
       name: Ch_4
       unit: V
       slope: 1.0
       offset: 0.0
-      connect: false
+      connect: true
       autozero: true
     - channel: AIN4
       name: Ch_5
       unit: V
       slope: 1.0
       offset: 0.0
-      connect: true
+      connect: false
       autozero: true
     - channel: AIN5
       name: Ch_6
@@ -58,7 +58,7 @@ devices:
       unit: V
       slope: 1.0
       offset: 0.0
-      connect: true
+      connect: false
       autozero: true
     - channel: AIN7
       name: Ch_8
@@ -70,14 +70,14 @@ devices:
     control:
     - channel: C1
       enable: false
-      type: 1
-      control: 0
-      feedback: 1
-    - channel: C2
-      enable: true
       type: 0
-      control: 2
-      feedback: 3
+      control: 0
+      feedback: 0
+    - channel: C2
+      enable: false
+      type: 0
+      control: 0
+      feedback: 0
   AMY:
     id: 470019440
     connection: 1
@@ -88,7 +88,7 @@ devices:
       unit: V
       slope: 1.0
       offset: 0.0
-      connect: false
+      connect: true
       autozero: true
     - channel: AIN1
       name: Ch_2
@@ -109,7 +109,7 @@ devices:
       unit: V
       slope: 1.0
       offset: 0.0
-      connect: true
+      connect: false
       autozero: true
     - channel: AIN4
       name: Ch_5
@@ -123,14 +123,14 @@ devices:
       unit: V
       slope: 1.0
       offset: 0.0
-      connect: true
+      connect: false
       autozero: true
     - channel: AIN6
       name: Ch_7
       unit: V
       slope: 1.0
       offset: 0.0
-      connect: true
+      connect: false
       autozero: true
     - channel: AIN7
       name: Ch_8
@@ -141,104 +141,35 @@ devices:
       autozero: true
     control:
     - channel: C1
-      enable: true
-      type: 1
-      control: 0
-      feedback: 3
-    - channel: C2
-      enable: true
+      enable: false
       type: 0
-      control: 2
-      feedback: 3
+      control: 0
+      feedback: 0
+    - channel: C2
+      enable: false
+      type: 0
+      control: 0
+      feedback: 0
 plots:
-  '2657502266688':
-    invertX: false
-    logXAxis: false
-    invertY: false
-    logYAxis: false
-    setGrid: true
-    setGridX: true
-    setGridY: true
-    alpha: 99
-    opacity: 99
-    auto: true
-    autoX: true
-    autoY: true
-    manualX: false
-    minXRange: -0.06
-    maxXRange: 1.65
-    manualY: false
-    minYRange: -11.07
-    maxYRange: -9.86
-    lock: false
-    channels:
-    - plot: false
-      name: Time
-      device: ALL
-      colour: '#35e3e3'
-      value: '0.00'
-      unit: s
-    - plot: false
-      name: Ch_2
-      device: AMY
-      colour: '#e91e63'
-      value: '0.00'
-      unit: V
-    - plot: false
-      name: Ch_4
-      device: AMY
-      colour: '#673ab7'
-      value: '0.00'
-      unit: V
-    - plot: false
-      name: Ch_6
-      device: AMY
-      colour: '#2196f3'
-      value: '0.00'
-      unit: V
-    - plot: false
-      name: Ch_7
-      device: AMY
-      colour: '#673ab7'
-      value: '0.00'
-      unit: V
-    - plot: false
-      name: Ch_1
-      device: DON
-      colour: '#9c27b0'
-      value: '0.00'
-      unit: V
-    - plot: false
-      name: Ch_5
-      device: DON
-      colour: '#03a9f4'
-      value: '0.00'
-      unit: V
-    - plot: false
-      name: Ch_7
-      device: DON
-      colour: '#dce775'
-      value: '0.00'
-      unit: V
-  '1999743824320':
+  '140467258235712':
     invertX: false
     logXAxis: false
     invertY: false
     logYAxis: false
     setGrid: false
-    setGridX: true
+    setGridX: false
     setGridY: false
-    alpha: 51
-    opacity: 95
+    alpha: 50
+    opacity: 50
     auto: true
     autoX: true
     autoY: true
     manualX: false
-    minXRange: -13.53
-    maxXRange: 12.71
+    minXRange: 0
+    maxXRange: 1
     manualY: false
-    minYRange: -36.69
-    maxYRange: -10.45
+    minYRange: 0
+    maxYRange: 1
     lock: false
     channels:
     - plot: false
@@ -247,45 +178,27 @@ plots:
       colour: '#35e3e3'
       value: '0.00'
       unit: s
+    - plot: true
+      name: Ch_1
+      device: AMY
+      colour: '#f44336'
+      value: '0.00'
+      unit: V
     - plot: false
       name: Ch_2
       device: AMY
       colour: '#e91e63'
       value: '0.00'
       unit: V
-    - plot: false
-      name: Ch_4
-      device: AMY
-      colour: '#673ab7'
-      value: '0.00'
-      unit: V
-    - plot: false
-      name: Ch_6
-      device: AMY
-      colour: '#2196f3'
-      value: '0.00'
-      unit: V
-    - plot: false
-      name: Ch_7
-      device: AMY
-      colour: '#673ab7'
-      value: '0.00'
-      unit: V
     - plot: true
-      name: Ch_1
-      device: DON
+      name: Ch_3
+      device: BOB
       colour: '#9c27b0'
       value: '0.00'
       unit: V
-    - plot: true
-      name: Ch_5
-      device: DON
-      colour: '#03a9f4'
-      value: '0.00'
-      unit: V
-    - plot: true
-      name: Ch_7
-      device: DON
-      colour: '#dce775'
+    - plot: false
+      name: Ch_4
+      device: BOB
+      colour: '#673ab7'
       value: '0.00'
       unit: V

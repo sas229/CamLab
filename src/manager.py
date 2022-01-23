@@ -1,6 +1,8 @@
 from PySide6.QtCore import QObject, Signal, Slot, QSettings, QTimer, QThread
 from src.models import DeviceTableModel, AcquisitionTableModel, ChannelsTableModel, ControlTableModel
 from src.device import Device
+from src.assembly import Assembly
+from src.timing import Timing
 import copy
 import logging
 import ruamel.yaml
@@ -10,53 +12,8 @@ from labjack import ljm
 import numpy as np
 import operator
 from random import randint
-from src.widgets import DeviceConfigurationGroupBox
 
 log = logging.getLogger(__name__)
-
-class Assembly(QObject):
-    plotDataChanged = Signal(np.ndarray)
-    samplesCount = Signal(int)
-    
-    def __init__(self):
-        super().__init__()
-        self.plotData = []
-        self.time = 0.00
-        self.count = 0
-        self.offsets = np.asarray((0, 0, 0, 0, 0, 0, 0, 0))
-        self.newData = []
-
-    @Slot(np.ndarray)
-    def updateNewData(self, data):
-        if np.shape(self.newData)[0] > 0:
-            self.newData = np.vstack((self.newData, data))
-        else:
-            self.newData = data
-
-    def updatePlotData(self):
-
-        if np.shape(self.newData)[0] > 0:
-            dt = 0.001
-            newData = self.newData
-            self.newData = []
-            numTimesteps = np.shape(newData)[0]
-            timesteps = np.linspace(0, (numTimesteps-1)*dt, numTimesteps)
-            timesteps += self.time
-            self.count += numTimesteps
-            self.samplesCount.emit(self.count)
-            newLines = np.column_stack((timesteps, newData-self.offsets))
-            if np.shape(self.plotData)[0] > 0:
-                self.plotData = np.vstack((self.plotData, newLines))
-            else:
-                self.plotData = newLines
-            self.plotDataChanged.emit(self.plotData)
-            self.time += numTimesteps*dt
-
-    def clearPlotData(self):
-        self.plotData = self.plotData[-1,:]
-
-    def autozero(self):
-        self.offsets = np.average(self.plotData[-10:,1:], axis=0)
 
 class Manager(QObject):
     updateUI = Signal(dict)
@@ -70,12 +27,8 @@ class Manager(QObject):
     updateDeviceConfigurationTab = Signal()
     removeWidget = Signal(str)
     clearControlTabs = Signal()
-    startTimers = Signal()
-    endTimers = Signal()
-    connectSampleTimer = Signal(str)
     plotWindowChannelsUpdated = Signal()
     existingPlotFound = Signal()
-
 
     def __init__(self):
         super().__init__()
@@ -94,7 +47,6 @@ class Manager(QObject):
         self.item1 = ['Analogue', 'Digital']
         self.item2 = ['Linear Actuator', 'Rotary Actuator','Pressure Pump']
         self.default_item3 = ['N/A']
-        self.deviceConfigurationGroupBox = DeviceConfigurationGroupBox()
 
         self.defaultAcquisitionTable = [
             {"channel": "AIN0", "name": "Ch_1", "unit": "V", "slope": 1.0, "offset": 0.00, "connect": False, "autozero": True},
@@ -130,30 +82,44 @@ class Manager(QObject):
 
         # Create assembly thread.
         self.assembly = Assembly()
-        log.info("Assembly thread instantiated.")
+        log.info("Assembly instance created.")
         self.assemblyThread = QThread(parent=self)
         log.info("Assembly thread created.")
         self.assembly.moveToThread(self.assemblyThread)
         self.assemblyThread.start()
         log.info("Assembly thread started.")
 
+        # Create timing thread.
+        self.timing = Timing()
+        log.info("Timing instance created.")
+        self.timingThread = QThread(parent=self)
+        log.info("Timing thread created.")
+        self.timing.moveToThread(self.timingThread)
+        self.timingThread.start()
+        log.info("Timing thread started.")
+
     def createDeviceThreads(self):
+        log.info("Creating device threads.")
         self.devices = {}
         self.deviceThread = {}
         enabledDevices = self.deviceTableModel.enabledDevices()
-        enabledDeviceList = []
+
+        # Create output arrays in assembly thread.        print("Stopping timer.")
+        self.assembly.createDataArrays(enabledDevices)
+
         for device in enabledDevices:
             name = device["name"]
             id = device["id"]
             connection = device["connection"]
 
             # Function required HERE to generate addresses from acquisition table data.
-            aAddresses = [46000, 46002, 46004, 46006, 46008, 46010, 46012, 46014]
+            aAddresses = [0, 2, 4, 6, 8, 10, 12, 14]
             dt = ljm.constants.FLOAT32
             aDataTypes = [dt, dt, dt, dt, dt, dt, dt, dt]
+            controlRate = self.configuration["global"]["controlRate"]
 
-            self.devices[name] = Device(id, connection, aAddresses, aDataTypes)
-            log.info("Device instance instantiated for device named " + name + ".")
+            self.devices[name] = Device(name, id, connection, aAddresses, aDataTypes, controlRate)
+            log.info("Device instance created for device named " + name + ".")
             self.deviceThread[name] = QThread(parent=self)
             log.info("Device thread created for device named " + name + ".")
             self.devices[name].moveToThread(self.deviceThread[name])
@@ -161,10 +127,12 @@ class Manager(QObject):
             log.info("Device thread started for device named " + name + ".")
 
             # Emit signal to connect sample timer to slot for the current device object.
-            self.connectSampleTimer.emit(name)
+            self.timing.controlDevices.connect(self.devices[name].readValues)
 
             # Connections.
             self.devices[name].emitData.connect(self.assembly.updateNewData)
+            log.info(name + " attached to assembly thread updateNewData method.")
+        log.info("Device threads created.")
 
     def loadDevicesFromConfiguration(self):
         # Find all devices listed in the configuration file.
@@ -277,7 +245,7 @@ class Manager(QObject):
                 else:
                     self.configuration["devices"][name] = newDevice 
 
-                # Update acquisition table models and add TableView to TabWidget by emitting the appropriate Signal. Any changes in the table will be reflected immediately in the underlying configuration data.
+                # Update acquisition table models and add TableView to TabWidget by emitting the appropriate Signal.
                 self.acquisitionModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
                 #self.addAcquisitionTable.emit(name)
                 #self.updateAcquisitionTabs.emit()
@@ -346,23 +314,28 @@ class Manager(QObject):
         # Boolean to indicate that the device list has finished refreshing.
         self.refreshing = False
 
+    @Slot()
     def configure(self):
         # Stop acquisition.
-        self.endTimers.emit()
+        self.timing.stop()
 
+        # Clear all previous data.
+        self.assembly.clearAllData()
+        
         # Close device threads.
         for name in self.deviceThread:
             self.deviceThread[name].quit()
             log.info("Thread for " + name + " stopped.")
 
         log.info("Configuring devices.")
-
+    
+    @Slot()
     def run(self):
         # Create device threads.
         self.createDeviceThreads()
 
         # Start acquisition.
-        self.startTimers.emit()
+        self.timing.start(self.configuration["global"]["controlRate"])
         log.info("Started acquisition and control.")
 
     def refreshDevices(self):

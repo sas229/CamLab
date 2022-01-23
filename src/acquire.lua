@@ -14,7 +14,7 @@ local function readAIN()
 end
 
 -- Initialisation.
-LJ.setLuaThrottle(100)
+-- LJ.setLuaThrottle(100)
 
 local interval = read(46180, 0)/1000
 LJ.IntervalConfig(0, interval)
@@ -22,6 +22,8 @@ LJ.IntervalConfig(0, interval)
 -- Main loop.
 while true do
     if checkInterval(0) then
-        readAIN()
+        -- readAIN()
+        local AIN = read(0, 3)
+        write(46000, 3, AIN)
     end
 end

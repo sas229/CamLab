@@ -87,7 +87,6 @@ class ColourPickerTableView(QTableView):
         self.setSelectionMode(self.SingleSelection)
         self.setShowGrid(False)
 
-        
         verticalHeader = self.verticalHeader()
         verticalHeader.hide()
         verticalHeader.setDefaultSectionSize(25)

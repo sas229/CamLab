@@ -9,7 +9,7 @@ from src.models import ChannelsTableModel, ColourPickerTableModel
 from src.views import ChannelsTableView, ColourPickerTableView
 from src.dialogs import ColourPickerDialog
 import logging
-import pyqtgraph as pg
+import src.local_pyqtgraph.pyqtgraph as pg
 import numpy as np
 
 
