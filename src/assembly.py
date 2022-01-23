@@ -37,8 +37,7 @@ class Assembly(QObject):
         # print(numTimesteps)
         numTimesteps = min(numTimesteps)
         
-
-        # Pop minNumRows of data from each data object onto assembledData if .
+        # Pop numTimesteps of data from each data object onto assembledData if more than 0.
         if numTimesteps > 0:
             timesteps = np.linspace(0, (numTimesteps-1)*self.dt, numTimesteps)
             timesteps += self.time

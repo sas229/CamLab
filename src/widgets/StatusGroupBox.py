@@ -27,25 +27,32 @@ class StatusGroupBox(QGroupBox):
         # Create UI objects.
         self.dateLabel = QLabel()
         self.dateLabel.setText("Date:")
+        
         self.timeLabel = QLabel()
         self.timeLabel.setText("Current time:")
+        
         self.elapsedLabel = QLabel()
         self.elapsedLabel.setText("Elapsed time:")
+
+        self.outputLabel = QLabel()
+        self.outputLabel.setText("Output:")
+
+        self.rateLabel = QLabel()
+        self.rateLabel.setText("Rate (Hz):")
+        
         self.date = QLabel()
         self.date.setFont(QFont("Arial", 25))
         self.date.setText(self.initialDate.toString(Qt.ISODate))
+        
         self.clock = QLabel()
         self.clock.setFont(QFont("Arial", 25))
-        self.outputLabel = QLabel()
-        self.outputLabel.setText("Output:")
+        
         self.output = QLabel()
         self.output.setFont(QFont("Arial", 15))
         
         self.elapsed = QLabel()
         self.elapsed.setFont(QFont("Arial", 25))
         
-        self.rateLabel = QLabel()
-        self.rateLabel.setText("Rate (Hz):")
         self.rate = QLabel()
         self.rate.setFont(QFont("Arial", 25))
         self.rate.setText("-")
@@ -63,7 +70,7 @@ class StatusGroupBox(QGroupBox):
         self.layout.addWidget(self.rate, 1, 3)
         self.setLayout(self.layout)
 
-        # Output text.
+        # Set output text.
         self.output.setText(
             "{path}/{date}_{hours:02}:{minutes:02}:{seconds:02}.txt".format(path="/home/data", date=self.initialDate.toString(Qt.ISODate), hours=self.initialTime.hour, minutes=self.initialTime.minute, seconds=self.initialTime.second)
         )
