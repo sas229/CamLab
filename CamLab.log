@@ -1,42 +1,42 @@
-2022-01-23 23:17:15,144 - __main__ - <module> - INFO - Log file created.
-2022-01-23 23:17:15,265 - src.manager - __init__ - INFO - Finding previous YAML file location from QSettings.
-2022-01-23 23:17:15,266 - src.manager - findConfigurationPath - INFO - Configuration file path found at /home/sam/Documents/Academia/Research/Code/CamLab/Test.yaml
-2022-01-23 23:17:15,266 - src.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLab/Test.yaml and saving location to QSettings.
-2022-01-23 23:17:15,291 - src.manager - loadConfiguration - INFO - Configuration file parsed.
-2022-01-23 23:17:15,328 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
-2022-01-23 23:17:15,358 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
-2022-01-23 23:17:15,358 - src.manager - __init__ - INFO - Assembly instance created.
-2022-01-23 23:17:15,359 - src.manager - __init__ - INFO - Assembly thread created.
-2022-01-23 23:17:15,359 - src.manager - __init__ - INFO - Assembly thread started.
-2022-01-23 23:17:15,359 - src.manager - __init__ - INFO - Timing instance created.
-2022-01-23 23:17:15,359 - src.manager - __init__ - INFO - Timing thread created.
-2022-01-23 23:17:15,360 - src.manager - __init__ - INFO - Timing thread started.
-2022-01-23 23:17:15,360 - __main__ - __init__ - INFO - Assembling UI.
-2022-01-23 23:17:15,517 - src.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLab/Test.yaml and saving location to QSettings.
-2022-01-23 23:17:15,537 - src.manager - loadConfiguration - INFO - Configuration file parsed.
-2022-01-23 23:17:15,612 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
-2022-01-23 23:17:15,703 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
-2022-01-23 23:17:15,874 - __main__ - <module> - INFO - Timer instantiated.
-2022-01-23 23:17:18,046 - src.widgets.CamLabToolBar - changeMode - INFO - Configuration mode enabled
-2022-01-23 23:17:18,047 - src.manager - createDeviceThreads - INFO - Creating device threads.
-2022-01-23 23:17:18,050 - src.assembly - createDataArrays - INFO - Output arrays created.
-2022-01-23 23:17:18,085 - src.device - openConnection - INFO - Connected to AMY.
-2022-01-23 23:17:18,087 - src.manager - createDeviceThreads - INFO - Device instance created for device named AMY.
-2022-01-23 23:17:18,087 - src.manager - createDeviceThreads - INFO - Device thread created for device named AMY.
-2022-01-23 23:17:18,088 - src.manager - createDeviceThreads - INFO - Device thread started for device named AMY.
-2022-01-23 23:17:18,088 - src.manager - createDeviceThreads - INFO - AMY attached to assembly thread updateNewData method.
-2022-01-23 23:17:18,090 - src.device - openConnection - INFO - Connected to BOB.
-2022-01-23 23:17:18,092 - src.manager - createDeviceThreads - INFO - Device instance created for device named BOB.
-2022-01-23 23:17:18,092 - src.manager - createDeviceThreads - INFO - Device thread created for device named BOB.
-2022-01-23 23:17:18,092 - src.manager - createDeviceThreads - INFO - Device thread started for device named BOB.
-2022-01-23 23:17:18,093 - src.manager - createDeviceThreads - INFO - BOB attached to assembly thread updateNewData method.
-2022-01-23 23:17:18,093 - src.manager - createDeviceThreads - INFO - Device threads created.
-2022-01-23 23:17:18,093 - src.timing - start - INFO - Starting device timer.
-2022-01-23 23:17:30,112 - __main__ - closeEvent - INFO - Thread for AMY stopped.
-2022-01-23 23:17:30,113 - __main__ - closeEvent - INFO - Thread for BOB stopped.
-2022-01-23 23:17:30,113 - __main__ - closeEvent - INFO - Assembly thread stopped.
-2022-01-23 23:17:30,114 - src.timing - stop - INFO - Stopped device timer.
-2022-01-23 23:17:30,114 - __main__ - closeEvent - INFO - Timing thread stopped.
-2022-01-23 23:17:30,115 - __main__ - closeEvent - INFO - Manager thread stopped.
-2022-01-23 23:17:30,115 - __main__ - closeEvent - INFO - Closing CamLab.
-2022-01-23 23:17:30,129 - src.manager - run - INFO - Started acquisition and control.
+2022-01-23 23:25:01,963 - __main__ - <module> - INFO - Log file created.
+2022-01-23 23:25:02,070 - src.manager - __init__ - INFO - Finding previous YAML file location from QSettings.
+2022-01-23 23:25:02,070 - src.manager - findConfigurationPath - INFO - Configuration file path found at /home/sam/Documents/Academia/Research/Code/CamLab/Test.yaml
+2022-01-23 23:25:02,070 - src.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLab/Test.yaml and saving location to QSettings.
+2022-01-23 23:25:02,091 - src.manager - loadConfiguration - INFO - Configuration file parsed.
+2022-01-23 23:25:02,133 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
+2022-01-23 23:25:02,153 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
+2022-01-23 23:25:02,153 - src.manager - __init__ - INFO - Assembly instance created.
+2022-01-23 23:25:02,153 - src.manager - __init__ - INFO - Assembly thread created.
+2022-01-23 23:25:02,153 - src.manager - __init__ - INFO - Assembly thread started.
+2022-01-23 23:25:02,153 - src.manager - __init__ - INFO - Timing instance created.
+2022-01-23 23:25:02,153 - src.manager - __init__ - INFO - Timing thread created.
+2022-01-23 23:25:02,154 - src.manager - __init__ - INFO - Timing thread started.
+2022-01-23 23:25:02,154 - __main__ - __init__ - INFO - Assembling UI.
+2022-01-23 23:25:02,297 - src.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLab/Test.yaml and saving location to QSettings.
+2022-01-23 23:25:02,317 - src.manager - loadConfiguration - INFO - Configuration file parsed.
+2022-01-23 23:25:02,392 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
+2022-01-23 23:25:02,503 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
+2022-01-23 23:25:02,703 - __main__ - <module> - INFO - Timer instantiated.
+2022-01-23 23:25:06,542 - src.widgets.CamLabToolBar - changeMode - INFO - Configuration mode enabled
+2022-01-23 23:25:06,547 - src.manager - createDeviceThreads - INFO - Creating device threads.
+2022-01-23 23:25:06,547 - src.assembly - createDataArrays - INFO - Output arrays created.
+2022-01-23 23:25:06,586 - src.device - openConnection - INFO - Connected to AMY.
+2022-01-23 23:25:06,588 - src.manager - createDeviceThreads - INFO - Device instance created for device named AMY.
+2022-01-23 23:25:06,589 - src.manager - createDeviceThreads - INFO - Device thread created for device named AMY.
+2022-01-23 23:25:06,589 - src.manager - createDeviceThreads - INFO - Device thread started for device named AMY.
+2022-01-23 23:25:06,590 - src.manager - createDeviceThreads - INFO - AMY attached to assembly thread updateNewData method.
+2022-01-23 23:25:06,592 - src.device - openConnection - INFO - Connected to BOB.
+2022-01-23 23:25:06,593 - src.manager - createDeviceThreads - INFO - Device instance created for device named BOB.
+2022-01-23 23:25:06,594 - src.manager - createDeviceThreads - INFO - Device thread created for device named BOB.
+2022-01-23 23:25:06,594 - src.manager - createDeviceThreads - INFO - Device thread started for device named BOB.
+2022-01-23 23:25:06,594 - src.manager - createDeviceThreads - INFO - BOB attached to assembly thread updateNewData method.
+2022-01-23 23:25:06,594 - src.manager - createDeviceThreads - INFO - Device threads created.
+2022-01-23 23:25:06,595 - src.timing - start - INFO - Starting device timer.
+2022-01-23 23:25:14,137 - __main__ - closeEvent - INFO - Thread for AMY stopped.
+2022-01-23 23:25:14,137 - __main__ - closeEvent - INFO - Thread for BOB stopped.
+2022-01-23 23:25:14,138 - __main__ - closeEvent - INFO - Assembly thread stopped.
+2022-01-23 23:25:14,138 - src.timing - stop - INFO - Stopped device timer.
+2022-01-23 23:25:14,138 - __main__ - closeEvent - INFO - Timing thread stopped.
+2022-01-23 23:25:14,138 - __main__ - closeEvent - INFO - Manager thread stopped.
+2022-01-23 23:25:14,139 - __main__ - closeEvent - INFO - Closing CamLab.
+2022-01-23 23:25:14,150 - src.manager - run - INFO - Started acquisition and control.
