@@ -36,16 +36,16 @@ class Manager(QObject):
         self.acquisitionModels = {}
         self.acquisitionTables = {}
         self.controlModels = {}
-        self.channelModels = {}
         self.devices = {}
-        self.deviceThread = {}
+        self.deviceThreads = {}
         self.refreshing = False
         self.deviceList = []
         self.j, self.k = 0, 4
-        self.controls = {}
-        self.controlTableModel = ControlTableModel()
+        
+
+        # Defaults.
         self.controlModeList = ['Analogue', 'Digital']
-        self.controlActuatorList = ['Linear Actuator', 'Rotary Actuator','Pressure Pump']
+        self.controlActuatorList = ['Linear Actuator', 'Rotary Actuator', 'Pressure Pump']
         self.defaultFeedbackChannel = ['N/A']
 
         self.defaultAcquisitionTable = [
@@ -98,7 +98,7 @@ class Manager(QObject):
     def createDeviceThreads(self):
         log.info("Creating device threads.")
         self.devices = {}
-        self.deviceThread = {}
+        self.deviceThreads = {}
         enabledDevices = self.deviceTableModel.enabledDevices()
 
         # Create output arrays in assembly thread.
@@ -117,10 +117,10 @@ class Manager(QObject):
 
             self.devices[name] = Device(name, id, connection, aAddresses, aDataTypes, controlRate)
             log.info("Device instance created for device named " + name + ".")
-            self.deviceThread[name] = QThread(parent=self)
+            self.deviceThreads[name] = QThread(parent=self)
             log.info("Device thread created for device named " + name + ".")
-            self.devices[name].moveToThread(self.deviceThread[name])
-            self.deviceThread[name].start()
+            self.devices[name].moveToThread(self.deviceThreads[name])
+            self.deviceThreads[name].start()
             log.info("Device thread started for device named " + name + ".")
 
             # Emit signal to connect sample timer to slot for the current device object.
@@ -307,8 +307,8 @@ class Manager(QObject):
         self.assembly.clearAllData()
         
         # Close device threads.
-        for name in self.deviceThread:
-            self.deviceThread[name].quit()
+        for name in self.deviceThreads:
+            self.deviceThreads[name].quit()
             log.info("Thread for " + name + " stopped.")
 
         log.info("Configuring devices.")

@@ -69,7 +69,7 @@ devices:
       autozero: true
     control:
     - channel: C1
-      enable: false
+      enable: true
       type: 0
       control: 0
       feedback: 0
@@ -146,7 +146,65 @@ devices:
       control: 0
       feedback: 0
     - channel: C2
-      enable: false
+      enable: true
       type: 0
       control: 0
-      feedback: 0
+      feedback: 1
+plots:
+  '140320305952896':
+    invertX: false
+    logXAxis: false
+    invertY: false
+    logYAxis: false
+    setGrid: false
+    setGridX: false
+    setGridY: false
+    alpha: 50
+    opacity: 50
+    auto: true
+    autoX: true
+    autoY: true
+    manualX: false
+    minXRange: 0
+    maxXRange: 1
+    manualY: false
+    minYRange: 0
+    maxYRange: 1
+    lock: false
+    channels:
+    - plot: false
+      name: Time
+      device: ALL
+      colour: '#35e3e3'
+      value: '0.00'
+      unit: s
+    - plot: true
+      name: Ch_1
+      device: AMY
+      colour: '#f44336'
+      value: '0.00'
+      unit: V
+    - plot: false
+      name: Ch_2
+      device: AMY
+      colour: '#e91e63'
+      value: '0.00'
+      unit: V
+    - plot: false
+      name: Ch_3
+      device: AMY
+      colour: '#9c27b0'
+      value: '0.00'
+      unit: V
+    - plot: false
+      name: Ch_1
+      device: TIM
+      colour: '#673ab7'
+      value: '0.00'
+      unit: V
+    - plot: false
+      name: Ch_2
+      device: TIM
+      colour: '#3f51b5'
+      value: '0.00'
+      unit: V

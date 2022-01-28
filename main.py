@@ -424,8 +424,8 @@ class MainWindow(QMainWindow, QtStyleTools):
                 sleep(1.0)
 
         # Stop and quit all threads and plots and then close.
-        for name in self.manager.deviceThread:
-            self.manager.deviceThread[name].quit()
+        for name in self.manager.deviceThreads:
+            self.manager.deviceThreads[name].quit()
             log.info("Thread for " + name + " stopped.")
         self.manager.assemblyThread.quit()
         log.info("Assembly thread stopped.")
