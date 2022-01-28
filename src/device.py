@@ -20,6 +20,7 @@ class Device(QObject):
         self.aDataTypes = dataTypes
         self.numFrames = len(self.aAddresses)
         self.controlRate = controlRate
+        self.handle = None
         self.openConnection()
         self.initialiseSettings()
         # self.script = "src/acquire.lua"
@@ -41,19 +42,20 @@ class Device(QObject):
 
     def initialiseSettings(self):
         # Method to initialise the device.
-        try:
-            # Set the ADC settings.
-            names = ["AIN_ALL_RANGE", "AIN_ALL_RESOLUTION_INDEX", "AIN_ALL_SETTLING_US"]
-            aValues = [10, 2, 0] # No amplification; 16.5 effective bits; auto settling time.
-            numFrames = len(names)
-            ljm.eWriteNames(self.handle, numFrames, names, aValues) 
-        except ljm.LJMError:
-            # Otherwise log the exception.
-            ljme = sys.exc_info()[1]
-            log.warning(ljme) 
-        except Exception:
-            e = sys.exc_info()[1]
-            log.warning(e)
+        if self.handle != None:
+            try:
+                # Set the ADC settings.
+                names = ["AIN_ALL_RANGE", "AIN_ALL_RESOLUTION_INDEX", "AIN_ALL_SETTLING_US"]
+                aValues = [10, 2, 0] # No amplification; 16.5 effective bits; auto settling time.
+                numFrames = len(names)
+                ljm.eWriteNames(self.handle, numFrames, names, aValues) 
+            except ljm.LJMError:
+                # Otherwise log the exception.
+                ljme = sys.exc_info()[1]
+                log.warning(ljme) 
+            except Exception:
+                e = sys.exc_info()[1]
+                log.warning(e)
 
     def loadLua(self):
         try:

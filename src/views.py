@@ -112,23 +112,15 @@ class ControlTableView(QTableView):
         self.checkBoxDelegate = CheckBoxDelegate("channel")
         self.stringDelegate = StringDelegate()
         self.floatValidatorDelegate = FloatValidatorDelegate()
-        #self.checkBoxDelegate = CheckBoxDelegate()
 
-        # controlModeList = ['Analog', 'Digital']
-        # controlActuatorList = ['Linear Actuator', 'Rotary Actuator','Pressure Pump']
-        # feedbackChannelList = ['No Channels Selected']
-        #self.comboBoxDelegate1.setItems(controlModeList)
-        #self.comboBoxDelegate2.setItems(item2_1)
-        #self.comboBoxDelegate3.setItems(defeault_item3)
-
-        self.comboBoxDelegate1 = ComboBoxDelegate(controlModeList)
-        self.comboBoxDelegate2 = ComboBoxDelegate(controlActuatorList)
-        self.comboBoxDelegate3 = ComboBoxDelegate(feedbackChannelList)
+        self.controlModeComboBoxDelegate = ComboBoxDelegate(controlModeList)
+        self.controlActuatorComboBoxDelegate = ComboBoxDelegate(controlActuatorList)
+        self.feedbackChannelListComboBoxDelegate = ComboBoxDelegate(feedbackChannelList)
 
         self.setItemDelegateForColumn(0, self.checkBoxDelegate)
-        self.setItemDelegateForColumn(1, self.comboBoxDelegate1)
-        self.setItemDelegateForColumn(2, self.comboBoxDelegate2)
-        self.setItemDelegateForColumn(3, self.comboBoxDelegate3)
+        self.setItemDelegateForColumn(1, self.controlModeComboBoxDelegate)
+        self.setItemDelegateForColumn(2, self.controlActuatorComboBoxDelegate)
+        self.setItemDelegateForColumn(3, self.feedbackChannelListComboBoxDelegate)
 
     def persistentEditorOpen(self):
         self.openPersistentEditor(self.model().index(0, 1))

@@ -167,13 +167,14 @@ class StringDelegate(QItemDelegate):
         model.setData(index, value, Qt.EditRole)
 
 class ComboBoxDelegate(QStyledItemDelegate):
+    """
+    A delegate that displays a combobox.
+    """
     def __init__(self, items):
         super().__init__()
-
         self.items = items
 
     def createEditor(self, parent, option, index):
-        #print('CreateEditor')
         editor = QComboBox(parent)
         editor.currentIndexChanged.connect(self.commit_editor)
         editor.addItems(self.items)
@@ -183,15 +184,7 @@ class ComboBoxDelegate(QStyledItemDelegate):
         editor = self.sender()
         self.commitData.emit(editor)
 
-    # def setEditorData(self, editor, index):
-    #     value = index.model().data(index)
-
-        # if value:
-        #     editor.setCurrentIndex(value)
-        #     print('SetEditorData', value)
-
     def setModelData(self, editor, model, index):
-        #print('modelSet', editor.currentIndex())
         model.setData(index, editor.currentIndex(), Qt.EditRole)
 
     def updateEditorGeometry(self, editor, option, index):
@@ -199,8 +192,6 @@ class ComboBoxDelegate(QStyledItemDelegate):
 
     def paint(self, painter, option, index):
         value = index.model().data(index)
-        # if value > len(self.items)-1:
-        #     value = len(self.items)-1
         text = self.items[value]
         option.text = text
         QApplication.style().drawControl(QStyle.CE_ItemViewItem, option, painter)

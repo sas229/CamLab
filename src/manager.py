@@ -18,15 +18,10 @@ log = logging.getLogger(__name__)
 class Manager(QObject):
     updateUI = Signal(dict)
     configurationChanged = Signal(dict)
-    #addAcquisitionTable = Signal(str)
-    #updateAcquisitionTabs = Signal()
     addDeviceConfiguration = Signal(str, list)
-    # clearAcquisitionTabs = Signal()
-    # clearControlTabs = Signal()
     clearDeviceConfigurationTabs = Signal()
     clearPlots = Signal()
     addControlTable = Signal(str,list)
-    #updateControlTabs = Signal()
     updateDeviceConfigurationTab = Signal()
     removeWidget = Signal(str)
     
@@ -159,7 +154,7 @@ class Manager(QObject):
                 except Exception:
                     e = sys.exc_info()[1]
                     log.warning(e)
-                # Update acquisition and control table models and add TableView to TabWidget by emitting the appropriate Signal. Any changes in the table will be reflected immediately in the underlying configuration data.
+                # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
                 self.deviceTableModel.appendRow(deviceInformation)
                 self.acquisitionModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
                 self.controlModels[name] = ControlTableModel(self.configuration["devices"][name]["control"])
@@ -167,7 +162,6 @@ class Manager(QObject):
             log.info("Configuration loaded.")
         self.updateDeviceConfigurationTab.emit()
         self.updateUI.emit(self.configuration)
-
 
     def findDevices(self):
         """Method to find all available devices and return an array of connection properties.
@@ -233,13 +227,9 @@ class Manager(QObject):
                 else:
                     self.configuration["devices"][name] = newDevice 
 
-                # Update acquisition table models and add TableView to TabWidget by emitting the appropriate Signal.
+                # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
                 self.acquisitionModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
-                #self.addAcquisitionTable.emit(name)
-                #self.updateAcquisitionTabs.emit()
                 self.controlModels[name] = ControlTableModel(self.configuration["devices"][name]["control"])
-                #self.addControlTable.emit(name, self.defaultFeedbackChannel)
-                #self.updateControlTabs.emit()
                 self.addDeviceConfiguration.emit(name, self.defaultFeedbackChannel)
                 self.updateDeviceConfigurationTab.emit()
                 self.updateUI.emit(self.configuration)
@@ -287,13 +277,9 @@ class Manager(QObject):
                 else:
                     self.configuration["devices"][name] = newDevice 
 
-                # Update acquisition and Output table models and add TableView to TabWidget by emitting the appropriate Signal. Any changes in the table will be reflected immediately in the underlying configuration data.
+                # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
                 self.acquisitionModels[name] = AcquisitionTableModel(data=self.configuration["devices"][name]["acquisition"])
-                #self.addAcquisitionTable.emit(name)
-                #self.updateAcquisitionTabs.emit()
                 self.controlModels[name] = ControlTableModel(self.configuration["devices"][name]["control"])
-                #self.addControlTable.emit(name, self.defaultControlTable)
-                #self.updateControlTabs.emit()
                 self.addDeviceConfiguration.emit(name)
                 self.updateDeviceConfigurationTab.emit()
                 self.updateUI.emit(self.configuration)
@@ -352,16 +338,18 @@ class Manager(QObject):
 
     @Slot(str)
     def loadConfiguration(self, loadConfigurationPath):
-        # Clear device table prior to loading devices from selected configuration.
+        # Clear device table and configuration tabs prior to loading devices from selected configuration.
         self.configuration = {}
         self.deviceTableModel.clearData()
+        self.clearDeviceConfigurationTabs.emit()
+
+        # Clear all manager dicts.
         self.acquisitionModels = {}
         self.acquisitionTables = {}
-        # self.clearAcquisitionTabs.emit()
         self.controlModels = {}
         self.controlTables = {}
-        # self.clearControlTabs.emit()
-        self.clearDeviceConfigurationTabs.emit()
+
+        # Load configuration.
         if not loadConfigurationPath is None:
             try:
                 log.info("Loading configuration from " + loadConfigurationPath + " and saving location to QSettings.")
@@ -375,7 +363,6 @@ class Manager(QObject):
                     self.setListFeedbackCombobox()
                     if "plots" in self.configuration:
                         self.existingPlotFound.emit()
-
             except FileNotFoundError:
                 log.warning("Previous configuration file not found.")
                 self.initialiseDefaultConfiguration()
@@ -421,11 +408,8 @@ class Manager(QObject):
         self.controlModels = {}
 
         # Initialise the basic default configuration.
-        # THE LINE BELOW IS CAUSING ERRORS!
         self.initialiseDefaultConfiguration()
-        
-        # self.loadConfiguration("/NoneExistentFile.yaml")
-        # self.updateUI.emit(self.configuration)
+        self.updateUI.emit(self.configuration)
         log.info("Cleared configuration by loading defaults.") 
 
     @Slot(str)
@@ -462,14 +446,13 @@ class Manager(QObject):
     def updateDarkMode(self, newDarkMode):
         self.configuration["global"]["darkMode"] = newDarkMode
         self.configurationChanged.emit(self.configuration) 
-        # log.info("New darkMode = " + str(newDarkMode))
+        log.info("New darkMode = " + str(newDarkMode))
 
     def resetColourSelector(self):
         self.j = 0
         self.k = 4
 
     def getGenericChannelsData(self):
-
         deviceList = self.deviceTableModel.enabledDevices()
         self.resetColourSelector()
         genericChannelsData = []
@@ -491,11 +474,11 @@ class Manager(QObject):
         # Create a generic channelsData list for the enabled devices.
         genericChannelsData = self.getGenericChannelsData()
 
-        # For each PlotWindow object compare the above with the current channels data.
+        # For each PlotWindow object compare the above with the current channelsData object.
         for plotNumber in self.configuration["plots"]:
             channelsData = self.configuration["plots"][plotNumber]["channels"]
 
-            # Iterate through the genericChannelsData and compare with channelData, inheriting the colour if it exists.
+            # Iterate through the genericChannelsData and compare with channelsData, inheriting the colour if it exists.
             for genericChannel in genericChannelsData:
                 name = genericChannel["name"]
                 device = genericChannel["device"]

@@ -130,9 +130,9 @@ class CamLabToolBar(QToolBar):
         log.info("Acquisition and control mode enabled." if self.running else "Configuration mode enabled")
         self.running = not self.running
         if self.darkMode == True:
-            self.modeButton.setIcon(QIcon("assets/settings_white_24px.svg" if self.running else "assets/play_circle_white_24dp.svg"))
+            self.modeButton.setIcon(QIcon("assets/settings_white_24dp.svg" if self.running else "assets/play_circle_white_24dp.svg"))
         else:
-            self.modeButton.setIcon(QIcon("assets/settings_black_24px.svg" if self.running else "assets/play_circle_black_24dp.svg"))
+            self.modeButton.setIcon(QIcon("assets/settings_black_24dp.svg" if self.running else "assets/play_circle_black_24dp.svg"))
         self.modeButton.setToolTip("Click to run acquisition and control." if self.running else "Click to configure.")
         self.refreshButton.setVisible(not self.refreshButton.isVisible())
         self.loadConfigButton.setVisible(not self.loadConfigButton.isVisible())
@@ -151,7 +151,7 @@ class CamLabToolBar(QToolBar):
         # Change appearance between light and dark modes.
         self.darkMode = darkMode
         if self.running == True:
-            self.modeButton.setIcon(QIcon("assets/settings_white_24px.svg" if self.running else "assets/settings_black_24dp.svg"))
+            self.modeButton.setIcon(QIcon("assets/settings_white_24dp.svg" if self.darkMode else "assets/settings_black_24dp.svg"))
         else:
             self.modeButton.setIcon(QIcon("assets/play_circle_white_24dp.svg" if self.darkMode else "assets/play_circle_black_24dp.svg"))
         self.addPlotButton.setIcon(QIcon("assets/stacked_line_chart_white_24dp.svg" if self.darkMode else "assets/stacked_line_chart_black_24dp.svg"))

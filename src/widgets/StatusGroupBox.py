@@ -101,6 +101,10 @@ class StatusGroupBox(QGroupBox):
         # Reset initial time and date.
         self.setInitialTimeDate()
 
+        # Acquire time now and calculate time elapsed.
+        self.currentTime = datetime.now()
+        self.elapsedTime =  self.nullRef + (self.currentTime - self.initialTime)
+
         # Reset output text.
         self.output.setText(
             "{path}/{date}_{hours:02}:{minutes:02}:{seconds:02}.txt".format(path="/home/data", date=self.initialDate.toString(Qt.ISODate), hours=self.initialTime.hour, minutes=self.initialTime.minute, seconds=self.initialTime.second)
