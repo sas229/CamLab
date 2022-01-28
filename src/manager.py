@@ -44,9 +44,9 @@ class Manager(QObject):
         self.j, self.k = 0, 4
         self.controls = {}
         self.controlTableModel = ControlTableModel()
-        self.item1 = ['Analogue', 'Digital']
-        self.item2 = ['Linear Actuator', 'Rotary Actuator','Pressure Pump']
-        self.default_item3 = ['N/A']
+        self.controlModeList = ['Analogue', 'Digital']
+        self.controlActuatorList = ['Linear Actuator', 'Rotary Actuator','Pressure Pump']
+        self.defaultFeedbackChannel = ['N/A']
 
         self.defaultAcquisitionTable = [
             {"channel": "AIN0", "name": "Ch_1", "unit": "V", "slope": 1.0, "offset": 0.00, "connect": False, "autozero": True},
@@ -64,11 +64,8 @@ class Manager(QObject):
             {"channel": "C2", "enable": False, "type": 0, "control": 0, "feedback": 0}
         ]
 
-
         # Instantiate the model for the device list.   
         self.deviceTableModel = DeviceTableModel()
-
-        #self.configuration.plots[number].channelsTableModel = ChannelsTableModel(channelsData)
 
         # Load last used configuration file.
         log.info("Finding previous YAML file location from QSettings.")
@@ -104,7 +101,7 @@ class Manager(QObject):
         self.deviceThread = {}
         enabledDevices = self.deviceTableModel.enabledDevices()
 
-        # Create output arrays in assembly thread.        print("Stopping timer.")
+        # Create output arrays in assembly thread.
         self.assembly.createDataArrays(enabledDevices)
 
         for device in enabledDevices:
@@ -163,7 +160,7 @@ class Manager(QObject):
                 self.deviceTableModel.appendRow(deviceInformation)
                 self.acquisitionModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
                 self.controlModels[name] = ControlTableModel(self.configuration["devices"][name]["control"])
-                self.addDeviceConfiguration.emit(name, self.default_item3)
+                self.addDeviceConfiguration.emit(name, self.defaultFeedbackChannel)
             log.info("Configuration loaded.")
         self.updateDeviceConfigurationTab.emit()
         self.updateUI.emit(self.configuration)
@@ -237,9 +234,9 @@ class Manager(QObject):
                 #self.addAcquisitionTable.emit(name)
                 #self.updateAcquisitionTabs.emit()
                 self.controlModels[name] = ControlTableModel(self.configuration["devices"][name]["control"])
-                #self.addControlTable.emit(name, self.default_item3)
+                #self.addControlTable.emit(name, self.defaultFeedbackChannel)
                 #self.updateControlTabs.emit()
-                self.addDeviceConfiguration.emit(name, self.default_item3)
+                self.addDeviceConfiguration.emit(name, self.defaultFeedbackChannel)
                 self.updateDeviceConfigurationTab.emit()
                 self.updateUI.emit(self.configuration)
         log.info("Found " + str(devicesUSB) + " USB device(s).")
@@ -549,18 +546,18 @@ class Manager(QObject):
             for key, value in device.items():
                 if value != []:
                     #self.controlTableViews[key].comboBoxDelegate3.clear()
-                    #self.item3.clear()
-                    item3 = copy.deepcopy(value)
+                    #self.feedbackChannelList.clear()
+                    feedbackChannelList = copy.deepcopy(value)
                     self.removeWidget.emit(key)
-                    self.addControlTable.emit(key, item3)
+                    self.addControlTable.emit(key, feedbackChannelList)
 
-                    #self.addDeviceConfiguration.emit(key, item3)
+                    #self.addDeviceConfiguration.emit(key, feedbackChannelList)
                     #self.updateControlTabs.emit()
                     #self.updateDeviceConfigurationTab.emit()
 
                 elif value == []:
                     self.removeWidget.emit(key)
-                    self.addControlTable.emit(key, self.default_item3)
+                    self.addControlTable.emit(key, self.defaultFeedbackChannel)
 
     def resetIndexFeedbackComboBox(self, index, name):
         #self.deviceConfigurationTabIndex()

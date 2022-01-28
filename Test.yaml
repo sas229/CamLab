@@ -30,7 +30,7 @@ devices:
       unit: V
       slope: 1.0
       offset: 0.0
-      connect: false
+      connect: true
       autozero: true
     - channel: AIN3
       name: Ch_4

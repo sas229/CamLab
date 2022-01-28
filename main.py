@@ -154,7 +154,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.statusGroupBox.reset()
 
     @Slot(str, list)
-    def addDeviceConfiguration(self, name, item3):
+    def addDeviceConfiguration(self, name, defaultFeedbackChannel):
 
         self.deviceConfigurationLayout[name] = QVBoxLayout()
         acquisitionLabel = QLabel('ACQUISITION')
@@ -166,7 +166,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.deviceConfigurationLayout[name].addWidget(self.acquisitionTableViews[name])
         conrtrolLabel = QLabel('CONTROL')
         self.deviceConfigurationLayout[name].addWidget(conrtrolLabel)
-        self.addControlTable(name, item3)
+        self.addControlTable(name, defaultFeedbackChannel)
         # self.controlTableViews[name].setFixedHeight(120)
         # self.deviceConfigurationLayout[name].addWidget(self.controlTableViews[name])
         self.deviceConfigurationWidget[name] = QWidget()
@@ -235,9 +235,9 @@ class MainWindow(QMainWindow, QtStyleTools):
 
 
     @Slot(str, list)
-    def addControlTable(self, name, item3):
+    def addControlTable(self, name, defaultFeedbackChannel):
         # Add acquisition table to dict and update the TabWidget.
-        self.controlTableViews[name] = ControlTableView(self.manager.item1, self.manager.item2, item3)
+        self.controlTableViews[name] = ControlTableView(self.manager.controlModeList, self.manager.controlActuatorList, defaultFeedbackChannel)
         self.controlTableViews[name].setModel(self.manager.controlModels[name])
         self.controlTableViews[name].setFixedHeight(120)
         self.deviceConfigurationLayout[name].addWidget(self.controlTableViews[name])

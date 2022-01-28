@@ -97,7 +97,7 @@ class ColourPickerTableView(QTableView):
 
 class ControlTableView(QTableView):
 
-    def __init__(self, item1, item2, item3, parent = None):
+    def __init__(self, controlModeList, controlActuatorList, feedbackChannelList, parent = None):
         super(ControlTableView, self).__init__(parent)
         self.setSelectionMode(self.SingleSelection)
         self.setShowGrid(False)
@@ -114,16 +114,16 @@ class ControlTableView(QTableView):
         self.floatValidatorDelegate = FloatValidatorDelegate()
         #self.checkBoxDelegate = CheckBoxDelegate()
 
-        # item1 = ['Analog', 'Digital']
-        # item2 = ['Linear Actuator', 'Rotary Actuator','Pressure Pump']
-        # item3 = ['No Channels Selected']
-        #self.comboBoxDelegate1.setItems(item1)
+        # controlModeList = ['Analog', 'Digital']
+        # controlActuatorList = ['Linear Actuator', 'Rotary Actuator','Pressure Pump']
+        # feedbackChannelList = ['No Channels Selected']
+        #self.comboBoxDelegate1.setItems(controlModeList)
         #self.comboBoxDelegate2.setItems(item2_1)
         #self.comboBoxDelegate3.setItems(defeault_item3)
 
-        self.comboBoxDelegate1 = ComboBoxDelegate(item1)
-        self.comboBoxDelegate2 = ComboBoxDelegate(item2)
-        self.comboBoxDelegate3 = ComboBoxDelegate(item3)
+        self.comboBoxDelegate1 = ComboBoxDelegate(controlModeList)
+        self.comboBoxDelegate2 = ComboBoxDelegate(controlActuatorList)
+        self.comboBoxDelegate3 = ComboBoxDelegate(feedbackChannelList)
 
         self.setItemDelegateForColumn(0, self.checkBoxDelegate)
         self.setItemDelegateForColumn(1, self.comboBoxDelegate1)
