@@ -21,12 +21,15 @@ class Manager(QObject):
     #addAcquisitionTable = Signal(str)
     #updateAcquisitionTabs = Signal()
     addDeviceConfiguration = Signal(str, list)
-    clearAcquisitionTabs = Signal()
+    # clearAcquisitionTabs = Signal()
+    # clearControlTabs = Signal()
+    clearDeviceConfigurationTabs = Signal()
+    clearPlots = Signal()
     addControlTable = Signal(str,list)
     #updateControlTabs = Signal()
     updateDeviceConfigurationTab = Signal()
     removeWidget = Signal(str)
-    clearControlTabs = Signal()
+    
     plotWindowChannelsUpdated = Signal()
     existingPlotFound = Signal()
 
@@ -178,8 +181,9 @@ class Manager(QObject):
         self.acquisitionModels = {}
         self.acquisitionTables = {}
         self.controlModels = {}
-        self.clearAcquisitionTabs.emit()
-        self.clearControlTabs.emit()
+        # self.clearAcquisitionTabs.emit()
+        # self.clearControlTabs.emit()
+        self.clearDeviceConfigurationTabs.emit()
         self.loadDevicesFromConfiguration()
 
         # Get a list of already existing devices.
@@ -353,10 +357,11 @@ class Manager(QObject):
         self.deviceTableModel.clearData()
         self.acquisitionModels = {}
         self.acquisitionTables = {}
-        self.clearAcquisitionTabs.emit()
+        # self.clearAcquisitionTabs.emit()
         self.controlModels = {}
         self.controlTables = {}
-        self.clearControlTabs.emit()
+        # self.clearControlTabs.emit()
+        self.clearDeviceConfigurationTabs.emit()
         if not loadConfigurationPath is None:
             try:
                 log.info("Loading configuration from " + loadConfigurationPath + " and saving location to QSettings.")
@@ -403,9 +408,24 @@ class Manager(QObject):
 
     @Slot()
     def clearConfiguration(self):
-        self.configuration = {}
-        self.loadConfiguration("/NoneExistentFile.yaml")
-        self.updateUI.emit(self.configuration)
+        # Clear all plots first.
+        self.clearPlots.emit()
+
+        # Next clear the device list and configuration tabs.
+        self.deviceTableModel.clearData()
+        self.clearDeviceConfigurationTabs.emit()
+        
+        # Clear all underlying models and tables.
+        self.acquisitionModels = {}
+        self.acquisitionTables = {}
+        self.controlModels = {}
+
+        # Initialise the basic default configuration.
+        # THE LINE BELOW IS CAUSING ERRORS!
+        self.initialiseDefaultConfiguration()
+        
+        # self.loadConfiguration("/NoneExistentFile.yaml")
+        # self.updateUI.emit(self.configuration)
         log.info("Cleared configuration by loading defaults.") 
 
     @Slot(str)

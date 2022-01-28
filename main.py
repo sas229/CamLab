@@ -120,13 +120,15 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.manager.configurationChanged.connect(self.updateUI)
         self.manager.configurationChanged.connect(self.globalSettingsGroupBox.updateUI)
         #self.manager.addAcquisitionTable.connect(self.addAcquisitionTable)
-        self.manager.clearAcquisitionTabs.connect(self.clearAcquisitionTabs)
+        # self.manager.clearAcquisitionTabs.connect(self.clearAcquisitionTabs)
+        self.manager.clearDeviceConfigurationTabs.connect(self.clearDeviceConfigurationTabs)
+        self.manager.clearPlots.connect(self.clearPlots)
         #self.manager.updateAcquisitionTabs.connect(self.updateAcquisitionTabs)
         self.manager.addDeviceConfiguration.connect(self.addDeviceConfiguration)
         self.manager.removeWidget.connect(self.removeWidgetFromLayout)
         self.manager.addControlTable.connect(self.addControlTable)
         #self.manager.updateControlTabs.connect(self.updateControlTabs)
-        self.manager.clearControlTabs.connect(self.clearControlTabs)
+        # self.manager.clearControlTabs.connect(self.clearControlTabs)
         self.manager.updateDeviceConfigurationTab.connect(self.updateDeviceConfigurationTabs)
         #self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.updateAcquisitionTabs)
         #self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.updateControlTabs)
@@ -186,6 +188,10 @@ class MainWindow(QMainWindow, QtStyleTools):
             if status == True and connect == True and name in self.acquisitionTableViews:
                 self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.addTab(self.deviceConfigurationWidget[name], name)
 
+    @Slot()
+    def clearDeviceConfigurationTabs(self):
+        self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.clear()
+
     @Slot(str)
     def removeWidgetFromLayout(self,name):
         self.controlTableViews[name].setParent(None)
@@ -208,10 +214,10 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.manager.acquisitionModels[name].channelIndexToggled.connect(
             self.resetControlFeedbackComboBox)
 
-    @Slot()
-    def clearAcquisitionTabs(self):
-        # Clear the acqusition table TabWidget.
-        self.acquisitionGroupBox.acquisitionTabWidget.clear()
+    # @Slot()
+    # def clearAcquisitionTabs(self):
+    #     # Clear the acqusition table TabWidget.
+    #     self.acquisitionGroupBox.acquisitionTabWidget.clear()
 
     @Slot()
     def updateAcquisitionTabs(self):
@@ -243,10 +249,10 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.deviceConfigurationLayout[name].addWidget(self.controlTableViews[name])
         #self.controlTableViews[name].persistentEditorOpen()
 
-    @Slot()
-    def clearControlTabs(self):
-        # Clear the Control table TabWidget.
-        self.controlGroupBox.controlTabWidget.clear()
+    # @Slot()
+    # def clearControlTabs(self):
+    #     # Clear the Control table TabWidget.
+    #     self.controlGroupBox.controlTabWidget.clear()
 
     @Slot()
     def updateControlTabs(self):
@@ -399,12 +405,18 @@ class MainWindow(QMainWindow, QtStyleTools):
 
     @Slot(str)
     def removePlot(self, plotNumber):
-
+        # Pop plot from if "plots" key in dict.
         self.plots.pop(plotNumber)
-        self.manager.configuration["plots"].pop(plotNumber)
+        if "plots" in self.manager.configuration:
+            self.manager.configuration["plots"].pop(plotNumber)
+            # If plots dict in manager is empty delete the plots key.
+            if self.manager.configuration["plots"] == {}:
+                del self.manager.configuration["plots"]
 
-        if self.manager.configuration["plots"] == {}:
-            del self.manager.configuration["plots"]
+    def clearPlots(self):
+        plotList = list(self.plots.keys())
+        for key in plotList:
+            self.plots[key].close()
 
     def storePlot(self, plotWindow):
         self.plots.update({plotWindow.plotNumber: plotWindow})
