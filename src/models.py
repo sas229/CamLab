@@ -85,6 +85,7 @@ class DeviceTableModel(QAbstractTableModel):
         return True
 
     def clearData(self):
+        """Method to clear data."""
         self.beginResetModel()       
         self._data.clear()
         self.endResetModel()
@@ -92,14 +93,15 @@ class DeviceTableModel(QAbstractTableModel):
         return True
 
     def enabledDevices(self):
-        """Return a list of dicts of target device IDs and status currently enabled."""
+        """Method to return a list of dicts of target device IDs with status currently enabled."""
         enabledDevices = []
         for device in self._data:
-            if device["connect"] == True:
+            if device["connect"] == True and device["status"] == True:
                 enabledDevices.append(device)
         return enabledDevices   
     
     def redrawIcons(self):
+        """Method to redraw icons as a workaround."""
         index_begin = self.index(0, 0)
         index_end = self.index(self.rowCount(), self.columnCount())
         self.dataChanged.emit(index_begin, index_end, [])

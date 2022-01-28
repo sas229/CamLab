@@ -6,78 +6,6 @@ global:
   path: /data
   filename: junk
 devices:
-  BOB:
-    id: 470019430
-    connection: 1
-    address: N/A
-    acquisition:
-    - channel: AIN0
-      name: Ch_1
-      unit: V
-      slope: 1.0
-      offset: 0.0
-      connect: false
-      autozero: true
-    - channel: AIN1
-      name: Ch_2
-      unit: V
-      slope: 1.0
-      offset: 0.0
-      connect: false
-      autozero: true
-    - channel: AIN2
-      name: Ch_3
-      unit: V
-      slope: 1.0
-      offset: 0.0
-      connect: true
-      autozero: true
-    - channel: AIN3
-      name: Ch_4
-      unit: V
-      slope: 1.0
-      offset: 0.0
-      connect: true
-      autozero: true
-    - channel: AIN4
-      name: Ch_5
-      unit: V
-      slope: 1.0
-      offset: 0.0
-      connect: false
-      autozero: true
-    - channel: AIN5
-      name: Ch_6
-      unit: V
-      slope: 1.0
-      offset: 0.0
-      connect: false
-      autozero: true
-    - channel: AIN6
-      name: Ch_7
-      unit: V
-      slope: 1.0
-      offset: 0.0
-      connect: false
-      autozero: true
-    - channel: AIN7
-      name: Ch_8
-      unit: V
-      slope: 1.0
-      offset: 0.0
-      connect: false
-      autozero: true
-    control:
-    - channel: C1
-      enable: false
-      type: 0
-      control: 0
-      feedback: 0
-    - channel: C2
-      enable: false
-      type: 0
-      control: 0
-      feedback: 0
   AMY:
     id: 470019440
     connection: 1
@@ -150,55 +78,75 @@ devices:
       type: 0
       control: 0
       feedback: 0
-plots:
-  '140467258235712':
-    invertX: false
-    logXAxis: false
-    invertY: false
-    logYAxis: false
-    setGrid: false
-    setGridX: false
-    setGridY: false
-    alpha: 50
-    opacity: 50
-    auto: true
-    autoX: true
-    autoY: true
-    manualX: false
-    minXRange: 0
-    maxXRange: 1
-    manualY: false
-    minYRange: 0
-    maxYRange: 1
-    lock: false
-    channels:
-    - plot: false
-      name: Time
-      device: ALL
-      colour: '#35e3e3'
-      value: '0.00'
-      unit: s
-    - plot: true
+  TIM:
+    id: 470020169
+    connection: 1
+    address: N/A
+    acquisition:
+    - channel: AIN0
       name: Ch_1
-      device: AMY
-      colour: '#f44336'
-      value: '0.00'
       unit: V
-    - plot: false
+      slope: 1.0
+      offset: 0.0
+      connect: true
+      autozero: true
+    - channel: AIN1
       name: Ch_2
-      device: AMY
-      colour: '#e91e63'
-      value: '0.00'
       unit: V
-    - plot: true
+      slope: 1.0
+      offset: 0.0
+      connect: true
+      autozero: true
+    - channel: AIN2
       name: Ch_3
-      device: BOB
-      colour: '#9c27b0'
-      value: '0.00'
       unit: V
-    - plot: false
+      slope: 1.0
+      offset: 0.0
+      connect: false
+      autozero: true
+    - channel: AIN3
       name: Ch_4
-      device: BOB
-      colour: '#673ab7'
-      value: '0.00'
       unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: false
+      autozero: true
+    - channel: AIN4
+      name: Ch_5
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: false
+      autozero: true
+    - channel: AIN5
+      name: Ch_6
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: false
+      autozero: true
+    - channel: AIN6
+      name: Ch_7
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: false
+      autozero: true
+    - channel: AIN7
+      name: Ch_8
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: false
+      autozero: true
+    control:
+    - channel: C1
+      enable: false
+      type: 0
+      control: 0
+      feedback: 0
+    - channel: C2
+      enable: false
+      type: 0
+      control: 0
+      feedback: 0

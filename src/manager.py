@@ -136,7 +136,6 @@ class Manager(QObject):
 
     def loadDevicesFromConfiguration(self):
         # Find all devices listed in the configuration file.
-
         if "devices" in self.configuration:
             for device in self.configuration["devices"].keys():
                 deviceInformation = {}
@@ -147,11 +146,12 @@ class Manager(QObject):
                 deviceInformation["address"] = self.configuration["devices"][device]["address"]
                 deviceInformation["status"] = False
 
-                if self.deviceList == []:
-                    self.deviceList.append({'Name': device, 'Connection': bool(deviceInformation["connection"])})
-                for i in range(len(self.deviceList)):
-                    if device not in self.deviceList[i]['Name']:
-                        self.deviceList.append({'Name': device, 'Connection': bool(deviceInformation["connection"])})
+                # Unclear what any of the below is for. To be deleted?
+                # if self.deviceList == []:
+                #     self.deviceList.append({'Name': device, 'Connection': bool(deviceInformation["connection"])})
+                # for i in range(len(self.deviceList)):
+                #     if device not in self.deviceList[i]['Name']:
+                #         self.deviceList.append({'Name': device, 'Connection': bool(deviceInformation["connection"])})
 
                 # Try to connect to each device using the ID.
                 try:
@@ -159,21 +159,7 @@ class Manager(QObject):
                     handle = ljm.open(7, int(deviceInformation["connection"]), int(deviceInformation["id"]))
                     name = ljm.eReadNameString(handle, "DEVICE_NAME_DEFAULT")
                     ljm.close(handle)
-                    deviceInformation["status"] = True
-                    self.deviceTableModel.appendRow(deviceInformation)
-                    self.acquisitionModels[name] = AcquisitionTableModel(
-                    self.configuration["devices"][name]["acquisition"])
-                    #self.addAcquisitionTable.emit(name)
-                    self.controlModels[name] = ControlTableModel(
-                    self.configuration["devices"][name]["control"])
-                    self.addDeviceConfiguration.emit(name, self.default_item3)
-                    #self.addControlTable.emit(name)
-                    # Update acquisition table models and add TableView to TabWidget by emitting the appropriate Signal. Any changes in the table will be reflected immediately in the underlying configuration data.
-                    log.info("Configuration loaded.")
-                    #self.updateAcquisitionTabs.emit()
-                    #self.updateControlTabs.emit()
-                    self.updateDeviceConfigurationTab.emit()
-                    self.updateUI.emit(self.configuration)
+                    deviceInformation["status"] = True                  
                 except ljm.LJMError:
                     # Otherwise log the exception and set the device status to false.
                     ljme = sys.exc_info()[1]
@@ -181,6 +167,16 @@ class Manager(QObject):
                 except Exception:
                     e = sys.exc_info()[1]
                     log.warning(e)
+                # Update acquisition and control table models and add TableView to TabWidget by emitting the appropriate Signal. Any changes in the table will be reflected immediately in the underlying configuration data.
+                self.deviceTableModel.appendRow(deviceInformation)
+                self.acquisitionModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
+                # self.addAcquisitionTable.emit(name)
+                self.controlModels[name] = ControlTableModel(self.configuration["devices"][name]["control"])
+                self.addDeviceConfiguration.emit(name, self.default_item3)
+            log.info("Configuration loaded.")
+        self.updateDeviceConfigurationTab.emit()
+        self.updateUI.emit(self.configuration)
+
 
     def findDevices(self):
         """Method to find all available devices and return an array of connection properties.

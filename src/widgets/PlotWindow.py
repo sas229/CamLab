@@ -11,8 +11,6 @@ from src.dialogs import ColourPickerDialog
 import logging
 import src.local_pyqtgraph.pyqtgraph as pg
 import numpy as np
-
-
 from qtrangeslider import QRangeSlider
 
 log = logging.getLogger(__name__)
