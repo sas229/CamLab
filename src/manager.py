@@ -145,14 +145,6 @@ class Manager(QObject):
                 deviceInformation["connection"] = self.configuration["devices"][device]["connection"]
                 deviceInformation["address"] = self.configuration["devices"][device]["address"]
                 deviceInformation["status"] = False
-
-                # Unclear what any of the below is for. To be deleted?
-                # if self.deviceList == []:
-                #     self.deviceList.append({'Name': device, 'Connection': bool(deviceInformation["connection"])})
-                # for i in range(len(self.deviceList)):
-                #     if device not in self.deviceList[i]['Name']:
-                #         self.deviceList.append({'Name': device, 'Connection': bool(deviceInformation["connection"])})
-
                 # Try to connect to each device using the ID.
                 try:
                     # If the connection is successful, set the device status to true.
@@ -170,7 +162,6 @@ class Manager(QObject):
                 # Update acquisition and control table models and add TableView to TabWidget by emitting the appropriate Signal. Any changes in the table will be reflected immediately in the underlying configuration data.
                 self.deviceTableModel.appendRow(deviceInformation)
                 self.acquisitionModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
-                # self.addAcquisitionTable.emit(name)
                 self.controlModels[name] = ControlTableModel(self.configuration["devices"][name]["control"])
                 self.addDeviceConfiguration.emit(name, self.default_item3)
             log.info("Configuration loaded.")
