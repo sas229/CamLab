@@ -47,15 +47,16 @@ class PlotWindow(QWidget, QtStyleTools):
         self.plotWindowLayout = QHBoxLayout()
         self.plotWindowLayout.addWidget(self.plot)   
 
-        # Channels data model.
-        self.selectedChannelsTableView = ChannelsTableView()
+        # Channels data model and table.
         self.setChannelsModel(self.defaultChannelsData)
+        self.selectedChannelsTableView = ChannelsTableView()
+        self.selectedChannelsTableView.setModel(self.channelsModel)
 
         # self.createPens()
         self.createLines()
 
         self.selectedChannelsLabel = QLabel("Selected channels:")
-        self.selectedChannelsTableView.setModel(self.channelsModel)
+        
         self.formatColumns()
 
         self.commonChannelLabel = QLabel("Common channel:")
