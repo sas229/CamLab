@@ -30,6 +30,7 @@ class PlotWindow(QWidget, QtStyleTools):
         self.resize(self.width, self.height)
         self.commonChannel = 0
         self.colourPickerDialog = ColourPickerDialog(self)
+        # self.colourPickerDialog = ColourPickerDialog()
         self.lock_xMin = 0
         self.lock_xMax = 0
         self.lock_yMin = 0
@@ -48,8 +49,8 @@ class PlotWindow(QWidget, QtStyleTools):
         self.plotWindowLayout.addWidget(self.plot)   
 
         # Channels data model and table.
-        self.setChannelsModel(self.defaultChannelsData)
         self.selectedChannelsTableView = ChannelsTableView()
+        self.setChannelsModel(self.defaultChannelsData)
         self.selectedChannelsTableView.setModel(self.channelsModel)
 
         # self.createPens()
