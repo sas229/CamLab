@@ -13,10 +13,10 @@ class Assembly(QObject):
         self.plotData = []
         self.time = 0.00
         self.count = 0
-        self.offsets = np.asarray((0, 0, 0, 0, 0, 0, 0, 0))
         self.dt = 0.01
 
         self.data = {}
+        self.offsets = []
 
     @Slot(str, np.ndarray)
     def updateNewData(self, name, data):
@@ -75,10 +75,16 @@ class Assembly(QObject):
     @Slot()
     def clearPlotData(self):
         self.plotData = self.plotData[-1,:]
+        log.info("Plots cleared.")
 
     @Slot()
     def autozero(self):
         self.offsets = np.average(self.plotData[-10:,1:], axis=0)
+        log.info("Autozero applied.")
+
+    @Slot()
+    def newFile(self):
+        log.info("New file started.")
 
     @Slot(list)
     def createDataArrays(self, enabledDevices):

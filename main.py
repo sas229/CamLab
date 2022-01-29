@@ -52,7 +52,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.mainWindowLayout = QVBoxLayout()
 
         # Toolbar.
-        self.toolbar = CamLabToolBar(self.configuration)
+        self.toolbar = CamLabToolBar()
         self.mainWindowLayout.addWidget(self.toolbar)
 
         # Status groupbox.
@@ -83,17 +83,12 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.centralWidget.setLayout(self.mainWindowLayout)
         self.setCentralWidget(self.centralWidget)
 
-        # Set dark mode (always do this last to ensure all GUI objects are displayed correctly).
-        self.darkMode = self.configuration["global"]["darkMode"]
-        self.setDarkMode()
+        # # Set dark mode (always do this last to ensure all GUI objects are displayed correctly).
+        # self.darkMode = self.configuration["global"]["darkMode"]
+        # self.setDarkMode()
 
         # Toolbar connections.
         self.toolbar.modeButton.triggered.connect(self.toggleMode)
-        self.toolbar.refreshButton.triggered.connect(self.manager.refreshDevices)
-        self.toolbar.loadConfiguration.connect(self.manager.loadConfiguration)
-        self.toolbar.saveConfiguration.connect(self.manager.saveConfiguration)
-        self.toolbar.clearConfigButton.triggered.connect(self.manager.clearConfiguration)
-        self.toolbar.darkModeChanged.connect(self.manager.updateDarkMode)
         self.toolbar.configure.connect(self.manager.configure)
         self.toolbar.configure.connect(self.manager.timing.stop)
         self.toolbar.configure.connect(self.end)
@@ -101,8 +96,17 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.toolbar.run.connect(self.start)
         self.toolbar.run.connect(self.statusGroupBox.setInitialTimeDate)
         self.toolbar.addPlotButton.triggered.connect(self.addPlot)
-        self.toolbar.clearPlotsButton.triggered.connect(self.manager.assembly.clearPlotData)
+        self.toolbar.controlPanelButton.triggered.connect(self.openControlPanel)
+        self.toolbar.cameraButton.triggered.connect(self.openCamera)
+        self.toolbar.extensionButton.triggered.connect(self.openExtension)
+        self.toolbar.refreshButton.triggered.connect(self.manager.refreshDevices)
+        self.toolbar.loadConfiguration.connect(self.manager.loadConfiguration)
+        self.toolbar.saveConfiguration.connect(self.manager.saveConfiguration)
+        self.toolbar.clearConfigButton.triggered.connect(self.manager.clearConfiguration)
+        self.toolbar.newFileButton.triggered.connect(self.manager.assembly.newFile)
         self.toolbar.autozeroButton.triggered.connect(self.manager.assembly.autozero)
+        self.toolbar.clearPlotsButton.triggered.connect(self.manager.assembly.clearPlotData)
+        self.toolbar.darkModeButton.triggered.connect(self.updateDarkMode)
 
         # Global settings connections.
         self.globalSettingsGroupBox.acquisitionRateChanged.connect(self.manager.updateAcquisitionRate)
@@ -139,20 +143,54 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.plotTimer.stop()
         self.statusGroupBox.reset()
 
+    @Slot()
+    def openControlPanel(self):
+        log.info("Control panel opened.")
+
+    @Slot()
+    def openCamera(self):
+        log.info("Camera opened.")
+
+    @Slot()
+    def openExtension(self):
+        log.info("Extension opened.")
+
+    @Slot()
+    def updateDarkMode(self):
+        # Toggle darkMode boolean in the configuration.
+        self.manager.configuration["global"]["darkMode"] = not self.darkMode
+
+        # Update the local darkMode variable.
+        self.darkMode = self.manager.configuration["global"]["darkMode"]
+
+        # Update the UI
+        self.updateUI(self.manager.configuration)
+        log.info("Dark mode changed.")
+
     @Slot(str, list)
     def addDeviceConfiguration(self, name, defaultFeedbackChannel):
         # Create layout.
         self.deviceConfigurationLayout[name] = QVBoxLayout()
 
-        # Acquisition table.
+        # Add acquisition table label.
         acquisitionLabel = QLabel('ACQUISITION')
         self.deviceConfigurationLayout[name].addWidget(acquisitionLabel)
-        self.addAcquisitionTable(name)
 
-        # Control table.
+        # Add acquisition table to the TabWidget.
+        self.acquisitionTableViews[name] = AcquisitionTableView()
+        self.acquisitionTableViews[name].setModel(self.manager.acquisitionModels[name])
         self.deviceConfigurationLayout[name].addWidget(self.acquisitionTableViews[name])
+
+        # Connections for acquisition table.
+        self.manager.acquisitionModels[name].acquisitionChannelTableUpdated.connect(self.manager.updatePlotWindowChannelsData)
+        self.manager.acquisitionModels[name].acquisitionChannelTableUpdated.connect(self.manager.setListFeedbackCombobox)
+        self.manager.acquisitionModels[name].channelIndexToggled.connect(self.resetControlFeedbackComboBox)
+
+        # Add control table label.
         conrtrolLabel = QLabel('CONTROL')
         self.deviceConfigurationLayout[name].addWidget(conrtrolLabel)
+
+        # Add control table to the TabWidget.
         self.addControlTable(name, defaultFeedbackChannel)
 
         # Set layout within widget.
@@ -163,9 +201,11 @@ class MainWindow(QMainWindow, QtStyleTools):
     def updateDeviceConfigurationTabs(self):
         # Clear the acquisition table TabWidget.
         self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.clear()
+
         # Get a list of enabled devices and current status.
         enabledDevices = self.manager.deviceTableModel.enabledDevices()
-        # If enabled and available, add the TabWidget.
+
+        # If enabled and status is True, add the TabWidget for this device.
         for device in enabledDevices:
             connect = device["connect"]
             name = device["name"]
@@ -185,18 +225,7 @@ class MainWindow(QMainWindow, QtStyleTools):
     def resetControlFeedbackComboBox(self, row):
         tabIndex = self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.currentIndex()
         name = self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.tabText(tabIndex)
-        # print(name)
         self.manager.resetIndexFeedbackComboBox(row, name)
-
-    def addAcquisitionTable(self, name):
-        # Add acquisition table to dict and update the TabWidget.
-        self.acquisitionTableViews[name] = AcquisitionTableView()
-        self.acquisitionTableViews[name].setModel(self.manager.acquisitionModels[name])
-        self.manager.acquisitionModels[name].acquisitionChannelTableUpdated.connect(self.manager.updatePlotWindowChannelsData)
-        self.manager.acquisitionModels[name].acquisitionChannelTableUpdated.connect(
-            self.manager.setListFeedbackCombobox)
-        self.manager.acquisitionModels[name].channelIndexToggled.connect(
-            self.resetControlFeedbackComboBox)
 
     @Slot(str, list)
     def addControlTable(self, name, defaultFeedbackChannel):
@@ -213,13 +242,21 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.configuration = newConfiguration
         self.darkMode = self.configuration["global"]["darkMode"]
         self.setDarkMode()
-        self.updateToolBarIcons()
-        self.updateTableIcons()
-        log.info("Updated main window settings in UI.")
+
+        # Update icon colours as a function of the darkMode boolean.
+        self.toolbar.updateIcons(self.darkMode)
+        self.devicesGroupBox.deviceTableView.connectionIconDelegate.setIcon(self.darkMode)
+        self.devicesGroupBox.deviceTableView.statusIconDelegate.setIcon(self.darkMode)
+
+        # Update the UI of plot windows if they exist.
+        if self.plots: 
+            self.updatePlotWindows()
+
+        log.info("Updated UI.")
 
     @Slot()
     def toggleMode(self):
-        # Toggle between run and configuration modes.
+        # Toggle between run and configuration modes by showing and hiding various UI items.
         self.statusGroupBox.setVisible(not self.statusGroupBox.isVisible())
         self.globalSettingsGroupBox.setVisible(not self.globalSettingsGroupBox.isVisible())
         self.devicesGroupBox.setVisible(not self.devicesGroupBox.isVisible())
@@ -242,15 +279,6 @@ class MainWindow(QMainWindow, QtStyleTools):
         stylesheet = self.styleSheet()
         with open('CamLab.css') as file:
             self.setStyleSheet(stylesheet + file.read().format(**os.environ))
-
-    def updateToolBarIcons(self):
-        # Workaround to change the toolbar icon style. 
-        self.toolbar.updateIcons(self.darkMode)
-
-    def updateTableIcons(self):
-        # Workaround to change icon style in device table delegates.
-        self.devicesGroupBox.deviceTableView.connectionIconDelegate.setIcon(self.darkMode)
-        self.devicesGroupBox.deviceTableView.statusIconDelegate.setIcon(self.darkMode)
 
     @Slot(list)
     def addPlot(self):
@@ -293,8 +321,8 @@ class MainWindow(QMainWindow, QtStyleTools):
             self.manager.configuration["plots"][plotNumber] = copy.deepcopy(defaultProperties)
             self.manager.setColourNewPlot(plotNumber)
 
-        # Update the configuration in the PlotWindow object.
-        self.plots[plotNumber].setConfiguration(self.manager.configuration)
+        # Show the plot.
+        plotWindow.show()
 
         # Connections.
         self.manager.configurationChanged.connect(self.plots[plotNumber].setConfiguration)
@@ -302,17 +330,19 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.plots[plotNumber].plotWindowClosed.connect(self.removePlot)
         self.plots[plotNumber].colourUpdated.connect(self.updateChannelColours)
 
-        # Show the plot.
-        plotWindow.show()
-
+        # Run updatePlotWindows function to reset configuration.
+        self.updatePlotWindows()
+        
     @Slot()
     def updatePlotWindows(self):
-        for plotNumber in self.manager.configuration["plots"].keys():
-            plotWindow = self.plots[plotNumber]
-            plotWindow.setPlotNumber(plotNumber)
-            plotWindow.setConfiguration(self.manager.configuration)
-            # self.manager.updatePlotWindowChannelsData()
-            # plotWindow.setChannelsModel(self.manager.configuration["plots"][plotNumber]["channels"])
+        if "plots" in self.manager.configuration:
+            for plotNumber in self.manager.configuration["plots"].keys():
+                plotWindow = self.plots[plotNumber]
+                plotWindow.setPlotNumber(plotNumber)
+                plotWindow.setConfiguration(self.manager.configuration)
+
+                # self.manager.updatePlotWindowChannelsData()
+                # plotWindow.setChannelsModel(self.manager.configuration["plots"][plotNumber]["channels"])
 
     @Slot(QModelIndex, str)
     def updateChannelColours(self, index, colour):
@@ -324,18 +354,20 @@ class MainWindow(QMainWindow, QtStyleTools):
     @Slot()
     def createExistingPlot(self):
         for plotNumber in self.manager.configuration["plots"].keys():
-
+            
             plotWindow = PlotWindow()
             plotWindow.setPlotNumber(plotNumber)
 
-            plotWindow.setConfiguration(self.manager.configuration)
-            #plotWindow.setChannelsModel(self.manager.configuration["plots"][plotNumber]["channels"])
+            # plotWindow.setConfiguration(self.manager.configuration)
+            # #plotWindow.setChannelsModel(self.manager.configuration["plots"][plotNumber]["channels"])
 
             self.plots.update({plotNumber: plotWindow})
 
+            # Show the plot.
             plotWindow.show()
 
-            self.manager.configurationChanged.connect(self.plots[plotNumber].updateUI)
+            # Connections.
+            self.manager.configurationChanged.connect(self.plots[plotNumber].setConfiguration)
             self.manager.assembly.plotDataChanged.connect(self.plots[plotNumber].updateLines)
             self.plots[plotNumber].plotWindowClosed.connect(self.removePlot)
             self.plots[plotNumber].colourUpdated.connect(self.updateChannelColours)

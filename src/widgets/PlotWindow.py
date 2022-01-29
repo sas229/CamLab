@@ -575,8 +575,7 @@ class PlotWindow(QWidget, QtStyleTools):
 
     def setConfiguration(self, configuration):
         self.configuration = configuration
-        self.darkMode = self.configuration["global"]["darkMode"]
-        self.setDarkMode()
+        
         self.logXRadio.setChecked(self.configuration["plots"][self.plotNumber]["logXAxis"])
         self.logYRadio.setChecked(self.configuration["plots"][self.plotNumber]["logYAxis"])
         self.invertXRadio.setChecked(self.configuration["plots"][self.plotNumber]["invertX"])
@@ -607,4 +606,7 @@ class PlotWindow(QWidget, QtStyleTools):
 
         self.fillCommonChannelComboBox()
         self.createLines()
+
+        self.darkMode = self.configuration["global"]["darkMode"]
+        self.setDarkMode()
 

@@ -26,7 +26,6 @@ class RefreshDevicesDialog(QProgressDialog):
 class ColourPickerDialog(QDialog):
     selectedColour = Signal(QModelIndex, str)
 
-
     def __init__(self, parent=None):
         super(ColourPickerDialog, self).__init__(parent)
         self.colourPickerTableModel = ColourPickerTableModel()

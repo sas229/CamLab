@@ -1,4 +1,4 @@
-from PySide6.QtCore import QObject, Signal, Slot, QSettings, QTimer, QThread
+from PySide6.QtCore import QObject, Signal, Slot, QSettings, QThread
 from src.models import DeviceTableModel, AcquisitionTableModel, ChannelsTableModel, ControlTableModel
 from src.device import Device
 from src.assembly import Assembly
@@ -10,8 +10,6 @@ import os
 import sys
 from labjack import ljm
 import numpy as np
-import operator
-from random import randint
 
 log = logging.getLogger(__name__)
 
@@ -175,8 +173,6 @@ class Manager(QObject):
         self.acquisitionModels = {}
         self.acquisitionTables = {}
         self.controlModels = {}
-        # self.clearAcquisitionTabs.emit()
-        # self.clearControlTabs.emit()
         self.clearDeviceConfigurationTabs.emit()
         self.loadDevicesFromConfiguration()
 

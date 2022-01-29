@@ -34,3 +34,6 @@ class Timing(QObject):
     def stop(self):
         self.running = False
         log.info("Stopped device timer.")
+
+
+

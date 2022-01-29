@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QToolBar, QWidget, QSizePolicy, QFileDialog
 from PySide6.QtGui import QIcon, QAction
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, Slot
 import logging
 
 log = logging.getLogger(__name__)
@@ -10,12 +10,10 @@ class CamLabToolBar(QToolBar):
     run = Signal() 
     loadConfiguration = Signal(str)
     saveConfiguration = Signal(str)
-    darkModeChanged = Signal(bool)
     
-    def __init__(self, configuration):
+    def __init__(self):
         super().__init__()
-        self.configuration = configuration
-        self.darkMode = self.configuration["global"]["darkMode"]
+        self.darkMode = True
         self.running = False
 
         # Mode QAction.
@@ -121,7 +119,7 @@ class CamLabToolBar(QToolBar):
 
         # Connections.
         self.modeButton.triggered.connect(self.changeMode)
-        self.darkModeButton.triggered.connect(self.emitDarkModeChanged)
+        # self.darkModeButton.triggered.connect(self.updateIcons)
         self.loadConfigButton.triggered.connect(self.emitLoadConfiguration)
         self.saveConfigButton.triggered.connect(self.emitSaveConfiguration)
 
@@ -147,6 +145,7 @@ class CamLabToolBar(QToolBar):
         else:
             self.configure.emit()
 
+    @Slot()
     def updateIcons(self, darkMode):
         # Change appearance between light and dark modes.
         self.darkMode = darkMode
@@ -168,7 +167,7 @@ class CamLabToolBar(QToolBar):
         self.clearConfigButton.setIcon(QIcon("assets/clear_white_24dp.svg" if self.darkMode else "assets/clear_black_24dp.svg"))
         self.darkModeButton.setIcon(QIcon("assets/light_mode_white_24dp.svg" if self.darkMode else "assets/dark_mode_black_24dp.svg"))
         self.darkModeButton.setToolTip("Click for light mode." if self.darkMode else "Click for dark mode.")
-
+        
     def emitLoadConfiguration(self):
         # Method to select a configuration file to load and emit it as a signal.
         filename, _ = QFileDialog.getOpenFileName(self,"Open CamLab configuration file", "","Yaml files (*.yaml)")
