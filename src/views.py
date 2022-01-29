@@ -94,7 +94,6 @@ class ColourPickerTableView(QTableView):
         horizontalHeader.hide()
         horizontalHeader.setDefaultSectionSize(25)
 
-
 class ControlTableView(QTableView):
 
     def __init__(self, controlModeList, controlActuatorList, feedbackChannelList, parent = None):

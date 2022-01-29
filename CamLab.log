@@ -1,37 +1,26 @@
-2022-01-29 15:24:12,353 - __main__ - <module> - INFO - Log file created.
-2022-01-29 15:24:12,453 - src.manager - __init__ - INFO - Finding previous YAML file location from QSettings.
-2022-01-29 15:24:12,453 - src.manager - findConfigurationPath - INFO - Configuration file path found at /home/sam/Documents/Academia/Research/Code/CamLab/Test.yaml
-2022-01-29 15:24:12,453 - src.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLab/Test.yaml and saving location to QSettings.
-2022-01-29 15:24:12,477 - src.manager - loadConfiguration - INFO - Configuration file parsed.
-2022-01-29 15:24:12,512 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
-2022-01-29 15:24:12,512 - src.manager - __init__ - INFO - Assembly instance created.
-2022-01-29 15:24:12,512 - src.manager - __init__ - INFO - Assembly thread created.
-2022-01-29 15:24:12,512 - src.manager - __init__ - INFO - Assembly thread started.
-2022-01-29 15:24:12,512 - src.manager - __init__ - INFO - Timing instance created.
-2022-01-29 15:24:12,512 - src.manager - __init__ - INFO - Timing thread created.
-2022-01-29 15:24:12,513 - src.manager - __init__ - INFO - Timing thread started.
-2022-01-29 15:24:12,513 - __main__ - __init__ - INFO - Assembling UI.
-2022-01-29 15:24:12,649 - src.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLab/Test.yaml and saving location to QSettings.
-2022-01-29 15:24:12,667 - src.manager - loadConfiguration - INFO - Configuration file parsed.
-2022-01-29 15:24:12,731 - __main__ - updateUI - INFO - Updated UI.
-2022-01-29 15:24:12,746 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
-2022-01-29 15:24:12,825 - __main__ - updateUI - INFO - Updated UI.
-2022-01-29 15:24:13,092 - __main__ - <module> - INFO - Timer instantiated.
-2022-01-29 15:24:13,691 - __main__ - updateUI - INFO - Updated UI.
-2022-01-29 15:24:17,182 - src.widgets.CamLabToolBar - changeMode - INFO - Configuration mode enabled
-2022-01-29 15:24:17,186 - src.manager - createDeviceThreads - INFO - Creating device threads.
-2022-01-29 15:24:17,187 - src.assembly - createDataArrays - INFO - Output arrays created.
-2022-01-29 15:24:17,224 - src.device - openConnection - INFO - Connected to AMY.
-2022-01-29 15:24:17,227 - src.manager - createDeviceThreads - INFO - Device instance created for device named AMY.
-2022-01-29 15:24:17,227 - src.manager - createDeviceThreads - INFO - Device thread created for device named AMY.
-2022-01-29 15:24:17,227 - src.manager - createDeviceThreads - INFO - Device thread started for device named AMY.
-2022-01-29 15:24:17,228 - src.manager - createDeviceThreads - INFO - AMY attached to assembly thread updateNewData method.
-2022-01-29 15:24:17,228 - src.manager - createDeviceThreads - INFO - Device threads created.
-2022-01-29 15:24:17,228 - src.timing - start - INFO - Starting device timer.
-2022-01-29 15:24:22,840 - __main__ - closeEvent - INFO - Thread for AMY stopped.
-2022-01-29 15:24:22,841 - __main__ - closeEvent - INFO - Assembly thread stopped.
-2022-01-29 15:24:22,841 - src.timing - stop - INFO - Stopped device timer.
-2022-01-29 15:24:22,841 - __main__ - closeEvent - INFO - Timing thread stopped.
-2022-01-29 15:24:22,842 - __main__ - closeEvent - INFO - Manager thread stopped.
-2022-01-29 15:24:22,842 - __main__ - closeEvent - INFO - Closing CamLab.
-2022-01-29 15:24:22,854 - src.manager - run - INFO - Started acquisition and control.
+2022-01-29 15:41:17,319 - __main__ - <module> - INFO - Log file created.
+2022-01-29 15:41:17,386 - src.manager - __init__ - INFO - Finding previous YAML file location from QSettings.
+2022-01-29 15:41:17,387 - src.manager - findConfigurationPath - INFO - Configuration file path found at /home/sam/Documents/Academia/Research/Code/CamLab/Test.yaml
+2022-01-29 15:41:17,387 - src.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLab/Test.yaml and saving location to QSettings.
+2022-01-29 15:41:17,405 - src.manager - loadConfiguration - INFO - Configuration file parsed.
+2022-01-29 15:41:17,433 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
+2022-01-29 15:41:17,434 - src.manager - __init__ - INFO - Assembly instance created.
+2022-01-29 15:41:17,434 - src.manager - __init__ - INFO - Assembly thread created.
+2022-01-29 15:41:17,434 - src.manager - __init__ - INFO - Assembly thread started.
+2022-01-29 15:41:17,434 - src.manager - __init__ - INFO - Timing instance created.
+2022-01-29 15:41:17,434 - src.manager - __init__ - INFO - Timing thread created.
+2022-01-29 15:41:17,434 - src.manager - __init__ - INFO - Timing thread started.
+2022-01-29 15:41:17,434 - __main__ - __init__ - INFO - Assembling UI.
+2022-01-29 15:41:17,565 - src.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLab/Test.yaml and saving location to QSettings.
+2022-01-29 15:41:17,584 - src.manager - loadConfiguration - INFO - Configuration file parsed.
+2022-01-29 15:41:17,647 - __main__ - updateUI - INFO - Updated UI.
+2022-01-29 15:41:17,663 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
+2022-01-29 15:41:17,742 - __main__ - updateUI - INFO - Updated UI.
+2022-01-29 15:41:18,024 - __main__ - <module> - INFO - Timer instantiated.
+2022-01-29 15:41:18,588 - __main__ - updateUI - INFO - Updated UI.
+2022-01-29 15:41:28,082 - __main__ - closeEvent - INFO - Assembly thread stopped.
+2022-01-29 15:41:28,083 - src.timing - stop - INFO - Stopped device timer.
+2022-01-29 15:41:28,083 - __main__ - closeEvent - INFO - Timing thread stopped.
+2022-01-29 15:41:28,084 - __main__ - closeEvent - INFO - Manager thread stopped.
+2022-01-29 15:41:28,084 - __main__ - closeEvent - INFO - Closing CamLab.
+2022-01-29 15:41:28,183 - __main__ - updateUI - INFO - Updated UI.

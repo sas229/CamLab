@@ -116,7 +116,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.manager.configurationChanged.connect(self.updateUI)
         self.manager.configurationChanged.connect(self.globalSettingsGroupBox.updateUI)
         self.manager.clearDeviceConfigurationTabs.connect(self.clearDeviceConfigurationTabs)
-        self.manager.clearPlots.connect(self.clearPlots)
+        self.manager.closePlots.connect(self.closePlots)
         self.manager.addDeviceConfiguration.connect(self.addDeviceConfiguration)
         self.manager.removeWidget.connect(self.removeWidgetFromLayout)
         self.manager.addControlTable.connect(self.addControlTable)
@@ -369,6 +369,11 @@ class MainWindow(QMainWindow, QtStyleTools):
             # If plots dict in manager is empty delete the plots key.
             if self.manager.configuration["plots"] == {}:
                 del self.manager.configuration["plots"]
+    
+    def closePlots(self):
+        plotList = list(self.plots.keys())
+        for key in plotList:
+            self.plots[key].close()
 
     @Slot(QModelIndex, str)
     def updateChannelColours(self, index, colour):
@@ -377,20 +382,9 @@ class MainWindow(QMainWindow, QtStyleTools):
             self.plots[plotNumber].setColour(index, colour)
         self.updatePlots()
 
-    def clearPlots(self):
-        plotList = list(self.plots.keys())
-        for key in plotList:
-            self.plots[key].close()
-
-    def storePlot(self, plotWindow):
-        self.plots.update({plotWindow.plotNumber: plotWindow})
-        return self.plots
-
     def closeEvent(self, event):
         # Close all plots.
-        plotList = list(self.plots.keys())
-        for key in plotList:
-            self.plots[key].close()
+        self.closePlots()
 
         # In the event the device list is refreshing, wait until complete before quitting all threads otherwise an error is shown, but hide the window in the meantime.
         self.setVisible(False)

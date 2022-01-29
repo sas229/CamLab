@@ -18,7 +18,7 @@ class Manager(QObject):
     configurationChanged = Signal(dict)
     addDeviceConfiguration = Signal(str, list)
     clearDeviceConfigurationTabs = Signal()
-    clearPlots = Signal()
+    closePlots = Signal()
     addControlTable = Signal(str,list)
     updateDeviceConfigurationTab = Signal()
     removeWidget = Signal(str)
@@ -390,8 +390,8 @@ class Manager(QObject):
 
     @Slot()
     def clearConfiguration(self):
-        # Clear all plots first.
-        self.clearPlots.emit()
+        # Delete all plots first.
+        self.closePlots.emit()
 
         # Next clear the device list and configuration tabs.
         self.deviceTableModel.clearData()

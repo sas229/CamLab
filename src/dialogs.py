@@ -37,7 +37,6 @@ class ColourPickerDialog(QDialog):
         self.setFixedWidth(499)
         self.setFixedHeight(249)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Popup)
-
         self.colourPickerTableView.clicked.connect(self.colourSelected)
 
     #index of colour table

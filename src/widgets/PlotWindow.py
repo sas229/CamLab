@@ -204,13 +204,9 @@ class PlotWindow(QWidget, QtStyleTools):
         self.plot.sigXRangeChanged.connect(self.manualXRange)
         self.plot.sigYRangeChanged.connect(self.manualYRange)
         self.lockRadio.stateChanged.connect(self.lockCheckBox)
-
-
-
         self.selectedChannelsTableView.clicked.connect(self.selectColour)
         self.colourPickerDialog.selectedColour.connect(self.setColour)
         self.colourPickerDialog.selectedColour.connect(self.emitColour)
-
         self.commonChannelComboBox.currentIndexChanged.connect(self.setCommonChannel)
 
 
