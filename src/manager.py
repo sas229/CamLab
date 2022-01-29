@@ -22,9 +22,8 @@ class Manager(QObject):
     addControlTable = Signal(str,list)
     updateDeviceConfigurationTab = Signal()
     removeWidget = Signal(str)
-    
     plotWindowChannelsUpdated = Signal()
-    existingPlotFound = Signal()
+    existingPlotsFound = Signal()
 
     def __init__(self):
         super().__init__()
@@ -358,7 +357,7 @@ class Manager(QObject):
                     self.loadDevicesFromConfiguration()
                     self.setListFeedbackCombobox()
                     if "plots" in self.configuration:
-                        self.existingPlotFound.emit()
+                        self.existingPlotsFound.emit()
             except FileNotFoundError:
                 log.warning("Previous configuration file not found.")
                 self.initialiseDefaultConfiguration()

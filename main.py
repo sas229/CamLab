@@ -129,7 +129,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.manager.updatePlotWindowChannelsData)
         self.manager.timing.actualRate.connect(self.statusGroupBox.update)
         self.manager.plotWindowChannelsUpdated.connect(self.updatePlotWindows)
-        self.manager.existingPlotFound.connect(self.createExistingPlot)
+        self.manager.existingPlotsFound.connect(self.createExistingPlots)
 
         # Timer connections.
         self.plotTimer.timeout.connect(self.manager.assembly.updatePlotData)
@@ -265,7 +265,7 @@ class MainWindow(QMainWindow, QtStyleTools):
             self.height = 300
             self.width = 800
         else:
-            self.height = 1008
+            self.height = 1000
             self.width = 800
         self.setFixedWidth(self.width)
         self.setFixedHeight(self.height)
@@ -330,37 +330,18 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.plots[plotNumber].plotWindowClosed.connect(self.removePlot)
         self.plots[plotNumber].colourUpdated.connect(self.updateChannelColours)
 
-        # Run updatePlotWindows function to reset configuration.
-        self.updatePlotWindows()
-        
-    @Slot()
-    def updatePlotWindows(self):
-        if "plots" in self.manager.configuration:
-            for plotNumber in self.manager.configuration["plots"].keys():
-                plotWindow = self.plots[plotNumber]
-                plotWindow.setPlotNumber(plotNumber)
-                plotWindow.setConfiguration(self.manager.configuration)
-
-                # self.manager.updatePlotWindowChannelsData()
-                # plotWindow.setChannelsModel(self.manager.configuration["plots"][plotNumber]["channels"])
-
-    @Slot(QModelIndex, str)
-    def updateChannelColours(self, index, colour):
-        #print(colour)
-        for plotNumber in self.manager.configuration["plots"].keys():
-            self.plots[plotNumber].setColour(index, colour)
+        # Update all plot windows to reset configuration.
         self.updatePlotWindows()
 
     @Slot()
-    def createExistingPlot(self):
+    def createExistingPlots(self):
+        # For all plots in self.manager.configuration["plots"][plotNumber], create a plot window.
         for plotNumber in self.manager.configuration["plots"].keys():
-            
+            # Create plot window object and set the plot number.
             plotWindow = PlotWindow()
             plotWindow.setPlotNumber(plotNumber)
 
-            # plotWindow.setConfiguration(self.manager.configuration)
-            # #plotWindow.setChannelsModel(self.manager.configuration["plots"][plotNumber]["channels"])
-
+            # Store plot window object in plots dict.
             self.plots.update({plotNumber: plotWindow})
 
             # Show the plot.
@@ -371,8 +352,19 @@ class MainWindow(QMainWindow, QtStyleTools):
             self.manager.assembly.plotDataChanged.connect(self.plots[plotNumber].updateLines)
             self.plots[plotNumber].plotWindowClosed.connect(self.removePlot)
             self.plots[plotNumber].colourUpdated.connect(self.updateChannelColours)
+        
+        # Update all plot windows to reset configuration.
         self.updatePlotWindows()
-
+        
+    @Slot()
+    def updatePlotWindows(self):
+        # If plots exist update teh configuration.
+        if "plots" in self.manager.configuration:
+            for plotNumber in self.manager.configuration["plots"].keys():
+                plotWindow = self.plots[plotNumber]
+                plotWindow.setPlotNumber(plotNumber)
+                plotWindow.setConfiguration(self.manager.configuration)
+                
     @Slot(str)
     def removePlot(self, plotNumber):
         # Pop plot from if "plots" key in dict.
@@ -382,6 +374,13 @@ class MainWindow(QMainWindow, QtStyleTools):
             # If plots dict in manager is empty delete the plots key.
             if self.manager.configuration["plots"] == {}:
                 del self.manager.configuration["plots"]
+
+    @Slot(QModelIndex, str)
+    def updateChannelColours(self, index, colour):
+        #print(colour)
+        for plotNumber in self.manager.configuration["plots"].keys():
+            self.plots[plotNumber].setColour(index, colour)
+        self.updatePlotWindows()
 
     def clearPlots(self):
         plotList = list(self.plots.keys())
