@@ -83,10 +83,6 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.centralWidget.setLayout(self.mainWindowLayout)
         self.setCentralWidget(self.centralWidget)
 
-        # # Set dark mode (always do this last to ensure all GUI objects are displayed correctly).
-        # self.darkMode = self.configuration["global"]["darkMode"]
-        # self.setDarkMode()
-
         # Toolbar connections.
         self.toolbar.modeButton.triggered.connect(self.toggleMode)
         self.toolbar.configure.connect(self.manager.configure)
@@ -128,7 +124,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.updateDeviceConfigurationTabs)
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.manager.updatePlotWindowChannelsData)
         self.manager.timing.actualRate.connect(self.statusGroupBox.update)
-        self.manager.plotWindowChannelsUpdated.connect(self.updatePlotWindows)
+        self.manager.plotWindowChannelsUpdated.connect(self.updatePlots)
         self.manager.existingPlotsFound.connect(self.createExistingPlots)
 
         # Timer connections.
@@ -241,7 +237,15 @@ class MainWindow(QMainWindow, QtStyleTools):
         # Update the UI after any configuration change.
         self.configuration = newConfiguration
         self.darkMode = self.configuration["global"]["darkMode"]
-        self.setDarkMode()
+
+        # Set the darkmode. 
+        if self.darkMode == True:
+            self.apply_stylesheet(self, theme='dark_blue.xml')
+        else:
+            self.apply_stylesheet(self, theme='light_blue.xml')
+        stylesheet = self.styleSheet()
+        with open('CamLab.css') as file:
+            self.setStyleSheet(stylesheet + file.read().format(**os.environ))
 
         # Update icon colours as a function of the darkMode boolean.
         self.toolbar.updateIcons(self.darkMode)
@@ -250,7 +254,7 @@ class MainWindow(QMainWindow, QtStyleTools):
 
         # Update the UI of plot windows if they exist.
         if self.plots: 
-            self.updatePlotWindows()
+            self.updatePlots()
 
         log.info("Updated UI.")
 
@@ -270,16 +274,6 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.setFixedWidth(self.width)
         self.setFixedHeight(self.height)
 
-    def setDarkMode(self):
-        # Set the darkmode. 
-        if self.darkMode == True:
-            self.apply_stylesheet(self, theme='dark_blue.xml')
-        else:
-            self.apply_stylesheet(self, theme='light_blue.xml')
-        stylesheet = self.styleSheet()
-        with open('CamLab.css') as file:
-            self.setStyleSheet(stylesheet + file.read().format(**os.environ))
-
     @Slot(list)
     def addPlot(self):
         # Define a default configuration in the same format as we want it to be stored in self.manager.configuration["plots"][plotNumber].
@@ -287,12 +281,10 @@ class MainWindow(QMainWindow, QtStyleTools):
         plotNumber = str(id(plotWindow))
         plotWindow.setPlotNumber(plotNumber)
 
-        #Store the plot windwow
+        # Store the plot windwow.
         self.plots.update({plotNumber: plotWindow})
 
-        # If the "plots" key doesn't exist in the configuration, it means no plots have been made before, so we add the key.
-        # Otherwise we add the plot.
-        # set colour for new plot window
+        # Defaults.
         defaultProperties = {
             "invertX": False,
             "logXAxis": False,
@@ -315,11 +307,14 @@ class MainWindow(QMainWindow, QtStyleTools):
             "lock": False,
             "channels": self.manager.getGenericChannelsData()
         }
+
+        # If the "plots" key doesn't exist in the configuration, it means no plots have been made before, so we add the key.
+        # Otherwise we add the plot and set the colour for the new plot window.        
         if "plots" not in self.manager.configuration:
             self.manager.configuration["plots"] = {plotNumber: copy.deepcopy(defaultProperties)}
         else:
             self.manager.configuration["plots"][plotNumber] = copy.deepcopy(defaultProperties)
-            self.manager.setColourNewPlot(plotNumber)
+        self.manager.setColourNewPlot(plotNumber)
 
         # Show the plot.
         plotWindow.show()
@@ -331,7 +326,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.plots[plotNumber].colourUpdated.connect(self.updateChannelColours)
 
         # Update all plot windows to reset configuration.
-        self.updatePlotWindows()
+        self.updatePlots()
 
     @Slot()
     def createExistingPlots(self):
@@ -354,11 +349,11 @@ class MainWindow(QMainWindow, QtStyleTools):
             self.plots[plotNumber].colourUpdated.connect(self.updateChannelColours)
         
         # Update all plot windows to reset configuration.
-        self.updatePlotWindows()
+        self.updatePlots()
         
     @Slot()
-    def updatePlotWindows(self):
-        # If plots exist update teh configuration.
+    def updatePlots(self):
+        # If plots exist update the configuration.
         if "plots" in self.manager.configuration:
             for plotNumber in self.manager.configuration["plots"].keys():
                 plotWindow = self.plots[plotNumber]
@@ -380,7 +375,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         #print(colour)
         for plotNumber in self.manager.configuration["plots"].keys():
             self.plots[plotNumber].setColour(index, colour)
-        self.updatePlotWindows()
+        self.updatePlots()
 
     def clearPlots(self):
         plotList = list(self.plots.keys())

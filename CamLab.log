@@ -1,102 +1,37 @@
-2022-01-29 14:34:40,394 - __main__ - <module> - INFO - Log file created.
-2022-01-29 14:34:40,496 - src.manager - __init__ - INFO - Finding previous YAML file location from QSettings.
-2022-01-29 14:34:40,496 - src.manager - findConfigurationPath - INFO - Configuration file path found at /home/sam/Documents/Academia/Research/Code/CamLab/Test.yaml
-2022-01-29 14:34:40,496 - src.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLab/Test.yaml and saving location to QSettings.
-2022-01-29 14:34:40,524 - src.manager - loadConfiguration - INFO - Configuration file parsed.
-2022-01-29 14:34:40,559 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
-2022-01-29 14:34:40,560 - src.manager - __init__ - INFO - Assembly instance created.
-2022-01-29 14:34:40,560 - src.manager - __init__ - INFO - Assembly thread created.
-2022-01-29 14:34:40,560 - src.manager - __init__ - INFO - Assembly thread started.
-2022-01-29 14:34:40,560 - src.manager - __init__ - INFO - Timing instance created.
-2022-01-29 14:34:40,560 - src.manager - __init__ - INFO - Timing thread created.
-2022-01-29 14:34:40,560 - src.manager - __init__ - INFO - Timing thread started.
-2022-01-29 14:34:40,561 - __main__ - __init__ - INFO - Assembling UI.
-2022-01-29 14:34:40,647 - src.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLab/Test.yaml and saving location to QSettings.
-2022-01-29 14:34:40,664 - src.manager - loadConfiguration - INFO - Configuration file parsed.
-2022-01-29 14:34:40,727 - __main__ - updateUI - INFO - Updated UI.
-2022-01-29 14:34:40,743 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
-2022-01-29 14:34:40,825 - __main__ - updateUI - INFO - Updated UI.
-2022-01-29 14:34:41,100 - __main__ - <module> - INFO - Timer instantiated.
-2022-01-29 14:34:41,680 - __main__ - updateUI - INFO - Updated UI.
-2022-01-29 14:34:44,260 - src.widgets.CamLabToolBar - changeMode - INFO - Configuration mode enabled
-2022-01-29 14:34:44,262 - src.manager - createDeviceThreads - INFO - Creating device threads.
-2022-01-29 14:34:44,264 - src.assembly - createDataArrays - INFO - Output arrays created.
-2022-01-29 14:34:44,297 - src.device - openConnection - INFO - Connected to AMY.
-2022-01-29 14:34:44,299 - src.manager - createDeviceThreads - INFO - Device instance created for device named AMY.
-2022-01-29 14:34:44,299 - src.manager - createDeviceThreads - INFO - Device thread created for device named AMY.
-2022-01-29 14:34:44,299 - src.manager - createDeviceThreads - INFO - Device thread started for device named AMY.
-2022-01-29 14:34:44,300 - src.manager - createDeviceThreads - INFO - AMY attached to assembly thread updateNewData method.
-2022-01-29 14:34:44,300 - src.manager - createDeviceThreads - INFO - Device threads created.
-2022-01-29 14:34:44,300 - src.timing - start - INFO - Starting device timer.
-2022-01-29 14:34:45,068 - src.widgets.CamLabToolBar - changeMode - INFO - Acquisition and control mode enabled.
-2022-01-29 14:34:45,073 - src.timing - stop - INFO - Stopped device timer.
-2022-01-29 14:34:45,073 - src.manager - run - INFO - Started acquisition and control.
-2022-01-29 14:34:45,074 - src.timing - stop - INFO - Stopped device timer.
-2022-01-29 14:34:45,075 - src.manager - configure - INFO - Thread for AMY stopped.
-2022-01-29 14:34:45,075 - src.manager - configure - INFO - Configuring devices.
-2022-01-29 14:34:45,189 - __main__ - updateUI - INFO - Updated UI.
-2022-01-29 14:34:45,668 - src.widgets.CamLabToolBar - changeMode - INFO - Configuration mode enabled
-2022-01-29 14:34:45,670 - src.manager - createDeviceThreads - INFO - Creating device threads.
-2022-01-29 14:34:45,673 - src.assembly - createDataArrays - INFO - Output arrays created.
-2022-01-29 14:34:45,674 - src.device - openConnection - INFO - Connected to AMY.
-2022-01-29 14:34:45,676 - src.manager - createDeviceThreads - INFO - Device instance created for device named AMY.
-2022-01-29 14:34:45,676 - src.manager - createDeviceThreads - INFO - Device thread created for device named AMY.
-2022-01-29 14:34:45,677 - src.manager - createDeviceThreads - INFO - Device thread started for device named AMY.
-2022-01-29 14:34:45,677 - src.manager - createDeviceThreads - INFO - AMY attached to assembly thread updateNewData method.
-2022-01-29 14:34:45,677 - src.manager - createDeviceThreads - INFO - Device threads created.
-2022-01-29 14:34:45,678 - src.timing - start - INFO - Starting device timer.
-2022-01-29 14:34:46,244 - src.widgets.CamLabToolBar - changeMode - INFO - Acquisition and control mode enabled.
-2022-01-29 14:34:46,249 - src.timing - stop - INFO - Stopped device timer.
-2022-01-29 14:34:46,249 - src.manager - run - INFO - Started acquisition and control.
-2022-01-29 14:34:46,250 - src.timing - stop - INFO - Stopped device timer.
-2022-01-29 14:34:46,250 - src.manager - configure - INFO - Thread for AMY stopped.
-2022-01-29 14:34:46,250 - src.manager - configure - INFO - Configuring devices.
-2022-01-29 14:34:48,476 - src.widgets.CamLabToolBar - changeMode - INFO - Configuration mode enabled
-2022-01-29 14:34:48,480 - src.manager - createDeviceThreads - INFO - Creating device threads.
-2022-01-29 14:34:48,480 - src.assembly - createDataArrays - INFO - Output arrays created.
-2022-01-29 14:34:48,481 - src.device - openConnection - INFO - Connected to AMY.
-2022-01-29 14:34:48,483 - src.manager - createDeviceThreads - INFO - Device instance created for device named AMY.
-2022-01-29 14:34:48,484 - src.manager - createDeviceThreads - INFO - Device thread created for device named AMY.
-2022-01-29 14:34:48,484 - src.manager - createDeviceThreads - INFO - Device thread started for device named AMY.
-2022-01-29 14:34:48,485 - src.manager - createDeviceThreads - INFO - AMY attached to assembly thread updateNewData method.
-2022-01-29 14:34:48,485 - src.manager - createDeviceThreads - INFO - Device threads created.
-2022-01-29 14:34:48,485 - src.timing - start - INFO - Starting device timer.
-2022-01-29 14:34:49,444 - src.widgets.CamLabToolBar - changeMode - INFO - Acquisition and control mode enabled.
-2022-01-29 14:34:49,446 - src.timing - stop - INFO - Stopped device timer.
-2022-01-29 14:34:49,455 - src.manager - run - INFO - Started acquisition and control.
-2022-01-29 14:34:49,456 - src.timing - stop - INFO - Stopped device timer.
-2022-01-29 14:34:49,456 - src.manager - configure - INFO - Thread for AMY stopped.
-2022-01-29 14:34:49,456 - src.manager - configure - INFO - Configuring devices.
-2022-01-29 14:34:52,564 - src.widgets.CamLabToolBar - changeMode - INFO - Configuration mode enabled
-2022-01-29 14:34:52,566 - src.manager - createDeviceThreads - INFO - Creating device threads.
-2022-01-29 14:34:52,568 - src.assembly - createDataArrays - INFO - Output arrays created.
-2022-01-29 14:34:52,569 - src.device - openConnection - INFO - Connected to AMY.
-2022-01-29 14:34:52,571 - src.manager - createDeviceThreads - INFO - Device instance created for device named AMY.
-2022-01-29 14:34:52,571 - src.manager - createDeviceThreads - INFO - Device thread created for device named AMY.
-2022-01-29 14:34:52,572 - src.manager - createDeviceThreads - INFO - Device thread started for device named AMY.
-2022-01-29 14:34:52,572 - src.manager - createDeviceThreads - INFO - AMY attached to assembly thread updateNewData method.
-2022-01-29 14:34:52,572 - src.manager - createDeviceThreads - INFO - Device threads created.
-2022-01-29 14:34:52,573 - src.timing - start - INFO - Starting device timer.
-2022-01-29 14:34:53,156 - src.widgets.CamLabToolBar - changeMode - INFO - Acquisition and control mode enabled.
-2022-01-29 14:34:53,158 - src.timing - stop - INFO - Stopped device timer.
-2022-01-29 14:34:53,163 - src.manager - run - INFO - Started acquisition and control.
-2022-01-29 14:34:53,164 - src.timing - stop - INFO - Stopped device timer.
-2022-01-29 14:34:53,164 - src.manager - configure - INFO - Thread for AMY stopped.
-2022-01-29 14:34:53,164 - src.manager - configure - INFO - Configuring devices.
-2022-01-29 14:34:53,660 - src.widgets.CamLabToolBar - changeMode - INFO - Configuration mode enabled
-2022-01-29 14:34:53,662 - src.manager - createDeviceThreads - INFO - Creating device threads.
-2022-01-29 14:34:53,664 - src.assembly - createDataArrays - INFO - Output arrays created.
-2022-01-29 14:34:53,665 - src.device - openConnection - INFO - Connected to AMY.
-2022-01-29 14:34:53,667 - src.manager - createDeviceThreads - INFO - Device instance created for device named AMY.
-2022-01-29 14:34:53,667 - src.manager - createDeviceThreads - INFO - Device thread created for device named AMY.
-2022-01-29 14:34:53,667 - src.manager - createDeviceThreads - INFO - Device thread started for device named AMY.
-2022-01-29 14:34:53,668 - src.manager - createDeviceThreads - INFO - AMY attached to assembly thread updateNewData method.
-2022-01-29 14:34:53,668 - src.manager - createDeviceThreads - INFO - Device threads created.
-2022-01-29 14:34:53,668 - src.timing - start - INFO - Starting device timer.
-2022-01-29 14:34:54,879 - __main__ - closeEvent - INFO - Thread for AMY stopped.
-2022-01-29 14:34:54,879 - __main__ - closeEvent - INFO - Assembly thread stopped.
-2022-01-29 14:34:54,880 - src.timing - stop - INFO - Stopped device timer.
-2022-01-29 14:34:54,880 - __main__ - closeEvent - INFO - Timing thread stopped.
-2022-01-29 14:34:54,880 - __main__ - closeEvent - INFO - Manager thread stopped.
-2022-01-29 14:34:54,880 - __main__ - closeEvent - INFO - Closing CamLab.
-2022-01-29 14:34:54,893 - src.manager - run - INFO - Started acquisition and control.
+2022-01-29 15:24:12,353 - __main__ - <module> - INFO - Log file created.
+2022-01-29 15:24:12,453 - src.manager - __init__ - INFO - Finding previous YAML file location from QSettings.
+2022-01-29 15:24:12,453 - src.manager - findConfigurationPath - INFO - Configuration file path found at /home/sam/Documents/Academia/Research/Code/CamLab/Test.yaml
+2022-01-29 15:24:12,453 - src.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLab/Test.yaml and saving location to QSettings.
+2022-01-29 15:24:12,477 - src.manager - loadConfiguration - INFO - Configuration file parsed.
+2022-01-29 15:24:12,512 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
+2022-01-29 15:24:12,512 - src.manager - __init__ - INFO - Assembly instance created.
+2022-01-29 15:24:12,512 - src.manager - __init__ - INFO - Assembly thread created.
+2022-01-29 15:24:12,512 - src.manager - __init__ - INFO - Assembly thread started.
+2022-01-29 15:24:12,512 - src.manager - __init__ - INFO - Timing instance created.
+2022-01-29 15:24:12,512 - src.manager - __init__ - INFO - Timing thread created.
+2022-01-29 15:24:12,513 - src.manager - __init__ - INFO - Timing thread started.
+2022-01-29 15:24:12,513 - __main__ - __init__ - INFO - Assembling UI.
+2022-01-29 15:24:12,649 - src.manager - loadConfiguration - INFO - Loading configuration from /home/sam/Documents/Academia/Research/Code/CamLab/Test.yaml and saving location to QSettings.
+2022-01-29 15:24:12,667 - src.manager - loadConfiguration - INFO - Configuration file parsed.
+2022-01-29 15:24:12,731 - __main__ - updateUI - INFO - Updated UI.
+2022-01-29 15:24:12,746 - src.manager - loadDevicesFromConfiguration - INFO - Configuration loaded.
+2022-01-29 15:24:12,825 - __main__ - updateUI - INFO - Updated UI.
+2022-01-29 15:24:13,092 - __main__ - <module> - INFO - Timer instantiated.
+2022-01-29 15:24:13,691 - __main__ - updateUI - INFO - Updated UI.
+2022-01-29 15:24:17,182 - src.widgets.CamLabToolBar - changeMode - INFO - Configuration mode enabled
+2022-01-29 15:24:17,186 - src.manager - createDeviceThreads - INFO - Creating device threads.
+2022-01-29 15:24:17,187 - src.assembly - createDataArrays - INFO - Output arrays created.
+2022-01-29 15:24:17,224 - src.device - openConnection - INFO - Connected to AMY.
+2022-01-29 15:24:17,227 - src.manager - createDeviceThreads - INFO - Device instance created for device named AMY.
+2022-01-29 15:24:17,227 - src.manager - createDeviceThreads - INFO - Device thread created for device named AMY.
+2022-01-29 15:24:17,227 - src.manager - createDeviceThreads - INFO - Device thread started for device named AMY.
+2022-01-29 15:24:17,228 - src.manager - createDeviceThreads - INFO - AMY attached to assembly thread updateNewData method.
+2022-01-29 15:24:17,228 - src.manager - createDeviceThreads - INFO - Device threads created.
+2022-01-29 15:24:17,228 - src.timing - start - INFO - Starting device timer.
+2022-01-29 15:24:22,840 - __main__ - closeEvent - INFO - Thread for AMY stopped.
+2022-01-29 15:24:22,841 - __main__ - closeEvent - INFO - Assembly thread stopped.
+2022-01-29 15:24:22,841 - src.timing - stop - INFO - Stopped device timer.
+2022-01-29 15:24:22,841 - __main__ - closeEvent - INFO - Timing thread stopped.
+2022-01-29 15:24:22,842 - __main__ - closeEvent - INFO - Manager thread stopped.
+2022-01-29 15:24:22,842 - __main__ - closeEvent - INFO - Closing CamLab.
+2022-01-29 15:24:22,854 - src.manager - run - INFO - Started acquisition and control.
