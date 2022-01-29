@@ -331,12 +331,12 @@ class PlotWindow(QWidget, QtStyleTools):
 
         self.configuration["plots"][self.plotNumber]["setGridY"] = (bool(b))
 
-    def updateUI(self, newConfiguration):
-        # Update the UI after any configuration change.
-        self.configuration = newConfiguration
-        self.darkMode = self.configuration["global"]["darkMode"]
-        self.setDarkMode()
-        log.info("Updated plot window settings in UI.")        
+    # def updateUI(self, newConfiguration):
+    #     # Update the UI after any configuration change.
+    #     self.configuration = newConfiguration
+    #     self.darkMode = self.configuration["global"]["darkMode"]
+    #     self.setDarkMode()
+    #     log.info("Updated plot window settings in UI.")        
 
     def setDarkMode(self):
         if self.darkMode == True:

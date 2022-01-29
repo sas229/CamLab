@@ -252,9 +252,9 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.devicesGroupBox.deviceTableView.connectionIconDelegate.setIcon(self.darkMode)
         self.devicesGroupBox.deviceTableView.statusIconDelegate.setIcon(self.darkMode)
 
-        # Update the UI of plot windows if they exist.
-        if self.plots: 
-            self.updatePlots()
+        # # Update the UI of plot windows if they exist.
+        # if self.plots: 
+        #     self.updatePlots()
 
         log.info("Updated UI.")
 
@@ -330,7 +330,7 @@ class MainWindow(QMainWindow, QtStyleTools):
 
     @Slot()
     def createExistingPlots(self):
-        # For all plots in self.manager.configuration["plots"][plotNumber], create a plot window.
+        # For all plots in self.manager.configuration create a plot window.
         for plotNumber in self.manager.configuration["plots"].keys():
             # Create plot window object and set the plot number.
             plotWindow = PlotWindow()

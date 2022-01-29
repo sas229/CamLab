@@ -34,8 +34,8 @@ class ColourPickerDialog(QDialog):
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.colourPickerTableView)
         self.setLayout(self.layout)
-        self.setFixedWidth(499)
-        self.setFixedHeight(249)
+        self.setFixedWidth(500)
+        self.setFixedHeight(250)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Popup)
         self.colourPickerTableView.clicked.connect(self.colourSelected)
 

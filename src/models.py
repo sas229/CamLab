@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt, QAbstractTableModel, QModelIndex, Signal
-from PySide6.QtGui import QColor
+from PySide6.QtGui import QColor, QBrush
 import operator
 
 class DeviceTableModel(QAbstractTableModel):
@@ -252,7 +252,7 @@ class ChannelsTableModel(QAbstractTableModel):
                     return item["value"]
                 elif index.column() == 5:
                     return item["unit"]
-        elif role == Qt.BackgroundRole:
+        elif role == Qt.DecorationRole:
             if index.isValid():
                 item = self._data[index.row()]
                 if index.column() == 1:
@@ -323,7 +323,7 @@ class ColourPickerTableModel(QAbstractTableModel):
         return len(self._data)
 
     def data(self, index, role=Qt.DisplayRole):
-        if role == Qt.BackgroundRole:
+        if role == Qt.DecorationRole:
             if index.isValid():
                 return QColor(self._data[index.column()][index.row()])
 

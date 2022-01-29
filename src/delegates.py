@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QItemDelegate, QStyledItemDelegate, QStyle, QLineEdit, QListWidget, QListWidgetItem, \
     QComboBox, QApplication, QAbstractItemView
-from PySide6.QtGui import QIcon, QDoubleValidator, QPixmap, QColor
+from PySide6.QtGui import QIcon, QDoubleValidator, QPixmap, QColor, QBrush
 from PySide6.QtCore import Qt, QEvent, QRect, QLocale, Signal
 
 
