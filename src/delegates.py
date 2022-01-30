@@ -168,7 +168,7 @@ class StringDelegate(QItemDelegate):
 
 class ComboBoxDelegate(QStyledItemDelegate):
     """
-    A delegate that displays a combobox.
+    A delegate that displays a combobox populated with the supplied items.
     """
     def __init__(self, items):
         super().__init__()

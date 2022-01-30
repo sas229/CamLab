@@ -22,7 +22,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         super().__init__()
         self.setWindowTitle("CamLab")
         self.width = 800
-        self.height = 1008
+        self.height = 955
         self.setFixedWidth(self.width)
         self.setFixedHeight(self.height)
         self.refreshing = False
@@ -249,7 +249,6 @@ class MainWindow(QMainWindow, QtStyleTools):
         # Update the UI of plot windows if they exist.
         if self.plots: 
             self.updatePlots()
-
         log.info("Updated UI.")
 
     @Slot()
@@ -263,7 +262,7 @@ class MainWindow(QMainWindow, QtStyleTools):
             self.height = 300
             self.width = 800
         else:
-            self.height = 1000
+            self.height = 955
             self.width = 800
         self.setFixedWidth(self.width)
         self.setFixedHeight(self.height)

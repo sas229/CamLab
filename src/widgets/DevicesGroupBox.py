@@ -9,7 +9,7 @@ class DevicesGroupBox(QGroupBox):
     def __init__(self, configuration):
         super().__init__() 
         self.configuration = configuration
-        self.setFixedHeight(175)#175
+        self.setFixedHeight(163)
         self.setTitle("Devices")
 
         # Create device table view.
