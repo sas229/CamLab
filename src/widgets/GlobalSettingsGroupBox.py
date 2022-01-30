@@ -7,7 +7,7 @@ log = logging.getLogger(__name__)
 
 class GlobalSettingsGroupBox(QGroupBox):
     darkModeChanged = Signal(bool)
-    acquisitionRateChanged = Signal(str)
+    skipSamplesChanged = Signal(str)
     controlRateChanged = Signal(str)
     averageSamplesChanged = Signal(str)
     pathChanged = Signal(str)
@@ -30,19 +30,19 @@ class GlobalSettingsGroupBox(QGroupBox):
         # Control rate input and validator.
         self.controlRateLabel = QLabel("Control Rate (Hz)")
         self.controlRateLineEdit = QLineEdit()
-        self.controlRateValidator = QDoubleValidator(bottom = 0.10, top = 2000.00, decimals=2)
+        self.controlRateValidator = QDoubleValidator(bottom = 0.10, top = 1000.00, decimals=2)
         self.controlRateLineEdit.setValidator(self.controlRateValidator)
         self.controlRateLineEdit.setText(str(self.configuration["global"]["controlRate"]))
 
-        # Acquisition rate input and validator.
-        self.acquisitionRateLabel = QLabel("Acquisition Rate (Hz)")
-        self.acquisitionRateLineEdit = QLineEdit()
-        self.acquisitionRateValidator = QDoubleValidator(bottom = 0.01, top = 2000.00, decimals=2)
-        self.acquisitionRateLineEdit.setValidator(self.acquisitionRateValidator)
-        self.acquisitionRateLineEdit.setText(str(self.configuration["global"]["acquisitionRate"]))
+        # Skip samples input and validator.
+        self.skipSamplesLabel = QLabel("Samples to skip before saving (-)")
+        self.skipSamplesLineEdit = QLineEdit()
+        self.skipSamplesValidator = QIntValidator(bottom = 1, top = 100)
+        self.skipSamplesLineEdit.setValidator(self.skipSamplesValidator)
+        self.skipSamplesLineEdit.setText(str(self.configuration["global"]["skipSamples"]))
 
         # Sample averaging and validator.
-        self.averageSamplesLabel = QLabel("Samples to average (-)")
+        self.averageSamplesLabel = QLabel("Samples to average when saving (-)")
         self.averageSamplesLineEdit = QLineEdit()
         self.averageSamplesValidator = QIntValidator(bottom = 1, top = 100)
         self.averageSamplesLineEdit.setValidator(self.averageSamplesValidator)
@@ -70,8 +70,8 @@ class GlobalSettingsGroupBox(QGroupBox):
         self.ratesLayout = QGridLayout()
         self.ratesLayout.addWidget(self.controlRateLabel, 0, 0)
         self.ratesLayout.addWidget(self.controlRateLineEdit, 1, 0)
-        self.ratesLayout.addWidget(self.acquisitionRateLabel, 0, 1)
-        self.ratesLayout.addWidget(self.acquisitionRateLineEdit, 1, 1)
+        self.ratesLayout.addWidget(self.skipSamplesLabel, 0, 1)
+        self.ratesLayout.addWidget(self.skipSamplesLineEdit, 1, 1)
         self.ratesLayout.addWidget(self.averageSamplesLabel, 0, 2)
         self.ratesLayout.addWidget(self.averageSamplesLineEdit, 1, 2)
         
@@ -86,7 +86,7 @@ class GlobalSettingsGroupBox(QGroupBox):
         self.setLayout(self.globalSettingsVLayout)
 
         # Connections.
-        self.acquisitionRateLineEdit.editingFinished.connect(self.emitAcquisitionRate)
+        self.skipSamplesLineEdit.editingFinished.connect(self.emitSkipSamples)
         self.controlRateLineEdit.editingFinished.connect(self.emitControlRate)
         self.averageSamplesLineEdit.editingFinished.connect(self.emitAverageSamples)
         self.setPathButton.clicked.connect(self.emitPath)
@@ -96,16 +96,16 @@ class GlobalSettingsGroupBox(QGroupBox):
     def updateUI(self, newConfiguration):
         # Method to update UI after configuration changes.
         self.configuration = newConfiguration
-        self.acquisitionRateLineEdit.setText(str(self.configuration["global"]["acquisitionRate"]))
+        self.skipSamplesLineEdit.setText(str(self.configuration["global"]["skipSamples"]))
         self.controlRateLineEdit.setText(str(self.configuration["global"]["controlRate"]))
         self.averageSamplesLineEdit.setText(str(self.configuration["global"]["averageSamples"]))
         self.setPathAddressLabel.setText(self.configuration["global"]["path"])
         self.setFilenameLineEdit.setText(self.configuration["global"]["filename"])
 
-    def emitAcquisitionRate(self):
+    def emitSkipSamples(self):
         # Method to emit the new acquisition rate.
-        newAcquisitionRate =self.acquisitionRateLineEdit.text()
-        self.acquisitionRateChanged.emit(newAcquisitionRate)
+        newSkipSamples =self.skipSamplesLineEdit.text()
+        self.skipSamplesChanged.emit(newSkipSamples)
 
     def emitControlRate(self):
         # Method to emit the new control rate.

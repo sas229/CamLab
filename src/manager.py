@@ -292,7 +292,7 @@ class Manager(QObject):
         self.configuration["global"] = {
             "darkMode": True,
             "controlRate": 1000.00,
-            "acquisitionRate": 100.00,
+            "skipSamples": 10,
             "averageSamples": 10,
             "path": "/data",
             "filename": "junk"
@@ -376,10 +376,10 @@ class Manager(QObject):
         log.info("Cleared configuration by loading defaults.") 
 
     @Slot(str)
-    def updateAcquisitionRate(self, newAcquisitionRate):
-        self.configuration["global"]["acquisitionRate"] = float(newAcquisitionRate)
+    def updateSkipSamples(self, newSkipSamples):
+        self.configuration["global"]["skipSamples"] = float(newSkipSamples)
         self.configurationChanged.emit(self.configuration) 
-        # log.info("New acquisition rate = " + newAcquisitionRate + " Hz")
+        # log.info("New acquisition rate = " + newSkipSamples + " Hz")
         
     @Slot(str)
     def updateControlRate(self, newControlRate):

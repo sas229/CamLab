@@ -105,7 +105,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.toolbar.darkModeButton.triggered.connect(self.updateDarkMode)
 
         # Global settings connections.
-        self.globalSettingsGroupBox.acquisitionRateChanged.connect(self.manager.updateAcquisitionRate)
+        self.globalSettingsGroupBox.skipSamplesChanged.connect(self.manager.updateSkipSamples)
         self.globalSettingsGroupBox.controlRateChanged.connect(self.manager.updateControlRate)
         self.globalSettingsGroupBox.averageSamplesChanged.connect(self.manager.updateAverageSamples)
         self.globalSettingsGroupBox.pathChanged.connect(self.manager.updatePath)
