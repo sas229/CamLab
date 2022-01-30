@@ -193,6 +193,7 @@ class Manager(QObject):
             if ID_USB[i] not in ID_Existing:
                 deviceInformation = {}
                 deviceInformation["connect"] = False
+                # Name string requires a brief connection.
                 handle = ljm.open(7, 1, ID_USB[i])
                 deviceInformation["name"] = ljm.eReadNameString(handle, "DEVICE_NAME_DEFAULT")
                 ljm.close(handle)
@@ -203,7 +204,6 @@ class Manager(QObject):
                 self.deviceTableModel.appendRow(deviceInformation)
                 self.updateUI.emit(self.configuration)
 
-                
                 # Make a deep copy to avoid pointers in the YAML output.
                 acquisitionTable = copy.deepcopy(self.defaultAcquisitionTable)
                 controlTable = copy.deepcopy(self.defaultControlTable)
