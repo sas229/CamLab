@@ -154,6 +154,7 @@ class Manager(QObject):
                 self.acquisitionModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
                 self.controlModels[name] = ControlTableModel(self.configuration["devices"][name]["control"])
                 self.deviceConfigurationAdded.emit(name, self.defaultFeedbackChannel)
+                self.setListFeedbackCombobox()
             log.info("Configuration loaded.")
         self.updateDeviceConfigurationTab.emit()
         self.updateUI.emit(self.configuration)
