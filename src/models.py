@@ -109,7 +109,7 @@ class DeviceTableModel(QAbstractTableModel):
 class AcquisitionTableModel(QAbstractTableModel):
 
     acquisitionChannelTableUpdated = Signal()
-    channelIndexToggled = Signal(int)
+    acquisitionChannelToggled = Signal(int)
 
     def __init__(self, data=[], parent=None):
         super(AcquisitionTableModel, self).__init__(parent)
@@ -172,7 +172,7 @@ class AcquisitionTableModel(QAbstractTableModel):
                 item["connect"] = value
                 # Emit a custom signal here to notify that the enabled channels have changed.
                 self.acquisitionChannelTableUpdated.emit()
-                self.channelIndexToggled.emit(index.row())
+                self.acquisitionChannelToggled.emit(index.row())
             elif index.column() == 1:
                 item["name"] = value
                 # Emit a custom signal here to notify that the enabled channels have changed.
@@ -334,7 +334,6 @@ class ColourPickerTableModel(QAbstractTableModel):
 
 class ControlTableModel(QAbstractTableModel):
 
-    #typeComboBoxUpdated = Signal(int)
     def __init__(self, data=[], parent=None):
         super(ControlTableModel, self).__init__(parent)
         self._data = data
@@ -388,7 +387,6 @@ class ControlTableModel(QAbstractTableModel):
                 item["enable"] = value
             elif index.column() == 1:
                 item["type"] = value
-                #self.typeComboBoxUpdated.emit(item["type"])
             elif index.column() == 2:
                 item["control"] = value
             elif index.column() == 3:

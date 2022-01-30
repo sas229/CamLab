@@ -194,6 +194,7 @@ class ComboBoxDelegate(QStyledItemDelegate):
         value = index.model().data(index)
         text = self.items[value]
         option.text = text
+        option.displayAlignment = Qt.AlignCenter
         QApplication.style().drawControl(QStyle.CE_ItemViewItem, option, painter)
 
 

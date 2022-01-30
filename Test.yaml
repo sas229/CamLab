@@ -1,0 +1,80 @@
+global:
+  darkMode: true
+  controlRate: 1000.0
+  skipSamples: 10
+  averageSamples: 10
+  path: /data
+  filename: junk
+devices:
+  AMY:
+    id: 470019440
+    connection: 4
+    address: 192.168.1.121
+    acquisition:
+    - channel: AIN0
+      name: Ch_1
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: true
+      autozero: true
+    - channel: AIN1
+      name: Ch_2
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: true
+      autozero: true
+    - channel: AIN2
+      name: Ch_3
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: true
+      autozero: true
+    - channel: AIN3
+      name: Ch_4
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: false
+      autozero: true
+    - channel: AIN4
+      name: Ch_5
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: false
+      autozero: true
+    - channel: AIN5
+      name: Ch_6
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: false
+      autozero: true
+    - channel: AIN6
+      name: Ch_7
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: false
+      autozero: true
+    - channel: AIN7
+      name: Ch_8
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: false
+      autozero: true
+    control:
+    - channel: C1
+      enable: true
+      type: 1
+      control: 1
+      feedback: 3
+    - channel: C2
+      enable: false
+      type: 0
+      control: 0
+      feedback: 0

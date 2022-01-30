@@ -4,8 +4,7 @@ from PySide6.QtGui import QIcon
 from PySide6.QtCore import Slot, Qt, QModelIndex, QPoint, QThread, QTimer
 from qt_material import apply_stylesheet, QtStyleTools
 from src.manager import Manager
-from src.widgets import CamLabToolBar, StatusGroupBox, GlobalSettingsGroupBox, DevicesGroupBox, AcquisitionGroupBox, \
-    PlotWindow, ControlGroupBox, DeviceConfigurationGroupBox
+from src.widgets import CamLabToolBar, StatusGroupBox, GlobalSettingsGroupBox, DevicesGroupBox, DeviceConfigurationGroupBox, PlotWindow
 from src.models import DeviceTableModel, AcquisitionTableModel, ColourPickerTableModel
 from src.views import DeviceTableView, AcquisitionTableView, ControlTableView
 from src.log import init_log
@@ -72,12 +71,6 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.deviceConfigurationGroupBox = DeviceConfigurationGroupBox()
         self.mainWindowLayout.addWidget(self.deviceConfigurationGroupBox)
 
-        # Acquisition groupbox.
-        self.acquisitionGroupBox = AcquisitionGroupBox()
-
-        # Control groupbox.
-        self.controlGroupBox = ControlGroupBox()
-
         # Set the central widget of the main window.
         self.centralWidget = QWidget()
         self.centralWidget.setLayout(self.mainWindowLayout)
@@ -117,7 +110,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.manager.configurationChanged.connect(self.globalSettingsGroupBox.updateUI)
         self.manager.clearDeviceConfigurationTabs.connect(self.clearDeviceConfigurationTabs)
         self.manager.closePlots.connect(self.closePlots)
-        self.manager.addDeviceConfiguration.connect(self.addDeviceConfiguration)
+        self.manager.deviceConfigurationAdded.connect(self.addDeviceConfigurationTab)
         self.manager.removeWidget.connect(self.removeWidgetFromLayout)
         self.manager.addControlTable.connect(self.addControlTable)
         self.manager.updateDeviceConfigurationTab.connect(self.updateDeviceConfigurationTabs)
@@ -164,7 +157,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         log.info("Dark mode changed.")
 
     @Slot(str, list)
-    def addDeviceConfiguration(self, name, defaultFeedbackChannel):
+    def addDeviceConfigurationTab(self, name, defaultFeedbackChannel):
         # Create layout.
         self.deviceConfigurationLayout[name] = QVBoxLayout()
 
@@ -180,11 +173,11 @@ class MainWindow(QMainWindow, QtStyleTools):
         # Connections for acquisition table.
         self.manager.acquisitionModels[name].acquisitionChannelTableUpdated.connect(self.manager.updatePlotWindowChannelsData)
         self.manager.acquisitionModels[name].acquisitionChannelTableUpdated.connect(self.manager.setListFeedbackCombobox)
-        self.manager.acquisitionModels[name].channelIndexToggled.connect(self.resetControlFeedbackComboBox)
+        self.manager.acquisitionModels[name].acquisitionChannelToggled.connect(self.resetControlFeedbackComboBox)
 
         # Add control table label.
-        conrtrolLabel = QLabel('CONTROL')
-        self.deviceConfigurationLayout[name].addWidget(conrtrolLabel)
+        controlLabel = QLabel('CONTROL')
+        self.deviceConfigurationLayout[name].addWidget(controlLabel)
 
         # Add control table to the TabWidget.
         self.addControlTable(name, defaultFeedbackChannel)
@@ -219,6 +212,7 @@ class MainWindow(QMainWindow, QtStyleTools):
 
     @Slot(int)
     def resetControlFeedbackComboBox(self, row):
+        # Method receives the row of the acquisition channel toggled and then gets the name of the channel and sends it to manager.
         tabIndex = self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.currentIndex()
         name = self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.tabText(tabIndex)
         self.manager.resetIndexFeedbackComboBox(row, name)
@@ -228,7 +222,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         # Add acquisition table to dict and update the TabWidget.
         self.controlTableViews[name] = ControlTableView(self.manager.controlModeList, self.manager.controlActuatorList, defaultFeedbackChannel)
         self.controlTableViews[name].setModel(self.manager.controlModels[name])
-        self.controlTableViews[name].setFixedHeight(120)
+        self.controlTableViews[name].setFixedHeight(89)
         self.deviceConfigurationLayout[name].addWidget(self.controlTableViews[name])
         # self.controlTableViews[name].persistentEditorOpen()
 
