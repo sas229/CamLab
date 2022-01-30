@@ -129,10 +129,5 @@ dmypy.json
 .pyre/
 
 # Development files
-axisCtrlTemplate.ui
-PlotItem.ui
-yaml_test.py
-renameDevice.py
-readDeviceName.py
 CamLab.log
 .yaml

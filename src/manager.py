@@ -275,7 +275,7 @@ class Manager(QObject):
                 # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
                 self.acquisitionModels[name] = AcquisitionTableModel(data=self.configuration["devices"][name]["acquisition"])
                 self.controlModels[name] = ControlTableModel(self.configuration["devices"][name]["control"])
-                self.addDeviceConfiguration.emit(name)
+                self.addDeviceConfiguration.emit(name, self.defaultFeedbackChannel)
                 self.updateDeviceConfigurationTab.emit()
                 self.updateUI.emit(self.configuration)
         log.info("Found " + str(numDevicesTCP) + " TCP device(s).")
