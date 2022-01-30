@@ -175,35 +175,53 @@ class Manager(QObject):
         self.clearDeviceConfigurationTabs.emit()
         self.loadDevicesFromConfiguration()
 
+        # Add LabJack USB devices, then TCP devices (USB preferred due to reduced latency).
+        self.addLJDevices("USB")
+        self.addLJDevices("TCP")
+
+        # Boolean to indicate that the device list has finished refreshing.
+        self.refreshing = False
+
+    def addLJDevices(self, mode):
         # Get a list of already existing devices.
         existingDevices = self.deviceTableModel._data
         ID_Existing = []
         for device in existingDevices:
             ID_Existing.append(device["id"])
-
-        # Check for USB connectons first and add to available device list if not already enabled.
-        log.info("Scanning for additional USB devices.")
-        info = ljm.listAll(7, 1)
-        devicesUSB = info[0]
+        
+        # Scan for devices.
+        if mode == "USB":
+            log.info("Scanning for additional USB devices.")
+            info = ljm.listAll(7, 1)
+        elif mode == "TCP": 
+            log.info("Scanning for additional TCP devices.")
+            info = ljm.listAll(7, 2)
+        numDevices = info[0]
         connectionType = info[2]
-        ID_USB = info[3]
+        ID = info[3]
         IP = info[4]
 
-        for i in range(devicesUSB):
-            if ID_USB[i] not in ID_Existing:
+        # Add devices if not already in device list.
+        for i in range(numDevices):
+            if ID[i] not in ID_Existing:
                 deviceInformation = {}
                 deviceInformation["connect"] = False
-                # Name string requires a brief connection.
-                handle = ljm.open(7, 1, ID_USB[i])
+                if mode == "USB":
+                    handle = ljm.open(7, 1, ID[i])
+                elif mode == "TCP":
+                    handle = ljm.open(7, 2, ID[i])
                 deviceInformation["name"] = ljm.eReadNameString(handle, "DEVICE_NAME_DEFAULT")
                 ljm.close(handle)
-                deviceInformation["id"] = ID_USB[i]
+                deviceInformation["id"] = ID[i]
                 deviceInformation["connection"] = connectionType[i]
-                deviceInformation["address"] = "N/A"
+                if mode == "USB":
+                    deviceInformation["address"] = "N/A"
+                elif mode == "TCP":
+                    deviceInformation["address"] = ljm.numberToIP(IP[i])
                 deviceInformation["status"] = True
                 self.deviceTableModel.appendRow(deviceInformation)
                 self.updateUI.emit(self.configuration)
-
+                
                 # Make a deep copy to avoid pointers in the YAML output.
                 acquisitionTable = copy.deepcopy(self.defaultAcquisitionTable)
                 controlTable = copy.deepcopy(self.defaultControlTable)
@@ -228,60 +246,10 @@ class Manager(QObject):
                 self.addDeviceConfiguration.emit(name, self.defaultFeedbackChannel)
                 self.updateDeviceConfigurationTab.emit()
                 self.updateUI.emit(self.configuration)
-        log.info("Found " + str(devicesUSB) + " USB device(s).")
-
-        # Check TCP and add to list if not already in available device list.
-        log.info("Scanning for TCP devices.")
-        info = ljm.listAll(7, 2)
-        numDevicesTCP = 0
-        devicesTCP = info[0]
-        connectionType = info[2]
-        ID_TCP = info[3]
-        IP = info[4]
-        for i in range(devicesTCP):
-            if ID_TCP[i] not in ID_USB and ID_TCP[i] not in ID_Existing:
-                numDevicesTCP += 1
-                deviceInformation = {}
-                deviceInformation["connect"] = False
-                # Name string requires a brief connection.
-                handle = ljm.open(7, 2, ID_TCP[i])
-                deviceInformation["name"] = ljm.eReadNameString(handle, "DEVICE_NAME_DEFAULT")
-                ljm.close(handle)
-                deviceInformation["id"] = ID_TCP[i]
-                deviceInformation["connection"] = connectionType[i]
-                deviceInformation["address"] =  ljm.numberToIP(IP[i])
-                deviceInformation["status"] = True
-                self.deviceTableModel.appendRow(deviceInformation)
-                self.updateUI.emit(self.configuration)
-
-                # Make a deep copy to avoid pointers in the YAML output.
-                acquisitionTable = copy.deepcopy(self.defaultAcquisitionTable)
-                controlTable = copy.deepcopy(self.defaultControlTable)
-                newDevice = {
-                    "id": deviceInformation["id"],
-                    "connection": deviceInformation["connection"],
-                    "address": deviceInformation["address"],
-                    "acquisition": acquisitionTable,
-                    "control": controlTable
-                }
-
-                # If no previous devices are configured, add the "devices" key to the configuration.
-                name = deviceInformation["name"]
-                if "devices" not in self.configuration:
-                    self.configuration["devices"] = {name: newDevice} 
-                else:
-                    self.configuration["devices"][name] = newDevice 
-
-                # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
-                self.acquisitionModels[name] = AcquisitionTableModel(data=self.configuration["devices"][name]["acquisition"])
-                self.controlModels[name] = ControlTableModel(self.configuration["devices"][name]["control"])
-                self.addDeviceConfiguration.emit(name, self.defaultFeedbackChannel)
-                self.updateDeviceConfigurationTab.emit()
-                self.updateUI.emit(self.configuration)
-        log.info("Found " + str(numDevicesTCP) + " TCP device(s).")
-
-        # Boolean to indicate that the device list has finished refreshing.
-        self.refreshing = False
+        if mode == "USB":
+            log.info("Found " + str(numDevices) + " USB device(s).")
+        elif mode == "TCP":
+            log.info("Found " + str(numDevices) + " TCP device(s).")
 
     @Slot()
     def configure(self):
