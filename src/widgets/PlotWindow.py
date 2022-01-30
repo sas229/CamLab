@@ -18,7 +18,6 @@ log = logging.getLogger(__name__)
 class PlotWindow(QWidget, QtStyleTools):
     plotWindowClosed = Signal(str)
     colourUpdated = Signal(QModelIndex, str)
-    channelsModelUpdated = Signal(str)
 
     def __init__(self):
         super().__init__()
@@ -115,7 +114,7 @@ class PlotWindow(QWidget, QtStyleTools):
 
         self.controlsGroupBox = QGroupBox("Axis Controls")
         self.controlsGroupBox.setFixedHeight(250)
-        self.controlsGroupBox.setFixedWidth(320)
+        self.controlsGroupBox.setFixedWidth(340)
         
         self.controlsLayout = QVBoxLayout()
         self.controlsLayout.addWidget(self.selectedChannelsTableGroupBox)
@@ -170,7 +169,7 @@ class PlotWindow(QWidget, QtStyleTools):
         self.controlsGroupBox.setLayout(self.controlsTabsLayout)
 
         self.selectedChannelsTableGroupBox.setLayout(self.selectedChannelsTableLayout) 
-        self.selectedChannelsTableGroupBox.setFixedWidth(320)
+        self.selectedChannelsTableGroupBox.setFixedWidth(340)
 
 
         self.plotWindowLayout.addLayout(self.controlsLayout)
@@ -195,6 +194,7 @@ class PlotWindow(QWidget, QtStyleTools):
         self.gridRadio.stateChanged.connect(self.setGridXY)
         self.gridXRadio.stateChanged.connect(self.setGridX)
         self.gridYRadio.stateChanged.connect(self.setGridY)
+        # self.swapRadio.stateChanged.connect(self.swapAxes)
         self.alphaSlider.valueChanged.connect(self.alphaSlider_value)
         self.opacitySlider.valueChanged.connect(self.opacitySlider_value)
         self.plot.scene().sigMousePanned.connect(self.switchToManualXY)
@@ -209,12 +209,26 @@ class PlotWindow(QWidget, QtStyleTools):
         self.colourPickerDialog.selectedColour.connect(self.emitColour)
         self.commonChannelComboBox.currentIndexChanged.connect(self.setCommonChannel)
 
+    # def swapAxes(self):
+    #     print("Function called.")
+    #     print(self.swapRadio.checkState())
+    #     styles = self.setStyle()
+    #     print(bool(self.swapRadio.checkState()))
+    #     if bool(self.swapRadio.checkState()) == True:
+    #         self.plot.setLabel('bottom', 'Selected channels', **styles)
+    #         self.plot.setLabel('left', 'Common channel', **styles)
+    #         print("Selected on bottom.")
+    #     elif bool(self.swapRadio.checkState()) == False:
+    #         self.plot.setLabel('left', 'Selected channels', **styles)
+    #         self.plot.setLabel('bottom', 'Common channel', **styles)
+    #         print("Common on bottom.")
+    #     self.updateUI(self.configuration)
 
     def formatColumns(self):
         self.selectedChannelsTableView.setColumnWidth(0, 30)
-        self.selectedChannelsTableView.setColumnWidth(1, 25)
+        self.selectedChannelsTableView.setColumnWidth(1, 30)
         self.selectedChannelsTableView.setColumnWidth(2, 60)
-        self.selectedChannelsTableView.setColumnWidth(3, 55)
+        self.selectedChannelsTableView.setColumnWidth(3, 60)
         self.selectedChannelsTableView.setColumnWidth(4, 60)
         self.selectedChannelsTableView.setColumnWidth(5, 30)
 
@@ -595,6 +609,7 @@ class PlotWindow(QWidget, QtStyleTools):
         self.autoXRadio.setChecked(self.configuration['plots'][self.plotNumber]["autoX"])
         self.autoYRadio.setChecked(self.configuration['plots'][self.plotNumber]["autoY"])
 
+        self.swapRadio.setChecked(self.configuration['plots'][self.plotNumber]["swap"])
 
         self.lockRadio.setChecked(self.configuration['plots'][self.plotNumber]["lock"])
 

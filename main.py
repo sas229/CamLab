@@ -279,8 +279,8 @@ class MainWindow(QMainWindow, QtStyleTools):
         # Defaults.
         defaultProperties = {
             "invertX": False,
-            "logXAxis": False,
             "invertY": False,
+            "logXAxis": False,
             "logYAxis": False,
             "setGrid": False,
             "setGridX": False,
@@ -296,6 +296,7 @@ class MainWindow(QMainWindow, QtStyleTools):
             "manualY": False,
             "minYRange": 0,
             "maxYRange": 1,
+            "swap": False,
             "lock": False,
             "channels": self.manager.getGenericChannelsData()
         }
