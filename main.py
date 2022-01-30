@@ -224,7 +224,6 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.controlTableViews[name].setModel(self.manager.controlModels[name])
         self.controlTableViews[name].setFixedHeight(89)
         self.deviceConfigurationLayout[name].addWidget(self.controlTableViews[name])
-        # self.controlTableViews[name].persistentEditorOpen()
 
     @Slot(dict)
     def updateUI(self, newConfiguration):

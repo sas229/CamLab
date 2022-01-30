@@ -72,7 +72,6 @@ class ConnectionIconDelegate(QStyledItemDelegate):
         super().__init__()
     
     def paint(self, painter, option, index):
-        model = index.model()
         if self.darkmode == True:
             if index.data(Qt.DisplayRole) == 0:
                 icon = QIcon("assets/sensors_off_white_24dp.svg")
@@ -197,6 +196,15 @@ class ComboBoxDelegate(QStyledItemDelegate):
         option.displayAlignment = Qt.AlignCenter
         QApplication.style().drawControl(QStyle.CE_ItemViewItem, option, painter)
 
+class ColouredBackgroundDelegate(QStyledItemDelegate):
+    """
+    A delegate that displays a coloured square.
+    """
+    def __init__(self, parent=None):
+        super(ColouredBackgroundDelegate, self).__init__(parent)
 
-
-
+    def paint(self, painter, option, index):
+        painter.save()
+        color = index.data(Qt.DecorationRole)
+        painter.fillRect(option.rect, QColor(color))
+        painter.restore()

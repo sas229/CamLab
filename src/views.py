@@ -1,7 +1,7 @@
 from PySide6.QtGui import QStandardItemModel, QStandardItem
 from PySide6.QtWidgets import QTableView, QHeaderView, QAbstractItemView
 from PySide6.QtCore import QModelIndex
-from src.delegates import CheckBoxDelegate, ConnectionIconDelegate, StatusIconDelegate, FloatValidatorDelegate, StringDelegate, ComboBoxDelegate
+from src.delegates import CheckBoxDelegate, ConnectionIconDelegate, StatusIconDelegate, FloatValidatorDelegate, StringDelegate, ComboBoxDelegate, ColouredBackgroundDelegate
 
 
 
@@ -94,6 +94,10 @@ class ColourPickerTableView(QTableView):
         horizontalHeader.hide()
         horizontalHeader.setDefaultSectionSize(25)
 
+        self.colouredBackgroundDelegate = ColouredBackgroundDelegate()
+
+        self.setItemDelegate(self.colouredBackgroundDelegate)
+
 class ControlTableView(QTableView):
 
     def __init__(self, controlModeList, controlActuatorList, feedbackChannelList, parent = None):
@@ -120,21 +124,5 @@ class ControlTableView(QTableView):
         self.setItemDelegateForColumn(1, self.controlModeComboBoxDelegate)
         self.setItemDelegateForColumn(2, self.controlActuatorComboBoxDelegate)
         self.setItemDelegateForColumn(3, self.feedbackChannelListComboBoxDelegate)
-
-    def persistentEditorOpen(self):
-        self.openPersistentEditor(self.model().index(0, 1))
-        self.openPersistentEditor(self.model().index(0, 2))
-        self.openPersistentEditor(self.model().index(0, 3))
-        self.openPersistentEditor(self.model().index(1, 1))
-        self.openPersistentEditor(self.model().index(1, 2))
-        self.openPersistentEditor(self.model().index(1, 3))
-
-    def persistentEditorClose(self):
-        self.closePersistentEditor(self.model().index(0, 1))
-        self.closePersistentEditor(self.model().index(0, 2))
-        self.closePersistentEditor(self.model().index(0, 3))
-        self.closePersistentEditor(self.model().index(1, 1))
-        self.closePersistentEditor(self.model().index(1, 2))
-        self.closePersistentEditor(self.model().index(1, 3))
 
 
