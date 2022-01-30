@@ -376,16 +376,16 @@ class Manager(QObject):
         log.info("Cleared configuration by loading defaults.") 
 
     @Slot(str)
-    def updateSkipSamples(self, newSkipSamples):
-        self.configuration["global"]["skipSamples"] = float(newSkipSamples)
-        self.configurationChanged.emit(self.configuration) 
-        # log.info("New acquisition rate = " + newSkipSamples + " Hz")
-        
-    @Slot(str)
     def updateControlRate(self, newControlRate):
         self.configuration["global"]["controlRate"] = float(newControlRate)
         self.configurationChanged.emit(self.configuration) 
         # log.info("New control rate = " + newControlRate + " Hz")
+
+    @Slot(str)
+    def updateSkipSamples(self, newSkipSamples):
+        self.configuration["global"]["skipSamples"] = int(newSkipSamples)
+        self.configurationChanged.emit(self.configuration) 
+        # log.info("New acquisition rate = " + newSkipSamples + " Hz")
 
     @Slot(str)
     def updateAverageSamples(self, newAverageSamples):
