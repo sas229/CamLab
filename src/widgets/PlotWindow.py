@@ -94,7 +94,7 @@ class PlotWindow(QWidget, QtStyleTools):
         self.invertXRadio = QCheckBox("Invert")
 
         self.logXRadio= QCheckBox("Log")
-        self.autoPanXRadio = QCheckBox("Auto Pan")
+        self.autoPanXRadio = QCheckBox("Auto")
         self.gridXRadio = QCheckBox("Grid")
 
 
@@ -109,7 +109,7 @@ class PlotWindow(QWidget, QtStyleTools):
         
         self.invertYRadio = QCheckBox("Invert")
         self.logYRadio= QCheckBox("Log")
-        self.autoPanYRadio = QCheckBox("Auto Pan")
+        self.autoPanYRadio = QCheckBox("Auto")
         self.gridYRadio = QCheckBox("Grid")
 
         self.controlsGroupBox = QGroupBox("Axis Controls")
@@ -189,8 +189,8 @@ class PlotWindow(QWidget, QtStyleTools):
         self.invertYRadio.stateChanged.connect(self.invertY)
         self.logYRadio.stateChanged.connect(self.logYAxis)
         self.autoRadio.stateChanged.connect(self.autoRange)
-        self.autoXRadio.stateChanged.connect(self.autoXRange)
-        self.autoYRadio.stateChanged.connect(self.autoYRange)
+        # self.autoXRadio.stateChanged.connect(self.autoXRange)
+        # self.autoYRadio.stateChanged.connect(self.autoYRange)
         self.gridRadio.stateChanged.connect(self.setGridXY)
         self.gridXRadio.stateChanged.connect(self.setGridX)
         self.gridYRadio.stateChanged.connect(self.setGridY)
@@ -401,18 +401,30 @@ class PlotWindow(QWidget, QtStyleTools):
         self.configuration["plots"][self.plotNumber]["opacity"] = (self.opacity)
 
     def autoRange(self):
-        b = self.autoRadio.checkState()
-        if bool(b) == True:
+        # When auto is True, enable the autoRange function, set autoXRadio 
+        # and autoYRadio to True and manualXRadio and manualYRadio to False. 
+        auto = bool(self.autoRadio.checkState())
+        lock = bool(self.lockRadio.checkState())
+        if auto == True:
             self.plot.enableAutoRange()
             self.autoXRadio.setChecked(True)
             self.autoYRadio.setChecked(True)
             self.manualXRadio.setChecked(False)
             self.manualYRadio.setChecked(False)
-
-        elif bool(b) == False:
+        # Otherwise disable the autoRange function, set autoXRadio 
+        # and autoYRadio to False and manualXRadio and manualYRadio to False.
+        elif auto == False:
             self.plot.disableAutoRange()
             self.autoXRadio.setChecked(False)
             self.autoYRadio.setChecked(False)
+            if lock == True:
+                self.manualXRadio.setChecked(False)
+                self.manualYRadio.setChecked(False)
+            elif lock == False:
+                self.manualXRadio.setChecked(True)
+                self.manualYRadio.setChecked(True)
+            self.setNewXRange()
+            self.setNewYRange()
 
     def autoXRange(self):
         b = self.autoXRadio.checkState()
