@@ -4,7 +4,7 @@ from PySide6.QtGui import QIcon
 from PySide6.QtCore import Slot, Qt, QModelIndex, QPoint, QThread, QTimer
 from qt_material import apply_stylesheet, QtStyleTools
 from src.manager import Manager
-from src.widgets import CamLabToolBar, StatusGroupBox, GlobalSettingsGroupBox, DevicesGroupBox, DeviceConfigurationGroupBox, PlotWindow
+from src.widgets import CamLabToolBar, StatusGroupBox, GlobalSettingsGroupBox, DevicesGroupBox, ConfigurationGroupBox, PlotWindow
 from src.models import DeviceTableModel, AcquisitionTableModel, ColourPickerTableModel
 from src.views import DeviceTableView, AcquisitionTableView, ControlTableView
 from src.log import init_log
@@ -68,8 +68,8 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.devicesGroupBox.deviceTableView.setModel(self.manager.deviceTableModel)
 
         # Device configuration groupbox.
-        self.deviceConfigurationGroupBox = DeviceConfigurationGroupBox()
-        self.mainWindowLayout.addWidget(self.deviceConfigurationGroupBox)
+        self.configurationGroupBox = ConfigurationGroupBox()
+        self.mainWindowLayout.addWidget(self.configurationGroupBox)
 
         # Set the central widget of the main window.
         self.centralWidget = QWidget()
@@ -189,7 +189,7 @@ class MainWindow(QMainWindow, QtStyleTools):
     @Slot()
     def updateDeviceConfigurationTabs(self):
         # Clear the acquisition table TabWidget.
-        self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.clear()
+        self.configurationGroupBox.deviceConfigurationTabWidget.clear()
 
         # Get a list of enabled devices and current status.
         enabledDevices = self.manager.deviceTableModel.enabledDevices()
@@ -200,11 +200,11 @@ class MainWindow(QMainWindow, QtStyleTools):
             name = device["name"]
             status = device["status"]
             if status == True and connect == True and name in self.acquisitionTableViews:
-                self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.addTab(self.deviceConfigurationWidget[name], name)
+                self.configurationGroupBox.deviceConfigurationTabWidget.addTab(self.deviceConfigurationWidget[name], name)
 
     @Slot()
     def clearDeviceConfigurationTabs(self):
-        self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.clear()
+        self.configurationGroupBox.deviceConfigurationTabWidget.clear()
 
     @Slot(str)
     def removeWidgetFromLayout(self,name):
@@ -213,8 +213,8 @@ class MainWindow(QMainWindow, QtStyleTools):
     @Slot(int)
     def resetControlFeedbackComboBox(self, row):
         # Method receives the row of the acquisition channel toggled and then gets the name of the channel and sends it to manager.
-        tabIndex = self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.currentIndex()
-        name = self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.tabText(tabIndex)
+        tabIndex = self.configurationGroupBox.deviceConfigurationTabWidget.currentIndex()
+        name = self.configurationGroupBox.deviceConfigurationTabWidget.tabText(tabIndex)
         self.manager.resetIndexFeedbackComboBox(row, name)
 
     @Slot(str, list)
@@ -256,7 +256,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.statusGroupBox.setVisible(not self.statusGroupBox.isVisible())
         self.globalSettingsGroupBox.setVisible(not self.globalSettingsGroupBox.isVisible())
         self.devicesGroupBox.setVisible(not self.devicesGroupBox.isVisible())
-        self.deviceConfigurationGroupBox.setVisible(not self.deviceConfigurationGroupBox.isVisible())
+        self.configurationGroupBox.setVisible(not self.configurationGroupBox.isVisible())
         if self.statusGroupBox.isVisible() == True:
             self.height = 300
             self.width = 800
@@ -364,13 +364,14 @@ class MainWindow(QMainWindow, QtStyleTools):
                 del self.manager.configuration["plots"]
     
     def closePlots(self):
+        # Close all plots.
         plotList = list(self.plots.keys())
         for key in plotList:
             self.plots[key].close()
 
     @Slot(QModelIndex, str)
     def updateChannelColours(self, index, colour):
-        #print(colour)
+        # Update colours of channels in all plots.
         for plotNumber in self.manager.configuration["plots"].keys():
             self.plots[plotNumber].setColour(index, colour)
         self.updatePlots()
