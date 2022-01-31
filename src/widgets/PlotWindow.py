@@ -29,10 +29,10 @@ class PlotWindow(QWidget, QtStyleTools):
         self.resize(self.width, self.height)
         self.commonChannel = 0
         self.colourPickerDialog = ColourPickerDialog(self)
-        self.lock_xMin = 0
-        self.lock_xMax = 0
-        self.lock_yMin = 0
-        self.lock_yMax = 0
+        self.minCommonAxisLock = 0
+        self.maxCommonAxisLock = 0
+        self.minSelectedAxisLock = 0
+        self.maxSelectedAxisLock = 0
 
         self.plot = pg.PlotWidget(self)
 
@@ -69,48 +69,45 @@ class PlotWindow(QWidget, QtStyleTools):
         self.selectedChannelsTableLayout = QVBoxLayout()
         self.selectedChannelsTableLayout.addWidget(self.selectedChannelsTableView)
         
-        self.swapRadio = QCheckBox("Swap")
-        self.autoRadio = QCheckBox("Auto")
-        self.downsampleRadio = QCheckBox("Downsample")
-        self.gridRadio = QCheckBox("Grid")
+        self.swapCheckBox = QCheckBox("Swap")
+        self.autoCheckBox = QCheckBox("Auto")
+        self.downsampleCheckBox = QCheckBox("Downsample")
+        self.gridCheckBox = QCheckBox("Grid")
         self.alphaLabel = QLabel("Alpha:")
         self.alphaSlider = QSlider(Qt.Horizontal)
-        #self.alphaSlider.setValue(self.alpha)
         self.opacityLabel = QLabel("Opacity:")
         self.opacitySlider = QSlider(Qt.Horizontal)
-        #self.opacitySlider.setValue(self.opacity)
 
-        self.autoXRadio = QCheckBox("Auto")
-        self.manualXRadio = QCheckBox("Manual")
-        self.setMinimumXLabel = QLabel("Minimum:")
-        self.setMinimumXLineEdit = QLineEdit()
-        self.setMinimumXLineEdit.setEnabled(False)
-        self.setMaximumXLabel = QLabel("Maximum:")
-        self.setMaximumXLineEdit = QLineEdit()
-        self.setMaximumXLineEdit.setEnabled(False)
+        self.autoCommonAxisCheckBox = QCheckBox("Auto")
+        self.manualCommonAxisCheckBox = QCheckBox("Manual")
+        self.setMinimumCommonAxisLabel = QLabel("Minimum:")
+        self.setMinimumCommonAxisLineEdit = QLineEdit()
+        self.setMinimumCommonAxisLineEdit.setEnabled(False)
+        self.setMaximumCommonAxisLabel = QLabel("Maximum:")
+        self.setMaximumCommonAxisLineEdit = QLineEdit()
+        self.setMaximumCommonAxisLineEdit.setEnabled(False)
 
-        self.lockRadio = QCheckBox("Lock")
+        self.lockCheckBox = QCheckBox("Lock")
 
-        self.invertXRadio = QCheckBox("Invert")
+        self.invertCommonAxisCheckBox = QCheckBox("Invert")
 
-        self.logXRadio= QCheckBox("Log")
-        self.autoPanXRadio = QCheckBox("Auto")
-        self.gridXRadio = QCheckBox("Grid")
+        self.logCommonAxisCheckBox= QCheckBox("Log")
+        self.autoPanCommonAxisCheckBox = QCheckBox("Auto")
+        self.lockCommonAxisCheckBox = QCheckBox("Lock")
 
-
-        self.autoYRadio = QCheckBox("Auto")
-        self.manualYRadio = QCheckBox("Manual")
-        self.setMinimumYLabel = QLabel("Minimum:")
-        self.setMinimumYLineEdit = QLineEdit()
-        self.setMinimumYLineEdit.setEnabled(False)
-        self.setMaximumYLabel = QLabel("Maximum:")
-        self.setMaximumYLineEdit = QLineEdit()
-        self.setMaximumYLineEdit.setEnabled(False)
+        self.autoSelectedAxisCheckBox = QCheckBox("Auto")
+        self.manualSelectedAxisCheckBox = QCheckBox("Manual")
+        self.setMinimumSelectedAxisLabel = QLabel("Minimum:")
+        self.setMinimumSelectedAxisLineEdit = QLineEdit()
+        self.setMinimumSelectedAxisLineEdit.setEnabled(False)
+        self.setMaximumSelectedAxisLabel = QLabel("Maximum:")
+        self.setMaximumSelectedAxisLineEdit = QLineEdit()
+        self.setMaximumSelectedAxisLineEdit.setEnabled(False)
         
-        self.invertYRadio = QCheckBox("Invert")
-        self.logYRadio= QCheckBox("Log")
-        self.autoPanYRadio = QCheckBox("Auto")
-        self.gridYRadio = QCheckBox("Grid")
+        self.invertSelectedAxisCheckBox = QCheckBox("Invert")
+        self.logSelectedAxisCheckBox= QCheckBox("Log")
+        self.autoPanSelectedAxisCheckBox = QCheckBox("Auto")
+        self.lockSelectedAxisCheckBox = QCheckBox("Lock")
 
         self.controlsGroupBox = QGroupBox("Axis Controls")
         self.controlsGroupBox.setFixedHeight(250)
@@ -123,10 +120,10 @@ class PlotWindow(QWidget, QtStyleTools):
 
         self.globalControlsWidget = QWidget()
         self.globalControlsLayout = QGridLayout()
-        self.globalControlsLayout.addWidget(self.autoRadio, 0, 0)
-        self.globalControlsLayout.addWidget(self.gridRadio, 0, 1)
-        self.globalControlsLayout.addWidget(self.swapRadio, 0, 2)
-        self.globalControlsLayout.addWidget(self.lockRadio, 0, 3)
+        self.globalControlsLayout.addWidget(self.autoCheckBox, 0, 0)
+        self.globalControlsLayout.addWidget(self.gridCheckBox, 0, 1)
+        self.globalControlsLayout.addWidget(self.swapCheckBox, 0, 2)
+        self.globalControlsLayout.addWidget(self.lockCheckBox, 0, 3)
         self.globalControlsLayout.addWidget(self.alphaLabel, 1, 0)
         self.globalControlsLayout.addWidget(self.alphaSlider, 1, 1, 1, 3)
         self.globalControlsLayout.addWidget(self.opacityLabel, 2, 0)
@@ -135,34 +132,35 @@ class PlotWindow(QWidget, QtStyleTools):
 
         self.xAxisControlsWidget = QWidget()
         self.xAxisControlsLayout = QGridLayout()
-        self.xAxisControlsLayout.addWidget(self.autoXRadio, 0, 0)
-        self.xAxisControlsLayout.addWidget(self.setMinimumXLabel, 0, 1)
-        self.xAxisControlsLayout.addWidget(self.setMaximumXLabel, 0, 2)
-        self.xAxisControlsLayout.addWidget(self.manualXRadio, 1, 0)
-        self.xAxisControlsLayout.addWidget(self.setMinimumXLineEdit, 1, 1)
-        self.xAxisControlsLayout.addWidget(self.setMaximumXLineEdit, 1, 2)
-        self.xAxisControlsLayout.addWidget(self.invertXRadio, 2, 0)
-        self.xAxisControlsLayout.addWidget(self.logXRadio, 2, 1)
-        self.xAxisControlsLayout.addWidget(self.gridXRadio, 2, 2)
+        self.xAxisControlsLayout.addWidget(self.autoCommonAxisCheckBox, 0, 0)
+        self.xAxisControlsLayout.addWidget(self.setMinimumCommonAxisLabel, 0, 1)
+        self.xAxisControlsLayout.addWidget(self.setMaximumCommonAxisLabel, 0, 2)
+        self.xAxisControlsLayout.addWidget(self.manualCommonAxisCheckBox, 1, 0)
+        self.xAxisControlsLayout.addWidget(self.setMinimumCommonAxisLineEdit, 1, 1)
+        self.xAxisControlsLayout.addWidget(self.setMaximumCommonAxisLineEdit, 1, 2)
+        self.xAxisControlsLayout.addWidget(self.lockCommonAxisCheckBox, 2, 0)
+        self.xAxisControlsLayout.addWidget(self.invertCommonAxisCheckBox, 2, 1)
+        self.xAxisControlsLayout.addWidget(self.logCommonAxisCheckBox, 2, 2)
         self.xAxisControlsWidget.setLayout(self.xAxisControlsLayout)
 
         self.yAxisControlsWidget = QWidget()
         self.yAxisControlsLayout = QGridLayout()
-        self.yAxisControlsLayout.addWidget(self.autoYRadio, 0, 0)
-        self.yAxisControlsLayout.addWidget(self.setMinimumYLabel, 0, 1)
-        self.yAxisControlsLayout.addWidget(self.setMaximumYLabel, 0, 2)
-        self.yAxisControlsLayout.addWidget(self.manualYRadio, 1, 0)
-        self.yAxisControlsLayout.addWidget(self.setMinimumYLineEdit, 1, 1)
-        self.yAxisControlsLayout.addWidget(self.setMaximumYLineEdit, 1, 2)
-        self.yAxisControlsLayout.addWidget(self.invertYRadio,2 , 0)
-        self.yAxisControlsLayout.addWidget(self.logYRadio, 2, 1)
-        self.yAxisControlsLayout.addWidget(self.gridYRadio, 2, 2)
+        self.yAxisControlsLayout.addWidget(self.autoSelectedAxisCheckBox, 0, 0)
+        self.yAxisControlsLayout.addWidget(self.setMinimumSelectedAxisLabel, 0, 1)
+        self.yAxisControlsLayout.addWidget(self.setMaximumSelectedAxisLabel, 0, 2)
+        self.yAxisControlsLayout.addWidget(self.manualSelectedAxisCheckBox, 1, 0)
+        self.yAxisControlsLayout.addWidget(self.setMinimumSelectedAxisLineEdit, 1, 1)
+        self.yAxisControlsLayout.addWidget(self.setMaximumSelectedAxisLineEdit, 1, 2)
+        self.yAxisControlsLayout.addWidget(self.lockSelectedAxisCheckBox, 2, 0)
+        self.yAxisControlsLayout.addWidget(self.invertSelectedAxisCheckBox,2 , 1)
+        self.yAxisControlsLayout.addWidget(self.logSelectedAxisCheckBox, 2, 2)
         self.yAxisControlsWidget.setLayout(self.yAxisControlsLayout)
 
         self.controlsTabWidget = QTabWidget()
-        self.controlsTabWidget.addTab(self.globalControlsWidget, "Global")
-        self.controlsTabWidget.addTab(self.xAxisControlsWidget, "X")
-        self.controlsTabWidget.addTab(self.yAxisControlsWidget, "Y")
+        self.controlsTabWidget.addTab(self.globalControlsWidget, "   Global   ")
+        self.controlsTabWidget.addTab(self.xAxisControlsWidget, "Common")
+        self.controlsTabWidget.addTab(self.yAxisControlsWidget, "Selected")
+        self.controlsTabWidget.setFixedWidth(285)
 
         self.controlsTabsLayout = QVBoxLayout()
         self.controlsTabsLayout.addWidget(self.controlsTabWidget)
@@ -177,58 +175,277 @@ class PlotWindow(QWidget, QtStyleTools):
 
         self.fillCommonChannelComboBox()
 
-        rangeX = self.plot.getViewBox().state
-        self.setMinimumXLineEdit.setText(str('%.2f' % rangeX['viewRange'][0][0]))
-        self.setMaximumXLineEdit.setText(str('%.2f' % rangeX['viewRange'][0][1]))
-        rangeY = self.plot.getViewBox().state
-        self.setMinimumYLineEdit.setText(str('%.2f' % rangeY['viewRange'][1][0]))
-        self.setMaximumYLineEdit.setText(str('%.2f' % rangeY['viewRange'][1][1]))
+        rangeCommonAxis = self.plot.getViewBox().state
+        self.setMinimumCommonAxisLineEdit.setText(str('%.2f' % rangeCommonAxis['viewRange'][0][0]))
+        self.setMaximumCommonAxisLineEdit.setText(str('%.2f' % rangeCommonAxis['viewRange'][0][1]))
+        rangeSelectedAxis = self.plot.getViewBox().state
+        self.setMinimumSelectedAxisLineEdit.setText(str('%.2f' % rangeSelectedAxis['viewRange'][1][0]))
+        self.setMaximumSelectedAxisLineEdit.setText(str('%.2f' % rangeSelectedAxis['viewRange'][1][1]))
 
-        self.invertXRadio.stateChanged.connect(self.invertX)
-        self.logXRadio.stateChanged.connect(self.logXAxis)
-        self.invertYRadio.stateChanged.connect(self.invertY)
-        self.logYRadio.stateChanged.connect(self.logYAxis)
-        self.autoRadio.stateChanged.connect(self.autoRange)
-        # self.autoXRadio.stateChanged.connect(self.autoXRange)
-        # self.autoYRadio.stateChanged.connect(self.autoYRange)
-        self.gridRadio.stateChanged.connect(self.setGridXY)
-        self.gridXRadio.stateChanged.connect(self.setGridX)
-        self.gridYRadio.stateChanged.connect(self.setGridY)
-        # self.swapRadio.stateChanged.connect(self.swapAxes)
+        self.invertCommonAxisCheckBox.stateChanged.connect(self.invertCommonAxis)
+        self.logCommonAxisCheckBox.stateChanged.connect(self.logCommonAxis)
+        self.invertSelectedAxisCheckBox.stateChanged.connect(self.invertSelectedAxis)
+        self.logSelectedAxisCheckBox.stateChanged.connect(self.logSelectedAxis)
+        
+        self.gridCheckBox.stateChanged.connect(self.setGrid)
         self.alphaSlider.valueChanged.connect(self.alphaSlider_value)
         self.opacitySlider.valueChanged.connect(self.opacitySlider_value)
-        self.plot.scene().sigMousePanned.connect(self.switchToManualXY)
-        self.plot.scene().sigMouseWheel.connect(self.switchToManualXY)
-        self.manualXRadio.stateChanged.connect(self.manualXRange)
-        self.manualYRadio.stateChanged.connect(self.manualYRange)
-        self.plot.sigXRangeChanged.connect(self.manualXRange)
-        self.plot.sigYRangeChanged.connect(self.manualYRange)
-        self.lockRadio.stateChanged.connect(self.lockCheckBox)
+        self.plot.scene().sigMousePanned.connect(self.switchToManual)
+        self.plot.scene().sigMouseWheel.connect(self.switchToManual)
+        
+        self.plot.sigXRangeChanged.connect(self.updateCommonAxisRange)
+        self.plot.sigYRangeChanged.connect(self.updateSelectedAxisRange)
+        
         self.selectedChannelsTableView.clicked.connect(self.selectColour)
         self.colourPickerDialog.selectedColour.connect(self.setColour)
         self.colourPickerDialog.selectedColour.connect(self.emitColour)
         self.commonChannelComboBox.currentIndexChanged.connect(self.setCommonChannel)
 
-    # def swapAxes(self):
-    #     print("Function called.")
-    #     print(self.swapRadio.checkState())
-    #     styles = self.setStyle()
-    #     print(bool(self.swapRadio.checkState()))
-    #     if bool(self.swapRadio.checkState()) == True:
-    #         self.plot.setLabel('bottom', 'Selected channels', **styles)
-    #         self.plot.setLabel('left', 'Common channel', **styles)
-    #         print("Selected on bottom.")
-    #     elif bool(self.swapRadio.checkState()) == False:
-    #         self.plot.setLabel('left', 'Selected channels', **styles)
-    #         self.plot.setLabel('bottom', 'Common channel', **styles)
-    #         print("Common on bottom.")
-    #     self.updateUI(self.configuration)
+        self.autoCheckBox.clicked.connect(self.autoMode)
+        self.autoCommonAxisCheckBox.clicked.connect(self.setAutoCommonAxisMode)
+        self.autoSelectedAxisCheckBox.clicked.connect(self.setAutoSelectedAxisMode)
+        self.manualCommonAxisCheckBox.clicked.connect(self.setManualCommonAxisMode)
+        self.manualSelectedAxisCheckBox.clicked.connect(self.setManualSelectedAxisMode)
+
+        self.lockCheckBox.clicked.connect(self.setLock)
+        self.lockCommonAxisCheckBox.stateChanged.connect(self.setLockX)
+        self.lockSelectedAxisCheckBox.stateChanged.connect(self.setLockY)
+
+        self.setMinimumCommonAxisLineEdit.returnPressed.connect(self.setNewCommonAxisRange)
+        self.setMaximumCommonAxisLineEdit.returnPressed.connect(self.setNewCommonAxisRange)
+        self.setMinimumSelectedAxisLineEdit.returnPressed.connect(self.setNewSelectedAxisRange)
+        self.setMaximumSelectedAxisLineEdit.returnPressed.connect(self.setNewSelectedAxisRange)
+
+    # @Slot 
+    # def updateAxisRange(self):
+    #     swap =
+
+    @Slot()
+    def setLock(self):
+        lock = bool(self.lockCheckBox.checkState())
+        if lock == True:
+            self.lockCommonAxisCheckBox.setChecked(True)
+            self.lockSelectedAxisCheckBox.setChecked(True)
+        else:
+            self.lockCommonAxisCheckBox.setChecked(False)
+            self.lockSelectedAxisCheckBox.setChecked(False)
+
+    @Slot()
+    def setLockX(self):
+        lockCommonAxis = bool(self.lockCommonAxisCheckBox.checkState())
+        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.checkState())
+        manualCommonAxis = bool(self.manualCommonAxisCheckBox.checkState())
+        if lockCommonAxis == True:
+            self.minXLock = copy.deepcopy(self.configuration["plots"][self.plotNumber]["minXRange"])
+            self.maxXLock = copy.deepcopy(self.configuration["plots"][self.plotNumber]["maxXRange"])
+            self.setMinimumCommonAxisLineEdit.setEnabled(False)
+            self.setMaximumCommonAxisLineEdit.setEnabled(False)
+            if lockSelectedAxis == True:
+                self.lockCheckBox.setChecked(True)
+        else:
+            self.lockCheckBox.setChecked(False)
+            if manualCommonAxis == True:
+                self.setMinimumCommonAxisLineEdit.setEnabled(True)
+                self.setMaximumCommonAxisLineEdit.setEnabled(True)        
+
+    @Slot()
+    def setLockY(self):
+        lockCommonAxis = bool(self.lockCommonAxisCheckBox.checkState())
+        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.checkState())
+        manualSelectedAxis = bool(self.manualSelectedAxisCheckBox.checkState())
+        if lockSelectedAxis == True:
+            self.minYLock = copy.deepcopy(self.configuration["plots"][self.plotNumber]["minYRange"])
+            self.maxYLock = copy.deepcopy(self.configuration["plots"][self.plotNumber]["maxYRange"])
+            self.setMinimumSelectedAxisLineEdit.setEnabled(False)
+            self.setMaximumSelectedAxisLineEdit.setEnabled(False)
+            if lockCommonAxis == True:
+                self.lockCheckBox.setChecked(True)
+        else:
+            self.lockCheckBox.setChecked(False)
+            if manualSelectedAxis == True:
+                self.setMinimumSelectedAxisLineEdit.setEnabled(True)
+                self.setMaximumSelectedAxisLineEdit.setEnabled(True)
+
+    @Slot()
+    def autoMode(self):
+        # When auto is True, enable the autoRange function on both axes, set autoCommonAxisCheckBox 
+        # and autoSelectedAxisCheckBox to True and manualCommonAxisCheckBox and manualSelectedAxisCheckBox to False. 
+        auto = bool(self.autoCheckBox.checkState())
+        lockCommonAxis = bool(self.lockCommonAxisCheckBox.checkState())
+        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.checkState())
+        if auto == True:
+            self.plot.enableAutoRange()
+            self.autoCommonAxisCheckBox.setChecked(True)
+            self.autoSelectedAxisCheckBox.setChecked(True)
+            self.manualCommonAxisCheckBox.setChecked(False)
+            self.manualSelectedAxisCheckBox.setChecked(False)
+            self.setMinimumCommonAxisLineEdit.setEnabled(False)
+            self.setMaximumCommonAxisLineEdit.setEnabled(False)
+            self.setMinimumSelectedAxisLineEdit.setEnabled(False)
+            self.setMaximumSelectedAxisLineEdit.setEnabled(False)
+        # Otherwise disable the autoRange function, set autoCommonAxisCheckBox 
+        # and autoSelectedAxisCheckBox to False and manualCommonAxisCheckBox and manualSelectedAxisCheckBox to False.
+        elif auto == False:
+            self.plot.disableAutoRange()
+            self.autoCommonAxisCheckBox.setChecked(False)
+            self.autoSelectedAxisCheckBox.setChecked(False)
+            self.manualCommonAxisCheckBox.setChecked(True)
+            self.manualSelectedAxisCheckBox.setChecked(True)
+            if lockCommonAxis == False:
+                self.setMinimumCommonAxisLineEdit.setEnabled(True)
+                self.setMaximumCommonAxisLineEdit.setEnabled(True)
+            if lockSelectedAxis == False:
+                self.setMinimumSelectedAxisLineEdit.setEnabled(True)
+                self.setMaximumSelectedAxisLineEdit.setEnabled(True)
+            self.setNewCommonAxisRange()
+            self.setNewSelectedAxisRange()
+        self.configuration["plots"][self.plotNumber]["auto"] = auto
+
+    @Slot()
+    def setAutoCommonAxisMode(self):
+        autoCommonAxis = bool(self.autoCommonAxisCheckBox.checkState())
+        if autoCommonAxis == True:
+            self.manualCommonAxisCheckBox.setChecked(False)
+            self.plot.enableAutoRange(axis='x')
+            self.setMinimumCommonAxisLineEdit.setEnabled(False)
+            self.setMaximumCommonAxisLineEdit.setEnabled(False)
+        else:
+            self.manualCommonAxisCheckBox.setChecked(True)
+            self.setManualCommonAxisMode()
+        self.configuration["plots"][self.plotNumber]["autoCommonAxis"] = autoCommonAxis
+
+    @Slot()
+    def setAutoSelectedAxisMode(self):
+        autoSelectedAxis = bool(self.autoSelectedAxisCheckBox.checkState())
+        if autoSelectedAxis == True:
+            self.manualSelectedAxisCheckBox.setChecked(False)
+            self.plot.enableAutoRange(axis='y')
+            self.setMinimumSelectedAxisLineEdit.setEnabled(False)
+            self.setMaximumSelectedAxisLineEdit.setEnabled(False)
+        else:
+            self.manualSelectedAxisCheckBox.setChecked(True)
+            self.setmanualSelectedAxisMode()
+        self.configuration["plots"][self.plotNumber]["autoSelectedAxis"] = autoSelectedAxis
+
+    @Slot()
+    def setManualCommonAxisMode(self):
+        self.setNewCommonAxisRange()
+        manualCommonAxis = bool(self.manualCommonAxisCheckBox.checkState())
+        lockCommonAxis = bool(self.lockCommonAxisCheckBox.checkState())
+        if manualCommonAxis == True:
+            self.plot.disableAutoRange(axis='x')
+            self.autoCheckBox.setChecked(False)
+            self.autoCommonAxisCheckBox.setChecked(False)
+            if lockCommonAxis == False:
+                self.setMinimumCommonAxisLineEdit.setEnabled(True)
+                self.setMaximumCommonAxisLineEdit.setEnabled(True)
+        else:
+            self.autoCommonAxisCheckBox.setChecked(True)
+            self.setautoCommonAxisMode()
+        self.configuration["plots"][self.plotNumber]["manualCommonAxis"] = manualCommonAxis
+            
+    @Slot()
+    def setManualSelectedAxisMode(self):
+        self.setNewSelectedAxisRange()
+        manualSelectedAxis = bool(self.manualSelectedAxisCheckBox.checkState())
+        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.checkState())
+        if manualSelectedAxis == True:
+            self.plot.disableAutoRange(axis='y')
+            self.autoCheckBox.setChecked(False)
+            self.autoSelectedAxisCheckBox.setChecked(False)
+            if lockSelectedAxis == False:
+                self.setMinimumSelectedAxisLineEdit.setEnabled(True)
+                self.setMaximumSelectedAxisLineEdit.setEnabled(True)
+        else:
+            self.autoSelectedAxisCheckBox.setChecked(True)
+            self.setautoSelectedAxisMode()      
+        self.configuration["plots"][self.plotNumber]["manualSelectedAxis"] = manualSelectedAxis
+    
+    @Slot()
+    def updateCommonAxisRange(self):
+        # Store current minX and maxX when sigXRangeChanged signal received.
+        rangeCommonAxis = self.plot.getViewBox().state
+        self.minX = float('%.2f' % rangeCommonAxis['viewRange'][0][0])
+        self.maxX = float('%.2f' % rangeCommonAxis['viewRange'][0][1])
+        self.configuration["plots"][self.plotNumber]["minXRange"] = self.minX
+        self.configuration["plots"][self.plotNumber]["maxXRange"] = self.maxX
+
+        # If lock is False update the lineedit text.
+        lockCommonAxis = bool(self.lockCommonAxisCheckBox.checkState())
+        if lockCommonAxis == True:
+            self.setMinimumCommonAxisLineEdit.setText(str(self.minXLock))
+            self.setMaximumCommonAxisLineEdit.setText(str(self.maxXLock))
+        elif lockCommonAxis == False:
+            self.setMinimumCommonAxisLineEdit.setText(str(self.minX))
+            self.setMaximumCommonAxisLineEdit.setText(str(self.maxX))
+    
+    @Slot()
+    def updateSelectedAxisRange(self):
+        # Store current minY and maxY when sigXRangeChanged signal received.
+        rangeSelectedAxis = self.plot.getViewBox().state
+        self.minY = float('%.2f' % rangeSelectedAxis['viewRange'][1][0])
+        self.maxY = float('%.2f' % rangeSelectedAxis['viewRange'][1][1])
+        self.configuration["plots"][self.plotNumber]["minYRange"] = self.minY
+        self.configuration["plots"][self.plotNumber]["maxYRange"] = self.maxY
+
+        # If lock is False update the lineedit text.
+        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.checkState())
+        if lockSelectedAxis == True:
+            self.setMinimumSelectedAxisLineEdit.setText(str(self.minYLock))
+            self.setMaximumSelectedAxisLineEdit.setText(str(self.maxYLock))
+        elif lockSelectedAxis == False:
+            self.setMinimumSelectedAxisLineEdit.setText(str(self.minY))
+            self.setMaximumSelectedAxisLineEdit.setText(str(self.maxY))
+
+    @Slot()
+    def setNewCommonAxisRange(self):
+        # Set the new range for the x axis.
+        self.minX = float(self.setMinimumCommonAxisLineEdit.text())
+        self.maxX = float(self.setMaximumCommonAxisLineEdit.text())
+        self.plot.setXRange(self.minX, self.maxX, padding=0)
+        
+    @Slot()
+    def setNewSelectedAxisRange(self):
+        # Set the new range for the y axis.
+        self.minY = float(self.setMinimumSelectedAxisLineEdit.text())
+        self.maxY = float(self.setMaximumSelectedAxisLineEdit.text())
+        self.plot.setYRange(self.minY, self.maxY, padding=0)
+    
+    @Slot()
+    def setNewSwapCommonAxisRange(self):
+        # Set the new range for the x axis (swapped).
+        self.minY = float(self.setMinimumSelectedAxisLineEdit.text())
+        self.maxY = float(self.setMaximumSelectedAxisLineEdit.text())
+        self.plot.setXRange(self.minY, self.maxY, padding=0)
+        
+    @Slot()
+    def setNewSwapSelectedAxisRange(self):
+        # Set the new range for the y axis (swapped).
+        self.minX = float(self.setMinimumCommonAxisLineEdit.text())
+        self.maxX = float(self.setMaximumCommonAxisLineEdit.text())
+        self.plot.setYRange(self.minX, self.maxX, padding=0)
+
+    @Slot()
+    def switchToManual(self):
+        lockCommonAxis = bool(self.lockCommonAxisCheckBox.checkState())
+        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.checkState())
+        self.autoCheckBox.setChecked(False)
+        self.autoCommonAxisCheckBox.setChecked(False)
+        self.autoSelectedAxisCheckBox.setChecked(False)
+        self.manualCommonAxisCheckBox.setChecked(True)
+        if lockCommonAxis == False:
+            self.setMinimumCommonAxisLineEdit.setEnabled(True)
+            self.setMaximumCommonAxisLineEdit.setEnabled(True)
+        self.manualSelectedAxisCheckBox.setChecked(True)
+        if lockSelectedAxis == False:
+            self.setMinimumSelectedAxisLineEdit.setEnabled(True)
+            self.setMaximumSelectedAxisLineEdit.setEnabled(True)
 
     def formatColumns(self):
         self.selectedChannelsTableView.setColumnWidth(0, 30)
         self.selectedChannelsTableView.setColumnWidth(1, 30)
-        self.selectedChannelsTableView.setColumnWidth(2, 60)
-        self.selectedChannelsTableView.setColumnWidth(3, 60)
+        self.selectedChannelsTableView.setColumnWidth(2, 70)
+        self.selectedChannelsTableView.setColumnWidth(3, 50)
         self.selectedChannelsTableView.setColumnWidth(4, 60)
         self.selectedChannelsTableView.setColumnWidth(5, 30)
 
@@ -257,11 +474,13 @@ class PlotWindow(QWidget, QtStyleTools):
     @Slot(np.ndarray)
     def updateLines(self, plotData):
         alphaValue = self.alpha
+        # manualCommonAxis = bool(self.manualCommonAxisCheckBox.checkState())
+        # manualSelectedAxis = bool(self.manualSelectedAxisCheckBox.checkState())
         styles = self.setStyle()
         numChannels = len(self.channelsModel._data)
         #do this if statement for the first time the plot is run
-        if bool(self.autoRadio.checkState()) == True:
-            self.autoRange()
+        if bool(self.autoCheckBox.checkState()) == True:
+            self.autoMode()
 
         for i in range(numChannels):
             colour = self.channelsModel._data[i]["colour"]
@@ -270,78 +489,71 @@ class PlotWindow(QWidget, QtStyleTools):
             self.channelsModel.setData(index, "{:.2f}".format(plotData[-1,i]), role=Qt.EditRole)
             if self.channelsModel._data[i]["plot"] == False:
                 self.lines[i].setData([],[])
-            elif self.swapRadio.checkState() == False:
+            elif self.swapCheckBox.checkState() == False:
                 self.lines[i].setAlpha(alphaValue/100, False)
                 self.lines[i].setData(plotData[:,self.commonChannel], plotData[:,i], pen=pen)
                 self.plot.setLabel('left', 'Selected channels', **styles)
                 self.plot.setLabel('bottom', 'Common channel', **styles)
+                # if manualCommonAxis == True:
+                #     self.setNewCommonAxisRange()
+                # if manualSelectedAxis == True:
+                #     self.setNewSelectedAxisRange()
             else:
                 self.lines[i].setAlpha(alphaValue/100, False)
                 self.lines[i].setData(plotData[:,i], plotData[:,self.commonChannel], pen=pen)
                 self.plot.setLabel('bottom', 'Selected channels', **styles)
                 self.plot.setLabel('left', 'Common channel', **styles)
+                # if manualCommonAxis == True:
+                #     self.setNewCommonAxisRange()
+                # if manualSelectedAxis == True:
+                #     self.setNewSelectedAxisRange()
 
     def setStyle(self):
         return {'color': os.environ['QTMATERIAL_SECONDARYTEXTCOLOR'], 'font-size': '16px'}
 
-    def logXAxis(self):
-        b = self.logXRadio.checkState()
-        self.plot.setLogMode(x=b, y=None)
-        self.configuration["plots"][self.plotNumber]["logXAxis"] = (bool(b))
+    def logCommonAxis(self):
+        swap = bool(self.swapCheckBox.checkState())
+        logCommonAxis = bool(self.logCommonAxisCheckBox.checkState())
+        if swap == True:
+            self.plot.setLogMode(x=None, y=logCommonAxis)
+        else:
+            self.plot.setLogMode(x=logCommonAxis, y=None)
+        self.configuration["plots"][self.plotNumber]["logCommonAxis"] = logCommonAxis
 
-    def invertX(self):
-        b = self.invertXRadio.checkState()
-        self.plot.getPlotItem().invertX(b)
-        self.configuration["plots"][self.plotNumber]["invertX"] = (bool(b))
+    def invertCommonAxis(self):
+        swap = bool(self.swapCheckBox.checkState())
+        invertCommonAxis = bool(self.invertCommonAxisCheckBox.checkState())
+        if swap == True:
+            self.plot.getPlotItem().invertY(invertCommonAxis)
+        else:
+            self.plot.getPlotItem().invertX(invertCommonAxis)
+        self.configuration["plots"][self.plotNumber]["invertCommonAxis"] = invertCommonAxis
 
-    def logYAxis(self):
-        b = self.logYRadio.checkState()
-        self.plot.setLogMode(x=None, y=b)
-        self.configuration["plots"][self.plotNumber]["logYAxis"] = (bool(b))
+    def logSelectedAxis(self):
+        swap = bool(self.swapCheckBox.checkState())
+        logSelectedAxis = bool(self.logSelectedAxisCheckBox.checkState())
+        if swap == True:
+            self.plot.setLogMode(x=logSelectedAxis, y=None)
+        else:
+            self.plot.setLogMode(x=None, y=logSelectedAxis)
+        self.configuration["plots"][self.plotNumber]["logSelectedAxis"] = logSelectedAxis
 
-    def invertY(self):
-        b = self.invertYRadio.checkState()
-        self.plot.getPlotItem().invertY(b)
-        self.configuration["plots"][self.plotNumber]["invertY"] = (bool(b))
+    def invertSelectedAxis(self):
+        swap = bool(self.swapCheckBox.checkState())
+        invertSelectedAxis = bool(self.invertSelectedAxisCheckBox.checkState())
+        if swap == True:
+            self.plot.getPlotItem().invertX(invertSelectedAxis)
+        else:
+            self.plot.getPlotItem().invertY(invertSelectedAxis)
+        self.configuration["plots"][self.plotNumber]["invertSelectedAxis"] = invertSelectedAxis
 
-    def setXRange(self):
+    def setCommonRange(self):
         self.plot.getPlotItem().setXRange(1,4)
 
-    def setGridXY(self):
-        b = self.gridRadio.checkState()
+    def setGrid(self):
+        b = self.gridCheckBox.checkState()
         self.plot.showGrid(x = b, y = b, alpha = self.opacity/100)
-        self.gridXRadio.setChecked(bool(b))
-        self.gridYRadio.setChecked(bool(b))
-
         self.configuration["plots"][self.plotNumber]["setGrid"] = (bool(b))
-
-    def setGridX(self):
-        b = self.gridXRadio.checkState()
-        self.plot.showGrid(x = b, y = None, alpha = self.opacity/100)
-        if bool(self.gridXRadio.checkState()) == False and bool(self.gridYRadio.checkState()) == True:
-            self.gridRadio.setChecked(False)
-            self.gridYRadio.setChecked(True)
-        elif bool(self.gridXRadio.checkState()) == False and bool(self.gridYRadio.checkState()) == False:
-            self.gridRadio.setChecked(False)
-            self.gridYRadio.setChecked(False)
-        elif bool(self.gridXRadio.checkState()) == True and bool(self.gridYRadio.checkState()) == True and bool(self.gridRadio.checkState()) == False:
-            self.gridRadio.setChecked(True)
-
-        self.configuration["plots"][self.plotNumber]["setGridX"] = (bool(b))
-
-    def setGridY(self):
-        b = self.gridYRadio.checkState()
-        self.plot.showGrid(x=None, y=b, alpha = self.opacity/100)
-        if bool(self.gridYRadio.checkState()) == False and bool(self.gridXRadio.checkState()) == True:
-            self.gridRadio.setChecked(False)
-            self.gridXRadio.setChecked(True)
-        elif bool(self.gridYRadio.checkState()) == False and bool(self.gridXRadio.checkState()) == False:
-            self.gridRadio.setChecked(False)
-            self.gridXRadio.setChecked(False)
-        elif bool(self.gridYRadio.checkState()) == True and bool(self.gridXRadio.checkState()) == True and bool(self.gridRadio.checkState()) == False:
-            self.gridRadio.setChecked(True)
-
-        self.configuration["plots"][self.plotNumber]["setGridY"] = (bool(b))
 
     def updateUI(self, newConfiguration):
         # Update the UI after any configuration change.
@@ -393,237 +605,39 @@ class PlotWindow(QWidget, QtStyleTools):
 
     def opacitySlider_value(self, i):
         self.opacity = i
-        if bool(self.gridRadio.checkState()) == True:
-            self.setGridXY()
-        elif bool(self.gridRadio.checkState()) == False:
-            self.setGridY()
-            self.setGridX()
+        if bool(self.gridCheckBox.checkState()) == True:
+            self.setGrid()
         self.configuration["plots"][self.plotNumber]["opacity"] = (self.opacity)
-
-    def autoRange(self):
-        # When auto is True, enable the autoRange function, set autoXRadio 
-        # and autoYRadio to True and manualXRadio and manualYRadio to False. 
-        auto = bool(self.autoRadio.checkState())
-        lock = bool(self.lockRadio.checkState())
-        if auto == True:
-            self.plot.enableAutoRange()
-            self.autoXRadio.setChecked(True)
-            self.autoYRadio.setChecked(True)
-            self.manualXRadio.setChecked(False)
-            self.manualYRadio.setChecked(False)
-        # Otherwise disable the autoRange function, set autoXRadio 
-        # and autoYRadio to False and manualXRadio and manualYRadio to False.
-        elif auto == False:
-            self.plot.disableAutoRange()
-            self.autoXRadio.setChecked(False)
-            self.autoYRadio.setChecked(False)
-            if lock == True:
-                self.manualXRadio.setChecked(False)
-                self.manualYRadio.setChecked(False)
-            elif lock == False:
-                self.manualXRadio.setChecked(True)
-                self.manualYRadio.setChecked(True)
-            self.setNewXRange()
-            self.setNewYRange()
-
-    def autoXRange(self):
-        b = self.autoXRadio.checkState()
-        if bool(b) == False and bool(self.autoYRadio.checkState()) == True:
-            self.plot.disableAutoRange(axis='x')
-            self.manualXRadio.setChecked(True)
-            self.autoRadio.setChecked(False)
-            self.autoYRadio.setChecked(True)
-
-        elif bool(b) == False and bool(self.autoYRadio.checkState()) == False:
-            self.plot.disableAutoRange(axis='x')
-            self.manualXRadio.setChecked(True)
-            self.autoRadio.setChecked(False)
-            self.autoYRadio.setChecked(False)
-
-        elif bool(b) == True and bool(self.autoYRadio.checkState()) == False:
-            self.plot.enableAutoRange(axis='x')
-            self.manualXRadio.setChecked(False)
-
-        elif bool(b) == True and bool(self.autoYRadio.checkState()) == True and bool(
-                self.autoRadio.checkState()) == False:
-            self.manualXRadio.setChecked(False)
-            self.autoRadio.setChecked(True)
-
-    def autoYRange(self):
-        b = self.autoYRadio.checkState()
-        if bool(b) == False and bool(self.autoXRadio.checkState()) == True:
-            self.plot.disableAutoRange(axis='y')
-            self.manualYRadio.setChecked(True)
-            self.autoRadio.setChecked(False)
-            self.autoXRadio.setChecked(True)
-
-        elif bool(b) == False and bool(self.autoXRadio.checkState()) == False:
-            self.plot.disableAutoRange(axis='y')
-            self.manualYRadio.setChecked(True)
-            self.autoRadio.setChecked(False)
-            self.autoXRadio.setChecked(False)
-
-        elif bool(b) == True and bool(self.autoXRadio.checkState()) == False:
-            self.plot.enableAutoRange(axis='y')
-            self.manualYRadio.setChecked(False)
-
-        elif bool(b) == True and bool(self.autoXRadio.checkState()) == True and bool(
-                self.autoRadio.checkState()) == False:
-            self.manualYRadio.setChecked(False)
-            self.autoRadio.setChecked(True)
-
-    def switchToManualXY(self):
-        self.autoRadio.setChecked(False)
-        if bool(self.autoRadio.checkState()) == False:
-            self.autoXRadio.setChecked(False)
-            self.autoYRadio.setChecked(False)
-
-    def manualXRange(self):
-        rangeX = self.plot.getViewBox().state
-        xMin = float('%.2f' % rangeX['viewRange'][0][0])
-        xMax = float('%.2f' % rangeX['viewRange'][0][1])
-        self.setMinimumXLineEdit.setText(str(xMin))
-        self.setMaximumXLineEdit.setText(str(xMax))
-
-
-        b = self.manualXRadio.checkState()
-
-        if bool(b) == True:
-            self.setMinimumXLineEdit.setEnabled(True)
-            self.setMaximumXLineEdit.setEnabled(True)
-
-            self.setMinimumXLineEdit.returnPressed.connect(self.setNewXRange)
-            self.setMaximumXLineEdit.returnPressed.connect(self.setNewXRange)
-
-            self.autoXRadio.setChecked(False)
-
-
-        elif bool(b) == False:
-            self.setMinimumXLineEdit.setEnabled(False)
-            self.setMaximumXLineEdit.setEnabled(False)
-
-            self.autoXRadio.setChecked(True)
-
-        if bool(self.lockRadio.checkState()) == True:
-            self.setMinimumXLineEdit.setEnabled(False)
-            self.setMaximumXLineEdit.setEnabled(False)
-            xMin = self.lock_xMin
-            xMax = self.lock_xMax
-            self.setMinimumXLineEdit.setText(str(xMin))
-            self.setMaximumXLineEdit.setText(str(xMax))
-
-        self.configuration["plots"][self.plotNumber]["minXRange"] = xMin
-        self.configuration["plots"][self.plotNumber]["maxXRange"] = xMax
-        self.configuration["plots"][self.plotNumber]["manualX"] = (bool(b))
-
-    def manualYRange(self):
-        rangeY = self.plot.getViewBox().state
-        yMin = float('%.2f' % rangeY['viewRange'][1][0])
-        yMax = float('%.2f' % rangeY['viewRange'][1][1])
-        self.setMinimumYLineEdit.setText(str(yMin))
-        self.setMaximumYLineEdit.setText(str(yMax))
-
-        b = self.manualYRadio.checkState()
-        if bool(b) == True:
-            self.setMinimumYLineEdit.setEnabled(True)
-            self.setMaximumYLineEdit.setEnabled(True)
-
-            self.setMinimumYLineEdit.returnPressed.connect(self.setNewYRange)
-            self.setMaximumYLineEdit.returnPressed.connect(self.setNewYRange)
-
-            self.autoYRadio.setChecked(False)
-
-        elif bool(b) == False:
-            self.setMinimumYLineEdit.setEnabled(False)
-            self.setMaximumYLineEdit.setEnabled(False)
-            self.autoYRadio.setChecked(True)
-
-        if bool(self.lockRadio.checkState()) == True:
-            self.setMinimumYLineEdit.setEnabled(False)
-            self.setMaximumYLineEdit.setEnabled(False)
-            yMin = self.lock_yMin
-            yMax = self.lock_yMax
-            self.setMinimumYLineEdit.setText(str(yMin))
-            self.setMaximumYLineEdit.setText(str(yMax))
-
-
-        self.configuration["plots"][self.plotNumber]["minYRange"] = yMin
-        self.configuration["plots"][self.plotNumber]["maxYRange"] = yMax
-        self.configuration["plots"][self.plotNumber]["manualY"] = (bool(b))
-
-    def setNewXRange(self):
-        xMin = float(self.setMinimumXLineEdit.text())
-        xMax = float(self.setMaximumXLineEdit.text())
-        self.plot.setXRange(xMin, xMax, padding=0)
-        self.configuration["plots"][self.plotNumber]["minXRange"] = xMin
-        self.configuration["plots"][self.plotNumber]["maxXRange"] = xMax
-
-    def setNewYRange(self):
-        yMin = float(self.setMinimumYLineEdit.text())
-        yMax = float(self.setMaximumYLineEdit.text())
-        self.plot.setYRange(yMin, yMax, padding=0)
-        self.configuration["plots"][self.plotNumber]["minYRange"] = yMin
-        self.configuration["plots"][self.plotNumber]["maxYRange"] = yMax
-
-    def lockCheckBox(self):
-
-        b = self.lockRadio.checkState()
-        if bool(b) == True:
-            #self.autoRadio.setChecked(False)
-            self.lock_xMin = copy.deepcopy(self.configuration["plots"][self.plotNumber]["minXRange"])
-            self.lock_xMax = copy.deepcopy(self.configuration["plots"][self.plotNumber]["maxXRange"])
-            self.lock_yMin = copy.deepcopy(self.configuration["plots"][self.plotNumber]["minYRange"])
-            self.lock_yMax = copy.deepcopy(self.configuration["plots"][self.plotNumber]["maxYRange"])
-
-            self.plot.sigXRangeChanged.disconnect(self.manualXRange)
-            self.plot.sigYRangeChanged.disconnect(self.manualYRange)
-            self.setMinimumXLineEdit.setEnabled(False)
-            self.setMaximumXLineEdit.setEnabled(False)
-            self.setMinimumYLineEdit.setEnabled(False)
-            self.setMaximumYLineEdit.setEnabled(False)
-
-        elif bool(b) == False:
-            self.plot.sigXRangeChanged.connect(self.manualXRange)
-            self.plot.sigYRangeChanged.connect(self.manualYRange)
-            if bool(self.manualXRadio.checkState()) == True:
-                self.setMinimumXLineEdit.setEnabled(True)
-                self.setMaximumXLineEdit.setEnabled(True)
-            if bool(self.manualYRadio.checkState()) == True:
-                self.setMinimumYLineEdit.setEnabled(True)
-                self.setMaximumYLineEdit.setEnabled(True)
-
-
-        self.configuration["plots"][self.plotNumber]["lock"] = bool(b)
 
     def setConfiguration(self, configuration):
         self.configuration = configuration
         
-        self.logXRadio.setChecked(self.configuration["plots"][self.plotNumber]["logXAxis"])
-        self.logYRadio.setChecked(self.configuration["plots"][self.plotNumber]["logYAxis"])
-        self.invertXRadio.setChecked(self.configuration["plots"][self.plotNumber]["invertX"])
-        self.invertYRadio.setChecked(self.configuration["plots"][self.plotNumber]["invertY"])
-        self.gridRadio.setChecked(self.configuration["plots"][self.plotNumber]["setGrid"])
-        self.gridXRadio.setChecked(self.configuration["plots"][self.plotNumber]["setGridX"])
-        self.gridYRadio.setChecked(self.configuration["plots"][self.plotNumber]["setGridY"])
+        self.logCommonAxisCheckBox.setChecked(self.configuration["plots"][self.plotNumber]["logCommonAxis"])
+        self.logSelectedAxisCheckBox.setChecked(self.configuration["plots"][self.plotNumber]["logSelectedAxis"])
+        self.invertCommonAxisCheckBox.setChecked(self.configuration["plots"][self.plotNumber]["invertCommonAxis"])
+        self.invertSelectedAxisCheckBox.setChecked(self.configuration["plots"][self.plotNumber]["invertSelectedAxis"])
+        self.gridCheckBox.setChecked(self.configuration["plots"][self.plotNumber]["setGrid"])
         self.alphaSlider.setValue(self.configuration["plots"][self.plotNumber]["alpha"])
         self.opacitySlider.setValue(self.configuration["plots"][self.plotNumber]["opacity"])
 
-        xMin = copy.deepcopy(self.configuration['plots'][self.plotNumber]["minXRange"])
-        xMax = copy.deepcopy(self.configuration['plots'][self.plotNumber]["maxXRange"])
-        yMin = copy.deepcopy(self.configuration['plots'][self.plotNumber]["minYRange"])
-        yMax = copy.deepcopy(self.configuration['plots'][self.plotNumber]["maxYRange"])
-        self.manualXRadio.setChecked(self.configuration['plots'][self.plotNumber]["manualX"])
-        self.manualYRadio.setChecked(self.configuration['plots'][self.plotNumber]["manualY"])
-        self.plot.setXRange(xMin, xMax, padding=0)
-        self.plot.setYRange(yMin, yMax, padding = 0)
+        minX = copy.deepcopy(self.configuration['plots'][self.plotNumber]["minCommonAxisRange"])
+        maxX = copy.deepcopy(self.configuration['plots'][self.plotNumber]["maxCommonAxisRange"])
+        minY = copy.deepcopy(self.configuration['plots'][self.plotNumber]["minSelectedAxisRange"])
+        maxY = copy.deepcopy(self.configuration['plots'][self.plotNumber]["maxSelectedAxisRange"])
+        self.manualCommonAxisCheckBox.setChecked(self.configuration['plots'][self.plotNumber]["manualCommonAxis"])
+        self.manualSelectedAxisCheckBox.setChecked(self.configuration['plots'][self.plotNumber]["manualSelectedAxis"])
+        self.plot.setXRange(minX, maxX, padding=0)
+        self.plot.setYRange(minY, maxY, padding = 0)
 
-        self.autoRadio.setChecked(self.configuration['plots'][self.plotNumber]["auto"])
-        self.autoXRadio.setChecked(self.configuration['plots'][self.plotNumber]["autoX"])
-        self.autoYRadio.setChecked(self.configuration['plots'][self.plotNumber]["autoY"])
+        self.autoCheckBox.setChecked(self.configuration['plots'][self.plotNumber]["auto"])
+        self.autoCommonAxisCheckBox.setChecked(self.configuration['plots'][self.plotNumber]["autoCommonAxis"])
+        self.autoSelectedAxisCheckBox.setChecked(self.configuration['plots'][self.plotNumber]["autoSelectedAxis"])
 
-        self.swapRadio.setChecked(self.configuration['plots'][self.plotNumber]["swap"])
+        self.swapCheckBox.setChecked(self.configuration['plots'][self.plotNumber]["swap"])
 
-        self.lockRadio.setChecked(self.configuration['plots'][self.plotNumber]["lock"])
+        self.lockCheckBox.setChecked(self.configuration['plots'][self.plotNumber]["lock"])
+        self.lockCommonAxisCheckBox.setChecked(self.configuration['plots'][self.plotNumber]["lockCommonAxis"])
+        self.lockSelectedAxisCheckBox.setChecked(self.configuration['plots'][self.plotNumber]["lockSelectedAxis"])
 
         self.setChannelsModel(self.configuration["plots"][self.plotNumber]["channels"])
 

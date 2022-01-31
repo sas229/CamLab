@@ -79,27 +79,27 @@ devices:
       control: 0
       feedback: 0
 plots:
-  '140439644769024':
-    invertX: false
-    invertY: false
-    logXAxis: false
-    logYAxis: false
+  '140547399990144':
+    invertCommonAxis: false
+    invertSelectedAxis: false
+    logCommonAxis: false
+    logSelectedAxis: false
     setGrid: false
-    setGridX: false
-    setGridY: false
     alpha: 50
     opacity: 50
     auto: true
-    autoX: true
-    autoY: true
-    manualX: false
-    minXRange: 0
-    maxXRange: 1
-    manualY: false
-    minYRange: 0
-    maxYRange: 1
+    autoCommonAxis: true
+    autoSelectedAxis: true
+    manualCommonAxis: false
+    minCommonAxisRange: 0
+    maxCommonAxisRange: 1
+    manualSelectedAxis: false
+    minSelectedAxisRange: 0
+    maxSelectedAxisRange: 1
     swap: false
     lock: false
+    lockCommonAxis: false
+    lockSelectedAxis: false
     channels:
     - plot: false
       name: Time
