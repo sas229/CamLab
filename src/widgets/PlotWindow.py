@@ -304,11 +304,14 @@ class PlotWindow(QWidget, QtStyleTools):
     @Slot()
     def setAutoCommonAxisMode(self):
         autoCommonAxis = bool(self.autoCommonAxisCheckBox.checkState())
+        autoSelectedAxis = bool(self.autoSelectedAxisCheckBox.checkState())
         if autoCommonAxis == True:
             self.manualCommonAxisCheckBox.setChecked(False)
             self.plot.enableAutoRange(axis='x')
             self.setMinimumCommonAxisLineEdit.setEnabled(False)
             self.setMaximumCommonAxisLineEdit.setEnabled(False)
+            if autoSelectedAxis == True:
+                self.autoCheckBox.setChecked(True)
         else:
             self.manualCommonAxisCheckBox.setChecked(True)
             self.setManualCommonAxisMode()
@@ -316,15 +319,18 @@ class PlotWindow(QWidget, QtStyleTools):
 
     @Slot()
     def setAutoSelectedAxisMode(self):
+        autoCommonAxis = bool(self.autoCommonAxisCheckBox.checkState())
         autoSelectedAxis = bool(self.autoSelectedAxisCheckBox.checkState())
         if autoSelectedAxis == True:
             self.manualSelectedAxisCheckBox.setChecked(False)
             self.plot.enableAutoRange(axis='y')
             self.setMinimumSelectedAxisLineEdit.setEnabled(False)
             self.setMaximumSelectedAxisLineEdit.setEnabled(False)
+            if autoCommonAxis == True:
+                self.autoCheckBox.setChecked(True)
         else:
             self.manualSelectedAxisCheckBox.setChecked(True)
-            self.setmanualSelectedAxisMode()
+            self.setManualSelectedAxisMode()
         self.configuration["plots"][self.plotNumber]["autoSelectedAxis"] = autoSelectedAxis
 
     @Slot()
@@ -341,7 +347,7 @@ class PlotWindow(QWidget, QtStyleTools):
                 self.setMaximumCommonAxisLineEdit.setEnabled(True)
         else:
             self.autoCommonAxisCheckBox.setChecked(True)
-            self.setautoCommonAxisMode()
+            self.setAutoCommonAxisMode()
         self.configuration["plots"][self.plotNumber]["manualCommonAxis"] = manualCommonAxis
             
     @Slot()

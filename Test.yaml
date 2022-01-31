@@ -1,6 +1,6 @@
 global:
   darkMode: true
-  controlRate: 1000.0
+  controlRate: 100.0
   skipSamples: 10
   averageSamples: 10
   path: /data
@@ -84,9 +84,9 @@ plots:
     invertSelectedAxis: false
     logCommonAxis: false
     logSelectedAxis: false
-    setGrid: false
+    setGrid: true
     alpha: 50
-    opacity: 50
+    opacity: 48
     auto: true
     autoCommonAxis: true
     autoSelectedAxis: true
@@ -113,3 +113,7 @@ plots:
       colour: '#f44336'
       value: '0.00'
       unit: V
+    minXRange: 0.0
+    maxXRange: 1.0
+    minYRange: 0.0
+    maxYRange: 1.0
