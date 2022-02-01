@@ -10,6 +10,7 @@ import os
 import sys
 from labjack import ljm
 import numpy as np
+import time
 
 log = logging.getLogger(__name__)
 
@@ -289,6 +290,8 @@ class Manager(QObject):
     def initialiseDefaultConfiguration(self):
         self.configuration = {}
         self.configuration["global"] = {
+            "x": 0,
+            "y": 0,
             "darkMode": True,
             "controlRate": 1000.00,
             "skipSamples": 10,
@@ -300,12 +303,16 @@ class Manager(QObject):
 
     @Slot(str)
     def loadConfiguration(self, loadConfigurationPath):
-        # Clear device table and configuration tabs prior to loading devices from selected configuration.
-        self.configuration = {}
+        # Clear the configuration.
+        self.clearConfiguration()
+        time.sleep(1)
+
+        # Next clear the device list and configuration tabs.
         self.deviceTableModel.clearData()
         self.clearDeviceConfigurationTabs.emit()
-
-        # Clear all manager dicts.
+        
+        # # Clear all underlying models and tables.
+        self.configuration = {}
         self.acquisitionModels = {}
         self.acquisitionTables = {}
         self.controlModels = {}
@@ -319,7 +326,7 @@ class Manager(QObject):
                     self.configuration = ruamel.yaml.load(file, Loader=ruamel.yaml.Loader)
                     log.info("Configuration file parsed.")
                     self.configurationPath = loadConfigurationPath
-                    self.configurationChanged.emit(self.configuration)
+                    # self.configurationChanged.emit(self.configuration)
                     self.settings.setValue("configurationPath", loadConfigurationPath)
                     self.loadDevicesFromConfiguration()
                     self.setListFeedbackCombobox()
@@ -333,20 +340,21 @@ class Manager(QObject):
     def saveConfiguration(self, saveConfigurationPath):
         # Make deep copies of the configuration and filter out devices that are not enabled in the device table.
         configuration = copy.deepcopy(self.configuration)
-        devices = copy.deepcopy(self.configuration["devices"])
-        enabledDevices = self.deviceTableModel.enabledDevices()
-        enabledDeviceList = []
-        for device in enabledDevices:
-            enabledDeviceList.append(device["name"])
-        for device in configuration["devices"]:
-            if device not in enabledDeviceList:
-                devices.pop(device)
-        configuration["devices"] = devices
+        if "devices" in configuration:
+            devices = copy.deepcopy(self.configuration["devices"])
+            enabledDevices = self.deviceTableModel.enabledDevices()
+            enabledDeviceList = []
+            for device in enabledDevices:
+                enabledDeviceList.append(device["name"])
+            for device in configuration["devices"]:
+                if device not in enabledDeviceList:
+                    devices.pop(device)
+            configuration["devices"] = devices
 
         if "plots" in configuration:
            for plotNumber in configuration["plots"]:
                for channel in configuration["plots"][plotNumber]["channels"]:
-                   channel['value'] = '0.00'
+                   channel['value'] = 0.00
 
         # Save the yaml file and its path to QSettings.
         with open(saveConfigurationPath, "w") as file:
