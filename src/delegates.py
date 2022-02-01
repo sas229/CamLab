@@ -138,7 +138,7 @@ class FloatValidatorDelegate(QItemDelegate):
 
     def setModelData (self, editor, model, index):
         '''
-        Change the underlying data model by updating teh value as a float.
+        Change the underlying data model by updating the value as a float.
         '''
         value = float(editor.text())        
         model.setData(index, value, Qt.EditRole)

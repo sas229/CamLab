@@ -1,11 +1,11 @@
-QLineEdit:disabled {{
+/* QLineEdit:disabled {{
     color: {QTMATERIAL_SECONDARYTEXTCOLOR};
     background-color: {QTMATERIAL_SECONDARYCOLOR};
-}}
+}} */
 
 QGroupBox {{
     background-color: {QTMATERIAL_SECONDARYLIGHTCOLOR};
-}}
+}} 
 
 /* QTableView:item {{
   padding: 5px;

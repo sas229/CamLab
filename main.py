@@ -1,6 +1,6 @@
 import sys, os
 from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QLabel
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QScreen
 from PySide6.QtCore import Slot, Qt, QModelIndex, QPoint, QThread, QTimer
 from qt_material import apply_stylesheet, QtStyleTools
 from src.manager import Manager
@@ -26,6 +26,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.setFixedWidth(self.width)
         self.setFixedHeight(self.height)
         self.refreshing = False
+        self.screenSize = QScreen.availableGeometry(QApplication.primaryScreen())
 
         # Empty dicts for storage. 
         self.deviceConfigurationLayout = {}
@@ -42,6 +43,11 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.managerThread = QThread(parent=self)
         self.manager.moveToThread(self.managerThread)
         self.managerThread.start()
+
+        # Set position.
+        x = self.manager.configuration["global"]["x"]
+        y = self.manager.configuration["global"]["y"]
+        self.setGeometry(x, y, self.width, self.height)
 
         # Extract the configuration to generate initial UI setup.
         self.configuration = self.manager.configuration
@@ -122,6 +128,12 @@ class MainWindow(QMainWindow, QtStyleTools):
 
         # Timer connections.
         self.plotTimer.timeout.connect(self.manager.assembly.updatePlotData)
+    
+    def moveEvent(self, event):
+        position = self.geometry()
+        self.configuration["global"]["x"] = int(position.x())
+        self.configuration["global"]["y"] = int(position.y())
+        return
 
     @Slot()
     def start(self):
@@ -277,27 +289,39 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.plots.update({plotNumber: plotWindow})
 
         # Defaults.
+        width = 1200
+        height = 800
+        x = self.screenSize.width()/2 - width/2
+        y = self.screenSize.height()/2 - height/2
         defaultProperties = {
-            "invertX": False,
-            "invertY": False,
-            "logXAxis": False,
-            "logYAxis": False,
-            "setGrid": False,
-            "setGridX": False,
-            "setGridY": False,
             "alpha": 50,
-            "opacity": 50,
             "auto": True,
-            "autoX": True,
-            "autoY": True,
-            "manualX": False,
-            "minXRange": 0,
-            "maxXRange": 1,
-            "manualY": False,
-            "minYRange": 0,
-            "maxYRange": 1,
-            "swap": False,
+            "autoCommonAxis": True,
+            "autoSelectedAxis": True,
+            "height": height,
+            "width": width,
+            "invertCommonAxis": False,
+            "invertSelectedAxis": False,
             "lock": False,
+            "lockCommonAxis": False,
+            "lockSelectedAxis": False,
+            "logCommonAxis": False,
+            "logSelectedAxis": False,          
+            "manualCommonAxis": False,
+            "manualSelectedAxis": False,
+            "minCommonAxisRange": 0,
+            "minSelectedAxisRange": 0,
+            "maxCommonAxisRange": 1,
+            "maxSelectedAxisRange": 1,
+            "minCommonAxisRangeLock": 0,
+            "minSelectedAxisRangeLock": 0,
+            "maxCommonAxisRangeLock": 1,
+            "maxSelectedAxisRangeLock": 1,
+            "opacity": 50,
+            "setGrid": False,
+            "swap": False,
+            "x": x,
+            "y": y,
             "channels": self.manager.getGenericChannelsData()
         }
 
@@ -310,11 +334,12 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.manager.setColourNewPlot(plotNumber)
 
         # Show the plot.
+        plotWindow.setConfiguration(self.manager.configuration)
         plotWindow.show()
 
         # Connections.
         self.manager.configurationChanged.connect(self.plots[plotNumber].setConfiguration)
-        self.manager.assembly.plotDataChanged.connect(self.plots[plotNumber].updateLines)
+        self.manager.assembly.plotDataChanged.connect(self.plots[plotNumber].updatePlotData)
         self.plots[plotNumber].plotWindowClosed.connect(self.removePlot)
         self.plots[plotNumber].colourUpdated.connect(self.updateChannelColours)
 
@@ -333,11 +358,12 @@ class MainWindow(QMainWindow, QtStyleTools):
             self.plots.update({plotNumber: plotWindow})
 
             # Show the plot.
+            plotWindow.setConfiguration(self.manager.configuration)
             plotWindow.show()
 
             # Connections.
             self.manager.configurationChanged.connect(self.plots[plotNumber].setConfiguration)
-            self.manager.assembly.plotDataChanged.connect(self.plots[plotNumber].updateLines)
+            self.manager.assembly.plotDataChanged.connect(self.plots[plotNumber].updatePlotData)
             self.plots[plotNumber].plotWindowClosed.connect(self.removePlot)
             self.plots[plotNumber].colourUpdated.connect(self.updateChannelColours)
         
