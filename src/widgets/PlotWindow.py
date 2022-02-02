@@ -693,7 +693,7 @@ class PlotWindow(QWidget, QtStyleTools):
         styles = self.setStyle()
         for i in range(self.numChannels):
             colour = self.channelsModel._data[i]["colour"]
-            pen = pg.mkPen(colour)
+            pen = pg.mkPen(colour, width=2)
             index = self.channelsModel.index(i,4)
             self.channelsModel.setData(index, "{:.2f}".format(self.plotData[-1,i]), role=Qt.EditRole)
             if self.channelsModel._data[i]["plot"] == False:
