@@ -1,4 +1,4 @@
-from PySide6.QtCore import QObject, Signal, Slot, QSettings, QThread, QModelIndex
+from PySide6.QtCore import QObject, Signal, Slot, QSettings, QThread, QModelIndex, QDate, Qt
 from src.models import DeviceTableModel, AcquisitionTableModel, ChannelsTableModel, ControlTableModel
 from src.device import Device
 from src.assembly import Assembly
@@ -12,6 +12,7 @@ from labjack import ljm
 import numpy as np
 import time
 import re
+from datetime import datetime
 
 log = logging.getLogger(__name__)
 
@@ -100,6 +101,47 @@ class Manager(QObject):
             count += 1
         log.info("Updated offsets in configuration.")
 
+    def generateFilename(self):
+        initialTime = datetime.now()
+        initialDate = QDate.currentDate()
+        path = str(self.configuration["global"]["path"])
+        filename = str(self.configuration["global"]["filename"])
+        date = str(initialDate.toString(Qt.ISODate))
+        time = str("{hours:02}:{minutes:02}:{seconds:02}".format(hours=initialTime.hour, minutes=initialTime.minute, seconds=initialTime.second))
+        ext = ".txt"
+        return  path, filename, date, time, ext
+
+    def createHeader(self):
+        path, filename, date, timestart, ext = self.generateFilename()
+        byeline = "CamLab data acquisition and device control system: https://github.com/sas229/CamLab\n"
+        testline = "Test name:" + filename + "\nDate: " + date + "\nTime: " + timestart + "\n\n"
+        slopeline = "Slopes:"
+        offsetline = "Offsets:"
+        channelline = "Channel:"
+        nameline = "Time (s)"
+        enabledDevices = self.deviceTableModel.enabledDevices()
+        for device in enabledDevices:
+            deviceName = device["name"]
+            channels, names, units, slopes, offsets, autozero = self.acquisitionModels[deviceName].enabledChannels()
+            for slope in slopes:
+                slopeline += "\t"
+                slopeline += str(slope)
+            for offset in offsets:
+                offsetline += "\t"
+                offsetline += str(offset)
+            for channel in channels:
+                channelline += "\t"
+                channelline += str(channel) + " [" + str(deviceName) + "]"
+            for i in range(len(names)):
+                nameline += "\t"
+                nameline += str(names[i]) + " (" + str(units[i]) + ")"
+        slopeline += "\n"
+        offsetline += "\n\n"
+        channelline += "\n\n"
+        nameline += "\n"
+        header = byeline + testline + slopeline + offsetline + channelline + nameline
+        return header
+
     def createDeviceThreads(self):
         log.info("Creating device threads.")
         self.devices = {}
@@ -108,8 +150,22 @@ class Manager(QObject):
 
         # Create output arrays in assembly thread.
         self.assembly.createDataArrays(enabledDevices)
+        
+        # Initialise assembly thread.
+        controlRate = self.configuration["global"]["controlRate"]
+        skipSamples = self.configuration["global"]["skipSamples"]
+        averageSamples = self.configuration["global"]["averageSamples"]
+        self.assembly.settings(controlRate, skipSamples, averageSamples)
+        
+        # Set filename.
+        path, filename, date, time, ext = self.generateFilename()
+        self.assembly.setFilename(path, filename, date, time, ext)
 
-        # For each device set the acuisition array and execute in a separate thread.
+        # Generate the header for the output file.
+        header = self.createHeader()
+        self.assembly.writeHeader(header)
+
+        # For each device set the acquisition array and execute in a separate thread.
         for device in enabledDevices:
             name = device["name"]
             id = device["id"]
@@ -273,6 +329,9 @@ class Manager(QObject):
 
     @Slot()
     def configure(self):
+        # Close current file.
+        self.assembly.closeFile()
+
         # Stop acquisition.
         self.timing.stop()
 
@@ -347,7 +406,7 @@ class Manager(QObject):
                     self.configuration = ruamel.yaml.load(file, Loader=ruamel.yaml.Loader)
                     log.info("Configuration file parsed.")
                     self.configurationPath = loadConfigurationPath
-                    # self.configurationChanged.emit(self.configuration)
+                    self.configurationChanged.emit(self.configuration)
                     self.settings.setValue("configurationPath", loadConfigurationPath)
                     self.loadDevicesFromConfiguration()
                     self.setListFeedbackCombobox()

@@ -310,7 +310,7 @@ class PlotWindow(QWidget, QtStyleTools):
         self.updatePlot()
         self.darkMode = self.configuration["global"]["darkMode"]
         self.setDarkMode()
-        log.info("Configuration set.")
+        # log.info("Configuration set.")
 
     def updateConfiguration(self):
         # Update the configuration based on current GUI settings.

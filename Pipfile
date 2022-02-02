@@ -13,6 +13,7 @@ labjack = "*"
 labjack-ljm = "*"
 qtrangeslider = "*"
 numpy = "*"
+scipy = "*"
 
 [dev-packages]
 
