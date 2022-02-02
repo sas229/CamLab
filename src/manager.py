@@ -1,4 +1,4 @@
-from PySide6.QtCore import QObject, Signal, Slot, QSettings, QThread
+from PySide6.QtCore import QObject, Signal, Slot, QSettings, QThread, QModelIndex
 from src.models import DeviceTableModel, AcquisitionTableModel, ChannelsTableModel, ControlTableModel
 from src.device import Device
 from src.assembly import Assembly
@@ -39,7 +39,6 @@ class Manager(QObject):
         self.deviceList = []
         self.j, self.k = 0, 4
         
-
         # Defaults.
         self.defaultAcquisitionTable = [
             {"channel": "AIN0", "name": "Ch_1", "unit": "V", "slope": 1.0, "offset": 0.00, "connect": False, "autozero": True},
@@ -88,7 +87,18 @@ class Manager(QObject):
         log.info("Timing thread created.")
         self.timing.moveToThread(self.timingThread)
         self.timingThread.start()
-        log.info("Timing thread started.")
+        log.info("Timing thread started.")           
+
+    @Slot(str, list, list)
+    def updateDeviceOffsets(self, name, channels, newOffsets):
+        count = 0
+        for channel in channels:
+            index = int(re.findall(r'\d+', channel)[0])
+            offset = round(newOffsets[count], 3)
+            self.configuration["devices"][name]["acquisition"][index]["offset"] = offset
+            self.configurationChanged.emit(self.configuration)
+            count += 1
+        log.info("Updated offsets in configuration.")
 
     def createDeviceThreads(self):
         log.info("Creating device threads.")
@@ -106,18 +116,18 @@ class Manager(QObject):
             connection = device["connection"]
             
             # Generate addresses for acqusition.
-            enabledChannels, enabledNames, enabledUnits = self.acquisitionModels[name].enabledChannels()
-            aAddresses = []
-            aDataTypes = []
+            channels, names, units, slopes, offsets, autozero = self.acquisitionModels[name].enabledChannels()
+            addresses = []
+            dataTypes = []
             dt = ljm.constants.FLOAT32
-            for channel in enabledChannels:
+            for channel in channels:
                 address = int(re.findall(r'\d+', channel)[0])*2 # Multiply by two to get correct LJ address for AIN.
-                aAddresses.append(address)
-                aDataTypes.append(dt)
+                addresses.append(address)
+                dataTypes.append(dt)
             controlRate = self.configuration["global"]["controlRate"]
 
             # Create device instance and move to thread.
-            self.devices[name] = Device(name, id, connection, aAddresses, aDataTypes, controlRate)
+            self.devices[name] = Device(name, id, connection, channels, addresses, dataTypes, slopes, offsets, autozero, controlRate)
             log.info("Device instance created for device named " + name + ".")
             self.deviceThreads[name] = QThread(parent=self)
             log.info("Device thread created for device named " + name + ".")
@@ -127,9 +137,11 @@ class Manager(QObject):
 
             # Emit signal to connect sample timer to slot for the current device object.
             self.timing.controlDevices.connect(self.devices[name].readValues)
+            self.assembly.autozeroDevices.connect(self.devices[name].recalculateOffsets)
 
             # Connections.
             self.devices[name].emitData.connect(self.assembly.updateNewData)
+            self.devices[name].updateOffsets.connect(self.updateDeviceOffsets)
             log.info(name + " attached to assembly thread updateNewData method.")
         log.info("Device threads created.")
 
@@ -283,6 +295,7 @@ class Manager(QObject):
         self.timing.start(self.configuration["global"]["controlRate"])
         log.info("Started acquisition and control.")
 
+    @Slot()
     def refreshDevices(self):
         log.info("Refreshing devices.")
         self.findDevices()
@@ -438,13 +451,14 @@ class Manager(QObject):
             {"plot": False, "name": "Time", "device": "ALL", "colour": "#35e3e3", "value": "0.00", "unit": "s"})
         for device in deviceList:
             # Get lists of the enabled channel names and units.
-            enabledChannels, enabledNames, enabledUnits = self.acquisitionModels[device["name"]].enabledChannels()
+            name = device["name"]
+            channels, names, units, slopes, offsets, autozero = self.acquisitionModels[name].enabledChannels()
 
             # Create a generic channelsData list.
-            for i in range(len(enabledChannels)):
+            for i in range(len(channels)):
                 genericChannelsData.append(
-                    {"plot": False, "name": enabledNames[i], "device": device["name"], "colour": self.setColourDefault(),
-                     "value": "0.00", "unit": enabledUnits[i]})
+                    {"plot": False, "name": names[i], "device": device["name"], "colour": self.setColourDefault(),
+                     "value": "0.00", "unit": units[i]})
 
         return genericChannelsData
 

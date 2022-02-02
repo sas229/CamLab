@@ -10,15 +10,20 @@ log = logging.getLogger(__name__)
 
 class Device(QObject):
     emitData = Signal(str, np.ndarray)
+    updateOffsets = Signal(str, list, list)
 
-    def __init__(self, name, id, connection, addresses, dataTypes, controlRate):
+    def __init__(self, name, id, connection, channels, addresses, dataTypes, slopes, offsets, autozero, controlRate):
         super().__init__()
         self.name = name
         self.id = id 
         self.connection = connection
-        self.aAddresses = addresses
-        self.aDataTypes = dataTypes
-        self.numFrames = len(self.aAddresses)
+        self.channels = channels
+        self.addresses = addresses
+        self.dataTypes = dataTypes
+        self.slopes = np.asarray(slopes)
+        self.offsets = np.asarray(offsets)
+        self.autozero = np.asarray(autozero)
+        self.numFrames = len(self.addresses)
         self.controlRate = controlRate
         self.handle = None
         self.openConnection()
@@ -107,10 +112,11 @@ class Device(QObject):
     def readValues(self):
         # Method to read registers on device.
         try:
-            # Read from the device.
+            # Read from the device and apply slope and offsets.
             self.handle = ljm.open(7, self.connection, self.id)
-            data = np.asarray(ljm.eReadAddresses(self.handle, self.numFrames, self.aAddresses, self.aDataTypes))
-            self.emitData.emit(self.name, data)
+            self.raw = np.asarray(ljm.eReadAddresses(self.handle, self.numFrames, self.addresses, self.dataTypes))
+            self.data = self.slopes*(self.raw - self.offsets)
+            self.emitData.emit(self.name, self.data)
         except ljm.LJMError:
             # Otherwise log the exception.
             ljme = sys.exc_info()[1]
@@ -118,5 +124,15 @@ class Device(QObject):
         except Exception:
             e = sys.exc_info()[1]
             log.warning(e)
+
+    @Slot()
+    def recalculateOffsets(self):
+        # Method to autozero channels as required by the configuration.
+        adjustOffsets = (self.raw-self.offsets)*self.autozero
+        self.offsets = self.offsets + adjustOffsets
+
+        # Update the device configuration.
+        self.updateOffsets.emit(self.name, self.channels, self.offsets.tolist())
+        log.info("Autozero applied to device.")
 
         

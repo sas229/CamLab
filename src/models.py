@@ -208,13 +208,18 @@ class AcquisitionTableModel(QAbstractTableModel):
         enabledChannels = []
         enabledNames = []
         enabledUnits = []
+        enabledSlopes = []
+        enabledOffsets = []
+        enabledAutozero = []
         for channel in self._data:
             if channel["connect"] == True:
                 enabledChannels.append(channel["channel"])
                 enabledNames.append(channel["name"])
                 enabledUnits.append(channel["unit"])
-        return enabledChannels, enabledNames, enabledUnits
-
+                enabledSlopes.append(channel["slope"])
+                enabledOffsets.append(channel["offset"])
+                enabledAutozero.append(channel["autozero"])
+        return enabledChannels, enabledNames, enabledUnits, enabledSlopes, enabledOffsets, enabledAutozero
 
 class ChannelsTableModel(QAbstractTableModel):
 

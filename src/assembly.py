@@ -7,6 +7,7 @@ log = logging.getLogger(__name__)
 
 class Assembly(QObject):
     plotDataChanged = Signal(np.ndarray)
+    autozeroDevices = Signal()
     
     def __init__(self):
         super().__init__()
@@ -25,7 +26,6 @@ class Assembly(QObject):
             self.data[name] = np.vstack((self.data[name], data))
         else:
             self.data[name] = data
-        # print(name + str(np.shape(self.data[name])))
 
     @Slot()
     def updatePlotData(self):
@@ -79,8 +79,8 @@ class Assembly(QObject):
 
     @Slot()
     def autozero(self):
-        self.offsets = np.average(self.plotData[-10:,1:], axis=0)
-        log.info("Autozero applied.")
+        self.autozeroDevices.emit()
+        log.info("Autozero signal sent by assembly.")
 
     @Slot()
     def newFile(self):
