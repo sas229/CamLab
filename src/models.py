@@ -116,12 +116,12 @@ class AcquisitionTableModel(QAbstractTableModel):
         self._data = data
         if self._data != None:
             self._column_name = [
-                "Channel",
+                "channel",
                 "name",
-                "Unit",
-                "Slope",
-                "Offset",
-                "Autozero",
+                "unit",
+                "slope",
+                "offset",
+                "autozero",
             ]    
 
     def rowCount(self, parent=QModelIndex()):
@@ -204,14 +204,16 @@ class AcquisitionTableModel(QAbstractTableModel):
             return Qt.ItemIsEnabled | Qt.ItemIsEditable
 
     def enabledChannels(self):
-        """Return two lists containing enabled channel names and units."""
+        """Return two lists containing enabled channels, names and units."""
         enabledChannels = []
+        enabledNames = []
         enabledUnits = []
         for channel in self._data:
             if channel["connect"] == True:
-                enabledChannels.append(channel["name"])
+                enabledChannels.append(channel["channel"])
+                enabledNames.append(channel["name"])
                 enabledUnits.append(channel["unit"])
-        return enabledChannels, enabledUnits
+        return enabledChannels, enabledNames, enabledUnits
 
 
 class ChannelsTableModel(QAbstractTableModel):
