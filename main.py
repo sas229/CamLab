@@ -125,6 +125,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.manager.timing.actualRate.connect(self.statusGroupBox.update)
         self.manager.plotWindowChannelsUpdated.connect(self.updatePlots)
         self.manager.existingPlotsFound.connect(self.createExistingPlots)
+        self.manager.outputText.connect(self.statusGroupBox.setOutputText)
 
         # Timer connections.
         self.plotTimer.timeout.connect(self.manager.assembly.updatePlotData)

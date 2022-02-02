@@ -27,6 +27,7 @@ class Manager(QObject):
     removeWidget = Signal(str)
     plotWindowChannelsUpdated = Signal()
     existingPlotsFound = Signal()
+    outputText = Signal(str)
 
     def __init__(self):
         super().__init__()
@@ -109,6 +110,8 @@ class Manager(QObject):
         date = str(initialDate.toString(Qt.ISODate))
         time = str("{hours:02}:{minutes:02}:{seconds:02}".format(hours=initialTime.hour, minutes=initialTime.minute, seconds=initialTime.second))
         ext = ".txt"
+        output = path + "/" + filename + "_" + date + "_" + time + "_1" + ext
+        self.outputText.emit(output)
         return  path, filename, date, time, ext
 
     def createHeader(self):

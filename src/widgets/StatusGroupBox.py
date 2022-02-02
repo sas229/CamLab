@@ -70,10 +70,10 @@ class StatusGroupBox(QGroupBox):
         self.layout.addWidget(self.rate, 1, 3)
         self.setLayout(self.layout)
 
-        # Set output text.
-        self.output.setText(
-            "{path}/{date}_{hours:02}:{minutes:02}:{seconds:02}.txt".format(path="/home/data", date=self.initialDate.toString(Qt.ISODate), hours=self.initialTime.hour, minutes=self.initialTime.minute, seconds=self.initialTime.second)
-        )
+        # # Set output text.
+        # self.output.setText(
+        #     "{path}/{date}_{hours:02}:{minutes:02}:{seconds:02}.txt".format(path="/home/data", date=self.initialDate.toString(Qt.ISODate), hours=self.initialTime.hour, minutes=self.initialTime.minute, seconds=self.initialTime.second)
+        # )
     
     def update(self, actualRate):
         # Store actual rate.
@@ -105,10 +105,10 @@ class StatusGroupBox(QGroupBox):
         self.currentTime = datetime.now()
         self.elapsedTime =  self.nullRef + (self.currentTime - self.initialTime)
 
-        # Reset output text.
-        self.output.setText(
-            "{path}/{date}_{hours:02}:{minutes:02}:{seconds:02}.txt".format(path="/home/data", date=self.initialDate.toString(Qt.ISODate), hours=self.initialTime.hour, minutes=self.initialTime.minute, seconds=self.initialTime.second)
-        )
+        # # Reset output text.
+        # self.output.setText(
+        #     "{path}/{date}_{hours:02}:{minutes:02}:{seconds:02}.txt".format(path="/home/data", date=self.initialDate.toString(Qt.ISODate), hours=self.initialTime.hour, minutes=self.initialTime.minute, seconds=self.initialTime.second)
+        # )
 
         # Reset clock text.
         self.clock.setText(
@@ -128,5 +128,10 @@ class StatusGroupBox(QGroupBox):
         # Method to set initial time and date.
         self.initialTime = datetime.now()
         self.initialDate = QDate.currentDate()
+
+    @Slot()
+    def setOutputText(self, output):
+        self.output.setText(output)
+
         
         
