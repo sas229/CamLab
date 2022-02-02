@@ -11,6 +11,7 @@ import sys
 from labjack import ljm
 import numpy as np
 import time
+import re
 
 log = logging.getLogger(__name__)
 
@@ -98,17 +99,24 @@ class Manager(QObject):
         # Create output arrays in assembly thread.
         self.assembly.createDataArrays(enabledDevices)
 
+        # For each device set the acuisition array and execute in a separate thread.
         for device in enabledDevices:
             name = device["name"]
             id = device["id"]
             connection = device["connection"]
-
-            # Function required HERE to generate addresses from acquisition table data.
-            aAddresses = [0, 2, 4, 6, 8, 10, 12, 14]
+            
+            # Generate addresses for acqusition.
+            enabledChannels, enabledNames, enabledUnits = self.acquisitionModels[name].enabledChannels()
+            aAddresses = []
+            aDataTypes = []
             dt = ljm.constants.FLOAT32
-            aDataTypes = [dt, dt, dt, dt, dt, dt, dt, dt]
+            for channel in enabledChannels:
+                address = int(re.findall(r'\d+', channel)[0])*2 # Multiply by two to get correct LJ address for AIN.
+                aAddresses.append(address)
+                aDataTypes.append(dt)
             controlRate = self.configuration["global"]["controlRate"]
 
+            # Create device instance and move to thread.
             self.devices[name] = Device(name, id, connection, aAddresses, aDataTypes, controlRate)
             log.info("Device instance created for device named " + name + ".")
             self.deviceThreads[name] = QThread(parent=self)
@@ -430,13 +438,13 @@ class Manager(QObject):
             {"plot": False, "name": "Time", "device": "ALL", "colour": "#35e3e3", "value": "0.00", "unit": "s"})
         for device in deviceList:
             # Get lists of the enabled channel names and units.
-            ch_nameList, ch_unitList = self.acquisitionModels[device["name"]].enabledChannels()
+            enabledChannels, enabledNames, enabledUnits = self.acquisitionModels[device["name"]].enabledChannels()
 
             # Create a generic channelsData list.
-            for i in range(len(ch_nameList)):
+            for i in range(len(enabledChannels)):
                 genericChannelsData.append(
-                    {"plot": False, "name": ch_nameList[i], "device": device["name"], "colour": self.setColourDefault(),
-                     "value": "0.00", "unit": ch_unitList[i]})
+                    {"plot": False, "name": enabledNames[i], "device": device["name"], "colour": self.setColourDefault(),
+                     "value": "0.00", "unit": enabledUnits[i]})
 
         return genericChannelsData
 
@@ -511,7 +519,7 @@ class Manager(QObject):
         deviceChannelList = []
         for device in enabledDevices:
             name = device['name']
-            enabledChannels = self.acquisitionModels[name].enabledChannels()
+            enabledChannels = self.acquisitionModels[device["name"]].enabledChannels()
             enabledChannels[0].insert(0, 'N/A')
             deviceChannelList.append({name : enabledChannels[0]})
 
