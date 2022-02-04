@@ -117,7 +117,7 @@ class Manager(QObject):
     def createHeader(self):
         path, filename, date, timestart, ext = self.generateFilename()
         byeline = "CamLab data acquisition and device control system: https://github.com/sas229/CamLab\n"
-        testline = "Test name:" + filename + "\nDate: " + date + "\nTime: " + timestart + "\n\n"
+        testline = "Test name :" + filename + "\nDate: " + date + "\nTime: " + timestart + "\n\n"
         slopeline = "Slopes:"
         offsetline = "Offsets:"
         channelline = "Channel:"

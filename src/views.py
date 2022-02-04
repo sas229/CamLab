@@ -4,7 +4,6 @@ from PySide6.QtCore import QModelIndex
 from src.delegates import CheckBoxDelegate, ConnectionIconDelegate, StatusIconDelegate, FloatValidatorDelegate, StringDelegate, ComboBoxDelegate, ColouredBackgroundDelegate
 
 
-
 class DeviceTableView(QTableView):
 
     def __init__(self, configuration, data=[], parent=None):

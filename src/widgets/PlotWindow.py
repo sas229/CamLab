@@ -693,7 +693,7 @@ class PlotWindow(QWidget, QtStyleTools):
         styles = self.setStyle()
         for i in range(self.numChannels):
             colour = self.channelsModel._data[i]["colour"]
-            pen = pg.mkPen(colour, width=2)
+            pen = pg.mkPen(colour, width=1)
             index = self.channelsModel.index(i,4)
             self.channelsModel.setData(index, "{:.2f}".format(self.plotData[-1,i]), role=Qt.EditRole)
             if self.channelsModel._data[i]["plot"] == False:
@@ -709,7 +709,6 @@ class PlotWindow(QWidget, QtStyleTools):
                     self.plot.setLogMode(y=True)
                 elif logSelectedAxis == False:
                     self.plot.setLogMode(y=False)
-     
             elif swap == True:
                 self.lines[i].setAlpha(alphaValue/100, False)
                 self.lines[i].setData(self.plotData[:,i], self.plotData[:,self.commonChannel], pen=pen)
