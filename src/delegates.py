@@ -160,10 +160,10 @@ class StringDelegate(QItemDelegate):
         Update the edited text in the model after validation by checking the string length is greater than zero.
         '''
         value = editor.text()
-        if len(value) == 0:
+        if len(value) != 0:
             model = index.model()
-            value = model.data(index)
-        model.setData(index, value, Qt.EditRole)
+            # value = model.data(index, "name")
+            model.setData(index, value, Qt.EditRole)
 
 class ComboBoxDelegate(QStyledItemDelegate):
     """
