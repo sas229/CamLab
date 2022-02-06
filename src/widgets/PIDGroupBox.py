@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QGroupBox, QLabel, QLineEdit, QcheckBox, QVBoxLayout, QHBoxLayout
+from PySide6.QtWidgets import QGroupBox, QLabel, QLineEdit, QCheckBox, QGridLayout
 from PySide6.QtGui import QDoubleValidator
 from PySide6.QtCore import Signal
 

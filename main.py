@@ -4,11 +4,10 @@ from PySide6.QtGui import QIcon, QScreen
 from PySide6.QtCore import Slot, Qt, QModelIndex, QPoint, QThread, QTimer
 from qt_material import apply_stylesheet, QtStyleTools
 from src.manager import Manager
-from src.widgets import CamLabToolBar, StatusGroupBox, GlobalSettingsGroupBox, DevicesGroupBox, ConfigurationGroupBox, PlotWindow
+from src.widgets import CamLabToolBar, StatusGroupBox, GlobalSettingsGroupBox, DevicesGroupBox, ConfigurationGroupBox, PlotWindow, ControlWindow, LinearAxis
 from src.models import DeviceTableModel, AcquisitionTableModel, ColourPickerTableModel
 from src.views import DeviceTableView, AcquisitionTableView, ControlTableView
 from src.log import init_log
-
 from src.models import ChannelsTableModel
 from src.dialogs import ColourPickerDialog
 from src.dialogs import RefreshDevicesDialog
@@ -82,6 +81,10 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.centralWidget.setLayout(self.mainWindowLayout)
         self.setCentralWidget(self.centralWidget)
 
+        # Control window.
+        self.controlWindow = ControlWindow()
+        self.controlWindow.hide()
+
         # Toolbar connections.
         self.toolbar.modeButton.triggered.connect(self.toggleMode)
         self.toolbar.configure.connect(self.manager.configure)
@@ -116,6 +119,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.manager.configurationChanged.connect(self.globalSettingsGroupBox.updateUI)
         self.manager.clearDeviceConfigurationTabs.connect(self.clearDeviceConfigurationTabs)
         self.manager.closePlots.connect(self.closePlots)
+        self.manager.clearControls.connect(self.clearControls)
         self.manager.deviceConfigurationAdded.connect(self.addDeviceConfigurationTab)
         self.manager.removeWidget.connect(self.removeWidgetFromLayout)
         self.manager.addControlTable.connect(self.addControlTable)
@@ -129,6 +133,59 @@ class MainWindow(QMainWindow, QtStyleTools):
 
         # Timer connections.
         self.plotTimer.timeout.connect(self.manager.assembly.updatePlotData)
+    
+    @Slot()
+    def clearControls(self):
+        controlTabs = self.controlWindow.controlTabWidget.count()
+        for control in reversed(range(controlTabs)):
+            if control > 1:
+                self.controlWindow.controlTabWidget.removeTab(control)
+
+    @Slot() 
+    def updateControlTabs(self):
+        # Method to update control tab widgets.
+        enabledControlChannels = []
+        devices = self.manager.deviceTableModel.enabledDevices()
+        for device in devices:
+            name = device["name"]
+            channels = self.manager.controlTableModels[name].enabledChannels()
+            for channel in channels:
+                if channel["enable"] == True:
+                    enabledControlChannels.append(channel["name"])
+        
+        self.controlWindow.controlTabWidget.clear()
+        self.controlWindow.controlTabWidget.addTab(QWidget(), "Control")
+        self.controlWindow.controlTabWidget.addTab(QWidget(), "Sequences")  
+        for channel in enabledControlChannels:
+            linearAxis = LinearAxis()
+
+            settings = {
+                "feedbackMinimum": 0,
+                "feedbackMaximum": 100,
+                "feedbackLeft": 0,
+                "feedbackRight": 80,
+                "feedbackSetPoint": 40,
+                "feedbackProcessVariable": 40,
+                "positionMinimum": -100,
+                "positionMaximum": 100,
+                "positionLeft": -80,
+                "positionRight": 80,
+                "positionSetPoint": 20,
+                "positionProcessVariable": 20,
+                "feedbackUnit": "(N)",
+                "positionUnit": "(mm)",
+                "speedUnit": "(mm/s)",
+                "connected": True,
+                "KP": 1.0,
+                "KI": 2.0,
+                "KD": 3.0,
+                "derivativeOnMeasurement": False,
+                "enablePIDControl": True
+                }
+
+            linearAxis.setValues(settings=settings)         
+
+            self.controlWindow.controlTabWidget.addTab(linearAxis, channel)
     
     def moveEvent(self, event):
         position = self.geometry()
@@ -147,6 +204,7 @@ class MainWindow(QMainWindow, QtStyleTools):
 
     @Slot()
     def openControlPanel(self):
+        self.controlWindow.show()
         log.info("Control panel opened.")
 
     @Slot()
@@ -232,11 +290,13 @@ class MainWindow(QMainWindow, QtStyleTools):
 
     @Slot(str, list)
     def addControlTable(self, name, defaultFeedbackChannel):
-        # Add acquisition table to dict and update the TabWidget.
+        # Add acquisition table to dict, update the TabWidget and connect to control widget generation method.
         self.controlTableViews[name] = ControlTableView(self.manager.controlModeList, self.manager.controlActuatorList, defaultFeedbackChannel)
-        self.controlTableViews[name].setModel(self.manager.controlModels[name])
+        self.controlTableViews[name].setModel(self.manager.controlTableModels[name])
         self.controlTableViews[name].setFixedHeight(89)
         self.deviceConfigurationLayout[name].addWidget(self.controlTableViews[name])
+        self.manager.controlTableModels[name].controlChannelToggled.connect(self.updateControlTabs)
+        self.updateControlTabs()
 
     @Slot(dict)
     def updateUI(self, newConfiguration):
@@ -406,6 +466,9 @@ class MainWindow(QMainWindow, QtStyleTools):
     def closeEvent(self, event):
         # Close all plots.
         self.closePlots()
+
+        # Close control window.
+        self.controlWindow.close()
 
         # In the event the device list is refreshing, wait until complete before quitting all threads otherwise an error is shown, but hide the window in the meantime.
         self.setVisible(False)

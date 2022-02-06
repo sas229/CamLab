@@ -3,7 +3,7 @@ from PySide6.QtGui import QDoubleValidator
 from PySide6.QtCore import Slot, Qt, Signal
 from src.widgets.LinearSlider import LinearSlider
 
-class AxisSliderGroupBox(QGroupBox):
+class SliderGroupBox(QGroupBox):
     leftLimitChanged = Signal(float)
     rightLimitChanged = Signal(float)
     minimumRangeChanged = Signal(float)

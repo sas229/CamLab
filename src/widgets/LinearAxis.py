@@ -1,9 +1,13 @@
-from PySide6.QtWidgets import QGroupBox, QLabel, QLineEdit, QcheckBox, QVBoxLayout, QHBoxLayout
+from PySide6.QtWidgets import QWidget, QGroupBox, QLabel, QLineEdit, QCheckBox, QGridLayout, QVBoxLayout
 from PySide6.QtGui import QDoubleValidator
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, Slot
 from src.widgets.GlobalControlsGroupBox import GlobalControlsGroupBox
 from src.widgets.SettingsGroupBox import SettingsGroupBox
 from src.widgets.JogGroupBox import JogGroupBox
+from src.widgets.AdjustGroupBox import AdjustGroupBox
+from src.widgets.PIDGroupBox import PIDGroupBox
+from src.widgets.DemandGroupBox import DemandGroupBox
+from src.widgets.SliderGroupBox import SliderGroupBox
 
 class LinearAxis(QWidget):
     positionSetPointChanged = Signal(float)
@@ -46,18 +50,37 @@ class LinearAxis(QWidget):
         self.feedbackDemand = DemandGroupBox("Demand")
         self.feedbackStatus = SliderGroupBox("Feedback Status")
 
+        # # Main layout.
+        # self.axisLayout = QGridLayout()
+        # self.axisLayout.addWidget(self.globalControls, 0, 0, 2, 1)
+        # self.axisLayout.addWidget(self.settings, 0, 0, 2, 1)
+        # self.axisLayout.addWidget(self.jog, 0, 1)
+        # self.axisLayout.addWidget(self.adjust, 0, 2)
+        # self.axisLayout.addWidget(self.positionDemand, 0, 3)
+        # self.axisLayout.addWidget(self.positionStatus, 0, 4)
+        # self.axisLayout.addWidget(self.PID, 1, 1, 1, 2)
+        # self.axisLayout.addWidget(self.feedbackDemand, 1, 3)
+        # self.axisLayout.addWidget(self.feedbackStatus, 1, 4)        
+        # self.setLayout(self.axisLayout)
+
         # Main layout.
-        self.axisLayout = QGridLayout()
-        self.axisLayout.addWidget(self.globalControls, 0, 0, 2, 1)
-        self.axisLayout.addWidget(self.settings, 0, 0, 2, 1)
-        self.axisLayout.addWidget(self.jog, 0, 1)
-        self.axisLayout.addWidget(self.adjust, 0, 2)
-        self.axisLayout.addWidget(self.positionDemand, 0, 3)
-        self.axisLayout.addWidget(self.positionStatus, 0, 4)
-        self.axisLayout.addWidget(self.PID, 1, 1, 1, 2)
-        self.axisLayout.addWidget(self.feedbackDemand, 1, 3)
-        self.axisLayout.addWidget(self.feedbackStatus, 1, 4)        
-        self.setLayout(self.axisLayout)
+        self.gridLayout = QGridLayout()
+        self.gridLayout.addWidget(self.globalControls, 0, 0, 1, 4)
+        self.gridLayout.addWidget(self.settings, 0, 0, 1, 4)
+        self.gridLayout.addWidget(self.jog, 1, 0)
+        self.gridLayout.addWidget(self.adjust, 1, 1)
+        self.gridLayout.addWidget(self.positionDemand, 1, 2)
+        self.gridLayout.addWidget(self.positionStatus, 1, 3)
+        self.gridLayout.addWidget(self.PID, 2, 0, 1, 2)
+        self.gridLayout.addWidget(self.feedbackDemand, 2, 2)
+        self.gridLayout.addWidget(self.feedbackStatus, 2, 3)        
+        
+        self.layout = QVBoxLayout()
+        self.layout.addStretch()
+        self.layout.addLayout(self.gridLayout)
+        self.layout.addStretch()
+
+        self.setLayout(self.layout)
 
         # Connections.
         self.feedbackDemand.setPointLineEdit.returnPressed.connect(self.setFeedbackSetPoint)
@@ -87,7 +110,7 @@ class LinearAxis(QWidget):
         self.globalControls.zeroEncoderButton.clicked.connect(self.emitZeroEncoder)
         self.globalControls.settingsButton.clicked.connect(self.showSettings)
         self.settings.returnButton.clicked.connect(self.hideSettings)
-    
+
     @Slot()
     def showSettings(self):
         self.globalControls.hide()
@@ -244,209 +267,9 @@ class LinearAxis(QWidget):
         self.feedbackStatus.axisSlider.setProcessVariable(value)
         self.feedbackDemand.processVariableLineEdit.setText("{value:.2f}".format(value=value))
 
-    def setValues(self, settings=None, **kwargs):
-        if settings == None:
-            settings = kwargs
-        for setting in settings.keys():
-            if setting == "positionMinimum":
-                self.positionStatus.setMinimumRange(settings["positionMinimum"])
-            elif setting == "positionMaximum":
-                self.positionStatus.setMaximumRange(settings["positionMaximum"])
-            elif setting == "positionLeft":
-                self.positionStatus.setLeftLimit(settings["positionLeft"])
-            elif setting == "positionRight":
-                self.positionStatus.setRightLimit(settings["positionRight"])
-            elif setting == "positionSetPoint":
-                self.setPositionSetPoint(settings["positionSetPoint"])
-            elif setting == "positionProcessVariable":
-                self.setPositionProcessVariable(settings["positionProcessVariable"])
-            elif setting == "feedbackMinimum":
-                self.feedbackStatus.setMinimumRange(settings["feedbackMinimum"])
-            elif setting == "feedbackMaximum":
-                self.feedbackStatus.setMaximumRange(settings["feedbackMaximum"])
-            elif setting == "feedbackLeft":
-                self.feedbackStatus.setLeftLimit(settings["feedbackLeft"])
-            elif setting == "feedbackRight":
-                self.feedbackStatus.setRightLimit(settings["feedbackRight"])
-            elif setting == "feedbackSetPoint":
-                self.setFeedbackSetPoint(settings["feedbackSetPoint"])
-            elif setting == "feedbackProcessVariable":
-                self.setFeedbackProcessVariable(settings["feedbackProcessVariable"])
-            elif setting == "feedbackUnit":
-                self.feedbackDemand.setUnit(settings["feedbackUnit"])
-                self.feedbackStatus.setUnit(settings["feedbackUnit"])   
-            elif setting == "positionUnit":
-                self.positionDemand.setUnit(settings["positionUnit"])
-                self.positionStatus.setUnit(settings["positionUnit"])
-                self.adjust.setUnit(settings["positionUnit"]) 
-            elif setting == "speedUnit":
-                self.jog.setUnit(settings["speedUnit"])    
-            elif setting == "connected":
-                self.globalControls.connectedIndicator.setChecked(settings["connected"])
-            elif setting == "KP":
-                self.PID.setKP(settings["KP"])
-            elif setting == "KI":
-                self.PID.setKI(settings["KI"])
-            elif setting == "KD":
-                self.PID.setKD(settings["KD"])
-            elif setting == "derivativeOnMeasurement":
-                self.PID.setDerivativeOnMeasurement(settings["derivativeOnMeasurement"])    ettings)
-    
     @Slot()
-    def showSettings(self):
-        self.globalControls.hide()
-        self.settings.show()
-    
-    @Slot()
-    def hideSettings(self):
-        self.globalControls.show()
-        self.settings.hide()
-
-    @Slot()
-    def emitZeroEncoder(self):
-        self.zeroEncoder.emit()
-        
-    @Slot()
-    def emitAxisEnableState(self):
-        enabled = self.globalControls.enableButton.isChecked()
-        if enabled == True:
-            self.axisEnabled.emit()
-            self.globalControls.settingsButton.setEnabled(False)
-        elif enabled == False:
-            self.axisDisabled.emit()
-            self.globalControls.settingsButton.setEnabled(True)
-            
-    @Slot()
-    def emitPIDControlState(self):
-        PIDControl = self.globalControls.PIDControlButton.isChecked()
-        if PIDControl == True:
-            self.feedbackEnabled.emit()
-        elif PIDControl == False:
-            self.feedbackDisabled.emit()
-        
-    @Slot()
-    def emitPositiveJogEnabled(self):
-        self.positiveJogEnabled.emit()
-    
-    @Slot()
-    def emitNegativeJogEnabled(self):
-        self.negativeJogEnabled.emit()
-    
-    @Slot()
-    def emitPositiveJogDisabled(self):
-        self.positiveJogDisabled.emit()
-        
-    @Slot()
-    def emitNegativeJogDisabled(self):
-        self.negativeJogDisabled.emit()
-
-    @Slot()
-    def emitSpeedChanged(self, value):
-        self.speedChanged.emit(value)
-    
-    @Slot()
-    def emitDerivativeOnMeasurement(self, value):
-        self.derivativeOnMeasurementChanged.emit(value)
-    
-    @Slot()
-    def emitKPChanged(self, value):
-        self.KPChanged.emit(value)
-        
-    @Slot()
-    def emitKIChanged(self, value):
-        self.KIChanged.emit(value)
-    
-    @Slot()
-    def emitKDChanged(self, value):
-        self.KDChanged.emit(value)
-
-    @Slot()
-    def emitPositionLeftLimitChanged(self, value):
-        self.positionLeftLimitChanged.emit(value)
-
-    @Slot()
-    def emitPositionRightLimitChanged(self, value):
-        self.positionRightLimitChanged.emit(value)
-        
-    @Slot()
-    def emitPositionMinimumRangeChanged(self, value):
-        self.positionMinimumRangeChanged.emit(value)   
-    
-    @Slot()
-    def emitPositionMaximumRangeChanged(self, value):
-        self.positionMaximumRangeChanged.emit(value)
-    
-    @Slot()
-    def emitFeedbackLeftLimitChanged(self, value):
-        self.feedbackLeftLimitChanged.emit(value)
-    
-    @Slot()
-    def emitFeedbackRightLimitChanged(self, value):
-        self.feedbackRightLimitChanged.emit(value)
-        
-    @Slot()
-    def emitFeedbackMinimumRangeChanged(self, value):
-        self.feedbackMinimumRangeChanged.emit(value)
-        
-    @Slot()
-    def emitFeedbackMaximumRangeChanged(self, value):
-        self.feedbackMaximumRangeChanged.emit(value)
-        
-    @Slot()
-    def adjustPositionSetPoint(self, adjustment):
-        currentSetPoint = float(self.positionDemand.setPointLineEdit.text())
-        newSetPoint = currentSetPoint + adjustment
-        self.setPositionSetPoint(newSetPoint)
-
-    @Slot()
-    def setFeedbackSetPoint(self, value=None):
-        if value == None:
-            # Signal sent from LineEdit.
-            value = float(self.feedbackDemand.setPointLineEdit.text())
-        # Signal sent from slider. Ensure within limits.
-        value = max(value, self.feedbackStatus.axisSlider.leftLimit)
-        value = min(value, self.feedbackStatus.axisSlider.rightLimit)
-        self.feedbackDemand.setPointLineEdit.setText("{value:.2f}".format(value=value))
-        self.feedbackStatus.setSetPoint(float(value))
-        self.feedbackSetPointChanged.emit(value)
-        if self.feedbackStatus.axisSlider.setPoint == self.feedbackStatus.axisSlider.leftLimit:
-            self.globalControls.limitIndicator.setChecked(True)
-            self.limitReached.emit()
-        elif self.feedbackStatus.axisSlider.setPoint == self.feedbackStatus.axisSlider.rightLimit:
-            self.globalControls.limitIndicator.setChecked(True)
-            self.limitReached.emit()
-        else:
-            self.globalControls.limitIndicator.setChecked(False)
-    
-    @Slot()
-    def setPositionSetPoint(self, value=None):
-        if value == None:
-            # Signal sent from LineEdit.
-            value = float(self.positionDemand.setPointLineEdit.text())
-        # Signal sent from slider. Ensure within limits.
-        value = max(value, self.positionStatus.axisSlider.leftLimit)
-        value = min(value, self.positionStatus.axisSlider.rightLimit)
-        self.positionDemand.setPointLineEdit.setText("{value:.2f}".format(value=value))
-        self.positionStatus.setSetPoint(value)
-        self.positionSetPointChanged.emit(value)
-        if self.positionStatus.axisSlider.setPoint == self.positionStatus.axisSlider.leftLimit:
-            self.globalControls.limitIndicator.setChecked(True)
-            self.limitReached.emit()
-        elif self.positionStatus.axisSlider.setPoint == self.positionStatus.axisSlider.rightLimit:
-            self.globalControls.limitIndicator.setChecked(True)
-            self.limitReached.emit()
-        else:
-            self.globalControls.limitIndicator.setChecked(False)
-
-    @Slot()
-    def setPositionProcessVariable(self, value):
-        self.positionStatus.axisSlider.setProcessVariable(value)
-        self.positionDemand.processVariableLineEdit.setText("{value:.2f}".format(value=value))
-    
-    @Slot()
-    def setFeedbackProcessVariable(self, value):
-        self.feedbackStatus.axisSlider.setProcessVariable(value)
-        self.feedbackDemand.processVariableLineEdit.setText("{value:.2f}".format(value=value))
+    def setPIDControlButtonEnable(self, value):
+        self.globalControls.PIDControlButton.setEnabled(value)
 
     def setValues(self, settings=None, **kwargs):
         if settings == None:
@@ -494,4 +317,6 @@ class LinearAxis(QWidget):
             elif setting == "KD":
                 self.PID.setKD(settings["KD"])
             elif setting == "derivativeOnMeasurement":
-                self.PID.setDerivativeOnMeasurement(settings["derivativeOnMeasurement"])    
+                self.PID.setDerivativeOnMeasurement(settings["derivativeOnMeasurement"])
+            elif setting == "enablePIDControl":
+                self.setPIDControlButtonEnable(settings["enablePIDControl"])

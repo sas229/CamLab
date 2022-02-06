@@ -340,6 +340,7 @@ class ColourPickerTableModel(QAbstractTableModel):
 
 
 class ControlTableModel(QAbstractTableModel):
+    controlChannelToggled = Signal(int)
 
     def __init__(self, data=[], parent=None):
         super(ControlTableModel, self).__init__(parent)
@@ -347,10 +348,11 @@ class ControlTableModel(QAbstractTableModel):
 
         if self._data != None:
             self._column_name = [
-                "Channel",
-                "Type",
-                "Control",
-                "Feedback"
+                "channel",
+                "name",
+                "type",
+                "control",
+                "feedback"
             ]
 
     def rowCount(self, parent=QModelIndex()):
@@ -375,10 +377,12 @@ class ControlTableModel(QAbstractTableModel):
                 if index.column() == 0:
                     return item["enable"]
                 elif index.column() == 1:
-                    return item["type"]
+                    return item["name"]
                 elif index.column() == 2:
-                    return item["control"]
+                    return item["type"]
                 elif index.column() == 3:
+                    return item["control"]
+                elif index.column() == 4:
                     return item["feedback"]
         elif role == Qt.CheckStateRole:
             if index.isValid():
@@ -393,11 +397,14 @@ class ControlTableModel(QAbstractTableModel):
             if index.column() == 0:
                 item["enable"] = value
             elif index.column() == 1:
-                item["type"] = value
+                item["name"] = value
             elif index.column() == 2:
-                item["control"] = value
+                item["type"] = value
             elif index.column() == 3:
+                item["control"] = value
+            elif index.column() == 4:
                 item["feedback"] = value
+            self.controlChannelToggled.emit(index.row())
             self.dataChanged.emit(index, index, [])
             return True
         else:
@@ -413,4 +420,12 @@ class ControlTableModel(QAbstractTableModel):
     def flags(self, index):
         if index.isValid():
             return Qt.ItemIsEnabled | Qt.ItemIsEditable
+
+    def enabledChannels(self):
+        """Method to return a list of dicts of enabled channels."""
+        enabledChannels = []
+        for channel in self._data:
+            if channel["enable"] == True:
+                enabledChannels.append(channel)
+        return enabledChannels
 
