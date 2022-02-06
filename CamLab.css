@@ -52,19 +52,19 @@ QPushButton.indicator:checked {{
   border-color:  'green';
 }}
 
-QPushButton.limitIndicator {{
+QPushButton.limitIndicator:disabled {{
   color: {QTMATERIAL_SECONDARYDARKCOLOR};
   background-color: 'green';
   border-color:  'green';
 }}
 
-QPushButton.limitIndicator:checked {{
+/* QPushButton.limitIndicator:checked {{
   color: {QTMATERIAL_SECONDARYDARKCOLOR};
   background-color: 'red';
   border-color:  'red';
-}}
+}} */
 
-QPushButton.limitIndicator:checked {{
+QPushButton.limitIndicator:disabled:checked {{
   color: {QTMATERIAL_SECONDARYDARKCOLOR};
   background-color: 'red';
   border-color:  'red';

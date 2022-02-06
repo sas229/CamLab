@@ -44,8 +44,8 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.managerThread.start()
 
         # Set position.
-        x = self.manager.configuration["global"]["x"]
-        y = self.manager.configuration["global"]["y"]
+        x = self.manager.configuration["configurationWindow"]["x"]
+        y = self.manager.configuration["configurationWindow"]["y"]
         self.setGeometry(x, y, self.width, self.height)
 
         # Extract the configuration to generate initial UI setup.
@@ -82,8 +82,14 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.setCentralWidget(self.centralWidget)
 
         # Control window.
-        self.controlWindow = ControlWindow()
-        self.controlWindow.hide()
+        self.controlWindow = ControlWindow(self.configuration)
+        if self.manager.configuration["controlWindow"]["visible"] == True:
+            self.controlWindow.show()
+            self.controlWindow.visible = True
+        else:
+            self.controlWindow.hide()
+        self.controlWindow.controlTabWidget.addTab(QWidget(), "Control")
+        self.controlWindow.controlTabWidget.addTab(QWidget(), "Sequences")  
 
         # Toolbar connections.
         self.toolbar.modeButton.triggered.connect(self.toggleMode)
@@ -121,7 +127,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.manager.closePlots.connect(self.closePlots)
         self.manager.clearControls.connect(self.clearControls)
         self.manager.deviceConfigurationAdded.connect(self.addDeviceConfigurationTab)
-        self.manager.removeWidget.connect(self.removeWidgetFromLayout)
+        self.manager.removeControlTable.connect(self.removeControlTable)
         self.manager.addControlTable.connect(self.addControlTable)
         self.manager.updateDeviceConfigurationTab.connect(self.updateDeviceConfigurationTabs)
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.updateDeviceConfigurationTabs)
@@ -136,6 +142,7 @@ class MainWindow(QMainWindow, QtStyleTools):
     
     @Slot()
     def clearControls(self):
+        # Remove all tabs except device non-specific tabs.
         controlTabs = self.controlWindow.controlTabWidget.count()
         for control in reversed(range(controlTabs)):
             if control > 1:
@@ -144,53 +151,70 @@ class MainWindow(QMainWindow, QtStyleTools):
     @Slot() 
     def updateControlTabs(self):
         # Method to update control tab widgets.
+        self.clearControls()
+        axisCount = 0
         enabledControlChannels = []
         devices = self.manager.deviceTableModel.enabledDevices()
+        #  For each device get a list of enabled control channels.
         for device in devices:
             name = device["name"]
             channels = self.manager.controlTableModels[name].enabledChannels()
             for channel in channels:
                 if channel["enable"] == True:
-                    enabledControlChannels.append(channel["name"])
+                    enabledControlChannels.append(channel)
         
-        self.controlWindow.controlTabWidget.clear()
-        self.controlWindow.controlTabWidget.addTab(QWidget(), "Control")
-        self.controlWindow.controlTabWidget.addTab(QWidget(), "Sequences")  
-        for channel in enabledControlChannels:
-            linearAxis = LinearAxis()
-
-            settings = {
-                "feedbackMinimum": 0,
-                "feedbackMaximum": 100,
-                "feedbackLeft": 0,
-                "feedbackRight": 80,
-                "feedbackSetPoint": 40,
-                "feedbackProcessVariable": 40,
-                "positionMinimum": -100,
-                "positionMaximum": 100,
-                "positionLeft": -80,
-                "positionRight": 80,
-                "positionSetPoint": 20,
-                "positionProcessVariable": 20,
-                "feedbackUnit": "(N)",
-                "positionUnit": "(mm)",
-                "speedUnit": "(mm/s)",
-                "connected": True,
-                "KP": 1.0,
-                "KI": 2.0,
-                "KD": 3.0,
-                "derivativeOnMeasurement": False,
-                "enablePIDControl": True
-                }
-
-            linearAxis.setValues(settings=settings)         
-
-            self.controlWindow.controlTabWidget.addTab(linearAxis, channel)
+            #  For each device and enabled control channel create the appropriate control widget.
+            for channel in enabledControlChannels:
+                controlChannelName = channel["name"]
+                # Check configuration for previous settings, otherwise take defaults.
+                if controlChannelName not in self.manager.configuration["controlWindow"]:
+                    self.defaultControlSettings = {
+                        "feedbackMinimum": 0,
+                        "feedbackMaximum": 100,
+                        "feedbackLeft": 0,
+                        "feedbackRight": 80,
+                        "feedbackSetPoint": 40,
+                        "feedbackProcessVariable": 40,
+                        "positionMinimum": -100,
+                        "positionMaximum": 100,
+                        "positionLeft": -80,
+                        "positionRight": 80,
+                        "positionSetPoint": 20,
+                        "positionProcessVariable": 20,
+                        "feedbackUnit": "(N)",
+                        "positionUnit": "(mm)",
+                        "speedUnit": "(mm/s)",
+                        "connected": True,
+                        "KP": 1.0,
+                        "KI": 2.0,
+                        "KD": 3.0,
+                        "derivativeOnMeasurement": False,
+                        "enablePIDControl": False,
+                        "feedbackChannel": "N/A",
+                        "reachedLimit": False
+                    }
+                    defaults = copy.deepcopy(self.defaultControlSettings)
+                    self.manager.configuration["controlWindow"][controlChannelName] = defaults
+                # Check for feedback channel and disable PID control if none specified.
+                if channel["feedback"] == 0:
+                    self.manager.configuration["controlWindow"][controlChannelName]["enablePIDControl"] = False
+                    self.manager.configuration["controlWindow"][controlChannelName]["feedbackChannel"] = "N/A"
+                else:
+                    self.manager.configuration["controlWindow"][controlChannelName]["enablePIDControl"] = True
+                    self.manager.configuration["controlWindow"][controlChannelName]["feedbackChannel"] = "AIN" + str(channel["feedback"])
+                #  These widgets should probably be stored somehow...
+                if channel["control"] == 0:
+                    control = LinearAxis()
+                    control.setValues(settings=self.manager.configuration["controlWindow"][controlChannelName])    
+                else:
+                    control = QWidget()   
+                self.controlWindow.controlTabWidget.addTab(control, controlChannelName)
+                axisCount += 1
     
     def moveEvent(self, event):
         position = self.geometry()
-        self.configuration["global"]["x"] = int(position.x())
-        self.configuration["global"]["y"] = int(position.y())
+        self.configuration["configurationWindow"]["x"] = int(position.x())
+        self.configuration["configurationWindow"]["y"] = int(position.y())
         return
 
     @Slot()
@@ -205,6 +229,7 @@ class MainWindow(QMainWindow, QtStyleTools):
     @Slot()
     def openControlPanel(self):
         self.controlWindow.show()
+        self.configuration["controlWindow"]["visible"] = True
         log.info("Control panel opened.")
 
     @Slot()
@@ -278,7 +303,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.configurationGroupBox.deviceConfigurationTabWidget.clear()
 
     @Slot(str)
-    def removeWidgetFromLayout(self,name):
+    def removeControlTable(self,name):
         self.controlTableViews[name].setParent(None)
 
     @Slot(int)
@@ -321,6 +346,8 @@ class MainWindow(QMainWindow, QtStyleTools):
         # Update the UI of plot windows if they exist.
         if self.plots: 
             self.updatePlots()
+
+        self.controlWindow.updateUI(self.configuration)
         log.info("Updated UI.")
 
     @Slot()

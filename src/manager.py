@@ -25,7 +25,7 @@ class Manager(QObject):
     clearControls = Signal()
     addControlTable = Signal(str, list)
     updateDeviceConfigurationTab = Signal()
-    removeWidget = Signal(str)
+    removeControlTable = Signal(str)
     plotWindowChannelsUpdated = Signal()
     existingPlotsFound = Signal()
     outputText = Signal(str)
@@ -58,7 +58,7 @@ class Manager(QObject):
             {"channel": "C2", "name": "C2", "enable": False, "type": 1, "control": 0, "feedback": 0}
         ]
         self.controlModeList = ['Analogue', 'Digital']
-        self.controlActuatorList = ['Linear Actuator', 'Rotary Actuator', 'Pressure Pump']
+        self.controlActuatorList = ['Linear', 'Rotary', 'Pump', 'Speed']
         self.defaultFeedbackChannel = ['N/A']
 
         # Instantiate the model for the device list.   
@@ -376,8 +376,6 @@ class Manager(QObject):
     def initialiseDefaultConfiguration(self):
         self.configuration = {}
         self.configuration["global"] = {
-            "x": 0,
-            "y": 0,
             "darkMode": True,
             "controlRate": 1000.00,
             "skipSamples": 10,
@@ -385,6 +383,17 @@ class Manager(QObject):
             "path": "/data",
             "filename": "junk"
             }
+        self.configuration["configurationWindow"] = {
+            "x": 0,
+            "y": 0
+        }
+        self.configuration["controlWindow"] = {
+            "x": 0,
+            "y": 0,
+            "width": 1200,
+            "height": 600,
+            "visible": False
+        }
         self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
@@ -609,10 +618,10 @@ class Manager(QObject):
                 # If value is not empty, pass the feedbackChannelList object, otherwise pass the defaults.
                 if value != []:
                     feedbackChannelList = copy.deepcopy(value)
-                    self.removeWidget.emit(key)
+                    self.removeControlTable.emit(key)
                     self.addControlTable.emit(key, feedbackChannelList)
                 elif value == []:
-                    self.removeWidget.emit(key)
+                    self.removeControlTable.emit(key)
                     self.addControlTable.emit(key, self.defaultFeedbackChannel)
 
     def resetIndexFeedbackComboBox(self, row, name):

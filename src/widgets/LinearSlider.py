@@ -254,7 +254,7 @@ class LinearSlider(QWidget):
             painter.drawText(rect, Qt.AlignCenter, "{position:.3f}".format(position=self.rightLimit))
 
         # Minimum range label.
-        x = 0
+        x = -5
         rect = QRect(x, self.d_height/2 + self.padding - 10, 60, 60)
         painter.setPen(self.rangeText)
         painter.setFont(QFont('monoespace', 10))
@@ -268,7 +268,7 @@ class LinearSlider(QWidget):
             painter.drawText(rect, Qt.AlignHCenter, "{position:.3f}".format(position=self.minimumRange))
 
         # Maximum range label.
-        x = self.d_width + self.padding - 30
+        x = self.d_width + self.padding - 35
         rect = QRect(x, self.d_height/2 + self.padding - 10, 60, 60)
         painter.setPen(self.rangeText)
         painter.setFont(QFont('monoespace', 10))

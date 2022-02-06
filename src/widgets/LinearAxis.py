@@ -50,19 +50,6 @@ class LinearAxis(QWidget):
         self.feedbackDemand = DemandGroupBox("Demand")
         self.feedbackStatus = SliderGroupBox("Feedback Status")
 
-        # # Main layout.
-        # self.axisLayout = QGridLayout()
-        # self.axisLayout.addWidget(self.globalControls, 0, 0, 2, 1)
-        # self.axisLayout.addWidget(self.settings, 0, 0, 2, 1)
-        # self.axisLayout.addWidget(self.jog, 0, 1)
-        # self.axisLayout.addWidget(self.adjust, 0, 2)
-        # self.axisLayout.addWidget(self.positionDemand, 0, 3)
-        # self.axisLayout.addWidget(self.positionStatus, 0, 4)
-        # self.axisLayout.addWidget(self.PID, 1, 1, 1, 2)
-        # self.axisLayout.addWidget(self.feedbackDemand, 1, 3)
-        # self.axisLayout.addWidget(self.feedbackStatus, 1, 4)        
-        # self.setLayout(self.axisLayout)
-
         # Main layout.
         self.gridLayout = QGridLayout()
         self.gridLayout.addWidget(self.globalControls, 0, 0, 1, 4)
