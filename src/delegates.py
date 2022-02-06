@@ -162,7 +162,6 @@ class StringDelegate(QItemDelegate):
         value = editor.text()
         if len(value) != 0:
             model = index.model()
-            # value = model.data(index, "name")
             model.setData(index, value, Qt.EditRole)
 
 class ComboBoxDelegate(QStyledItemDelegate):
