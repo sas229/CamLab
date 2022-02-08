@@ -153,23 +153,28 @@ class MainWindow(QMainWindow, QtStyleTools):
         # Method to update control tab widgets.
         self.clearControls()
         axisCount = 0
-        enabledControlChannels = []
+        enabledControls = []
         devices = self.manager.deviceTableModel.enabledDevices()
         #  For each device get a list of enabled control channels.
         for device in devices:
-            name = device["name"]
-            channels = self.manager.controlTableModels[name].enabledChannels()
-            for channel in channels:
-                if channel["enable"] == True:
-                    enabledControlChannels.append(channel)
+            deviceName = device["name"]
+            controls = self.manager.controlTableModels[deviceName].enabledControls()
+            for control in controls:
+                if control["enable"] == True:
+                    enabledControls.append(control)
         
             #  For each device and enabled control channel create the appropriate control widget.
-            for channel in enabledControlChannels:
-                controlChannelName = channel["name"]
+            for control in enabledControls:
+                controlChannel = control["channel"]
+                controlChannelName = control["name"]
+                controlName = deviceName + " " + controlChannel
                 # Check configuration for previous settings, otherwise take defaults.
-                if controlChannelName not in self.manager.configuration["controlWindow"]:
+                if controlName not in self.manager.configuration["controlWindow"]:
                     self.defaultControlSettings = {
-                        "enable": True,
+                        "name": controlChannelName,
+                        "device": deviceName,
+                        "channel": controlChannel,
+                        "enable": False,
                         "PIDControl": False,
                         "feedbackMinimum": 0,
                         "feedbackMaximum": 100,
@@ -186,33 +191,33 @@ class MainWindow(QMainWindow, QtStyleTools):
                         "feedbackUnit": "(N)",
                         "positionUnit": "(mm)",
                         "speedUnit": "(mm/s)",
-                        "connected": True,
+                        "connected": False,
                         "KP": 1.0,
-                        "KI": 2.0,
-                        "KD": 3.0,
+                        "KI": 1.0,
+                        "KD": 1.0,
                         "proportionalOnMeasurement": False,
                         "enablePIDControl": False,
                         "feedbackChannel": "N/A",
                         "reachedLimit": False
                     }
-                    defaults = copy.deepcopy(self.defaultControlSettings)
-                    self.manager.configuration["controlWindow"][controlChannelName] = defaults
+                    self.manager.configuration["controlWindow"][controlName] = copy.deepcopy(self.defaultControlSettings)
                 # Check for feedback channel and disable PID control if none specified.
-                if channel["feedback"] == 0:
-                    self.manager.configuration["controlWindow"][controlChannelName]["enablePIDControl"] = False
-                    self.manager.configuration["controlWindow"][controlChannelName]["feedbackChannel"] = "N/A"
-                elif channel["feedback"] == 0 and self.manager.configuration["controlWindow"][controlChannelName]["enable"] == False:
-                    self.manager.configuration["controlWindow"][controlChannelName]["enablePIDControl"] = False
-                    self.manager.configuration["controlWindow"][controlChannelName]["feedbackChannel"] = "N/A"
+                if control["feedback"] == 0:
+                    self.manager.configuration["controlWindow"][controlName]["enablePIDControl"] = False
+                    self.manager.configuration["controlWindow"][controlName]["feedbackChannel"] = "N/A"
+                elif control["feedback"] == 0 and self.manager.configuration["controlWindow"][controlName]["enable"] == False:
+                    self.manager.configuration["controlWindow"][controlName]["enablePIDControl"] = False
+                    self.manager.configuration["controlWindow"][controlName]["feedbackChannel"] = "N/A"
                 else:
-                    self.manager.configuration["controlWindow"][controlChannelName]["feedbackChannel"] = "AIN" + str(channel["feedback"])
+                    self.manager.configuration["controlWindow"][controlName]["feedbackChannel"] = "AIN" + str(channel["feedback"])
                 #  These widgets should probably be stored somehow...
-                if channel["control"] == 0:
-                    control = LinearAxis()
-                    control.setValues(settings=self.manager.configuration["controlWindow"][controlChannelName])    
+                if control["control"] == 0:
+                    panel = LinearAxis()
+                    panel.setValues(settings=self.manager.configuration["controlWindow"][controlName])    
                 else:
-                    control = QWidget()   
-                self.controlWindow.controlTabWidget.addTab(control, controlChannelName)
+                    panel = QWidget()   
+                # Add to control window tab bar.
+                self.controlWindow.controlTabWidget.addTab(panel, controlChannelName)
                 axisCount += 1
     
     def moveEvent(self, event):

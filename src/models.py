@@ -341,6 +341,7 @@ class ColourPickerTableModel(QAbstractTableModel):
 
 class ControlTableModel(QAbstractTableModel):
     controlChannelToggled = Signal(int)
+    controlChannelNameChanged = Signal (str, str)
 
     def __init__(self, data=[], parent=None):
         super(ControlTableModel, self).__init__(parent)
@@ -397,6 +398,7 @@ class ControlTableModel(QAbstractTableModel):
             if index.column() == 0:
                 item["enable"] = value
             elif index.column() == 1:
+                self.controlChannelNameChanged.emit(item["name"], value)
                 item["name"] = value
             elif index.column() == 2:
                 item["type"] = value
@@ -421,11 +423,11 @@ class ControlTableModel(QAbstractTableModel):
         if index.isValid():
             return Qt.ItemIsEnabled | Qt.ItemIsEditable
 
-    def enabledChannels(self):
-        """Method to return a list of dicts of enabled channels."""
-        enabledChannels = []
-        for channel in self._data:
-            if channel["enable"] == True:
-                enabledChannels.append(channel)
-        return enabledChannels
+    def enabledControls(self):
+        """Method to return a list of dicts of enabled controls."""
+        enabledControls = []
+        for control in self._data:
+            if control["enable"] == True:
+                enabledControls.append(control)
+        return enabledControls
 

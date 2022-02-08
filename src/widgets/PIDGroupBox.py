@@ -70,5 +70,5 @@ class PIDGroupBox(QGroupBox):
         self.KDLineEdit.setText("{value:.2f}".format(value=value))
         self.KDLineEditChanged.emit(value)
 
-    def setDerivativeOnMeasurement(self, value):
+    def setProportionalOnMeasurement(self, value):
         self.proportionalOnMeasurement.setChecked(value)
