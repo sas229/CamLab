@@ -94,6 +94,9 @@ class SliderGroupBox(QGroupBox):
         self.leftLimitLineEdit.setText("{value:.2f}".format(value=value))
         self.leftLimitChanged.emit(value)
 
+    def getLeftLimit(self):
+        return self.axisSlider.leftLimit
+
     @Slot()
     def setRightLimit(self, value=None):
         # Limit values to range between maximum range and set point.
@@ -106,11 +109,17 @@ class SliderGroupBox(QGroupBox):
         self.rightLimitLineEdit.setText("{value:.2f}".format(value=value))
         self.rightLimitChanged.emit(value)
 
+    def getRightLimit(self):
+        return self.axisSlider.rightLimit
+
     @Slot()
     def setSetPoint(self, value):
         # Set set point.
         self.axisSlider.setPoint = value
         self.axisSlider.update()
+
+    def getSetPoint(self):
+        return self.axisSlider.setPoint
 
     @Slot()
     def setMinimumRange(self, value=None):
@@ -133,6 +142,9 @@ class SliderGroupBox(QGroupBox):
             self.minimumRangeLineEdit.setText("{value:.2f}".format(value=value))
         self.axisSlider.update()
         self.minimumRangeChanged.emit(value)
+
+    def getMinimumRange(self):
+        return self.axisSlider.minimumRange
         
     @Slot()
     def setMaximumRange(self, value=None):
@@ -155,6 +167,9 @@ class SliderGroupBox(QGroupBox):
             self.maximumRangeLineEdit.setText("{value:.2f}".format(value=value))
         self.axisSlider.update()
         self.maximumRangeChanged.emit(value)
+
+    def getMaximumRange(self):
+        return self.axisSlider.maximumRange
     
     def setUnit(self, unit):
         # Set units for labels.

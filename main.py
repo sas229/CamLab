@@ -152,7 +152,6 @@ class MainWindow(QMainWindow, QtStyleTools):
     def updateControlTabs(self):
         # Method to update control tab widgets.
         self.clearControls()
-        axisCount = 0
         enabledControls = []
         devices = self.manager.deviceTableModel.enabledDevices()
         #  For each device get a list of enabled control channels.
@@ -175,30 +174,31 @@ class MainWindow(QMainWindow, QtStyleTools):
                         "device": deviceName,
                         "channel": controlChannel,
                         "enable": False,
+                        "enablePIDControl": False,
                         "PIDControl": False,
+                        "connected": False,
+                        "reachedLimit": False,
+                        "primaryMinimum": -100,
+                        "primaryMaximum": 100,
+                        "primaryLeftLimit": -80,
+                        "primaryRightLimit": 80,
+                        "primarySetPoint": 20,
+                        "primaryProcessVariable": 20,
+                        "primaryUnit": "(mm)",
+                        "secondarySetPoint": 3.0,
+                        "secondaryUnit": "(mm/s)",
                         "feedbackMinimum": 0,
                         "feedbackMaximum": 100,
-                        "feedbackLeft": 0,
-                        "feedbackRight": 80,
+                        "feedbackLeftLimit": 0,
+                        "feedbackRightLimit": 80,
                         "feedbackSetPoint": 40,
                         "feedbackProcessVariable": 40,
-                        "positionMinimum": -100,
-                        "positionMaximum": 100,
-                        "positionLeft": -80,
-                        "positionRight": 80,
-                        "positionSetPoint": 20,
-                        "positionProcessVariable": 20,
                         "feedbackUnit": "(N)",
-                        "positionUnit": "(mm)",
-                        "speedUnit": "(mm/s)",
-                        "connected": False,
+                        "feedbackChannel": "N/A",
                         "KP": 1.0,
                         "KI": 1.0,
                         "KD": 1.0,
-                        "proportionalOnMeasurement": False,
-                        "enablePIDControl": False,
-                        "feedbackChannel": "N/A",
-                        "reachedLimit": False
+                        "proportionalOnMeasurement": False
                     }
                     self.manager.configuration["controlWindow"][controlName] = copy.deepcopy(self.defaultControlSettings)
                 # Check for feedback channel and disable PID control if none specified.
@@ -209,16 +209,17 @@ class MainWindow(QMainWindow, QtStyleTools):
                     self.manager.configuration["controlWindow"][controlName]["enablePIDControl"] = False
                     self.manager.configuration["controlWindow"][controlName]["feedbackChannel"] = "N/A"
                 else:
-                    self.manager.configuration["controlWindow"][controlName]["feedbackChannel"] = "AIN" + str(channel["feedback"])
+                    self.manager.configuration["controlWindow"][controlName]["feedbackChannel"] = "AIN" + str(control["feedback"])
+                #  Update control name.
+                self.manager.configuration["controlWindow"][controlName]["name"] = controlChannelName
                 #  These widgets should probably be stored somehow...
                 if control["control"] == 0:
-                    panel = LinearAxis()
-                    panel.setValues(settings=self.manager.configuration["controlWindow"][controlName])    
+                    panel = LinearAxis(controlName)
+                    panel.setConfiguration(configuration=self.manager.configuration)
                 else:
-                    panel = QWidget()   
+                    panel = QWidget()
                 # Add to control window tab bar.
                 self.controlWindow.controlTabWidget.addTab(panel, controlChannelName)
-                axisCount += 1
     
     def moveEvent(self, event):
         position = self.geometry()

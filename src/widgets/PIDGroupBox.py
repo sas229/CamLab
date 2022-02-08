@@ -9,6 +9,12 @@ class PIDGroupBox(QGroupBox):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Defaults.
+        self.KP = 1.00
+        self.KI = 1.00
+        self.KD = 1.00
+
         # Validator.
         self.doubleValidator = QDoubleValidator(decimals=2)
 
@@ -55,20 +61,35 @@ class PIDGroupBox(QGroupBox):
     def setKP(self, value=None):
         if value == None:
             value = float(self.KPLineEdit.text())
+        self.KP = value
         self.KPLineEdit.setText("{value:.2f}".format(value=value))
         self.KPLineEditChanged.emit(value)
+
+    def getKP(self):
+        return self.KP
     
     def setKI(self, value=None):
         if value == None:
             value = float(self.KILineEdit.text())
+        self.KI = value
         self.KILineEdit.setText("{value:.2f}".format(value=value))
         self.KILineEditChanged.emit(value)
+        
+    def getKI(self):
+        return self.KI
 
     def setKD(self, value=None):
         if value == None:
             value = float(self.KDLineEdit.text())
+        self.KD = value
         self.KDLineEdit.setText("{value:.2f}".format(value=value))
         self.KDLineEditChanged.emit(value)
 
+    def getKD(self):
+        return self.KD
+
     def setProportionalOnMeasurement(self, value):
         self.proportionalOnMeasurement.setChecked(value)
+
+    def getProportionalOnMeasurement(self):
+        return self.proportionalOnMeasurement.isChecked()

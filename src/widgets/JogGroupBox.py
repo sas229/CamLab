@@ -4,9 +4,14 @@ from PySide6.QtCore import Signal
 
 class JogGroupBox(QGroupBox):
     speedLineEditChanged = Signal(float)
+    speedUnitChanged = Signal()
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Defaults.
+        self.unit = ""
+
         # Validator.
         self.doubleValidator = QDoubleValidator(decimals=2)
 
@@ -41,9 +46,17 @@ class JogGroupBox(QGroupBox):
 
     def setUnit(self, unit):
         self.unit = unit
-        self.speedLabel.setText("Speed " + self.unit)
+        self.speedLabel.setText("Speed " + str(self.unit))
+        self.speedUnitChanged.emit()
+    
+    def getUnit(self):
+        return self.unit
 
-    def setSpeed(self):
-        value = float(self.speedLineEdit.text())
+    def setSpeed(self, value=None):
+        if value == None:
+            value = float(self.speedLineEdit.text())
         self.speedLineEdit.setText("{value:.2f}".format(value=value))
         self.speedLineEditChanged.emit(value)
+
+    def getSpeed(self):
+        return float(self.speedLineEdit.text())
