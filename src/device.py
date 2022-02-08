@@ -12,11 +12,16 @@ class Device(QObject):
     emitData = Signal(str, np.ndarray)
     updateOffsets = Signal(str, list, list)
 
-    def __init__(self, name, id, connection, channels, addresses, dataTypes, slopes, offsets, autozero, controlRate):
+    def __init__(self, name, id, connection):
         super().__init__()
         self.name = name
         self.id = id 
         self.connection = connection
+        self.handle = None
+        self.openConnection()
+        self.initialiseSettings()
+
+    def setAcquisition(self, channels, addresses, dataTypes, slopes, offsets, autozero, controlRate):
         self.channels = channels
         self.addresses = addresses
         self.dataTypes = dataTypes
@@ -25,12 +30,6 @@ class Device(QObject):
         self.autozero = np.asarray(autozero)
         self.numFrames = len(self.addresses)
         self.controlRate = controlRate
-        self.handle = None
-        self.openConnection()
-        self.initialiseSettings()
-        # self.script = "src/acquire.lua"
-        # self.loadLua()
-        # self.executeLua()
 
     def openConnection(self):
         # Method to open a device connection
@@ -62,6 +61,11 @@ class Device(QObject):
                 e = sys.exc_info()[1]
                 log.warning(e)
 
+    def loadLuaScript(self):
+        self.script = "src/acquire.lua"
+        self.loadLua()
+        self.executeLua()
+    
     def loadLua(self):
         try:
             # Read the Lua script.

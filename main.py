@@ -130,6 +130,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.manager.removeControlTable.connect(self.removeControlTable)
         self.manager.addControlTable.connect(self.addControlTable)
         self.manager.updateDeviceConfigurationTab.connect(self.updateDeviceConfigurationTabs)
+        self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.manager.manageDeviceThreads)
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.updateDeviceConfigurationTabs)
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.manager.updatePlotWindowChannelsData)
         self.manager.timing.actualRate.connect(self.statusGroupBox.update)
