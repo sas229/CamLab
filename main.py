@@ -88,8 +88,8 @@ class MainWindow(QMainWindow, QtStyleTools):
             self.controlWindow.visible = True
         else:
             self.controlWindow.hide()
-        self.controlWindow.controlTabWidget.addTab(QWidget(), "Control")
-        self.controlWindow.controlTabWidget.addTab(QWidget(), "Sequences")  
+        self.controlWindow.controlTabWidget.addTab(QWidget(), "Dashboard")
+        self.controlWindow.controlTabWidget.addTab(QWidget(), "Sequence")  
 
         # Toolbar connections.
         self.toolbar.modeButton.triggered.connect(self.toggleMode)
@@ -169,6 +169,8 @@ class MainWindow(QMainWindow, QtStyleTools):
                 # Check configuration for previous settings, otherwise take defaults.
                 if controlChannelName not in self.manager.configuration["controlWindow"]:
                     self.defaultControlSettings = {
+                        "enable": True,
+                        "PIDControl": False,
                         "feedbackMinimum": 0,
                         "feedbackMaximum": 100,
                         "feedbackLeft": 0,
@@ -188,7 +190,7 @@ class MainWindow(QMainWindow, QtStyleTools):
                         "KP": 1.0,
                         "KI": 2.0,
                         "KD": 3.0,
-                        "derivativeOnMeasurement": False,
+                        "proportionalOnMeasurement": False,
                         "enablePIDControl": False,
                         "feedbackChannel": "N/A",
                         "reachedLimit": False
@@ -199,8 +201,10 @@ class MainWindow(QMainWindow, QtStyleTools):
                 if channel["feedback"] == 0:
                     self.manager.configuration["controlWindow"][controlChannelName]["enablePIDControl"] = False
                     self.manager.configuration["controlWindow"][controlChannelName]["feedbackChannel"] = "N/A"
+                elif channel["feedback"] == 0 and self.manager.configuration["controlWindow"][controlChannelName]["enable"] == False:
+                    self.manager.configuration["controlWindow"][controlChannelName]["enablePIDControl"] = False
+                    self.manager.configuration["controlWindow"][controlChannelName]["feedbackChannel"] = "N/A"
                 else:
-                    self.manager.configuration["controlWindow"][controlChannelName]["enablePIDControl"] = True
                     self.manager.configuration["controlWindow"][controlChannelName]["feedbackChannel"] = "AIN" + str(channel["feedback"])
                 #  These widgets should probably be stored somehow...
                 if channel["control"] == 0:

@@ -29,7 +29,7 @@ class PIDGroupBox(QGroupBox):
         self.KDLineEdit.setText("1.00")
         self.KDLineEdit.setFixedWidth(80)
         self.optionsLabel = QLabel("Options")
-        self.derivativeOnMeasurement = QCheckBox("Derivative on measurement")
+        self.proportionalOnMeasurement = QCheckBox("Proportional on measurement")
 
         # Layout.
         self.Layout = QGridLayout()
@@ -40,7 +40,7 @@ class PIDGroupBox(QGroupBox):
         self.Layout.addWidget(self.KILineEdit, 1, 1)
         self.Layout.addWidget(self.KDLineEdit, 1, 2)
         self.Layout.addWidget(self.optionsLabel, 2, 0)
-        self.Layout.addWidget(self.derivativeOnMeasurement, 3, 0, 1, 3)
+        self.Layout.addWidget(self.proportionalOnMeasurement, 3, 0, 1, 3)
         self.setLayout(self.Layout) 
         
         # Geometry.
@@ -71,4 +71,4 @@ class PIDGroupBox(QGroupBox):
         self.KDLineEditChanged.emit(value)
 
     def setDerivativeOnMeasurement(self, value):
-        self.derivativeOnMeasurement.setChecked(value)
+        self.proportionalOnMeasurement.setChecked(value)

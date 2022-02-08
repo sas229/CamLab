@@ -6,10 +6,10 @@ LinearSlider {{
   qproperty-backgroundColour: {QTMATERIAL_SECONDARYDARKCOLOR};
   qproperty-grooveColour: {QTMATERIAL_SECONDARYCOLOR};
   qproperty-setPointColour: {QTMATERIAL_PRIMARYCOLOR};
-  qproperty-processVariableColour: {QTMATERIAL_PRIMARYCOLOR};
+  qproperty-processVariableColour: '#17a2b8';
   qproperty-textColour: {QTMATERIAL_PRIMARYCOLOR};
-  qproperty-limitColour: "orange";
-  qproperty-rangeColour: "red";
+  qproperty-limitColour: '#ffc107';
+  qproperty-rangeColour: '#dc3545';
 }}
 
 QGroupBox {{
@@ -17,14 +17,14 @@ QGroupBox {{
 }} 
 
 .limit {{
-  color: "orange";
-  border: 1px solid "orange";
+  color: '#ffc107';
+  border: 1px solid '#ffc107';
   border-width: 0 0 2px 0;
 }}
 
 .range {{
-  color: "red";
-  border: 1px solid "red";
+  color: '#dc3545';
+  border: 1px solid '#dc3545';
   border-width: 0 0 2px 0;
 }}
 
@@ -35,27 +35,27 @@ QGroupBox {{
 }}
 
 .processVariable {{
-  color: {QTMATERIAL_PRIMARYCOLOR};
-  border: 1px solid {QTMATERIAL_PRIMARYCOLOR};
+  color: '#17a2b8';
+  border: 1px solid '#17a2b8';
   border-width: 0 0 2px 0;
 }}
 
 QPushButton.indicator {{
   color: {QTMATERIAL_SECONDARYDARKCOLOR};
-  background-color: 'red';
-  border-color:  'red';
+  background-color: '#dc3545';
+  border-color:  '#dc3545';
 }}
 
 QPushButton.indicator:checked {{
   color: {QTMATERIAL_SECONDARYDARKCOLOR};
-  background-color: 'green';
-  border-color:  'green';
+  background-color: '#27AE60';
+  border-color:  '#27AE60';
 }}
 
 QPushButton.limitIndicator:disabled {{
   color: {QTMATERIAL_SECONDARYDARKCOLOR};
-  background-color: 'green';
-  border-color:  'green';
+  background-color: '#27AE60';
+  border-color:  '#27AE60';
 }}
 
 /* QPushButton.limitIndicator:checked {{
@@ -66,8 +66,8 @@ QPushButton.limitIndicator:disabled {{
 
 QPushButton.limitIndicator:disabled:checked {{
   color: {QTMATERIAL_SECONDARYDARKCOLOR};
-  background-color: 'red';
-  border-color:  'red';
+  background-color: '#dc3545';
+  border-color:  '#dc3545';
 }}
 
 QPushButton:disabled,

@@ -24,7 +24,7 @@ class LinearAxis(QWidget):
     KPChanged = Signal(float)
     KIChanged = Signal(float)
     KDChanged = Signal(float)
-    derivativeOnMeasurementChanged = Signal(bool)
+    proportionalOnMeasurementChanged = Signal(bool)
     positiveJogEnabled = Signal()
     negativeJogEnabled = Signal() 
     positiveJogDisabled = Signal()
@@ -86,7 +86,7 @@ class LinearAxis(QWidget):
         self.PID.KPLineEditChanged.connect(self.emitKPChanged)
         self.PID.KILineEditChanged.connect(self.emitKIChanged)
         self.PID.KDLineEditChanged.connect(self.emitKDChanged)
-        self.PID.derivativeOnMeasurement.stateChanged.connect(self.emitDerivativeOnMeasurement)
+        self.PID.proportionalOnMeasurement.stateChanged.connect(self.emitProportionalOnMeasurement)
         self.jog.speedLineEditChanged.connect(self.emitSpeedChanged)
         self.jog.jogPlusButton.pressed.connect(self.emitPositiveJogEnabled)
         self.jog.jogPlusButton.released.connect(self.emitPositiveJogDisabled)
@@ -118,9 +118,11 @@ class LinearAxis(QWidget):
         if enabled == True:
             self.axisEnabled.emit()
             self.globalControls.settingsButton.setEnabled(False)
+            self.globalControls.PIDControlButton.setEnabled(True)
         elif enabled == False:
             self.axisDisabled.emit()
             self.globalControls.settingsButton.setEnabled(True)
+            self.globalControls.PIDControlButton.setEnabled(False)
             
     @Slot()
     def emitPIDControlState(self):
@@ -151,8 +153,8 @@ class LinearAxis(QWidget):
         self.speedChanged.emit(value)
     
     @Slot()
-    def emitDerivativeOnMeasurement(self, value):
-        self.derivativeOnMeasurementChanged.emit(value)
+    def emitProportionalOnMeasurement(self, value):
+        self.proportionalOnMeasurementChanged.emit(value)
     
     @Slot()
     def emitKPChanged(self, value):
@@ -303,7 +305,12 @@ class LinearAxis(QWidget):
                 self.PID.setKI(settings["KI"])
             elif setting == "KD":
                 self.PID.setKD(settings["KD"])
-            elif setting == "derivativeOnMeasurement":
-                self.PID.setDerivativeOnMeasurement(settings["derivativeOnMeasurement"])
+            elif setting == "proportionalOnMeasurement":
+                self.PID.setProportionalOnMeasurement(settings["proportionalOnMeasurement"])
             elif setting == "enablePIDControl":
                 self.setPIDControlButtonEnable(settings["enablePIDControl"])
+            elif setting == "PIDControl":
+                self.globalControls.PIDControlButton.setChecked(settings["PIDControl"])
+            elif setting == "enable":
+                self.globalControls.enableButton.setChecked(settings["enable"])
+            
