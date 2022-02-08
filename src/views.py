@@ -112,16 +112,15 @@ class ControlTableView(QTableView):
         horizontalHeader.setSectionResizeMode(QHeaderView.Stretch)
 
         self.checkBoxDelegate = CheckBoxDelegate("channel")
-        self.stringDelegate = StringDelegate()
-        self.floatValidatorDelegate = FloatValidatorDelegate()
-
+        self.nameDelegate = StringDelegate()
         self.controlModeComboBoxDelegate = ComboBoxDelegate(controlModeList)
         self.controlActuatorComboBoxDelegate = ComboBoxDelegate(controlActuatorList)
         self.feedbackChannelListComboBoxDelegate = ComboBoxDelegate(feedbackChannelList)
 
         self.setItemDelegateForColumn(0, self.checkBoxDelegate)
-        self.setItemDelegateForColumn(1, self.controlModeComboBoxDelegate)
-        self.setItemDelegateForColumn(2, self.controlActuatorComboBoxDelegate)
-        self.setItemDelegateForColumn(3, self.feedbackChannelListComboBoxDelegate)
+        self.setItemDelegateForColumn(1, self.nameDelegate)
+        self.setItemDelegateForColumn(2, self.controlModeComboBoxDelegate)
+        self.setItemDelegateForColumn(3, self.controlActuatorComboBoxDelegate)
+        self.setItemDelegateForColumn(4, self.feedbackChannelListComboBoxDelegate)
 
 

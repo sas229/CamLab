@@ -1,11 +1,86 @@
+QGroupBox {{
+    background-color: {QTMATERIAL_SECONDARYLIGHTCOLOR};
+}} 
+
+LinearSlider {{
+  qproperty-backgroundColour: {QTMATERIAL_SECONDARYDARKCOLOR};
+  qproperty-grooveColour: {QTMATERIAL_SECONDARYCOLOR};
+  qproperty-setPointColour: {QTMATERIAL_PRIMARYCOLOR};
+  qproperty-processVariableColour: '#17a2b8';
+  qproperty-textColour: {QTMATERIAL_PRIMARYCOLOR};
+  qproperty-limitColour: '#ffc107';
+  qproperty-rangeColour: '#dc3545';
+}}
+
+QGroupBox {{
+  background-color: {QTMATERIAL_SECONDARYLIGHTCOLOR};
+}} 
+
+.limit {{
+  color: '#ffc107';
+  border: 1px solid '#ffc107';
+  border-width: 0 0 2px 0;
+}}
+
+.range {{
+  color: '#dc3545';
+  border: 1px solid '#dc3545';
+  border-width: 0 0 2px 0;
+}}
+
+.setPoint {{
+  color: {QTMATERIAL_PRIMARYCOLOR};
+  border: 1px solid {QTMATERIAL_PRIMARYCOLOR};
+  border-width: 0 0 2px 0;
+}}
+
+.processVariable {{
+  color: '#17a2b8';
+  border: 1px solid '#17a2b8';
+  border-width: 0 0 2px 0;
+}}
+
+QPushButton.indicator {{
+  color: {QTMATERIAL_SECONDARYDARKCOLOR};
+  background-color: '#dc3545';
+  border-color:  '#dc3545';
+}}
+
+QPushButton.indicator:checked {{
+  color: {QTMATERIAL_SECONDARYDARKCOLOR};
+  background-color: '#27AE60';
+  border-color:  '#27AE60';
+}}
+
+QPushButton.limitIndicator:disabled {{
+  color: {QTMATERIAL_SECONDARYDARKCOLOR};
+  background-color: '#27AE60';
+  border-color:  '#27AE60';
+}}
+
+/* QPushButton.limitIndicator:checked {{
+  color: {QTMATERIAL_SECONDARYDARKCOLOR};
+  background-color: 'red';
+  border-color:  'red';
+}} */
+
+QPushButton.limitIndicator:disabled:checked {{
+  color: {QTMATERIAL_SECONDARYDARKCOLOR};
+  background-color: '#dc3545';
+  border-color:  '#dc3545';
+}}
+
+QPushButton:disabled,
+QPushButton:flat:disabled {{
+  color: {QTMATERIAL_SECONDARYDARKCOLOR};
+  background-color: transparent;
+  border-color: {QTMATERIAL_SECONDARYDARKCOLOR};
+}}
+
 /* QLineEdit:disabled {{
     color: {QTMATERIAL_SECONDARYTEXTCOLOR};
     background-color: {QTMATERIAL_SECONDARYCOLOR};
 }} */
-
-QGroupBox {{
-    background-color: {QTMATERIAL_SECONDARYLIGHTCOLOR};
-}} 
 
 /* QTableView:item {{
   padding: 5px;

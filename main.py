@@ -4,11 +4,10 @@ from PySide6.QtGui import QIcon, QScreen
 from PySide6.QtCore import Slot, Qt, QModelIndex, QPoint, QThread, QTimer
 from qt_material import apply_stylesheet, QtStyleTools
 from src.manager import Manager
-from src.widgets import CamLabToolBar, StatusGroupBox, GlobalSettingsGroupBox, DevicesGroupBox, ConfigurationGroupBox, PlotWindow
+from src.widgets import CamLabToolBar, StatusGroupBox, GlobalSettingsGroupBox, DevicesGroupBox, ConfigurationGroupBox, PlotWindow, ControlWindow, LinearAxis
 from src.models import DeviceTableModel, AcquisitionTableModel, ColourPickerTableModel
 from src.views import DeviceTableView, AcquisitionTableView, ControlTableView
 from src.log import init_log
-
 from src.models import ChannelsTableModel
 from src.dialogs import ColourPickerDialog
 from src.dialogs import RefreshDevicesDialog
@@ -45,8 +44,8 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.managerThread.start()
 
         # Set position.
-        x = self.manager.configuration["global"]["x"]
-        y = self.manager.configuration["global"]["y"]
+        x = self.manager.configuration["configurationWindow"]["x"]
+        y = self.manager.configuration["configurationWindow"]["y"]
         self.setGeometry(x, y, self.width, self.height)
 
         # Extract the configuration to generate initial UI setup.
@@ -82,6 +81,16 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.centralWidget.setLayout(self.mainWindowLayout)
         self.setCentralWidget(self.centralWidget)
 
+        # Control window.
+        self.controlWindow = ControlWindow(self.configuration)
+        if self.manager.configuration["controlWindow"]["visible"] == True:
+            self.controlWindow.show()
+            self.controlWindow.visible = True
+        else:
+            self.controlWindow.hide()
+        self.controlWindow.controlTabWidget.addTab(QWidget(), "Dashboard")
+        self.controlWindow.controlTabWidget.addTab(QWidget(), "Sequence")  
+
         # Toolbar connections.
         self.toolbar.modeButton.triggered.connect(self.toggleMode)
         self.toolbar.configure.connect(self.manager.configure)
@@ -116,8 +125,9 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.manager.configurationChanged.connect(self.globalSettingsGroupBox.updateUI)
         self.manager.clearDeviceConfigurationTabs.connect(self.clearDeviceConfigurationTabs)
         self.manager.closePlots.connect(self.closePlots)
+        self.manager.clearControls.connect(self.clearControls)
         self.manager.deviceConfigurationAdded.connect(self.addDeviceConfigurationTab)
-        self.manager.removeWidget.connect(self.removeWidgetFromLayout)
+        self.manager.removeControlTable.connect(self.removeControlTable)
         self.manager.addControlTable.connect(self.addControlTable)
         self.manager.updateDeviceConfigurationTab.connect(self.updateDeviceConfigurationTabs)
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.updateDeviceConfigurationTabs)
@@ -130,10 +140,91 @@ class MainWindow(QMainWindow, QtStyleTools):
         # Timer connections.
         self.plotTimer.timeout.connect(self.manager.assembly.updatePlotData)
     
+    @Slot()
+    def clearControls(self):
+        # Remove all tabs except device non-specific tabs.
+        controlTabs = self.controlWindow.controlTabWidget.count()
+        for control in reversed(range(controlTabs)):
+            if control > 1:
+                self.controlWindow.controlTabWidget.removeTab(control)
+
+    @Slot() 
+    def updateControlTabs(self):
+        # Method to update control tab widgets.
+        self.clearControls()
+        enabledControls = []
+        devices = self.manager.deviceTableModel.enabledDevices()
+        #  For each device get a list of enabled control channels.
+        for device in devices:
+            deviceName = device["name"]
+            controls = self.manager.controlTableModels[deviceName].enabledControls()
+            for control in controls:
+                if control["enable"] == True:
+                    enabledControls.append(control)
+        
+            #  For each device and enabled control channel create the appropriate control widget.
+            for control in enabledControls:
+                controlChannel = control["channel"]
+                controlChannelName = control["name"]
+                controlName = deviceName + " " + controlChannel
+                # Check configuration for previous settings, otherwise take defaults.
+                if controlName not in self.manager.configuration["controlWindow"]:
+                    self.defaultControlSettings = {
+                        "name": controlChannelName,
+                        "device": deviceName,
+                        "channel": controlChannel,
+                        "enable": False,
+                        "enablePIDControl": False,
+                        "PIDControl": False,
+                        "connected": False,
+                        "reachedLimit": False,
+                        "primaryMinimum": -100,
+                        "primaryMaximum": 100,
+                        "primaryLeftLimit": -80,
+                        "primaryRightLimit": 80,
+                        "primarySetPoint": 20,
+                        "primaryProcessVariable": 20,
+                        "primaryUnit": "(mm)",
+                        "secondarySetPoint": 3.0,
+                        "secondaryUnit": "(mm/s)",
+                        "feedbackMinimum": 0,
+                        "feedbackMaximum": 100,
+                        "feedbackLeftLimit": 0,
+                        "feedbackRightLimit": 80,
+                        "feedbackSetPoint": 40,
+                        "feedbackProcessVariable": 40,
+                        "feedbackUnit": "(N)",
+                        "feedbackChannel": "N/A",
+                        "KP": 1.0,
+                        "KI": 1.0,
+                        "KD": 1.0,
+                        "proportionalOnMeasurement": False
+                    }
+                    self.manager.configuration["controlWindow"][controlName] = copy.deepcopy(self.defaultControlSettings)
+                # Check for feedback channel and disable PID control if none specified.
+                if control["feedback"] == 0:
+                    self.manager.configuration["controlWindow"][controlName]["enablePIDControl"] = False
+                    self.manager.configuration["controlWindow"][controlName]["feedbackChannel"] = "N/A"
+                elif control["feedback"] == 0 and self.manager.configuration["controlWindow"][controlName]["enable"] == False:
+                    self.manager.configuration["controlWindow"][controlName]["enablePIDControl"] = False
+                    self.manager.configuration["controlWindow"][controlName]["feedbackChannel"] = "N/A"
+                else:
+                    self.manager.configuration["controlWindow"][controlName]["feedbackChannel"] = "AIN" + str(control["feedback"])
+                #  Update control name.
+                self.manager.configuration["controlWindow"][controlName]["name"] = controlChannelName
+                #  These widgets should probably be stored somehow...
+                if control["control"] == 0:
+                    panel = LinearAxis(controlName)
+                    panel.setConfiguration(configuration=self.manager.configuration)
+                else:
+                    panel = QWidget()
+                # Add to control window tab bar.
+                self.controlWindow.controlTabWidget.addTab(panel, controlChannelName)
+    
     def moveEvent(self, event):
         position = self.geometry()
-        self.configuration["global"]["x"] = int(position.x())
-        self.configuration["global"]["y"] = int(position.y())
+        self.configuration["configurationWindow"]["x"] = int(position.x())
+        self.configuration["configurationWindow"]["y"] = int(position.y())
         return
 
     @Slot()
@@ -147,6 +238,8 @@ class MainWindow(QMainWindow, QtStyleTools):
 
     @Slot()
     def openControlPanel(self):
+        self.controlWindow.show()
+        self.configuration["controlWindow"]["visible"] = True
         log.info("Control panel opened.")
 
     @Slot()
@@ -220,7 +313,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.configurationGroupBox.deviceConfigurationTabWidget.clear()
 
     @Slot(str)
-    def removeWidgetFromLayout(self,name):
+    def removeControlTable(self,name):
         self.controlTableViews[name].setParent(None)
 
     @Slot(int)
@@ -232,11 +325,13 @@ class MainWindow(QMainWindow, QtStyleTools):
 
     @Slot(str, list)
     def addControlTable(self, name, defaultFeedbackChannel):
-        # Add acquisition table to dict and update the TabWidget.
+        # Add acquisition table to dict, update the TabWidget and connect to control widget generation method.
         self.controlTableViews[name] = ControlTableView(self.manager.controlModeList, self.manager.controlActuatorList, defaultFeedbackChannel)
-        self.controlTableViews[name].setModel(self.manager.controlModels[name])
+        self.controlTableViews[name].setModel(self.manager.controlTableModels[name])
         self.controlTableViews[name].setFixedHeight(89)
         self.deviceConfigurationLayout[name].addWidget(self.controlTableViews[name])
+        self.manager.controlTableModels[name].controlChannelToggled.connect(self.updateControlTabs)
+        self.updateControlTabs()
 
     @Slot(dict)
     def updateUI(self, newConfiguration):
@@ -261,6 +356,8 @@ class MainWindow(QMainWindow, QtStyleTools):
         # Update the UI of plot windows if they exist.
         if self.plots: 
             self.updatePlots()
+
+        self.controlWindow.updateUI(self.configuration)
         log.info("Updated UI.")
 
     @Slot()
@@ -406,6 +503,9 @@ class MainWindow(QMainWindow, QtStyleTools):
     def closeEvent(self, event):
         # Close all plots.
         self.closePlots()
+
+        # Close control window.
+        self.controlWindow.close()
 
         # In the event the device list is refreshing, wait until complete before quitting all threads otherwise an error is shown, but hide the window in the meantime.
         self.setVisible(False)

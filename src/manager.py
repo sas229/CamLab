@@ -22,9 +22,10 @@ class Manager(QObject):
     deviceConfigurationAdded = Signal(str, list)
     clearDeviceConfigurationTabs = Signal()
     closePlots = Signal()
+    clearControls = Signal()
     addControlTable = Signal(str, list)
     updateDeviceConfigurationTab = Signal()
-    removeWidget = Signal(str)
+    removeControlTable = Signal(str)
     plotWindowChannelsUpdated = Signal()
     existingPlotsFound = Signal()
     outputText = Signal(str)
@@ -34,7 +35,7 @@ class Manager(QObject):
         self.configuration = {}
         self.acquisitionModels = {}
         self.acquisitionTables = {}
-        self.controlModels = {}
+        self.controlTableModels = {}
         self.devices = {}
         self.deviceThreads = {}
         self.refreshing = False
@@ -53,11 +54,11 @@ class Manager(QObject):
             {"channel": "AIN7", "name": "Ch_8", "unit": "V", "slope": 1.0, "offset": 0.00, "connect": False, "autozero": True},
         ]
         self.defaultControlTable = [
-            {"channel": "C1", "enable": False, "type": 0, "control": 0, "feedback": 0},
-            {"channel": "C2", "enable": False, "type": 0, "control": 0, "feedback": 0}
+            {"channel": "C1", "name": "C1", "enable": False, "type": 1, "control": 0, "feedback": 0},
+            {"channel": "C2", "name": "C2", "enable": False, "type": 1, "control": 0, "feedback": 0}
         ]
         self.controlModeList = ['Analogue', 'Digital']
-        self.controlActuatorList = ['Linear Actuator', 'Rotary Actuator', 'Pressure Pump']
+        self.controlActuatorList = ['Linear', 'Rotary', 'Pump', 'Speed']
         self.defaultFeedbackChannel = ['N/A']
 
         # Instantiate the model for the device list.   
@@ -117,7 +118,7 @@ class Manager(QObject):
     def createHeader(self):
         path, filename, date, timestart, ext = self.generateFilename()
         byeline = "CamLab data acquisition and device control system: https://github.com/sas229/CamLab\n"
-        testline = "Test name :" + filename + "\nDate: " + date + "\nTime: " + timestart + "\n\n"
+        testline = "Test name: " + filename + "\nDate: " + date + "\nTime: " + timestart + "\n\n"
         slopeline = "Slopes:"
         offsetline = "Offsets:"
         channelline = "Channel:"
@@ -232,7 +233,7 @@ class Manager(QObject):
                 # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
                 self.deviceTableModel.appendRow(deviceInformation)
                 self.acquisitionModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
-                self.controlModels[name] = ControlTableModel(self.configuration["devices"][name]["control"])
+                self.controlTableModels[name] = ControlTableModel(self.configuration["devices"][name]["control"])
                 self.deviceConfigurationAdded.emit(name, self.defaultFeedbackChannel)
                 self.setListFeedbackCombobox()
             log.info("Configuration loaded.")
@@ -250,7 +251,7 @@ class Manager(QObject):
         self.deviceTableModel.clearData()
         self.acquisitionModels = {}
         self.acquisitionTables = {}
-        self.controlModels = {}
+        self.controlTableModels = {}
         self.clearDeviceConfigurationTabs.emit()
         self.loadDevicesFromConfiguration()
 
@@ -304,6 +305,8 @@ class Manager(QObject):
                 # Make a deep copy to avoid pointers in the YAML output.
                 acquisitionTable = copy.deepcopy(self.defaultAcquisitionTable)
                 controlTable = copy.deepcopy(self.defaultControlTable)
+                controlTable[0]["name"] = deviceInformation["name"] + " C1"
+                controlTable[1]["name"] = deviceInformation["name"] + " C2"
                 newDevice = {
                     "id": deviceInformation["id"],
                     "connection": deviceInformation["connection"],
@@ -321,7 +324,7 @@ class Manager(QObject):
 
                 # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
                 self.acquisitionModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
-                self.controlModels[name] = ControlTableModel(self.configuration["devices"][name]["control"])
+                self.controlTableModels[name] = ControlTableModel(self.configuration["devices"][name]["control"])
                 self.deviceConfigurationAdded.emit(name, self.defaultFeedbackChannel)
                 self.updateDeviceConfigurationTab.emit()
                 self.updateUI.emit(self.configuration)
@@ -373,8 +376,6 @@ class Manager(QObject):
     def initialiseDefaultConfiguration(self):
         self.configuration = {}
         self.configuration["global"] = {
-            "x": 0,
-            "y": 0,
             "darkMode": True,
             "controlRate": 1000.00,
             "skipSamples": 10,
@@ -382,6 +383,17 @@ class Manager(QObject):
             "path": "/data",
             "filename": "junk"
             }
+        self.configuration["configurationWindow"] = {
+            "x": 0,
+            "y": 0
+        }
+        self.configuration["controlWindow"] = {
+            "x": 0,
+            "y": 0,
+            "width": 1200,
+            "height": 600,
+            "visible": False
+        }
         self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
@@ -398,7 +410,7 @@ class Manager(QObject):
         self.configuration = {}
         self.acquisitionModels = {}
         self.acquisitionTables = {}
-        self.controlModels = {}
+        self.controlTableModels = {}
         self.controlTables = {}
 
         # Load configuration.
@@ -450,15 +462,16 @@ class Manager(QObject):
     def clearConfiguration(self):
         # Delete all plots first.
         self.closePlots.emit()
+        self.clearControls.emit()
 
         # Next clear the device list and configuration tabs.
         self.deviceTableModel.clearData()
         self.clearDeviceConfigurationTabs.emit()
         
-        # Clear all underlying models and tables.
+        # Clear all underlying models and tables. 
         self.acquisitionModels = {}
         self.acquisitionTables = {}
-        self.controlModels = {}
+        self.controlTableModels = {}
 
         # Initialise the basic default configuration.
         self.initialiseDefaultConfiguration()
@@ -605,10 +618,10 @@ class Manager(QObject):
                 # If value is not empty, pass the feedbackChannelList object, otherwise pass the defaults.
                 if value != []:
                     feedbackChannelList = copy.deepcopy(value)
-                    self.removeWidget.emit(key)
+                    self.removeControlTable.emit(key)
                     self.addControlTable.emit(key, feedbackChannelList)
                 elif value == []:
-                    self.removeWidget.emit(key)
+                    self.removeControlTable.emit(key)
                     self.addControlTable.emit(key, self.defaultFeedbackChannel)
 
     def resetIndexFeedbackComboBox(self, row, name):
