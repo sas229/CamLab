@@ -90,7 +90,7 @@ class LinearAxis(QWidget):
         # Connections.
         self.positionDemand.setPointLineEdit.returnPressed.connect(self.setPositionSetPoint)
         self.positionDemand.unitChanged.connect(self.emitPrimaryUnitChanged)
-        self.positionStatus.axisSlider.setPointChanged.connect(self.setPositionSetPoint)
+        self.positionStatus.axisSlider.setPointChanged.connect(self.updatePositionSetPointLineEdit)
         self.positionStatus.leftLimitChanged.connect(self.emitPrimaryLeftLimitChanged)
         self.positionStatus.rightLimitChanged.connect(self.emitPrimaryRightLimitChanged)
         self.positionStatus.minimumRangeChanged.connect(self.emitPrimaryMinimumRangeChanged)
@@ -267,7 +267,8 @@ class LinearAxis(QWidget):
     def adjustPositionSetPoint(self, adjustment):
         currentSetPoint = float(self.positionDemand.setPointLineEdit.text())
         newSetPoint = currentSetPoint + adjustment
-        self.setPositionSetPoint(newSetPoint)
+        self.positionStatus.axisSlider.setSetPoint(newSetPoint) 
+        self.updatePositionSetPointLineEdit(newSetPoint)
 
     @Slot()
     def setFeedbackSetPoint(self, value=None):
@@ -283,6 +284,11 @@ class LinearAxis(QWidget):
         self.configuration["controlWindow"][self.controlName]["feedbackSetPoint"] = self.feedbackStatus.getSetPoint()
     
     @Slot()
+    def updatePositionSetPointLineEdit(self, value):
+        self.positionDemand.setPointLineEdit.setText("{value:.2f}".format(value=value))
+        self.setPositionSetPoint()
+
+    @Slot()
     def setPositionSetPoint(self, value=None):
         origin = "device"
         if value == None:
@@ -292,12 +298,13 @@ class LinearAxis(QWidget):
         # Signal sent from slider. Ensure within limits.
         value = max(value, self.positionStatus.axisSlider.leftLimit)
         value = min(value, self.positionStatus.axisSlider.rightLimit)
-        self.positionDemand.setPointLineEdit.setText("{value:.2f}".format(value=value))
         self.positionStatus.setSetPoint(value)
         # If the origin of the update is the UI, then send a signal back to the device to execute the move.
         if origin == "UI":
             self.primarySetPointChanged.emit(self.channel, value)
-            print(value)
+        else:
+            # Otherwise update the line edit.
+            self.positionDemand.setPointLineEdit.setText("{value:.2f}".format(value=value))
         self.configuration["controlWindow"][self.controlName]["primarySetPoint"] = self.positionStatus.getSetPoint()
 
     @Slot()
@@ -309,21 +316,21 @@ class LinearAxis(QWidget):
         # If at the left limit, send out appropriate signals. If moving back into limits, allow that to happen.
         if self.positionStatus.axisSlider.processVariable <= self.positionStatus.axisSlider.leftLimit:
             if self.positionStatus.axisSlider.getProcessVariable() < self.previousPrimaryProcessVariable:
-                self.globalControls.limitIndicator.setChecked(True)
+                # self.globalControls.limitIndicator.setChecked(True)
                 self.primaryLeftLimitStatus.emit(self.channel, True)
                 self.limitChanged.emit(self.channel)
         # If at the right limit, send out appropriate signals. If moving back into limits, allow that to happen.
         elif self.positionStatus.axisSlider.processVariable >= self.positionStatus.axisSlider.rightLimit:
             if self.positionStatus.axisSlider.getProcessVariable() > self.previousPrimaryProcessVariable:
-                self.globalControls.limitIndicator.setChecked(True)
+                # self.globalControls.limitIndicator.setChecked(True)
                 self.primaryRightLimitStatus.emit(self.channel, True)
                 self.limitChanged.emit(self.channel)
         # Otherwise unset the limit indicator and emit both limit status signal booleans as false.
         else:
-            if self.globalControls.limitIndicator.isChecked() == True:
-                self.globalControls.limitIndicator.setChecked(False)
-                self.primaryLeftLimitStatus.emit(self.channel, False)
-                self.primaryRightLimitStatus.emit(self.channel, False)
+            # if self.globalControls.limitIndicator.isChecked() == True:
+                # self.globalControls.limitIndicator.setChecked(False)
+            self.primaryLeftLimitStatus.emit(self.channel, False)
+            self.primaryRightLimitStatus.emit(self.channel, False)
         
         # Save the previous process variable.
         self.previousPrimaryProcessVariable = self.positionStatus.axisSlider.getProcessVariable()
@@ -340,23 +347,23 @@ class LinearAxis(QWidget):
         # If at the left limit, send out appropriate signals. If moving back into limits, allow that to happen.
         if self.feedbackStatus.axisSlider.processVariable <= self.feedbackStatus.axisSlider.leftLimit:
             if self.feedbackStatus.axisSlider.getProcessVariable() < self.previousFeedbackProcessVariable:
-                self.globalControls.limitIndicator.setChecked(True)
+                # self.globalControls.limitIndicator.setChecked(True)
                 self.feedbackLeftLimitStatus.emit(self.channel, True)
                 self.limitChanged.emit(self.channel)
 
         # If at the right limit, send out appropriate signals. If moving back into limits, allow that to happen.
         elif self.feedbackStatus.axisSlider.processVariable >= self.feedbackStatus.axisSlider.rightLimit:
             if self.feedbackStatus.axisSlider.getProcessVariable() > self.previousFeedbackProcessVariable:
-                self.globalControls.limitIndicator.setChecked(True)
+                # self.globalControls.limitIndicator.setChecked(True)
                 self.feedbackRightLimitStatus.emit(self.channel, True)
                 self.limitChanged.emit(self.channel)
 
         # Otherwise unset the limit indicator and emit both limit status signal booleans as false.
         else:
-            if self.globalControls.limitIndicator.isChecked() == True:
-                self.globalControls.limitIndicator.setChecked(False)
-                self.feedbackLeftLimitStatus.emit(self.channel, False)
-                self.feedbackRightLimitStatus.emit(self.channel, False)
+            # if self.globalControls.limitIndicator.isChecked() == True:
+                # self.globalControls.limitIndicator.setChecked(False)
+            self.feedbackLeftLimitStatus.emit(self.channel, False)
+            self.feedbackRightLimitStatus.emit(self.channel, False)
 
         # Save the previous process variable.
         self.previousFeedbackProcessVariable = self.feedbackStatus.axisSlider.getProcessVariable()

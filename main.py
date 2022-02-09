@@ -35,7 +35,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.plots = {}
 
         # Timers.
-        self.plotTimer = QTimer()
+        self.updateTimer = QTimer()
 
         # Instantiate the manager object and thread.
         self.manager = Manager()
@@ -139,7 +139,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.manager.outputText.connect(self.statusGroupBox.setOutputText)
 
         # Timer connections.
-        self.plotTimer.timeout.connect(self.manager.assembly.updatePlotData)
+        self.updateTimer.timeout.connect(self.manager.assembly.updatePlotData)
     
     @Slot()
     def clearControls(self):
@@ -184,10 +184,17 @@ class MainWindow(QMainWindow, QtStyleTools):
                     controlWidget.primaryLeftLimitStatus.connect(self.manager.devices[deviceName].updatePositionLeftLimitStatus)
                     controlWidget.primaryRightLimitStatus.connect(self.manager.devices[deviceName].updatePositionRightLimitStatus)
                     controlWidget.primarySetPointChanged.connect(self.manager.devices[deviceName].moveToPosition)
-
-                    self.manager.devices[deviceName].updatePositionSetPoint.connect(controlWidget.setPositionSetPoint)
-                    self.manager.devices[deviceName].updatePositionProcessVariable.connect(controlWidget.setPositionProcessVariable)
-                    self.manager.devices[deviceName].updateFeedbackProcessVariable.connect(controlWidget.setFeedbackProcessVariable)
+                    self.updateTimer.timeout.connect(self.manager.devices[deviceName].updateControlPanel)
+                    if control["channel"] == "C1":
+                        self.manager.devices[deviceName].updatePositionSetPointC1.connect(controlWidget.setPositionSetPoint)
+                        # self.manager.devices[deviceName].updateFeedbackSetPointC1.connect(controlWidget.setFeedbackSetPoint)
+                        self.manager.devices[deviceName].updatePositionProcessVariableC1.connect(controlWidget.setPositionProcessVariable)
+                        self.manager.devices[deviceName].updateFeedbackProcessVariableC1.connect(controlWidget.setFeedbackProcessVariable)
+                    elif control["channel"] == "C2":
+                        self.manager.devices[deviceName].updatePositionSetPointC2.connect(controlWidget.setPositionSetPoint)
+                        # self.manager.devices[deviceName].updateFeedbackSetPointC2.connect(controlWidget.setFeedbackSetPoint)
+                        self.manager.devices[deviceName].updatePositionProcessVariableC2.connect(controlWidget.setPositionProcessVariable)
+                        self.manager.devices[deviceName].updateFeedbackProcessVariableC2.connect(controlWidget.setFeedbackProcessVariable)
                 else:
                     controlWidget = QWidget()
 
@@ -252,11 +259,11 @@ class MainWindow(QMainWindow, QtStyleTools):
 
     @Slot()
     def start(self):
-        self.plotTimer.start(250)
+        self.updateTimer.start(100)
         
     @Slot()
     def end(self):
-        self.plotTimer.stop()
+        self.updateTimer.stop()
         self.statusGroupBox.reset()
 
     @Slot()

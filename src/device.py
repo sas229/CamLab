@@ -11,9 +11,12 @@ log = logging.getLogger(__name__)
 class Device(QObject):
     emitData = Signal(str, np.ndarray)
     updateOffsets = Signal(str, list, list)
-    updatePositionSetPoint = Signal(float)
-    updatePositionProcessVariable = Signal(float)
-    updateFeedbackProcessVariable = Signal(float)
+    updatePositionSetPointC1 = Signal(float)
+    updatePositionSetPointC2 = Signal(float)
+    updatePositionProcessVariableC1 = Signal(float)
+    updatePositionProcessVariableC2 = Signal(float)
+    updateFeedbackProcessVariableC1 = Signal(float)
+    updateFeedbackProcessVariableC2 = Signal(float)
 
     def __init__(self, name, id, connection):
         super().__init__()
@@ -25,14 +28,24 @@ class Device(QObject):
         self.initialiseSettings()
 
         # Variables
-        self.jog = False
-        self.direction = 0
-        self.position = 0
-        self.countsPerUnit = 128000
-        self.pulsesPerUnit = 3200
-        self.previousCount = 0
+        self.jogC1 = False
+        self.jogC2 = False
+        self.directionC1 = 0
+        self.directionC2 = 0
+        self.positionC1 = 0
+        self.positionC2 = 0
+        self.countsPerUnitC1 = 128000
+        self.countsPerUnitC2 = 128000
+        self.pulsesPerUnitC1 = 3200
+        self.pulsesPerUnitC2 = 3200
+        self.previousCountC1 = 0
+        self.previousCountC2 = 0
+        self.positionSetPointC1 = 0
+        self.positionSetPointC2 = 0
         self.positionLeftLimitStatusC1 = False
         self.positionLeftLimitStatusC2 = False
+        self.positionRightLimitStatusC1 = False
+        self.positionRightLimitStatusC2 = False
 
     def setClock(self, clock, freq):
         # Check Clock 0 is disabled.
@@ -135,71 +148,130 @@ class Device(QObject):
     
     @Slot(str)
     def jogPositiveOn(self, channel):
-        self.jog = True
         self.handle = ljm.open(7, self.connection, self.id)
-        self.direction = 0
         if channel == "C1":
-            ljm.eWriteAddress(self.handle, 2009, 0, self.direction)
+            self.directionC1 = 0
+            self.jogC1 = True
+            ljm.eWriteAddress(self.handle, 2009, 0, self.directionC1)
             ljm.eWriteAddress(self.handle, 44008, 1, 1)
         elif channel == "C2":
-            self.direction
-            ljm.eWriteAddress(self.handle, 2011, 0, self.direction)
+            self.directionC2 = 0
+            self.jogC2 = True
+            ljm.eWriteAddress(self.handle, 2011, 0, self.directionC2)
             ljm.eWriteAddress(self.handle, 44010, 1, 1)
 
     @Slot(str)
     def jogPositiveOff(self, channel):
-        self.jog = False
         # print(channel + " jog positive off.")
         self.handle = ljm.open(7, self.connection, self.id)
         if channel == "C1":
+            self.jogC1 = False
             ljm.eWriteAddress(self.handle, 44008, 1, 0)
         elif channel == "C2":
+            self.jogC2 = False
             ljm.eWriteAddress(self.handle, 44010, 1, 0)
           
     
     @Slot(str)
     def jogNegativeOn(self, channel):
-        self.jog = True
         # print(channel + " jog negative on.")
         self.handle = ljm.open(7, self.connection, self.id)
-        self.direction = 1
         if channel == "C1":
-            ljm.eWriteAddress(self.handle, 2009, 0, self.direction)
+            self.directionC1 = 1
+            self.jogC1 = True
+            ljm.eWriteAddress(self.handle, 2009, 0, self.directionC1)
             ljm.eWriteAddress(self.handle, 44008, 1, 1)
         elif channel == "C2":
-            ljm.eWriteAddress(self.handle, 2011, 0, self.direction)
+            self.directionC2 = 1
+            self.jogC2 = True
+            ljm.eWriteAddress(self.handle, 2011, 0, self.directionC2)
             ljm.eWriteAddress(self.handle, 44010, 1, 1)
 
     @Slot(str)
     def jogNegativeOff(self, channel):
-        self.jog = False
         # print(channel + " jog negative off.")
         self.handle = ljm.open(7, self.connection, self.id)
         if channel == "C1":
+            self.jogC1 = False
             ljm.eWriteAddress(self.handle, 44008, 1, 0)
         elif channel == "C2":
+            self.jogC2 = False
             ljm.eWriteAddress(self.handle, 44010, 1, 0)
+
+    @Slot()
+    def updateControlPanel(self):
+        if self.jogC1 == True: 
+            self.updatePositionSetPointC1.emit(self.positionC1)
+        elif self.jogC2 == True:
+            self.updatePositionSetPointC2.emit(self.positionC2)
+        self.updatePositionProcessVariableC1.emit(self.positionC1) 
+        self.updatePositionProcessVariableC2.emit(self.positionC2)
+        self.updateFeedbackProcessVariableC1.emit(self.data[0])
+        self.updateFeedbackProcessVariableC2.emit(self.data[1])
 
     @Slot(str, float)
     def moveToPosition(self, channel, position):
-        currentPosition = self.position
-        increment = position - currentPosition
-        direction = int(np.sign(increment))
-        pulses = int(np.round(np.abs(increment)*self.pulsesPerUnit, 0))
-        print(increment, direction, pulses)
+        if channel == "C1":
+            currentPosition = self.positionC1
+            increment = position - currentPosition
+            pulses = int(np.round(np.abs(increment)*self.pulsesPerUnitC1, 0))
+            if increment > 0:
+                self.directionC1 = 0
+            elif increment < 0:   
+                self.directionC1 = 1
+            self.setDirection(channel, self.directionC1)
+            self.positionSetPointC1 = position
+            ljm.eWriteAddress(self.handle, 44008, 1, 1)
+        elif channel == "C2":
+            currentPosition = self.positionC2
+            increment = position - currentPosition
+            pulses = int(np.round(np.abs(increment)*self.pulsesPerUnitC2, 0))
+            if increment > 0:
+                self.directionC2 = 0
+            elif increment < 0:   
+                self.directionC2 = 1
+            self.setDirection(channel, self.directionC2)
+            self.positionSetPointC2 = position
+            ljm.eWriteAddress(self.handle, 44010, 1, 1)
 
-    def getPosition(self):
+    def setDirection(self, channel, direction):
+        if channel == "C1":
+            address = 2009
+        elif channel == "C2":
+            address = 2011
+        ljm.eWriteAddress(self.handle, address, 0, direction)
+
+    def getPositionC1(self):
         self.handle = ljm.open(7, self.connection, self.id)
         count = ljm.eReadName(self.handle, "DIO1_EF_READ_A")
-        increment = (count - self.previousCount)/self.pulsesPerUnit
-        if self.direction == 0:
-            self.position += increment
-        elif self.direction == 1:
-            self.position -= increment
-        self.updatePositionProcessVariable.emit(self.position)
-        if self.jog == True:
-            self.updatePositionSetPoint.emit(self.position)
-        self.previousCount = count
+        increment = (count - self.previousCountC1)/self.pulsesPerUnitC1
+        if self.directionC1 == 0:
+            self.positionC1 += increment
+        elif self.directionC1 == 1:
+            self.positionC1 -= increment
+        # If moving under setpoint control, stop if target reached.
+        if self.jogC1 == False:
+            if self.directionC1 == 0 and self.positionC1 >= self.positionSetPointC1:
+                ljm.eWriteAddress(self.handle, 44008, 1, 0) 
+            elif self.directionC1 == 1 and self.positionC1 <= self.positionSetPointC1:
+                ljm.eWriteAddress(self.handle, 44008, 1, 0) 
+        self.previousCountC1 = count
+
+    def getPositionC2(self):
+        self.handle = ljm.open(7, self.connection, self.id)
+        count = ljm.eReadName(self.handle, "DIO3_EF_READ_A")
+        increment = (count - self.previousCountC2)/self.pulsesPerUnitC2
+        if self.directionC2 == 0:
+            self.positionC2 += increment
+        elif self.directionC2 == 1:
+            self.positionC2 -= increment
+        # If moving under setpoint control, stop if target reached.
+        if self.jogC2 == False:
+            if self.directionC2 == 0 and self.positionC2 >= self.positionSetPointC2:
+                ljm.eWriteAddress(self.handle, 44010, 1, 0) 
+            elif self.directionC2 == 1 and self.positionC2 <= self.positionSetPointC2:
+                ljm.eWriteAddress(self.handle, 44010, 1, 0) 
+        self.previousCountC2 = count
 
     def configurePulseCounters(self):
         #  Refresh device connection.
@@ -326,8 +398,8 @@ class Device(QObject):
             self.raw = np.asarray(ljm.eReadAddresses(self.handle, self.numFrames, self.addresses, self.dataTypes))
             self.data = self.slopes*(self.raw - self.offsets)
             self.emitData.emit(self.name, self.data)
-            self.getPosition()
-            self.updateFeedbackProcessVariable.emit(self.data[0])
+            self.getPositionC1()
+            self.getPositionC2()
         except ljm.LJMError:
             # Otherwise log the exception.
             ljme = sys.exc_info()[1]
