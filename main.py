@@ -168,6 +168,29 @@ class MainWindow(QMainWindow, QtStyleTools):
                 controlChannel = control["channel"]
                 controlChannelName = control["name"]
                 controlName = deviceName + " " + controlChannel
+
+                #  Create control widget.
+                if control["control"] == 0:
+                    controlWidget = LinearAxis(controlName)
+
+                    # Connections.
+                    controlWidget.axisEnabled.connect(self.manager.devices[deviceName].enableControl)
+                    controlWidget.axisDisabled.connect(self.manager.devices[deviceName].disableControl)
+                    controlWidget.secondarySetPointChanged.connect(self.manager.devices[deviceName].setSpeed)
+                    controlWidget.positiveJogEnabled.connect(self.manager.devices[deviceName].jogPositiveOn)
+                    controlWidget.positiveJogDisabled.connect(self.manager.devices[deviceName].jogPositiveOff)
+                    controlWidget.negativeJogEnabled.connect(self.manager.devices[deviceName].jogNegativeOn)
+                    controlWidget.negativeJogDisabled.connect(self.manager.devices[deviceName].jogNegativeOff)
+                    controlWidget.primaryLeftLimitStatus.connect(self.manager.devices[deviceName].updatePositionLeftLimitStatus)
+                    controlWidget.primaryRightLimitStatus.connect(self.manager.devices[deviceName].updatePositionRightLimitStatus)
+                    controlWidget.primarySetPointChanged.connect(self.manager.devices[deviceName].moveToPosition)
+
+                    self.manager.devices[deviceName].updatePositionSetPoint.connect(controlWidget.setPositionSetPoint)
+                    self.manager.devices[deviceName].updatePositionProcessVariable.connect(controlWidget.setPositionProcessVariable)
+                    self.manager.devices[deviceName].updateFeedbackProcessVariable.connect(controlWidget.setFeedbackProcessVariable)
+                else:
+                    controlWidget = QWidget()
+
                 # Check configuration for previous settings, otherwise take defaults.
                 if controlName not in self.manager.configuration["controlWindow"]:
                     self.defaultControlSettings = {
@@ -202,6 +225,7 @@ class MainWindow(QMainWindow, QtStyleTools):
                         "proportionalOnMeasurement": False
                     }
                     self.manager.configuration["controlWindow"][controlName] = copy.deepcopy(self.defaultControlSettings)
+
                 # Check for feedback channel and disable PID control if none specified.
                 if control["feedback"] == 0:
                     self.manager.configuration["controlWindow"][controlName]["enablePIDControl"] = False
@@ -213,14 +237,12 @@ class MainWindow(QMainWindow, QtStyleTools):
                     self.manager.configuration["controlWindow"][controlName]["feedbackChannel"] = "AIN" + str(control["feedback"])
                 #  Update control name.
                 self.manager.configuration["controlWindow"][controlName]["name"] = controlChannelName
-                #  These widgets should probably be stored somehow...
-                if control["control"] == 0:
-                    panel = LinearAxis(controlName)
-                    panel.setConfiguration(configuration=self.manager.configuration)
-                else:
-                    panel = QWidget()
+                
+                # Set the configuration.
+                controlWidget.setConfiguration(configuration=self.manager.configuration)
+                
                 # Add to control window tab bar.
-                self.controlWindow.controlTabWidget.addTab(panel, controlChannelName)
+                self.controlWindow.controlTabWidget.addTab(controlWidget, controlChannelName)
     
     def moveEvent(self, event):
         position = self.geometry()

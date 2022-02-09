@@ -206,7 +206,10 @@ class Manager(QObject):
             self.devices[name].updateOffsets.connect(self.updateDeviceOffsets)
             log.info(name + " attached to basic acquisition connections.")
         elif connect == False:
+            self.device.pop(name)
+            log.info("Device instance deleted for device named " + name + ".")
             self.deviceThreads[name].quit()  
+            self.deviceThreads.pop(name)
             log.info("Device thread deleted for device named " + name + ".")
     
     def loadDevicesFromConfiguration(self):
@@ -348,7 +351,6 @@ class Manager(QObject):
 
         # Clear all previous data.
         self.assembly.clearAllData()
-
         log.info("Configuring devices.")
     
     @Slot()
