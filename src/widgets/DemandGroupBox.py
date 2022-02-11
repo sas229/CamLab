@@ -9,8 +9,8 @@ class DemandGroupBox(QGroupBox):
         super().__init__(*args, **kwargs)
 
         # Defaults.
-        self.setPoint = 50
-        self.processVariable = 50
+        self.setPoint = 0
+        self.processVariable = 0
         self.unit = ""
 
         # Validator.
@@ -26,7 +26,7 @@ class DemandGroupBox(QGroupBox):
         self.processVariableLabel = QLabel("PV")
         self.processVariableLineEdit = QLineEdit()
         self.processVariableLineEdit.setProperty("class", "processVariable")
-        self.processVariableLineEdit.setText(str(self.processVariable))
+        self.processVariableLineEdit.setText("")
         self.processVariableLineEdit.setFixedWidth(100)
         self.processVariableLineEdit.setReadOnly(True)
 

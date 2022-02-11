@@ -40,13 +40,37 @@ QGroupBox {{
   border-width: 0 0 2px 0;
 }}
 
-QPushButton.indicator {{
+/* QPushButton.indicator {{
+  color: {QTMATERIAL_SECONDARYDARKCOLOR};
+  background-color: '#dc3545';
+  border-color:  '#dc3545';
+}} */
+
+QPushButton.indicator:disabled {{
   color: {QTMATERIAL_SECONDARYDARKCOLOR};
   background-color: '#dc3545';
   border-color:  '#dc3545';
 }}
 
-QPushButton.indicator:checked {{
+QPushButton.indicator:disabled:checked {{
+  color: {QTMATERIAL_SECONDARYDARKCOLOR};
+  background-color: '#27AE60';
+  border-color:  '#27AE60';
+}}
+
+/* QPushButton.runningIndicator {{
+  color: {QTMATERIAL_SECONDARYDARKCOLOR};
+  background-color: '#dc3545';
+  border-color:  '#dc3545';
+}} */
+
+QPushButton.runningIndicator:disabled {{
+  color: {QTMATERIAL_SECONDARYDARKCOLOR};
+  background-color: '#dc3545';
+  border-color:  '#dc3545';
+}}
+
+QPushButton.runningIndicator:disabled:checked {{
   color: {QTMATERIAL_SECONDARYDARKCOLOR};
   background-color: '#27AE60';
   border-color:  '#27AE60';
@@ -57,12 +81,6 @@ QPushButton.limitIndicator:disabled {{
   background-color: '#27AE60';
   border-color:  '#27AE60';
 }}
-
-/* QPushButton.limitIndicator:checked {{
-  color: {QTMATERIAL_SECONDARYDARKCOLOR};
-  background-color: 'red';
-  border-color:  'red';
-}} */
 
 QPushButton.limitIndicator:disabled:checked {{
   color: {QTMATERIAL_SECONDARYDARKCOLOR};

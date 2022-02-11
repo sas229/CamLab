@@ -13,7 +13,7 @@ class JogGroupBox(QGroupBox):
         self.unit = ""
 
         # Validator.
-        self.doubleValidator = QDoubleValidator(decimals=2)
+        self.doubleValidator = QDoubleValidator(decimals=3, bottom=0.001, top=3.0)
 
         # Controls.
         self.speedLabel = QLabel("Speed")
@@ -55,7 +55,7 @@ class JogGroupBox(QGroupBox):
     def setSpeed(self, value=None):
         if value == None:
             value = float(self.speedLineEdit.text())
-        self.speedLineEdit.setText("{value:.2f}".format(value=value))
+        self.speedLineEdit.setText("{value:.3f}".format(value=value))
         self.speedLineEditChanged.emit(value)
 
     def getSpeed(self):
