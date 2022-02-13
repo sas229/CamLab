@@ -182,6 +182,8 @@ class MainWindow(QMainWindow, QtStyleTools):
                     controlWidget.primaryLeftLimitChanged.connect(self.manager.devices[deviceName].updatePositionLeftLimit)
                     controlWidget.primaryRightLimitChanged.connect(self.manager.devices[deviceName].updatePositionRightLimit)
                     controlWidget.primarySetPointChanged.connect(self.manager.devices[deviceName].moveToPosition)
+                    controlWidget.feedbackLeftLimitChanged.connect(self.manager.devices[deviceName].updateFeedbackLeftLimit)
+                    controlWidget.feedbackRightLimitChanged.connect(self.manager.devices[deviceName].updateFeedbackRightLimit)
                     controlWidget.zeroPosition.connect(self.manager.devices[deviceName].zeroPosition)
                     controlWidget.stopCommand.connect(self.manager.devices[deviceName].stopCommand)
                     self.checkTimer.timeout.connect(self.manager.devices[deviceName].checkConnection)
@@ -192,7 +194,7 @@ class MainWindow(QMainWindow, QtStyleTools):
                         self.manager.devices[deviceName].updateLimitIndicatorC1.connect(controlWidget.setLimitIndicator)
                         self.manager.devices[deviceName].updateConnectionIndicatorC1.connect(controlWidget.setConnectedIndicator)
                         self.manager.devices[deviceName].updatePositionSetPointC1.connect(controlWidget.setPositionSetPoint)
-                        # self.manager.devices[deviceName].updateFeedbackSetPointC1.connect(controlWidget.setFeedbackSetPoint)
+                        self.manager.devices[deviceName].updateFeedbackSetPointC1.connect(controlWidget.setFeedbackSetPoint)
                         self.manager.devices[deviceName].updatePositionProcessVariableC1.connect(controlWidget.setPositionProcessVariable)
                         self.manager.devices[deviceName].updateFeedbackProcessVariableC1.connect(controlWidget.setFeedbackProcessVariable)
                     elif control["channel"] == "C2":
@@ -200,7 +202,7 @@ class MainWindow(QMainWindow, QtStyleTools):
                         self.manager.devices[deviceName].updateLimitIndicatorC2.connect(controlWidget.setLimitIndicator)
                         self.manager.devices[deviceName].updateConnectionIndicatorC2.connect(controlWidget.setConnectedIndicator)
                         self.manager.devices[deviceName].updatePositionSetPointC2.connect(controlWidget.setPositionSetPoint)
-                        # self.manager.devices[deviceName].updateFeedbackSetPointC2.connect(controlWidget.setFeedbackSetPoint)
+                        self.manager.devices[deviceName].updateFeedbackSetPointC2.connect(controlWidget.setFeedbackSetPoint)
                         self.manager.devices[deviceName].updatePositionProcessVariableC2.connect(controlWidget.setPositionProcessVariable)
                         self.manager.devices[deviceName].updateFeedbackProcessVariableC2.connect(controlWidget.setFeedbackProcessVariable)
                 else:

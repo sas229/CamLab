@@ -200,7 +200,7 @@ class Manager(QObject):
         skipSamples = self.configuration["global"]["skipSamples"]
         averageSamples = self.configuration["global"]["averageSamples"]
         self.assembly.settings(controlRate, skipSamples, averageSamples)
-        
+
         # Set filename.
         path, filename, date, time, ext = self.generateFilename()
         self.assembly.setFilename(path, filename, date, time, ext)
@@ -212,8 +212,6 @@ class Manager(QObject):
         # For each device set the acquisition array and execute in a separate thread.
         for device in enabledDevices:
             name = device["name"]
-            id = device["id"]
-            connection = device["connection"]
             
             # Generate addresses for acqusition and set acquisition in device.
             channels, names, units, slopes, offsets, autozero = self.acquisitionModels[name].enabledChannels()
@@ -224,9 +222,25 @@ class Manager(QObject):
                 address = int(re.findall(r'\d+', channel)[0])*2 # Multiply by two to get correct LJ address for AIN.
                 addresses.append(address)
                 dataTypes.append(dt)
+            # print(addresses)
             controlRate = self.configuration["global"]["controlRate"]
             self.devices[name].setAcquisition(channels, addresses, dataTypes, slopes, offsets, autozero, controlRate)
             log.info("Acquisition settings set for device named " + name + ".")
+
+    def setDeviceFeedbackChannels(self):
+        log.info("Setting feedback channels for all devices.")
+        # Get a list of enabled devices.
+        enabledDevices = self.deviceTableModel.enabledDevices()
+
+        # For each device set the acquisition array and execute in a separate thread.
+        for device in enabledDevices:
+            deviceName = device["name"]
+
+            # Control channels.
+            controls = self.controlTableModels[deviceName].enabledControls()
+            for control in controls:
+                self.devices[deviceName].setFeedbackChannels(control["channel"], control["feedback"])
+                log.info("Feedback channel set to " + str(control["feedback"]) + " for control channel " + control["channel"] + " on " + deviceName + ".")
 
     @Slot(str, int, int, bool)
     def manageDeviceThreads(self, name, id, connection, connect):
@@ -399,6 +413,9 @@ class Manager(QObject):
     def run(self):
         # Set acquisition settings.
         self.setAcquisitionSettings()
+
+        # Set feedback channels.
+        self.setDeviceFeedbackChannels()
         
         # Start acquisition.
         self.timing.start(self.configuration["global"]["controlRate"])
