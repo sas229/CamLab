@@ -57,22 +57,12 @@ class Manager(QObject):
             {"channel": "C1", "name": "C1", "enable": False, "type": 1, "control": 0, "feedback": 0},
             {"channel": "C2", "name": "C2", "enable": False, "type": 1, "control": 0, "feedback": 0}
         ]
-        self.controlModeList = ['Analogue', 'Digital']
-        self.controlActuatorList = ['Linear', 'Rotary', 'Pump', 'Speed']
+        self.controlModeList = ['Digital', 'Digital']
+        self.controlActuatorList = ['Linear', 'Linear']
         self.defaultFeedbackChannel = ['N/A']
 
         # Instantiate the model for the device list.   
         self.deviceTableModel = DeviceTableModel()
-
-        # Load last used configuration file.
-        log.info("Finding previous YAML file location from QSettings.")
-        self.settings = QSettings("CamLab", "Settings")
-        self.settings.sync()
-        self.findConfigurationPath()
-        if self.configurationPath != None:
-            self.loadConfiguration(self.configurationPath)
-        else:
-            self.initialiseDefaultConfiguration()
 
         # Create assembly thread.
         self.assembly = Assembly()
@@ -91,6 +81,16 @@ class Manager(QObject):
         self.timing.moveToThread(self.timingThread)
         self.timingThread.start()
         log.info("Timing thread started.")           
+
+        # Load last used configuration file.
+        log.info("Finding previous YAML file location from QSettings.")
+        self.settings = QSettings("CamLab", "Settings")
+        self.settings.sync()
+        self.findConfigurationPath()
+        if self.configurationPath != None:
+            self.loadConfiguration(self.configurationPath)
+        else:
+            self.initialiseDefaultConfiguration()
 
     @Slot(str, list, list)
     def updateDeviceOffsets(self, name, channels, newOffsets):
@@ -123,9 +123,11 @@ class Manager(QObject):
         offsetline = "Offsets:"
         channelline = "Channel:"
         nameline = "Time (s)"
+        #  For each enabled device, add the enabled channels for acquisition and control.
         enabledDevices = self.deviceTableModel.enabledDevices()
         for device in enabledDevices:
             deviceName = device["name"]
+            # Acquisition channels.
             channels, names, units, slopes, offsets, autozero = self.acquisitionModels[deviceName].enabledChannels()
             for slope in slopes:
                 slopeline += "\t"
@@ -139,6 +141,45 @@ class Manager(QObject):
             for i in range(len(names)):
                 nameline += "\t"
                 nameline += str(names[i]) + " (" + str(units[i]) + ")"
+            # Control channels.
+            controls = self.controlTableModels[deviceName].enabledControls()
+            for control in controls:
+                # Get name of control and units.
+                controlName = deviceName + " " + control["channel"]
+                primaryUnit = self.configuration["controlWindow"][controlName]["primaryUnit"]
+                secondaryUnit = self.configuration["controlWindow"][controlName]["secondaryUnit"]
+                feedbackUnit = self.configuration["controlWindow"][controlName]["feedbackUnit"]
+                # Get feedback channel name.
+                feedbackChannelIndex = control["feedback"]
+                feedbackChannel = self.configuration["controlWindow"][controlName]["feedbackChannel"]
+                # For each enabled control add the required header components depending on the actuator type.
+                if control["control"] == 0:
+                    if feedbackChannelIndex == 0:
+                        slopeline += "\t 1 \t 1 \t 1 \t 1" 
+                        offsetline += "\t 0 \t 0 \t 0 \t 0"
+                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]" 
+                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]"
+                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]"
+                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]" 
+                        nameline += "\t Position SP " + str(primaryUnit)
+                        nameline += "\t Position PV " + str(primaryUnit)
+                        nameline += "\t Direction (-)"
+                        nameline += "\t Speed " + str(secondaryUnit)
+                    else:
+                        slopeline += "\t 1 \t 1 \t 1 \t 1 \t 1 \t 1" 
+                        offsetline += "\t 0 \t 0 \t 0 \t 0 \t 0 \t 0"
+                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]" 
+                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]"
+                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]"
+                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]" 
+                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]"
+                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]" 
+                        nameline += "\t Position SP " + str(primaryUnit)
+                        nameline += "\t Position PV " + str(primaryUnit)
+                        nameline += "\t Direction (-)"
+                        nameline += "\t Speed " + str(secondaryUnit)
+                        nameline += "\t Feedback SP " + str(feedbackUnit)
+                        nameline += "\t Feedback PV " + str(feedbackUnit)
         slopeline += "\n"
         offsetline += "\n\n"
         channelline += "\n\n"
@@ -146,10 +187,9 @@ class Manager(QObject):
         header = byeline + testline + slopeline + offsetline + channelline + nameline
         return header
 
-    def createDeviceThreads(self):
-        log.info("Creating device threads.")
-        self.devices = {}
-        self.deviceThreads = {}
+    def setAcquisitionSettings(self):
+        log.info("Setting acquisition for all devices.")
+        # Get a list of enabled devices.
         enabledDevices = self.deviceTableModel.enabledDevices()
 
         # Create output arrays in assembly thread.
@@ -160,7 +200,7 @@ class Manager(QObject):
         skipSamples = self.configuration["global"]["skipSamples"]
         averageSamples = self.configuration["global"]["averageSamples"]
         self.assembly.settings(controlRate, skipSamples, averageSamples)
-        
+
         # Set filename.
         path, filename, date, time, ext = self.generateFilename()
         self.assembly.setFilename(path, filename, date, time, ext)
@@ -168,14 +208,12 @@ class Manager(QObject):
         # Generate the header for the output file.
         header = self.createHeader()
         self.assembly.writeHeader(header)
-
+        
         # For each device set the acquisition array and execute in a separate thread.
         for device in enabledDevices:
             name = device["name"]
-            id = device["id"]
-            connection = device["connection"]
             
-            # Generate addresses for acqusition.
+            # Generate addresses for acqusition and set acquisition in device.
             channels, names, units, slopes, offsets, autozero = self.acquisitionModels[name].enabledChannels()
             addresses = []
             dataTypes = []
@@ -184,10 +222,31 @@ class Manager(QObject):
                 address = int(re.findall(r'\d+', channel)[0])*2 # Multiply by two to get correct LJ address for AIN.
                 addresses.append(address)
                 dataTypes.append(dt)
+            # print(addresses)
             controlRate = self.configuration["global"]["controlRate"]
+            self.devices[name].setAcquisition(channels, addresses, dataTypes, slopes, offsets, autozero, controlRate)
+            log.info("Acquisition settings set for device named " + name + ".")
 
-            # Create device instance and move to thread.
-            self.devices[name] = Device(name, id, connection, channels, addresses, dataTypes, slopes, offsets, autozero, controlRate)
+    def setDeviceFeedbackChannels(self):
+        log.info("Setting feedback channels for all devices.")
+        # Get a list of enabled devices.
+        enabledDevices = self.deviceTableModel.enabledDevices()
+
+        # For each device set the acquisition array and execute in a separate thread.
+        for device in enabledDevices:
+            deviceName = device["name"]
+
+            # Control channels.
+            controls = self.controlTableModels[deviceName].enabledControls()
+            for control in controls:
+                self.devices[deviceName].setFeedbackChannels(control["channel"], control["feedback"])
+                log.info("Feedback channel set to " + str(control["feedback"]) + " for control channel " + control["channel"] + " on " + deviceName + ".")
+
+    @Slot(str, int, int, bool)
+    def manageDeviceThreads(self, name, id, connection, connect):
+        # Create device instance and move to thread if it doesn't already exist.
+        if connect == True and name not in self.devices:
+            self.devices[name] = Device(name, id, connection)
             log.info("Device instance created for device named " + name + ".")
             self.deviceThreads[name] = QThread(parent=self)
             log.info("Device thread created for device named " + name + ".")
@@ -195,16 +254,20 @@ class Manager(QObject):
             self.deviceThreads[name].start()
             log.info("Device thread started for device named " + name + ".")
 
-            # Emit signal to connect sample timer to slot for the current device object.
+            # Connections.
             self.timing.controlDevices.connect(self.devices[name].readValues)
             self.assembly.autozeroDevices.connect(self.devices[name].recalculateOffsets)
-
-            # Connections.
             self.devices[name].emitData.connect(self.assembly.updateNewData)
             self.devices[name].updateOffsets.connect(self.updateDeviceOffsets)
-            log.info(name + " attached to assembly thread updateNewData method.")
-        log.info("Device threads created.")
-
+            log.info(name + " attached to basic acquisition connections.")
+        
+        elif connect == False:
+            self.device.pop(name)
+            log.info("Device instance deleted for device named " + name + ".")
+            self.deviceThreads[name].quit()  
+            self.deviceThreads.pop(name)
+            log.info("Device thread deleted for device named " + name + ".")
+    
     def loadDevicesFromConfiguration(self):
         # Find all devices listed in the configuration file.
         if "devices" in self.configuration:
@@ -232,6 +295,7 @@ class Manager(QObject):
                     log.warning(e)
                 # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
                 self.deviceTableModel.appendRow(deviceInformation)
+                self.manageDeviceThreads(name=device, id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True)
                 self.acquisitionModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
                 self.controlTableModels[name] = ControlTableModel(self.configuration["devices"][name]["control"])
                 self.deviceConfigurationAdded.emit(name, self.defaultFeedbackChannel)
@@ -340,22 +404,19 @@ class Manager(QObject):
 
         # Stop acquisition.
         self.timing.stop()
-
+        
         # Clear all previous data.
         self.assembly.clearAllData()
-        
-        # Close device threads.
-        for name in self.deviceThreads:
-            self.deviceThreads[name].quit()
-            log.info("Thread for " + name + " stopped.")
-
         log.info("Configuring devices.")
     
     @Slot()
     def run(self):
-        # Create device threads.
-        self.createDeviceThreads()
+        # Set acquisition settings.
+        self.setAcquisitionSettings()
 
+        # Set feedback channels.
+        self.setDeviceFeedbackChannels()
+        
         # Start acquisition.
         self.timing.start(self.configuration["global"]["controlRate"])
         log.info("Started acquisition and control.")
@@ -534,27 +595,72 @@ class Manager(QObject):
                 genericChannelsData.append(
                     {"plot": False, "name": names[i], "device": device["name"], "colour": self.setColourDefault(),
                      "value": "0.00", "unit": units[i]})
-
+            # Control channels.
+            controls = self.controlTableModels[name].enabledControls()
+            device = device["name"]
+            for control in controls:
+                controlName = name + " " + control["channel"]
+                # Slice in lines that follows removes the brackets.
+                primaryUnit = self.configuration["controlWindow"][controlName]["primaryUnit"][1:-1]
+                secondaryUnit = self.configuration["controlWindow"][controlName]["secondaryUnit"][1:-1]
+                feedbackUnit = self.configuration["controlWindow"][controlName]["feedbackUnit"][1:-1]
+                channel = control["channel"]
+                if control["feedback"] == 0:
+                    if control["control"] == 0:
+                        genericChannelsData.append(
+                        {"plot": False, "name": "Postion SP" , "device": control["name"], "colour": self.setColourDefault(),
+                        "value": "0.00", "unit": primaryUnit})
+                        genericChannelsData.append(
+                        {"plot": False, "name": "Postion PV" , "device": control["name"], "colour": self.setColourDefault(),
+                        "value": "0.00", "unit": primaryUnit})
+                        genericChannelsData.append(
+                        {"plot": False, "name": "Direction" , "device": control["name"], "colour": self.setColourDefault(),
+                        "value": "0.00", "unit": "-"})
+                        genericChannelsData.append(
+                        {"plot": False, "name": "Speed" , "device": control["name"], "colour": self.setColourDefault(),
+                        "value": "0.00", "unit": secondaryUnit})
+                else:
+                    if control["control"] == 0:
+                        genericChannelsData.append(
+                        {"plot": False, "name": "Postion SP" , "device": control["name"], "colour": self.setColourDefault(),
+                        "value": "0.00", "unit": primaryUnit})
+                        genericChannelsData.append(
+                        {"plot": False, "name": "Postion PV" , "device": control["name"], "colour": self.setColourDefault(),
+                        "value": "0.00", "unit": primaryUnit})
+                        genericChannelsData.append(
+                        {"plot": False, "name": "Direction" , "device": control["name"], "colour": self.setColourDefault(),
+                        "value": "0.00", "unit": "-"})
+                        genericChannelsData.append(
+                        {"plot": False, "name": "Speed" , "device": control["name"], "colour": self.setColourDefault(),
+                        "value": "0.00", "unit": secondaryUnit})
+                        genericChannelsData.append(
+                        {"plot": False, "name": "Feedback SP" , "device": control["name"], "colour": self.setColourDefault(),
+                        "value": "0.00", "unit": feedbackUnit})
+                        genericChannelsData.append(
+                        {"plot": False, "name": "Feedback PV" , "device": control["name"], "colour": self.setColourDefault(),
+                        "value": "0.00", "unit": feedbackUnit})
         return genericChannelsData
 
+    @Slot()
     def updatePlotWindowChannelsData(self):
-        # Create a generic channelsData list for the enabled devices.
-        genericChannelsData = self.getGenericChannelsData()
+        if "plots" in self.configuration:
+            # Create a generic channelsData list for the enabled devices.
+            genericChannelsData = self.getGenericChannelsData()
 
-        # For each PlotWindow object compare the above with the current channelsData object.
-        for plotNumber in self.configuration["plots"]:
-            channelsData = self.configuration["plots"][plotNumber]["channels"]
+            # For each PlotWindow object compare the above with the current channelsData object.
+            for plotNumber in self.configuration["plots"]:
+                channelsData = self.configuration["plots"][plotNumber]["channels"]
 
-            # Iterate through the genericChannelsData and compare with channelsData, inheriting the colour if it exists.
-            for genericChannel in genericChannelsData:
-                name = genericChannel["name"]
-                device = genericChannel["device"]
-                for channel in channelsData:
-                    if channel["name"] == name and channel["device"] == device:
-                        genericChannel["plot"] = copy.deepcopy(channel["plot"])
-                        genericChannel["colour"] = copy.deepcopy(channel["colour"])
-            self.configuration["plots"][plotNumber]["channels"] = copy.deepcopy(genericChannelsData)
-            self.plotWindowChannelsUpdated.emit()
+                # Iterate through the genericChannelsData and compare with channelsData, inheriting the colour if it exists.
+                for genericChannel in genericChannelsData:
+                    name = genericChannel["name"]
+                    device = genericChannel["device"]
+                    for channel in channelsData:
+                        if channel["name"] == name and channel["device"] == device:
+                            genericChannel["plot"] = copy.deepcopy(channel["plot"])
+                            genericChannel["colour"] = copy.deepcopy(channel["colour"])
+                self.configuration["plots"][plotNumber]["channels"] = copy.deepcopy(genericChannelsData)
+                self.plotWindowChannelsUpdated.emit()
 
     def setColourDefault(self):
         colour = [

@@ -3,9 +3,9 @@ from PySide6.QtCore import Qt, QRect, QRectF, Property, QPoint, Signal
 from PySide6.QtGui import QPainter, QBrush, QColor, QPen, QFont, QPolygon
 
 class LinearSlider(QWidget):
-    leftLimitChanged = Signal(float)
-    rightLimitChanged = Signal(float)
-    setPointChanged = Signal(float)
+    leftLimitSliderMoved = Signal(float)
+    rightLimitSliderMoved = Signal(float)
+    setPointSliderMoved = Signal(float)
     
     def __init__(self, minimumRange = 0, maximumRange = 100, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -360,13 +360,13 @@ class LinearSlider(QWidget):
         if self.positionsUpdated == True:
             if self.pressedControl == 1: 
                 # Emit the left limit changed signal.
-                self.leftLimitChanged.emit(self.leftLimit)
+                self.leftLimitSliderMoved.emit(self.leftLimit)
             elif self.pressedControl == 2: 
                 # Emit the right limit changed signal.
-                self.rightLimitChanged.emit(self.rightLimit)
+                self.rightLimitSliderMoved.emit(self.rightLimit)
             elif self.pressedControl == 3: 
                 # Emit the set point changed signal.
-                self.setPointChanged.emit(self.setPoint)
+                self.setPointSliderMoved.emit(self.setPoint)
             self.positionsUpdated = False
         self.pressedControl = 0
         self.update()

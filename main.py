@@ -1,7 +1,7 @@
 import sys, os
 from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QLabel
 from PySide6.QtGui import QIcon, QScreen
-from PySide6.QtCore import Slot, Qt, QModelIndex, QPoint, QThread, QTimer
+from PySide6.QtCore import Signal, Slot, Qt, QModelIndex, QPoint, QThread, QTimer
 from qt_material import apply_stylesheet, QtStyleTools
 from src.manager import Manager
 from src.widgets import CamLabToolBar, StatusGroupBox, GlobalSettingsGroupBox, DevicesGroupBox, ConfigurationGroupBox, PlotWindow, ControlWindow, LinearAxis
@@ -17,6 +17,8 @@ from time import sleep
 from random import randint
 
 class MainWindow(QMainWindow, QtStyleTools):
+    running = Signal(bool)
+    
     def __init__(self):
         super().__init__()
         self.setWindowTitle("CamLab")
@@ -35,7 +37,9 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.plots = {}
 
         # Timers.
-        self.plotTimer = QTimer()
+        self.updateTimer = QTimer()
+        self.checkTimer = QTimer()
+        self.checkTimer.start(1000)
 
         # Instantiate the manager object and thread.
         self.manager = Manager()
@@ -130,6 +134,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.manager.removeControlTable.connect(self.removeControlTable)
         self.manager.addControlTable.connect(self.addControlTable)
         self.manager.updateDeviceConfigurationTab.connect(self.updateDeviceConfigurationTabs)
+        self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.manager.manageDeviceThreads)
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.updateDeviceConfigurationTabs)
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.manager.updatePlotWindowChannelsData)
         self.manager.timing.actualRate.connect(self.statusGroupBox.update)
@@ -138,7 +143,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.manager.outputText.connect(self.statusGroupBox.setOutputText)
 
         # Timer connections.
-        self.plotTimer.timeout.connect(self.manager.assembly.updatePlotData)
+        self.updateTimer.timeout.connect(self.manager.assembly.updatePlotData)
     
     @Slot()
     def clearControls(self):
@@ -152,74 +157,110 @@ class MainWindow(QMainWindow, QtStyleTools):
     def updateControlTabs(self):
         # Method to update control tab widgets.
         self.clearControls()
-        enabledControls = []
         devices = self.manager.deviceTableModel.enabledDevices()
         #  For each device get a list of enabled control channels.
         for device in devices:
             deviceName = device["name"]
             controls = self.manager.controlTableModels[deviceName].enabledControls()
             for control in controls:
-                if control["enable"] == True:
-                    enabledControls.append(control)
-        
-            #  For each device and enabled control channel create the appropriate control widget.
-            for control in enabledControls:
                 controlChannel = control["channel"]
                 controlChannelName = control["name"]
                 controlName = deviceName + " " + controlChannel
+
+                #  Create control widget.
+                if control["control"] == 0:
+                    controlWidget = LinearAxis(controlName)
+
+                    # Connections.
+                    controlWidget.enable.connect(self.manager.devices[deviceName].setEnable)
+                    controlWidget.secondarySetPointChanged.connect(self.manager.devices[deviceName].setSpeed)
+                    controlWidget.positiveJogEnabled.connect(self.manager.devices[deviceName].jogPositiveOn)
+                    controlWidget.positiveJogDisabled.connect(self.manager.devices[deviceName].jogPositiveOff)
+                    controlWidget.negativeJogEnabled.connect(self.manager.devices[deviceName].jogNegativeOn)
+                    controlWidget.negativeJogDisabled.connect(self.manager.devices[deviceName].jogNegativeOff)
+                    controlWidget.primaryLeftLimitChanged.connect(self.manager.devices[deviceName].updatePositionLeftLimit)
+                    controlWidget.primaryRightLimitChanged.connect(self.manager.devices[deviceName].updatePositionRightLimit)
+                    controlWidget.primarySetPointChanged.connect(self.manager.devices[deviceName].moveToPosition)
+                    controlWidget.feedbackLeftLimitChanged.connect(self.manager.devices[deviceName].updateFeedbackLeftLimit)
+                    controlWidget.feedbackRightLimitChanged.connect(self.manager.devices[deviceName].updateFeedbackRightLimit)
+                    controlWidget.feedbackSetPointChanged.connect(self.manager.devices[deviceName].setFeedbackSetPoint)
+                    controlWidget.zeroPosition.connect(self.manager.devices[deviceName].zeroPosition)
+                    controlWidget.stopCommand.connect(self.manager.devices[deviceName].stopCommand)
+                    controlWidget.PIDControl.connect(self.manager.devices[deviceName].setPIDControl)
+                    controlWidget.KPChanged.connect(self.manager.devices[deviceName].setKP)
+                    controlWidget.KIChanged.connect(self.manager.devices[deviceName].setKI)
+                    controlWidget.KDChanged.connect(self.manager.devices[deviceName].setKD)
+                    controlWidget.proportionalOnMeasurementChanged.connect(self.manager.devices[deviceName].setPoM)
+                    self.checkTimer.timeout.connect(self.manager.devices[deviceName].checkConnection)
+                    self.running.connect(self.manager.devices[deviceName].setRunning)
+                    self.manager.devices[deviceName].updateRunningIndicator.connect(controlWidget.setRunningIndicator)
+                    if control["channel"] == "C1":
+                        self.updateTimer.timeout.connect(self.manager.devices[deviceName].updateControlPanelC1)
+                        self.manager.devices[deviceName].updateLimitIndicatorC1.connect(controlWidget.setLimitIndicator)
+                        self.manager.devices[deviceName].updateConnectionIndicatorC1.connect(controlWidget.setConnectedIndicator)
+                        self.manager.devices[deviceName].updateSpeedC1.connect(controlWidget.jog.setSpeed)
+                        self.manager.devices[deviceName].updatePositionSetPointC1.connect(controlWidget.setPositionSetPoint)
+                        self.manager.devices[deviceName].updateFeedbackSetPointC1.connect(controlWidget.setFeedbackSetPoint)
+                        self.manager.devices[deviceName].updatePositionProcessVariableC1.connect(controlWidget.setPositionProcessVariable)
+                        self.manager.devices[deviceName].updateFeedbackProcessVariableC1.connect(controlWidget.setFeedbackProcessVariable)
+                    elif control["channel"] == "C2":
+                        self.updateTimer.timeout.connect(self.manager.devices[deviceName].updateControlPanelC2)
+                        self.manager.devices[deviceName].updateLimitIndicatorC2.connect(controlWidget.setLimitIndicator)
+                        self.manager.devices[deviceName].updateConnectionIndicatorC2.connect(controlWidget.setConnectedIndicator)
+                        self.manager.devices[deviceName].updateSpeedC2.connect(controlWidget.jog.setSpeed)
+                        self.manager.devices[deviceName].updatePositionSetPointC2.connect(controlWidget.setPositionSetPoint)
+                        self.manager.devices[deviceName].updateFeedbackSetPointC2.connect(controlWidget.setFeedbackSetPoint)
+                        self.manager.devices[deviceName].updatePositionProcessVariableC2.connect(controlWidget.setPositionProcessVariable)
+                        self.manager.devices[deviceName].updateFeedbackProcessVariableC2.connect(controlWidget.setFeedbackProcessVariable)
+                else:
+                    controlWidget = QWidget()
+
                 # Check configuration for previous settings, otherwise take defaults.
                 if controlName not in self.manager.configuration["controlWindow"]:
                     self.defaultControlSettings = {
                         "name": controlChannelName,
                         "device": deviceName,
                         "channel": controlChannel,
-                        "enable": False,
-                        "enablePIDControl": False,
-                        "PIDControl": False,
-                        "connected": False,
-                        "reachedLimit": False,
-                        "primaryMinimum": -100,
-                        "primaryMaximum": 100,
-                        "primaryLeftLimit": -80,
-                        "primaryRightLimit": 80,
-                        "primarySetPoint": 20,
-                        "primaryProcessVariable": 20,
+                        "primaryMinimum": -100.00,
+                        "primaryMaximum": 100.00,
+                        "primaryLeftLimit": -80.00,
+                        "primaryRightLimit": 80.00,
+                        "primarySetPoint": 0.00,
+                        "primaryProcessVariable": 0.00,
                         "primaryUnit": "(mm)",
-                        "secondarySetPoint": 3.0,
+                        "secondarySetPoint": 3.000,
                         "secondaryUnit": "(mm/s)",
-                        "feedbackMinimum": 0,
-                        "feedbackMaximum": 100,
-                        "feedbackLeftLimit": 0,
-                        "feedbackRightLimit": 80,
-                        "feedbackSetPoint": 40,
-                        "feedbackProcessVariable": 40,
+                        "feedbackMinimum": -20.00,
+                        "feedbackMaximum": 100.00,
+                        "feedbackLeftLimit": -10.00,
+                        "feedbackRightLimit": 90.00,
+                        "feedbackSetPoint": 0.00,
+                        "feedbackProcessVariable": 0.00,
                         "feedbackUnit": "(N)",
                         "feedbackChannel": "N/A",
-                        "KP": 1.0,
-                        "KI": 1.0,
-                        "KD": 1.0,
+                        "KP": 1.00,
+                        "KI": 1.00,
+                        "KD": 1.00,
                         "proportionalOnMeasurement": False
                     }
                     self.manager.configuration["controlWindow"][controlName] = copy.deepcopy(self.defaultControlSettings)
-                # Check for feedback channel and disable PID control if none specified.
+
+                # Check for feedback channel.
                 if control["feedback"] == 0:
-                    self.manager.configuration["controlWindow"][controlName]["enablePIDControl"] = False
-                    self.manager.configuration["controlWindow"][controlName]["feedbackChannel"] = "N/A"
-                elif control["feedback"] == 0 and self.manager.configuration["controlWindow"][controlName]["enable"] == False:
                     self.manager.configuration["controlWindow"][controlName]["enablePIDControl"] = False
                     self.manager.configuration["controlWindow"][controlName]["feedbackChannel"] = "N/A"
                 else:
                     self.manager.configuration["controlWindow"][controlName]["feedbackChannel"] = "AIN" + str(control["feedback"])
                 #  Update control name.
                 self.manager.configuration["controlWindow"][controlName]["name"] = controlChannelName
-                #  These widgets should probably be stored somehow...
-                if control["control"] == 0:
-                    panel = LinearAxis(controlName)
-                    panel.setConfiguration(configuration=self.manager.configuration)
-                else:
-                    panel = QWidget()
+                
+                # Set the configuration.
+                controlWidget.setConfiguration(configuration=self.manager.configuration)
+                self.manager.devices[deviceName].checkConnection()
+                self.manager.devices[deviceName].setPosition(controlChannel, self.manager.configuration["controlWindow"][controlName]["primaryProcessVariable"])
+                
                 # Add to control window tab bar.
-                self.controlWindow.controlTabWidget.addTab(panel, controlChannelName)
+                self.controlWindow.controlTabWidget.addTab(controlWidget, controlChannelName)
     
     def moveEvent(self, event):
         position = self.geometry()
@@ -229,11 +270,13 @@ class MainWindow(QMainWindow, QtStyleTools):
 
     @Slot()
     def start(self):
-        self.plotTimer.start(250)
+        self.updateTimer.start(100)
+        self.running.emit(True)
         
     @Slot()
     def end(self):
-        self.plotTimer.stop()
+        self.running.emit(False)
+        self.updateTimer.stop()
         self.statusGroupBox.reset()
 
     @Slot()
@@ -287,6 +330,7 @@ class MainWindow(QMainWindow, QtStyleTools):
 
         # Add control table to the TabWidget.
         self.addControlTable(name, defaultFeedbackChannel)
+        self.manager.controlTableModels[name].controlChannelNameChanged.connect(self.manager.updatePlotWindowChannelsData)
 
         # Set layout within widget.
         self.deviceConfigurationWidget[name] = QWidget()

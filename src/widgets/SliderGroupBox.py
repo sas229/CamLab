@@ -6,6 +6,8 @@ from src.widgets.LinearSlider import LinearSlider
 class SliderGroupBox(QGroupBox):
     leftLimitChanged = Signal(float)
     rightLimitChanged = Signal(float)
+    setPointChanged = Signal(float)
+    processVariableChanged = Signal(float)
     minimumRangeChanged = Signal(float)
     maximumRangeChanged = Signal(float)
     
@@ -75,12 +77,27 @@ class SliderGroupBox(QGroupBox):
         self.maximumRangeLineEdit.setFixedWidth(100)
 
         # Connections.
-        self.axisSlider.leftLimitChanged.connect(self.setLeftLimit)
-        self.axisSlider.rightLimitChanged.connect(self.setRightLimit)
+        self.axisSlider.leftLimitSliderMoved.connect(self.updateLeftLimit)
+        self.axisSlider.rightLimitSliderMoved.connect(self.updateRightLimit)
+        self.axisSlider.setPointSliderMoved.connect(self.emitSetPointChanged)
         self.leftLimitLineEdit.returnPressed.connect(self.setLeftLimit)
         self.rightLimitLineEdit.returnPressed.connect(self.setRightLimit)
         self.minimumRangeLineEdit.returnPressed.connect(self.setMinimumRange)
         self.maximumRangeLineEdit.returnPressed.connect(self.setMaximumRange)
+
+    @Slot()
+    def emitSetPointChanged(self, value):
+        self.setPointChanged.emit(value)
+
+    @Slot(float)
+    def updateLeftLimit(self, value):
+        self.leftLimitLineEdit.setText("{value:.2f}".format(value=value))
+        self.leftLimitChanged.emit(value)
+
+    @Slot(float)
+    def updateRightLimit(self, value):
+        self.rightLimitLineEdit.setText("{value:.2f}".format(value=value))
+        self.rightLimitChanged.emit(value)
 
     @Slot()
     def setLeftLimit(self, value=None):
@@ -89,22 +106,22 @@ class SliderGroupBox(QGroupBox):
             value = float(self.leftLimitLineEdit.text())
         value = min(value, self.axisSlider.setPoint)
         value = max(value, self.axisSlider.minimumRange)
-        self.axisSlider.leftLimit = value
+        self.axisSlider.setLeftLimit(value)
         self.axisSlider.update()
         self.leftLimitLineEdit.setText("{value:.2f}".format(value=value))
         self.leftLimitChanged.emit(value)
 
     def getLeftLimit(self):
-        return self.axisSlider.leftLimit
+        return self.axisSlider.getLeftLimit()
 
-    @Slot()
+    @Slot(float)
     def setRightLimit(self, value=None):
         # Limit values to range between maximum range and set point.
         if value == None:
             value = float(self.rightLimitLineEdit.text())
         value = max(value, self.axisSlider.setPoint)
         value = min(value, self.axisSlider.maximumRange)
-        self.axisSlider.rightLimit = value
+        self.axisSlider.setRightLimit(value)
         self.axisSlider.update()
         self.rightLimitLineEdit.setText("{value:.2f}".format(value=value))
         self.rightLimitChanged.emit(value)
@@ -113,13 +130,39 @@ class SliderGroupBox(QGroupBox):
         return self.axisSlider.rightLimit
 
     @Slot()
-    def setSetPoint(self, value):
-        # Set set point.
+    def setSetPoint(self, value=None):
+        # Set point values to range between left and right limits.
+        if value == None:
+            value = float(self.setPointLineEdit.text())
+        value = max(value, self.getLeftLimit())
+        value = min(value, self.getRightLimit())
         self.axisSlider.setPoint = value
         self.axisSlider.update()
+        # self.setPointChanged.emit(value)
 
     def getSetPoint(self):
         return self.axisSlider.setPoint
+
+    @Slot()
+    def setProcessVariable(self, value=None):
+        # Process variable values.
+        if value == None:
+            value = float(self.processVariableLineEdit.text())
+        self.axisSlider.processVariable = value
+        self.axisSlider.update()
+        self.processVariableChanged.emit(value)
+
+    def getProcessVariable(self):
+        return self.axisSlider.processVariable
+
+    # @Slot()
+    # def setSetPoint(self, value):
+    #     # Set set point.
+    #     self.axisSlider.setPoint = value
+    #     self.axisSlider.update()
+
+    # def getSetPoint(self):
+    #     return self.axisSlider.setPoint
 
     @Slot()
     def setMinimumRange(self, value=None):

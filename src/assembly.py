@@ -32,12 +32,14 @@ class Assembly(QObject):
         self.date = date
         self.timestart = timestart
         self.filepath = path + "/" + filename + "_" + date + "_" + timestart + "_1" + ext
+        log.info("Filename set.")
 
     def writeHeader(self, header):
         self.file = open(self.filepath, 'w+')
         self.file.write(header)
         self.file.close()
         self.file = open(self.filepath, 'ab')
+        log.info("Header written.")
 
     @Slot(str, np.ndarray)
     def updateNewData(self, name, data):

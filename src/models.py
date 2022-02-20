@@ -4,7 +4,7 @@ import operator
 
 class DeviceTableModel(QAbstractTableModel):
     """Methods for data and setData also emit signals to add and remove tabs from the acquisition tab widget when enabled or disabled."""
-    deviceConnectStatusUpdated = Signal(str, bool)
+    deviceConnectStatusUpdated = Signal(str, int, int, bool)
 
     def __init__(self, data=[], parent=None):
         super(DeviceTableModel, self).__init__(parent)
@@ -55,7 +55,7 @@ class DeviceTableModel(QAbstractTableModel):
             item = self._data[index.row()]
             if index.column() == 0:
                 item["connect"] = value
-                self.deviceConnectStatusUpdated.emit(item['name'], item['connect'])
+                self.deviceConnectStatusUpdated.emit(item['name'], item['id'], item['connection'], item['connect'])
             elif index.column() == 4:
                 item["status"] = value
             self.dataChanged.emit(index, index, [])
@@ -307,7 +307,7 @@ class ColourPickerTableModel(QAbstractTableModel):
             ["#e1bee7", "#ce93d8", "#ba68c8", "#ab47bc", "#9c27b0", "#8e24aa", "#7b1fa2", "#6a1b9a", "#4a148c"],
             ["#d1c4e9", "#b39ddb", "#9575cd", "#7e57c2", "#673ab7", "#5e35b1", "#512da8", "#4527a0", "#311b92"],
             ["#c5cae9", "#9fa8da", "#7986cb", "#5c6bc0", "#3f51b5", "#3949ab", "#303f9f", "#283593", "#1a237e"],
-            ["#bbdefb", "#90caf9", "#64b5f6", "#42a5f5", "#2196f3", "#1e88e5", "#1976d2", "#1565c0", "#0d47a1"],
+            ["#bbdefb", "#90caf9", "#64b5f6", "#42a5f5", "#2'N/A'196f3", "#1e88e5", "#1976d2", "#1565c0", "#0d47a1"],
             ["#b3e5fc", "#81d4fa", "#4fc3f7", "#29b6f6", "#03a9f4", "#039be5", "#0288d1", "#0277bd", "#01579b"],
             ["#b2ebf2", "#80deea", "#4dd0e1", "#26c6da", "#00bcd4", "#00acc1", "#0097a7", "#00838f", "#006064"],
             ["#b2dfdb", "#80cbc4", "#4db6ac", "#26a69a", "#009688", "#00897b", "#00796b", "#00695c", "#004d40"],
@@ -342,6 +342,7 @@ class ColourPickerTableModel(QAbstractTableModel):
 class ControlTableModel(QAbstractTableModel):
     controlChannelToggled = Signal(int)
     controlChannelNameChanged = Signal (str, str)
+    # controlTableUpdated = Signal()
 
     def __init__(self, data=[], parent=None):
         super(ControlTableModel, self).__init__(parent)

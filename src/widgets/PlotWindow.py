@@ -89,10 +89,12 @@ class PlotWindow(QWidget, QtStyleTools):
         self.minimumCommonAxisLineEdit = QLineEdit()
         self.minimumCommonAxisLineEdit.setEnabled(False)
         self.minimumCommonAxisLineEdit.setValidator(validator)
+        self.minimumCommonAxisLineEdit.setFixedWidth(80)
         self.setMaximumCommonAxisLabel = QLabel("Maximum:")
         self.maximumCommonAxisLineEdit = QLineEdit()
         self.maximumCommonAxisLineEdit.setEnabled(False)
         self.maximumCommonAxisLineEdit.setValidator(validator)
+        self.maximumCommonAxisLineEdit.setFixedWidth(80)
 
         self.lockCheckBox = QCheckBox("Lock")
 
@@ -102,18 +104,18 @@ class PlotWindow(QWidget, QtStyleTools):
         self.autoPanCommonAxisCheckBox = QCheckBox("Auto")
         self.lockCommonAxisCheckBox = QCheckBox("Lock")
 
-        
-
         self.autoSelectedAxisCheckBox = QCheckBox("Auto")
         self.manualSelectedAxisCheckBox = QCheckBox("Manual")
         self.setMinimumSelectedAxisLabel = QLabel("Minimum:")
         self.minimumSelectedAxisLineEdit = QLineEdit()
         self.minimumSelectedAxisLineEdit.setEnabled(False)
         self.minimumSelectedAxisLineEdit.setValidator(validator)
+        self.minimumSelectedAxisLineEdit.setFixedWidth(80)
         self.setMaximumSelectedAxisLabel = QLabel("Maximum:")
         self.maximumSelectedAxisLineEdit = QLineEdit()
         self.maximumSelectedAxisLineEdit.setEnabled(False)
         self.maximumSelectedAxisLineEdit.setValidator(validator)
+        self.maximumSelectedAxisLineEdit.setFixedWidth(80)
         
         self.invertSelectedAxisCheckBox = QCheckBox("Invert")
         self.logSelectedAxisCheckBox= QCheckBox("Log")
@@ -122,7 +124,7 @@ class PlotWindow(QWidget, QtStyleTools):
 
         self.controlsGroupBox = QGroupBox("Axis Controls")
         self.controlsGroupBox.setFixedHeight(250)
-        self.controlsGroupBox.setFixedWidth(340)
+        self.controlsGroupBox.setFixedWidth(400)
         
         self.controlsLayout = QVBoxLayout()
         self.controlsLayout.addWidget(self.selectedChannelsTableGroupBox)
@@ -171,14 +173,14 @@ class PlotWindow(QWidget, QtStyleTools):
         self.controlsTabWidget.addTab(self.globalControlsWidget, "   Global   ")
         self.controlsTabWidget.addTab(self.xAxisControlsWidget, "Common")
         self.controlsTabWidget.addTab(self.yAxisControlsWidget, "Selected")
-        self.controlsTabWidget.setFixedWidth(285)
+        # self.controlsTabWidget.setFixedWidth(285)
 
         self.controlsTabsLayout = QVBoxLayout()
         self.controlsTabsLayout.addWidget(self.controlsTabWidget)
         self.controlsGroupBox.setLayout(self.controlsTabsLayout)
 
         self.selectedChannelsTableGroupBox.setLayout(self.selectedChannelsTableLayout) 
-        self.selectedChannelsTableGroupBox.setFixedWidth(340)
+        self.selectedChannelsTableGroupBox.setFixedWidth(400)
 
 
         self.plotWindowLayout.addLayout(self.controlsLayout)
@@ -635,10 +637,10 @@ class PlotWindow(QWidget, QtStyleTools):
         # Format channels table columns.
         self.selectedChannelsTableView.setColumnWidth(0, 30)
         self.selectedChannelsTableView.setColumnWidth(1, 30)
-        self.selectedChannelsTableView.setColumnWidth(2, 70)
-        self.selectedChannelsTableView.setColumnWidth(3, 50)
-        self.selectedChannelsTableView.setColumnWidth(4, 60)
-        self.selectedChannelsTableView.setColumnWidth(5, 30)
+        self.selectedChannelsTableView.setColumnWidth(2, 95)
+        self.selectedChannelsTableView.setColumnWidth(3, 75)
+        self.selectedChannelsTableView.setColumnWidth(4, 55)
+        self.selectedChannelsTableView.setColumnWidth(5, 40)
 
     def setPlotNumber(self, plotNumber):
         # Set the plot number.
