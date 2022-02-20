@@ -701,10 +701,10 @@ class Device(QObject):
         elif self.directionC1 == -1:
             self.positionProcessVariableC1 -= incrementPulses
 
-        # # Check positional error using feedback pulses and reset motor if required.
-        # err = abs(incrementPulses-incrementCount)
-        # if err > 0.1:
-        #     self.resetMotor("C1")
+        # Check positional error using feedback pulses and reset motor if required.
+        err = abs(incrementPulses-incrementCount)
+        if err > 1:
+            log.warning("Returned position on C1 does not match demand.")
         
         # If moving under jog control, stop if target limit.
         if self.jogC1 == True:
@@ -726,12 +726,6 @@ class Device(QObject):
             incrementCount = (self.countC2-self.previousCountC2)/self.countsPerUnitC2
         self.previousCountC2 = self.countC2
 
-        # # Increment position process variable.
-        # if self.directionC2 == 1:
-        #     self.positionProcessVariableC2 += incrementCount
-        # elif self.directionC2 == -1:
-        #     self.positionProcessVariableC2 -= incrementCount
-
         # Check motor status by comparing pulses count output with pulses returned.
         if self.pulsesC2 == 0:
             incrementPulses = 0
@@ -745,10 +739,10 @@ class Device(QObject):
         elif self.directionC2 == -1:
             self.positionProcessVariableC2 -= incrementPulses
 
-        # # Check positional error using feedback pulses and reset motor if required.
-        # err = abs(incrementPulses-incrementCount)
-        # if err > 0.1:
-        #     self.resetMotor("C2")
+        # Check positional error using feedback pulses and reset motor if required.
+        err = abs(incrementPulses-incrementCount)
+        if err > 1:
+            log.warning("Returned position on C2 does not match demand.")
         
         # If moving under jog control, stop if target limit.
         if self.jogC2 == True:
