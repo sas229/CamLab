@@ -128,14 +128,14 @@ class Device(QObject):
                 self.PID_C1.reset()
                 self.PID_C1.output_limits = (-speedLimit, speedLimit)
                 self.PID_C1.setpoint = self.feedbackSetPointC1
-                # self.PID_C1.set_auto_mode(True, last_output=0.001)
+                self.PID_C1.set_auto_mode(True, last_output=0.001)
                 aNames = ["DIO4_EF_ENABLE", "DIO4_EF_INDEX", "DIO4_EF_OPTIONS", "DIO4_EF_CONFIG_A", "DIO4_EF_ENABLE"]
                 aValues = [0, 0, 1, self.widthC1, 1]
-                print(self.widthC1)
                 numFrames = len(aNames)
                 results = ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
             else:
                 self.positionSetPointC1 = self.positionProcessVariableC1
+                self.PID_C1.set_auto_mode(False)
                 self.updatePositionSetPointC1.emit(self.positionSetPointC1)
                 ljm.eWriteName(self.handle, "DIO4_EF_ENABLE", 0)
         elif channel == "C2":
@@ -282,7 +282,8 @@ class Device(QObject):
     def setClock(self, clock, freq):        
         # Define appropriate clock settings, selecting the minimum possible divisor 
         # that does not result in a roll value that exceeds the bit depth of the clock.
-        # Clamp frequency to 320000, which is equivalent to 3000 RPM for a 6400 CPR encoder.
+        # Clamp frequency to 426666, which is equivalent to 4000 RPM for a 6400 CPR encoder
+        # with a 16 bit clock and divisor value of 8.
         core_freq = 80000000
         max_roll = 2**16
         divisor = 8
@@ -311,7 +312,8 @@ class Device(QObject):
     def updateClock(self, clock, freq):        
         # Define appropriate clock settings, selecting the minimum possible divisor 
         # that does not result in a roll value that exceeds the bit depth of the clock.
-        # Clamp frequency to 32000, which is equivalent to 3000 RPM for a 6400 CPR encoder.
+        # Clamp frequency to 426666, which is equivalent to 4000 RPM for a 6400 CPR encoder
+        # with a 16 bit clock and divisor value of 8.
         core_freq = 80000000
         max_roll = 2**16
         divisor = 8
@@ -555,7 +557,9 @@ class Device(QObject):
         self.updatePositionProcessVariableC1.emit(self.positionProcessVariableC1)
         if self.feedbackChannelC1 > 0:
             self.updateFeedbackProcessVariableC1.emit(self.feedbackProcessVariableC1)
-            if self.statusPIDC1 == False:
+            if self.statusPIDC1 == True:
+                self.updatePositionSetPointC1.emit(self.positionProcessVariableC1)
+            elif self.statusPIDC1 == False:
                 self.updateFeedbackSetPointC1.emit(self.feedbackProcessVariableC1) 
         
     @Slot()
@@ -565,7 +569,9 @@ class Device(QObject):
         self.updatePositionProcessVariableC2.emit(self.positionProcessVariableC2)
         if self.feedbackChannelC2 > 0:
             self.updateFeedbackProcessVariableC2.emit(self.feedbackProcessVariableC2)
-            if self.statusPIDC2 == False:
+            if self.statusPIDC1 == True:
+                self.updatePositionSetPointC2.emit(self.positionProcessVariableC2)
+            elif self.statusPIDC2 == False:
                 self.updateFeedbackSetPointC2.emit(self.feedbackProcessVariableC2) 
         
     @Slot(str, float)
@@ -770,11 +776,11 @@ class Device(QObject):
         self.handle = ljm.open(7, self.connection, self.id)
 
         # Setup pulse counters. Set to mode 2 which counts both rising and falling edges. 
-        # 500 microsecond debounce period, which is just less than the time between rising and
-        # falling edges for 32 PPR at 3000 RPM.
+        # 400 microsecond debounce period, which is just less than the time between rising and
+        # falling edges for 16 PPR at 4000 RPM.
         aNamesC1 = ["DIO1_EF_ENABLE", "DIO1_EF_INDEX", "DIO1_EF_CONFIG_A", "DIO1_EF_CONFIG_B", "DIO1_EF_ENABLE"]
         aNamesC2 = ["DIO3_EF_ENABLE", "DIO3_EF_INDEX", "DIO3_EF_CONFIG_A", "DIO3_EF_CONFIG_B", "DIO3_EF_ENABLE"]
-        aValues = [0, 9, 500, 2, 1]
+        aValues = [0, 9, 400, 2, 1]
         numFrames = 5
         ljm.eWriteNames(self.handle, numFrames, aNamesC1, aValues)
         ljm.eWriteNames(self.handle, numFrames, aNamesC2, aValues)
