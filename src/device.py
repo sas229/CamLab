@@ -682,12 +682,6 @@ class Device(QObject):
             incrementCount = (self.countC1-self.previousCountC1)/self.countsPerUnitC1
         self.previousCountC1 = self.countC1
 
-        # # Increment position process variable.
-        # if self.directionC1 == 1:
-        #     self.positionProcessVariableC1 += incrementCount
-        # elif self.directionC1 == -1:
-        #     self.positionProcessVariableC1 -= incrementCount
-
         # Check motor status by comparing pulses count output with pulses returned.
         if self.pulsesC1 == 0:
             incrementPulses = 0
@@ -896,18 +890,10 @@ class Device(QObject):
                 self.feedbackProcessVariableC1 = self.data[self.feedbackChannelC1-1]
                 if self.statusPIDC1 == True:
                     self.speedSetPointC1 = self.PID_C1(self.feedbackProcessVariableC1)
-                    # print(self.speedSetPointC1)
                     self.directionC1 = int(np.sign(self.speedSetPointC1))
                     demandSpeed = np.abs(self.speedSetPointC1)
-                    # print(self.speedSetPointC1, demandSpeed, self.directionC1)
                     self.setDirection("C1", self.directionC1)
                     self.setSpeed("C1", demandSpeed)
-                    # ljm.eWriteName(self.handle, "DIO4_EF_CONFIG_A", width)
-                    # aNames = ["DIO4_EF_INDEX", "DIO4_EF_OPTIONS", "DIO4_EF_CONFIG_A", "DIO4_EF_ENABLE"]
-                    # aValues = [0, 1, width, 1]
-                    # numFrames = len(aNames)
-                    # results = ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
-                    # self.emitPulses("C1")
             if self.feedbackC2 == True:
                 self.feedbackProcessVariableC2 = self.data[self.feedbackChannelC2-1]
                 if self.statusPIDC2 == True:
