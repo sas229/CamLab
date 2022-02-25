@@ -15,7 +15,8 @@ import numpy as np
 log = logging.getLogger(__name__)
 
 class PlotWindow(QWidget, QtStyleTools):
-    plotWindowClosed = Signal(str)
+    # plotWindowClosed = Signal(str)
+    plotWindowClosed = Signal(QWidget)
     colourUpdated = Signal(QModelIndex, str)
 
     def __init__(self):
@@ -818,7 +819,8 @@ class PlotWindow(QWidget, QtStyleTools):
         self.colourUpdated.emit(index, colour)
 
     def closeEvent(self, event):
-        self.plotWindowClosed.emit(self.plotNumber)
+        # self.plotWindowClosed.emit(self.plotNumber)
+        self.plotWindowClosed.emit(self)
 
     def setChannelsModel(self, channelsData):
         self.channelsModel = ChannelsTableModel(channelsData)

@@ -44,6 +44,7 @@ class LinearAxis(QWidget):
     secondaryUnitChanged = Signal(str)
     connectedChanged = Signal(str)
     stopCommand = Signal(str)
+    axisWindowClosed = Signal(QWidget)
 
     def __init__(self, controlName, *args, **kwargs):
         super().__init__(*args, **kwargs)              
@@ -120,6 +121,9 @@ class LinearAxis(QWidget):
         self.globalControls.settingsButton.clicked.connect(self.showSettings)
         self.globalControls.connectedIndicator.toggled.connect(self.emitConnectedChanged)
         self.settings.returnButton.clicked.connect(self.hideSettings)
+
+    def closeEvent(self, event):
+        self.axisWindowClosed.emit(self)
 
     @Slot()
     def showSettings(self):

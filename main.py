@@ -101,7 +101,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.centralWidget.setLayout(self.mainWindowLayout)
         self.setCentralWidget(self.centralWidget)
 
-        # # Toolbar connections.
+        # Toolbar connections.
         self.toolbar.configure.connect(self.manager.configure)
         self.toolbar.configure.connect(self.manager.timing.stop)
         self.toolbar.configure.connect(self.end)
@@ -120,6 +120,9 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.toolbar.autozeroButton.triggered.connect(self.manager.assembly.autozero)
         self.toolbar.clearPlotsButton.triggered.connect(self.manager.assembly.clearPlotData)
         self.toolbar.darkModeButton.triggered.connect(self.updateDarkMode)
+
+        # Tab interface connections.
+        self.tabs.tabToWindow.connect(self.tabToWindow)
 
         # Global settings connections.
         self.globalSettingsGroupBox.skipSamplesChanged.connect(self.manager.updateSkipSamples)
@@ -150,6 +153,39 @@ class MainWindow(QMainWindow, QtStyleTools):
         # Timer connections.
         self.updateTimer.timeout.connect(self.manager.assembly.updatePlotData)
         self.updateUI(self.manager.configuration)
+
+    @Slot()
+    def windowToTab(self, widget):
+        if self.tabs.indexOf(widget) == -1:
+            widget.setWindowFlags(Qt.Widget)
+            # If not a PlotWindow, insert in order.
+            if not isinstance(widget, PlotWindow):
+                controlDevice, channel = widget.controlName.split(' ')
+                devices = self.manager.deviceTableModel.enabledDevices()
+                #  For each device get a list of enabled control channels.
+                index = 3
+                for device in devices:
+                    deviceName = device["name"]
+                    controls = self.manager.controlTableModels[deviceName].enabledControls()
+                    for control in controls:
+                        controlChannel = control["channel"]
+                        controlChannelName = control["name"]
+                        controlName = deviceName + " " + controlChannel
+                        if deviceName == controlDevice and controlChannel == channel:
+                            self.tabs.insertPersistentTab(index, widget, widget.windowTitle())
+                        index += 1
+            # Otherwise append on end of tab bar.
+            else:
+                self.tabs.addTab(widget, widget.windowTitle())    
+
+    @Slot()
+    def tabToWindow(self, widget, index):
+        if index != -1:
+            text = self.tabs.tabText(index)
+            self.tabs.removeTab(index)
+            widget.setWindowFlags(Qt.Window)
+            widget.setWindowTitle(text)
+            widget.show()
 
     @Slot()
     def clearControls(self):
@@ -201,6 +237,7 @@ class MainWindow(QMainWindow, QtStyleTools):
                     controlWidget.KIChanged.connect(self.manager.devices[deviceName].setKI)
                     controlWidget.KDChanged.connect(self.manager.devices[deviceName].setKD)
                     controlWidget.proportionalOnMeasurementChanged.connect(self.manager.devices[deviceName].setPoM)
+                    controlWidget.axisWindowClosed.connect(self.windowToTab)
                     self.checkTimer.timeout.connect(self.manager.devices[deviceName].checkConnection)
                     self.running.connect(self.manager.devices[deviceName].setRunning)
                     self.manager.devices[deviceName].updateRunningIndicator.connect(controlWidget.setRunningIndicator)
@@ -489,7 +526,8 @@ class MainWindow(QMainWindow, QtStyleTools):
         # Connections.
         self.manager.configurationChanged.connect(self.plots[plotNumber].setConfiguration)
         self.manager.assembly.plotDataChanged.connect(self.plots[plotNumber].updatePlotData)
-        self.plots[plotNumber].plotWindowClosed.connect(self.removePlot)
+        # self.plots[plotNumber].plotWindowClosed.connect(self.removePlot)
+        self.plots[plotNumber].plotWindowClosed.connect(self.windowToTab)
         self.plots[plotNumber].colourUpdated.connect(self.updateChannelColours)
 
         # Update all plot windows to reset configuration.
@@ -513,7 +551,8 @@ class MainWindow(QMainWindow, QtStyleTools):
             # Connections.
             self.manager.configurationChanged.connect(self.plots[plotNumber].setConfiguration)
             self.manager.assembly.plotDataChanged.connect(self.plots[plotNumber].updatePlotData)
-            self.plots[plotNumber].plotWindowClosed.connect(self.removePlot)
+            # self.plots[plotNumber].plotWindowClosed.connect(self.removePlot)
+            self.plots[plotNumber].plotWindowClosed.connect(self.windowToTab)
             self.plots[plotNumber].colourUpdated.connect(self.updateChannelColours)
         
         # Update all plot windows to reset configuration.
@@ -540,11 +579,6 @@ class MainWindow(QMainWindow, QtStyleTools):
                 del self.manager.configuration["plots"]
     
     def closePlots(self):
-        # Close all plots.
-        plotList = list(self.plots.keys())
-        for key in plotList:
-            self.plots[key].close()     
-
         # Remove plot tabs.
         tabs = self.tabs.count()
         for index in reversed(range(tabs)):
@@ -552,6 +586,7 @@ class MainWindow(QMainWindow, QtStyleTools):
             text = self.tabs.tabText(index)
             if isinstance(widget, PlotWindow):
                 self.tabs.removeTab(index)
+        self.plots = {}
 
     @Slot(QModelIndex, str)
     def updateChannelColours(self, index, colour):

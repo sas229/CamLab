@@ -1,18 +1,23 @@
 from PySide6.QtWidgets import QTabWidget, QWidget, QTabBar
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Slot, Signal
 from src.widgets import PlotWindow
 
 class TabInterface(QTabWidget):
+    tabToWindow = Signal(QWidget, int)
 
     def __init__(self):
         super().__init__()
         
         # Settings.
-        self.setMovable(True)
         self.setTabsClosable(True)
 
         # Connections.
         self.tabCloseRequested.connect(self.closeTab)
+        self.tabBarDoubleClicked.connect(self.floatTab)
+
+    def floatTab(self, index):
+        widget = self.widget(index)
+        self.tabToWindow.emit(widget, index)
 
     def addPersistentTab(self, widget, name):
         self.addTab(widget, name)
