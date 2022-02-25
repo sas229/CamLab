@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QTabWidget, QWidget, QTabBar
 from PySide6.QtCore import Slot
+from src.widgets import PlotWindow
 
 class TabInterface(QTabWidget):
 
@@ -24,7 +25,10 @@ class TabInterface(QTabWidget):
 
     @Slot(int)
     def closeTab(self, index):
-        currentWidget = self.widget(index)
-        # currentWidget.deleteLater()
+        widget = self.widget(index)
+        if isinstance(widget, PlotWindow):
+            widget.close()
+            widget.deleteLater()
+            widget = None
         self.removeTab(index)
     

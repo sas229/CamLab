@@ -421,27 +421,11 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.toolbar.updateIcons(self.darkMode)
 
         # Update the UI of plot windows if they exist.
-        if self.plots: 
+        if self.plots and "plots" in self.manager.configuration: 
             self.updatePlots()
 
         # self.controlWindow.updateUI(self.configuration)
         log.info("Updated UI.")
-
-    # @Slot()
-    # def toggleMode(self):
-    #     # Toggle between run and configuration modes by showing and hiding various UI items.
-    #     self.statusGroupBox.setVisible(not self.statusGroupBox.isVisible())
-    #     self.globalSettingsGroupBox.setVisible(not self.globalSettingsGroupBox.isVisible())
-    #     self.devicesGroupBox.setVisible(not self.devicesGroupBox.isVisible())
-    #     self.configurationGroupBox.setVisible(not self.configurationGroupBox.isVisible())
-    #     if self.statusGroupBox.isVisible() == True:
-    #         self.height = 300
-    #         self.width = 800
-    #     else:
-    #         self.height = 955
-    #         self.width = 800
-    #     self.setFixedWidth(self.width)
-    #     self.setFixedHeight(self.height)
 
     @Slot(list)
     def addPlot(self):
@@ -500,8 +484,7 @@ class MainWindow(QMainWindow, QtStyleTools):
 
         # Show the plot.
         plotWindow.setConfiguration(self.manager.configuration)
-        # plotWindow.show()
-        self.tabs.addTab(plotWindow, "Plot")
+        self.tabs.addTab(self.plots[plotNumber], "Plot")
 
         # Connections.
         self.manager.configurationChanged.connect(self.plots[plotNumber].setConfiguration)
@@ -525,8 +508,7 @@ class MainWindow(QMainWindow, QtStyleTools):
 
             # Show the plot.
             plotWindow.setConfiguration(self.manager.configuration)
-            # plotWindow.show()
-            self.tabs.addTab(plotWindow, "Plot")
+            self.tabs.addTab(self.plots[plotNumber], "Plot")
 
             # Connections.
             self.manager.configurationChanged.connect(self.plots[plotNumber].setConfiguration)
@@ -549,7 +531,8 @@ class MainWindow(QMainWindow, QtStyleTools):
     @Slot(str)
     def removePlot(self, plotNumber):
         # Pop plot from if "plots" key in dict.
-        self.plots.pop(plotNumber)
+        if plotNumber in self.plots:
+            self.plots.pop(plotNumber)
         if "plots" in self.manager.configuration:
             self.manager.configuration["plots"].pop(plotNumber)
             # If plots dict in manager is empty delete the plots key.
@@ -560,7 +543,15 @@ class MainWindow(QMainWindow, QtStyleTools):
         # Close all plots.
         plotList = list(self.plots.keys())
         for key in plotList:
-            self.plots[key].close()
+            self.plots[key].close()     
+
+        # Remove plot tabs.
+        tabs = self.tabs.count()
+        for index in reversed(range(tabs)):
+            widget = self.tabs.widget(index)
+            text = self.tabs.tabText(index)
+            if isinstance(widget, PlotWindow):
+                self.tabs.removeTab(index)
 
     @Slot(QModelIndex, str)
     def updateChannelColours(self, index, colour):
