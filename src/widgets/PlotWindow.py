@@ -4,7 +4,7 @@ import os
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QCheckBox, QTabWidget, QLabel, QLineEdit, QGridLayout, QComboBox, QSlider
 from PySide6.QtGui import QIcon, QAction, QCursor, QDoubleValidator, QFont
 from PySide6.QtCore import Signal, Slot, Qt, QModelIndex, QEvent, QLocale
-from qt_material import apply_stylesheet, QtStyleTools
+from src.local_qt_material import apply_stylesheet, QtStyleTools
 from src.models import ChannelsTableModel, ColourPickerTableModel
 from src.views import ChannelsTableView, ColourPickerTableView
 from src.dialogs import ColourPickerDialog

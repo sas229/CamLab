@@ -14,3 +14,4 @@ from .JogGroupBox import JogGroupBox
 from .PIDGroupBox import PIDGroupBox
 from .SettingsGroupBox import SettingsGroupBox
 from .SliderGroupBox import SliderGroupBox
+from .TabInterface import TabInterface

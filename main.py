@@ -1,10 +1,10 @@
 import sys, os
 from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QLabel, QTabWidget
 from PySide6.QtGui import QIcon, QScreen
-from PySide6.QtCore import Signal, Slot, Qt, QModelIndex, QPoint, QThread, QTimer
-from qt_material import apply_stylesheet, QtStyleTools
+from PySide6.QtCore import Signal, Slot, Qt, QModelIndex, QPoint, QThread, QTimer, QDir
+from src.local_qt_material import apply_stylesheet, QtStyleTools
 from src.manager import Manager
-from src.widgets import CamLabToolBar, StatusGroupBox, GlobalSettingsGroupBox, DevicesGroupBox, ConfigurationGroupBox, PlotWindow, ControlWindow, LinearAxis
+from src.widgets import CamLabToolBar, TabInterface, StatusGroupBox, GlobalSettingsGroupBox, DevicesGroupBox, ConfigurationGroupBox, PlotWindow, ControlWindow, LinearAxis
 from src.models import DeviceTableModel, AcquisitionTableModel, ColourPickerTableModel
 from src.views import DeviceTableView, AcquisitionTableView, ControlTableView
 from src.log import init_log
@@ -54,6 +54,7 @@ class MainWindow(QMainWindow, QtStyleTools):
 
         # Extract the configuration to generate initial UI setup.
         self.configuration = self.manager.configuration
+        self.setTheme()
 
         # Main window layout.
         log.info("Assembling UI.")
@@ -62,11 +63,12 @@ class MainWindow(QMainWindow, QtStyleTools):
         # Toolbar.
         self.toolbar = CamLabToolBar()
         self.mainWindowLayout.addWidget(self.toolbar)
-
-        self.tabs = QTabWidget()
-        self.tabs.addTab(QWidget(), "Dashboard")
-        self.tabs.addTab(QWidget(), "Configuration")
-        self.tabs.addTab(QWidget(), "Sequence")
+        
+        # Tab interface.
+        self.tabs = TabInterface()
+        self.tabs.addTab(QWidget(), "Plot 1")
+        self.tabs.addTab(QWidget(), "Plot 2")
+        self.tabs.addTab(QWidget(), "Plot 3")
         self.mainWindowLayout.addWidget(self.tabs)
 
         # # Status groupbox.
@@ -109,7 +111,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         # self.toolbar.run.connect(self.manager.run)
         # self.toolbar.run.connect(self.start)
         # self.toolbar.run.connect(self.statusGroupBox.setInitialTimeDate)
-        # self.toolbar.addPlotButton.triggered.connect(self.addPlot)
+        self.toolbar.addPlotButton.triggered.connect(self.addPlot)
         # self.toolbar.controlPanelButton.triggered.connect(self.openControlPanel)
         # self.toolbar.cameraButton.triggered.connect(self.openCamera)
         # self.toolbar.extensionButton.triggered.connect(self.openExtension)
@@ -120,7 +122,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         # self.toolbar.newFileButton.triggered.connect(self.manager.assembly.newFile)
         # self.toolbar.autozeroButton.triggered.connect(self.manager.assembly.autozero)
         # self.toolbar.clearPlotsButton.triggered.connect(self.manager.assembly.clearPlotData)
-        # self.toolbar.darkModeButton.triggered.connect(self.updateDarkMode)
+        self.toolbar.darkModeButton.triggered.connect(self.updateDarkMode)
 
         # # Global settings connections.
         # self.globalSettingsGroupBox.skipSamplesChanged.connect(self.manager.updateSkipSamples)
@@ -383,21 +385,23 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.manager.controlTableModels[name].controlChannelToggled.connect(self.updateControlTabs)
         self.updateControlTabs()
 
+    def setTheme(self):
+        self.darkMode = self.configuration["global"]["darkMode"]
+        # Set the darkmode. 
+        if self.darkMode == True:
+            self.apply_stylesheet(self, theme='dark_blue.xml')
+        else:
+            self.apply_stylesheet(self, theme='light_blue.xml', invert_secondary = True)
+        stylesheet = self.styleSheet()
+        with open('CamLab.css') as file:
+            self.setStyleSheet(stylesheet + file.read().format(**os.environ))
+
     @Slot(dict)
     def updateUI(self, newConfiguration):
         # Update the UI after any configuration change.
         self.configuration = newConfiguration
         self.darkMode = self.configuration["global"]["darkMode"]
-
-        # Set the darkmode. 
-        if self.darkMode == True:
-            self.apply_stylesheet(self, theme='dark_blue.xml')
-        else:
-            self.apply_stylesheet(self, theme='light_blue.xml')
-        stylesheet = self.styleSheet()
-        with open('CamLab.css') as file:
-            self.setStyleSheet(stylesheet + file.read().format(**os.environ))
-
+        self.setTheme()
         # Update icon colours as a function of the darkMode boolean.
         self.toolbar.updateIcons(self.darkMode)
         # self.devicesGroupBox.deviceTableView.connectionIconDelegate.setIcon(self.darkMode)
@@ -483,7 +487,8 @@ class MainWindow(QMainWindow, QtStyleTools):
 
         # Show the plot.
         plotWindow.setConfiguration(self.manager.configuration)
-        plotWindow.show()
+        # plotWindow.show()
+        self.tabs.addTab(plotWindow, "Plot")
 
         # Connections.
         self.manager.configurationChanged.connect(self.plots[plotNumber].setConfiguration)
