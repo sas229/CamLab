@@ -129,6 +129,7 @@ class Device(QObject):
                 self.PID_C1.output_limits = (-speedLimit, speedLimit)
                 self.PID_C1.setpoint = self.feedbackSetPointC1
                 self.PID_C1.set_auto_mode(True, last_output=0.001)
+                # self.PID_C1.set_auto_mode(True, last_output=self.speedC1)
                 aNames = ["DIO4_EF_ENABLE", "DIO4_EF_INDEX", "DIO4_EF_OPTIONS", "DIO4_EF_CONFIG_A", "DIO4_EF_ENABLE"]
                 aValues = [0, 0, 1, self.widthC1, 1]
                 numFrames = len(aNames)
