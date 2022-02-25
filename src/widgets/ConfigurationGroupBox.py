@@ -8,6 +8,7 @@ class ConfigurationGroupBox(QGroupBox):
 
     def __init__(self):
         super().__init__()
+        self.setMinimumWidth(750)
         self.setFixedHeight(500)
         self.setTitle("Device Configuration")
 

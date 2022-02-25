@@ -342,7 +342,6 @@ class ColourPickerTableModel(QAbstractTableModel):
 class ControlTableModel(QAbstractTableModel):
     controlChannelToggled = Signal(int)
     controlChannelNameChanged = Signal (str, str)
-    # controlTableUpdated = Signal()
 
     def __init__(self, data=[], parent=None):
         super(ControlTableModel, self).__init__(parent)

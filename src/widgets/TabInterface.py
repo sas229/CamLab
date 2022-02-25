@@ -10,20 +10,16 @@ class TabInterface(QTabWidget):
         self.setMovable(True)
         self.setTabsClosable(True)
 
-        # Set default persistent tabs.
-        self.addTab(QWidget(), "Dashboard")
-        self.addTab(QWidget(), "Configuration")
-        self.addTab(QWidget(), "Sequence")
-        self.tabBar().setTabButton(0, QTabBar.RightSide, None)
-        self.tabBar().setTabButton(1, QTabBar.RightSide, None)
-        self.tabBar().setTabButton(2, QTabBar.RightSide, None)
-
         # Connections.
         self.tabCloseRequested.connect(self.closeTab)
 
     def addPersistentTab(self, widget, name):
         self.addTab(widget, name)
         index = self.tabBar().count()-1
+        self.tabBar().setTabButton(index, QTabBar.RightSide, None)
+    
+    def insertPersistentTab(self, index, widget, name):
+        self.insertTab(index, widget, name)
         self.tabBar().setTabButton(index, QTabBar.RightSide, None)
 
     @Slot(int)

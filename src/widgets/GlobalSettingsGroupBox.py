@@ -17,6 +17,8 @@ class GlobalSettingsGroupBox(QGroupBox):
         super().__init__() 
         self.configuration = configuration
         self.setTitle("Global Settings")
+        self.setMinimumWidth(600)
+        self.setFixedHeight(200)
 
         # Set path inputs.
         self.setPathLabel = QLabel("Output")
@@ -35,14 +37,14 @@ class GlobalSettingsGroupBox(QGroupBox):
         self.controlRateLineEdit.setText(str(self.configuration["global"]["controlRate"]))
 
         # Skip samples input and validator.
-        self.skipSamplesLabel = QLabel("Samples to skip before saving (-)")
+        self.skipSamplesLabel = QLabel("Downsample (-)")
         self.skipSamplesLineEdit = QLineEdit()
         self.skipSamplesValidator = QIntValidator(bottom = 1, top = 100)
         self.skipSamplesLineEdit.setValidator(self.skipSamplesValidator)
         self.skipSamplesLineEdit.setText(str(self.configuration["global"]["skipSamples"]))
 
         # Sample averaging and validator.
-        self.averageSamplesLabel = QLabel("Samples to average when saving (-)")
+        self.averageSamplesLabel = QLabel("Average (-)")
         self.averageSamplesLineEdit = QLineEdit()
         self.averageSamplesValidator = QIntValidator(bottom = 1, top = 100)
         self.averageSamplesLineEdit.setValidator(self.averageSamplesValidator)

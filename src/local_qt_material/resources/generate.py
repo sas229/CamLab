@@ -21,6 +21,7 @@ class ResourseGenerator:
         else:
             self.index = os.path.join(RESOURCES_PATH, parent)
 
+        # Extra options added below.
         self.contex = [
             (os.path.join(self.index, 'disabled'), disabled),
             (os.path.join(self.index, 'primary'), primary),

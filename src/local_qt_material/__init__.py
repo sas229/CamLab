@@ -272,6 +272,7 @@ def density(value, density_scale, border=0, scale=1, density_interval=4):
 # ----------------------------------------------------------------------
 def set_icons_theme(theme, parent='theme'):
     """"""
+    # Extra arguments added to ResourceGenerator instantiation to make additional icon colours.
     source = os.path.join(os.path.dirname(__file__), 'resources', 'source')
     resources = ResourseGenerator(primary=theme['primaryColor'], secondary=theme['secondaryColor'], secondaryText=theme['secondaryTextColor'],
                                   disabled=theme['secondaryLightColor'], source=source, parent=parent)
@@ -280,7 +281,6 @@ def set_icons_theme(theme, parent='theme'):
     if GUI:
         try:
             QDir.addSearchPath('icon', resources.index)
-            print(resources.index)
             QDir.addSearchPath('qt_material', os.path.join(
                 os.path.dirname(__file__), 'resources'))
         except:  # snake_case, true_property

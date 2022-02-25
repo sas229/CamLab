@@ -72,28 +72,15 @@ class ConnectionIconDelegate(QStyledItemDelegate):
         super().__init__()
     
     def paint(self, painter, option, index):
-        if self.darkmode == True:
-            if index.data(Qt.DisplayRole) == 0:
-                icon = QIcon("assets/sensors_off_white_24dp.svg")
-            elif index.data(Qt.DisplayRole) == 1:
-                icon = QIcon("assets/usb_white_24dp.svg")
-            elif index.data(Qt.DisplayRole) == 3:
-                icon = QIcon("assets/cable_white_24dp.svg")
-            elif index.data(Qt.DisplayRole) == 4:
-                icon = QIcon("assets/wifi_white_24dp.svg")
-        else:
-            if index.data(Qt.DisplayRole) == 0:
-                icon = QIcon("assets/sensors_off_black_24dp.svg")
-            elif index.data(Qt.DisplayRole) == 1:
-                icon = QIcon("assets/usb_black_24dp.svg")
-            elif index.data(Qt.DisplayRole) == 3:
-                icon = QIcon("assets/cable_black_24dp.svg")
-            elif index.data(Qt.DisplayRole) == 4:
-                icon = QIcon("assets/wifi_black_24dp.svg")
+        if index.data(Qt.DisplayRole) == 0:
+            icon = QIcon("icon:/secondaryText/sensors_off.svg")
+        elif index.data(Qt.DisplayRole) == 1:
+            icon = QIcon("icon:/secondaryText/usb.svg")
+        elif index.data(Qt.DisplayRole) == 3:
+            icon = QIcon("icon:/secondaryText/cable.svg")
+        elif index.data(Qt.DisplayRole) == 4:
+            icon = QIcon("icon:/secondaryText/wifi.svg")
         icon.paint(painter, option.rect, Qt.AlignCenter)
-
-    def setIcon(self, darkmode):
-        self.darkmode = darkmode
 
 class StatusIconDelegate(QStyledItemDelegate):
     """
@@ -103,20 +90,11 @@ class StatusIconDelegate(QStyledItemDelegate):
         super().__init__()
 
     def paint(self, painter, option, index):
-        if self.darkmode == True:
-            if index.data(Qt.DisplayRole) == True:
-                icon = QIcon("assets/link_white_24dp.svg")
-            elif index.data(Qt.DisplayRole) == False:
-                icon = QIcon("assets/link_off_white_24dp.svg")
-        else:
-            if index.data(Qt.DisplayRole) == True:
-                icon = QIcon("assets/link_black_24dp.svg")
-            elif index.data(Qt.DisplayRole) == False:
-                icon = QIcon("assets/link_off_black_24dp.svg")
+        if index.data(Qt.DisplayRole) == True:
+            icon = QIcon("icon:/secondaryText/link.svg")
+        elif index.data(Qt.DisplayRole) == False:
+            icon = QIcon("icon:/secondaryText/link_off.svg")
         icon.paint(painter, option.rect, Qt.AlignCenter)
-    
-    def setIcon(self, darkmode):
-        self.darkmode = darkmode
 
 class FloatValidatorDelegate(QItemDelegate):
     """

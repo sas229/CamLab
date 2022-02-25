@@ -24,9 +24,7 @@ class DeviceTableView(QTableView):
         self.nameCheckBoxDelegate = CheckBoxDelegate("name")
         self.stringDelegate = StringDelegate()
         self.connectionIconDelegate = ConnectionIconDelegate() 
-        self.connectionIconDelegate.setIcon(self.darkMode)
         self.statusIconDelegate = StatusIconDelegate()
-        self.statusIconDelegate.setIcon(self.darkMode) 
 
         self.setItemDelegateForColumn(0, self.nameCheckBoxDelegate)
         self.setItemDelegateForColumn(1, self.stringDelegate)

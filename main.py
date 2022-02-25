@@ -1,5 +1,5 @@
 import sys, os
-from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QLabel, QTabWidget
+from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QGridLayout, QLabel, QTabWidget
 from PySide6.QtGui import QIcon, QScreen
 from PySide6.QtCore import Signal, Slot, Qt, QModelIndex, QPoint, QThread, QTimer, QDir
 from src.local_qt_material import apply_stylesheet, QtStyleTools
@@ -66,100 +66,101 @@ class MainWindow(QMainWindow, QtStyleTools):
         
         # Tab interface.
         self.tabs = TabInterface()
-        self.tabs.addTab(QWidget(), "Plot 1")
-        self.tabs.addTab(QWidget(), "Plot 2")
-        self.tabs.addTab(QWidget(), "Plot 3")
         self.mainWindowLayout.addWidget(self.tabs)
 
         # # Status groupbox.
-        # self.statusGroupBox = StatusGroupBox()
+        self.statusGroupBox = StatusGroupBox()
         # self.mainWindowLayout.addWidget(self.statusGroupBox)
 
-        # # Global settings groupbox.
-        # self.globalSettingsGroupBox = GlobalSettingsGroupBox(self.configuration)
-        # self.mainWindowLayout.addWidget(self.globalSettingsGroupBox)
+        self.configurationWidget = QWidget()
 
-        # # Device table groupbox.
-        # self.devicesGroupBox = DevicesGroupBox(self.configuration)
-        # self.mainWindowLayout.addWidget(self.devicesGroupBox)
-        # self.devicesGroupBox.deviceTableView.setModel(self.manager.deviceTableModel)
+        # Global settings groupbox.
+        self.globalSettingsGroupBox = GlobalSettingsGroupBox(self.configuration)
+        
+        # Device table groupbox.
+        self.devicesGroupBox = DevicesGroupBox(self.configuration)
+        self.devicesGroupBox.deviceTableView.setModel(self.manager.deviceTableModel)
 
         # # Device configuration groupbox.
-        # self.configurationGroupBox = ConfigurationGroupBox()
-        # self.mainWindowLayout.addWidget(self.configurationGroupBox)
+        self.configurationGroupBox = ConfigurationGroupBox()
+
+        self.configurationLayout = QGridLayout()
+        self.configurationLayout.setRowStretch(0, 1)
+        self.configurationLayout.addWidget(self.globalSettingsGroupBox, 1, 0, 1, 1)
+        self.configurationLayout.addWidget(self.devicesGroupBox, 2, 0, 1, 1)
+        self.configurationLayout.addWidget(self.configurationGroupBox, 1, 1, 2, 1)
+        self.configurationLayout.setRowStretch(self.configurationLayout.rowCount(), 1)
+
+        self.configurationWidget.setLayout(self.configurationLayout)
+        self.tabs.addPersistentTab(self.configurationWidget, "Configuration")
+        self.tabs.addPersistentTab(QWidget(), "Sequences")
+        self.tabs.addPersistentTab(QWidget(), "Dashboard")
 
         # Set the central widget of the main window.
         self.centralWidget = QWidget()
         self.centralWidget.setLayout(self.mainWindowLayout)
         self.setCentralWidget(self.centralWidget)
 
-        # # Control window.
-        # self.controlWindow = ControlWindow(self.configuration)
-        # if self.manager.configuration["controlWindow"]["visible"] == True:
-        #     self.controlWindow.show()
-        #     self.controlWindow.visible = True
-        # else:
-        #     self.controlWindow.hide()
-        # self.controlWindow.controlTabWidget.addTab(QWidget(), "Dashboard")
-        # self.controlWindow.controlTabWidget.addTab(QWidget(), "Sequence")  
-
         # # Toolbar connections.
-        # self.toolbar.modeButton.triggered.connect(self.toggleMode)
-        # self.toolbar.configure.connect(self.manager.configure)
-        # self.toolbar.configure.connect(self.manager.timing.stop)
-        # self.toolbar.configure.connect(self.end)
-        # self.toolbar.run.connect(self.manager.run)
-        # self.toolbar.run.connect(self.start)
-        # self.toolbar.run.connect(self.statusGroupBox.setInitialTimeDate)
+        self.toolbar.configure.connect(self.manager.configure)
+        self.toolbar.configure.connect(self.manager.timing.stop)
+        self.toolbar.configure.connect(self.end)
+        self.toolbar.run.connect(self.manager.run)
+        self.toolbar.run.connect(self.start)
+        self.toolbar.run.connect(self.statusGroupBox.setInitialTimeDate)
         self.toolbar.addPlotButton.triggered.connect(self.addPlot)
-        # self.toolbar.controlPanelButton.triggered.connect(self.openControlPanel)
-        # self.toolbar.cameraButton.triggered.connect(self.openCamera)
-        # self.toolbar.extensionButton.triggered.connect(self.openExtension)
-        # self.toolbar.refreshButton.triggered.connect(self.manager.refreshDevices)
-        # self.toolbar.loadConfiguration.connect(self.manager.loadConfiguration)
-        # self.toolbar.saveConfiguration.connect(self.manager.saveConfiguration)
-        # self.toolbar.clearConfigButton.triggered.connect(self.manager.clearConfiguration)
-        # self.toolbar.newFileButton.triggered.connect(self.manager.assembly.newFile)
-        # self.toolbar.autozeroButton.triggered.connect(self.manager.assembly.autozero)
-        # self.toolbar.clearPlotsButton.triggered.connect(self.manager.assembly.clearPlotData)
+        self.toolbar.controlPanelButton.triggered.connect(self.openControlPanel)
+        self.toolbar.cameraButton.triggered.connect(self.openCamera)
+        self.toolbar.extensionButton.triggered.connect(self.openExtension)
+        self.toolbar.refreshButton.triggered.connect(self.manager.refreshDevices)
+        self.toolbar.loadConfiguration.connect(self.manager.loadConfiguration)
+        self.toolbar.saveConfiguration.connect(self.manager.saveConfiguration)
+        self.toolbar.clearConfigButton.triggered.connect(self.manager.clearConfiguration)
+        self.toolbar.newFileButton.triggered.connect(self.manager.assembly.newFile)
+        self.toolbar.autozeroButton.triggered.connect(self.manager.assembly.autozero)
+        self.toolbar.clearPlotsButton.triggered.connect(self.manager.assembly.clearPlotData)
         self.toolbar.darkModeButton.triggered.connect(self.updateDarkMode)
 
-        # # Global settings connections.
-        # self.globalSettingsGroupBox.skipSamplesChanged.connect(self.manager.updateSkipSamples)
-        # self.globalSettingsGroupBox.controlRateChanged.connect(self.manager.updateControlRate)
-        # self.globalSettingsGroupBox.averageSamplesChanged.connect(self.manager.updateAverageSamples)
-        # self.globalSettingsGroupBox.pathChanged.connect(self.manager.updatePath)
-        # self.globalSettingsGroupBox.filenameChanged.connect(self.manager.updateFilename)
+        # Global settings connections.
+        self.globalSettingsGroupBox.skipSamplesChanged.connect(self.manager.updateSkipSamples)
+        self.globalSettingsGroupBox.controlRateChanged.connect(self.manager.updateControlRate)
+        self.globalSettingsGroupBox.averageSamplesChanged.connect(self.manager.updateAverageSamples)
+        self.globalSettingsGroupBox.pathChanged.connect(self.manager.updatePath)
+        self.globalSettingsGroupBox.filenameChanged.connect(self.manager.updateFilename)
 
-        # # Manager connections.
-        # self.manager.updateUI.connect(self.updateUI)
-        # self.manager.configurationChanged.connect(self.updateUI)
-        # self.manager.configurationChanged.connect(self.globalSettingsGroupBox.updateUI)
-        # self.manager.clearDeviceConfigurationTabs.connect(self.clearDeviceConfigurationTabs)
-        # self.manager.closePlots.connect(self.closePlots)
-        # self.manager.clearControls.connect(self.clearControls)
-        # self.manager.deviceConfigurationAdded.connect(self.addDeviceConfigurationTab)
-        # self.manager.removeControlTable.connect(self.removeControlTable)
-        # self.manager.addControlTable.connect(self.addControlTable)
-        # self.manager.updateDeviceConfigurationTab.connect(self.updateDeviceConfigurationTabs)
-        # self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.manager.manageDeviceThreads)
-        # self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.updateDeviceConfigurationTabs)
-        # self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.manager.updatePlotWindowChannelsData)
-        # self.manager.timing.actualRate.connect(self.statusGroupBox.update)
-        # self.manager.plotWindowChannelsUpdated.connect(self.updatePlots)
-        # self.manager.existingPlotsFound.connect(self.createExistingPlots)
-        # self.manager.outputText.connect(self.statusGroupBox.setOutputText)
+        # Manager connections.
+        self.manager.updateUI.connect(self.updateUI)
+        self.manager.configurationChanged.connect(self.updateUI)
+        self.manager.configurationChanged.connect(self.globalSettingsGroupBox.updateUI)
+        self.manager.clearDeviceConfigurationTabs.connect(self.clearDeviceConfigurationTabs)
+        self.manager.closePlots.connect(self.closePlots)
+        self.manager.clearControls.connect(self.clearControls)
+        self.manager.deviceConfigurationAdded.connect(self.addDeviceConfigurationTab)
+        self.manager.removeControlTable.connect(self.removeControlTable)
+        self.manager.addControlTable.connect(self.addControlTable)
+        self.manager.updateDeviceConfigurationTab.connect(self.updateDeviceConfigurationTabs)
+        self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.manager.manageDeviceThreads)
+        self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.updateDeviceConfigurationTabs)
+        self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.manager.updatePlotWindowChannelsData)
+        self.manager.timing.actualRate.connect(self.statusGroupBox.update)
+        self.manager.plotWindowChannelsUpdated.connect(self.updatePlots)
+        self.manager.existingPlotsFound.connect(self.createExistingPlots)
+        self.manager.outputText.connect(self.statusGroupBox.setOutputText)
 
-        # # Timer connections.
-        # self.updateTimer.timeout.connect(self.manager.assembly.updatePlotData)
+        # Timer connections.
+        self.updateTimer.timeout.connect(self.manager.assembly.updatePlotData)
         self.updateUI(self.manager.configuration)
+
     @Slot()
     def clearControls(self):
-        # Remove all tabs except device non-specific tabs.
-        controlTabs = self.controlWindow.controlTabWidget.count()
-        for control in reversed(range(controlTabs)):
-            if control > 1:
-                self.controlWindow.controlTabWidget.removeTab(control)
+        # Remove all control tabs.
+        tabs = self.tabs.count()
+        for index in reversed(range(tabs)):
+            widget = self.tabs.widget(index)
+            text = self.tabs.tabText(index)
+            if not isinstance(widget, PlotWindow):
+                if text != "Dashboard" and text != "Configuration" and text != "Sequences":
+                    self.tabs.removeTab(index)
 
     @Slot() 
     def updateControlTabs(self):
@@ -167,6 +168,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.clearControls()
         devices = self.manager.deviceTableModel.enabledDevices()
         #  For each device get a list of enabled control channels.
+        index = 3
         for device in devices:
             deviceName = device["name"]
             controls = self.manager.controlTableModels[deviceName].enabledControls()
@@ -267,9 +269,10 @@ class MainWindow(QMainWindow, QtStyleTools):
                 self.manager.devices[deviceName].checkConnection()
                 self.manager.devices[deviceName].setPosition(controlChannel, self.manager.configuration["controlWindow"][controlName]["primaryProcessVariable"])
                 
-                # Add to control window tab bar.
-                self.controlWindow.controlTabWidget.addTab(controlWidget, controlChannelName)
-    
+                # Add to tab bar.
+                self.tabs.insertPersistentTab(index, controlWidget, controlChannelName)
+                index += 1
+
     def moveEvent(self, event):
         position = self.geometry()
         self.configuration["configurationWindow"]["x"] = int(position.x())
@@ -280,12 +283,24 @@ class MainWindow(QMainWindow, QtStyleTools):
     def start(self):
         self.updateTimer.start(100)
         self.running.emit(True)
+        # Hide the configuration and sequences tabs.
+        for index in range(self.tabs.count()):
+            if self.tabs.tabText(index) == "Configuration":
+                self.tabs.setTabVisible(index, False)
+            if self.tabs.tabText(index) == "Sequences":
+                self.tabs.setTabVisible(index, False)
         
     @Slot()
     def end(self):
         self.running.emit(False)
         self.updateTimer.stop()
         self.statusGroupBox.reset()
+        # Show the configuration and sequences tabs.
+        for index in range(self.tabs.count()):
+            if self.tabs.tabText(index) == "Configuration":
+                self.tabs.setTabVisible(index, True)
+            if self.tabs.tabText(index) == "Sequences":
+                self.tabs.setTabVisible(index, True)
 
     @Slot()
     def openControlPanel(self):
@@ -319,7 +334,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.deviceConfigurationLayout[name] = QVBoxLayout()
 
         # Add acquisition table label.
-        acquisitionLabel = QLabel('ACQUISITION')
+        acquisitionLabel = QLabel('Acquisition')
         self.deviceConfigurationLayout[name].addWidget(acquisitionLabel)
 
         # Add acquisition table to the TabWidget.
@@ -333,7 +348,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.manager.acquisitionModels[name].acquisitionChannelToggled.connect(self.resetControlFeedbackComboBox)
 
         # Add control table label.
-        controlLabel = QLabel('CONTROL')
+        controlLabel = QLabel('Control')
         self.deviceConfigurationLayout[name].addWidget(controlLabel)
 
         # Add control table to the TabWidget.
@@ -391,7 +406,7 @@ class MainWindow(QMainWindow, QtStyleTools):
         if self.darkMode == True:
             self.apply_stylesheet(self, theme='dark_blue.xml')
         else:
-            self.apply_stylesheet(self, theme='light_blue.xml', invert_secondary = True)
+            self.apply_stylesheet(self, theme='light_blue.xml')
         stylesheet = self.styleSheet()
         with open('CamLab.css') as file:
             self.setStyleSheet(stylesheet + file.read().format(**os.environ))
@@ -404,8 +419,6 @@ class MainWindow(QMainWindow, QtStyleTools):
         self.setTheme()
         # Update icon colours as a function of the darkMode boolean.
         self.toolbar.updateIcons(self.darkMode)
-        # self.devicesGroupBox.deviceTableView.connectionIconDelegate.setIcon(self.darkMode)
-        # self.devicesGroupBox.deviceTableView.statusIconDelegate.setIcon(self.darkMode)
 
         # Update the UI of plot windows if they exist.
         if self.plots: 
@@ -414,21 +427,21 @@ class MainWindow(QMainWindow, QtStyleTools):
         # self.controlWindow.updateUI(self.configuration)
         log.info("Updated UI.")
 
-    @Slot()
-    def toggleMode(self):
-        # Toggle between run and configuration modes by showing and hiding various UI items.
-        self.statusGroupBox.setVisible(not self.statusGroupBox.isVisible())
-        self.globalSettingsGroupBox.setVisible(not self.globalSettingsGroupBox.isVisible())
-        self.devicesGroupBox.setVisible(not self.devicesGroupBox.isVisible())
-        self.configurationGroupBox.setVisible(not self.configurationGroupBox.isVisible())
-        if self.statusGroupBox.isVisible() == True:
-            self.height = 300
-            self.width = 800
-        else:
-            self.height = 955
-            self.width = 800
-        self.setFixedWidth(self.width)
-        self.setFixedHeight(self.height)
+    # @Slot()
+    # def toggleMode(self):
+    #     # Toggle between run and configuration modes by showing and hiding various UI items.
+    #     self.statusGroupBox.setVisible(not self.statusGroupBox.isVisible())
+    #     self.globalSettingsGroupBox.setVisible(not self.globalSettingsGroupBox.isVisible())
+    #     self.devicesGroupBox.setVisible(not self.devicesGroupBox.isVisible())
+    #     self.configurationGroupBox.setVisible(not self.configurationGroupBox.isVisible())
+    #     if self.statusGroupBox.isVisible() == True:
+    #         self.height = 300
+    #         self.width = 800
+    #     else:
+    #         self.height = 955
+    #         self.width = 800
+    #     self.setFixedWidth(self.width)
+    #     self.setFixedHeight(self.height)
 
     @Slot(list)
     def addPlot(self):
@@ -512,7 +525,8 @@ class MainWindow(QMainWindow, QtStyleTools):
 
             # Show the plot.
             plotWindow.setConfiguration(self.manager.configuration)
-            plotWindow.show()
+            # plotWindow.show()
+            self.tabs.addTab(plotWindow, "Plot")
 
             # Connections.
             self.manager.configurationChanged.connect(self.plots[plotNumber].setConfiguration)
@@ -558,9 +572,6 @@ class MainWindow(QMainWindow, QtStyleTools):
     def closeEvent(self, event):
         # Close all plots.
         self.closePlots()
-
-        # Close control window.
-        self.controlWindow.close()
 
         # In the event the device list is refreshing, wait until complete before quitting all threads otherwise an error is shown, but hide the window in the meantime.
         self.setVisible(False)
