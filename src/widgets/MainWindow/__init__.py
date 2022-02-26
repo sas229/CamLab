@@ -1,7 +1,7 @@
-import sys, os
-from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QGridLayout, QLabel, QTabWidget
-from PySide6.QtGui import QIcon, QScreen
-from PySide6.QtCore import Signal, Slot, Qt, QModelIndex, QPoint, QThread, QTimer, QDir
+import os
+from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QGridLayout
+from PySide6.QtGui import QScreen
+from PySide6.QtCore import Signal, Slot, QThread, QTimer
 from src.local_qt_material import apply_stylesheet, QtStyleTools
 from src.widgets.MainWindow._utilities._TabUtilities import TabUtilities
 from src.widgets.MainWindow._utilities._PlotUtilities import PlotUtilities
@@ -16,9 +16,7 @@ from src.widgets.DevicesGroupBox import DevicesGroupBox
 from src.widgets.DeviceConfigurationGroupBox import DeviceConfigurationGroupBox
 from src.log import init_log
 import logging
-import copy
 from time import sleep
-from random import randint
 
 log = logging.getLogger(__name__)
 
