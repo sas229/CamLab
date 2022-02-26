@@ -1,6 +1,9 @@
 from PySide6.QtWidgets import QTabWidget, QWidget, QTabBar
 from PySide6.QtCore import Slot, Signal
 from src.widgets import PlotWindow
+import logging 
+
+log = logging.getLogger(__name__)
 
 class TabInterface(QTabWidget):
     tabToWindow = Signal(QWidget, int)
@@ -18,6 +21,7 @@ class TabInterface(QTabWidget):
     def floatTab(self, index):
         widget = self.widget(index)
         self.tabToWindow.emit(widget, index)
+        log.info("Tab converted to window.")
 
     def addPersistentTab(self, widget, name):
         self.addTab(widget, name)
@@ -31,4 +35,5 @@ class TabInterface(QTabWidget):
     @Slot(int)
     def closeTab(self, index):
         self.removeTab(index)
+        log.info("Tab removed.")
     

@@ -48,6 +48,7 @@ class LinearAxis(QWidget):
 
     def __init__(self, controlName, *args, **kwargs):
         super().__init__(*args, **kwargs)              
+        log.info("Linear axis instantiated.")
 
         # Inputs.
         self.controlName = controlName

@@ -21,6 +21,7 @@ class PlotWindow(QWidget, QtStyleTools):
 
     def __init__(self):
         super().__init__()
+        log.info("Plot instantiated.")
         self.defaultChannelsData = [{"plot": False, "name": "Time", "device": "ALL", "colour": "#35e3e3", "value": "0.00", "unit": "s"}]
         self.initWidth = 1200
         self.initHeight = 600
