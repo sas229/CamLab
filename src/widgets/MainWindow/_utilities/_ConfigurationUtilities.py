@@ -50,6 +50,7 @@ class ConfigurationUtilities:
             status = device["status"]
             if status == True and connect == True and name in self.acquisitionTableViews:
                 self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.addTab(self.deviceConfigurationWidget[name], name)
+        # Update control tabs to remove any deselected devices.
         self.updateControlTabs()
 
     @Slot()
