@@ -248,7 +248,7 @@ class Manager(QObject):
         if connect == True and name not in self.devices:
             self.devices[name] = Device(name, id, connection)
             log.info("Device instance created for device named " + name + ".")
-            self.deviceThreads[name] = QThread(parent=self)
+            self.deviceThreads[name] = QThread()
             log.info("Device thread created for device named " + name + ".")
             self.devices[name].moveToThread(self.deviceThreads[name])
             self.deviceThreads[name].start()

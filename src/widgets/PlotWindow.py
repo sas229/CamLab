@@ -23,7 +23,7 @@ class PlotWindow(QWidget, QtStyleTools):
         super().__init__()
         self.defaultChannelsData = [{"plot": False, "name": "Time", "device": "ALL", "colour": "#35e3e3", "value": "0.00", "unit": "s"}]
         self.initWidth = 1200
-        self.initHeight = 800
+        self.initHeight = 600
         self.resize(self.initWidth, self.initHeight)
         self.setMinimumSize(850, 550)
         self.alpha = 50

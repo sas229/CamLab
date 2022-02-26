@@ -4,7 +4,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
-class ConfigurationGroupBox(QGroupBox):
+class DeviceConfigurationGroupBox(QGroupBox):
 
     def __init__(self):
         super().__init__()
