@@ -5,7 +5,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
-class CamLabToolBar(QToolBar):
+class ToolBar(QToolBar):
     configure = Signal() 
     run = Signal() 
     loadConfiguration = Signal(str)

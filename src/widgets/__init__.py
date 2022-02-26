@@ -1,5 +1,5 @@
 from .MainWindow import MainWindow
-from .CamLabToolBar import CamLabToolBar
+from .ToolBar import ToolBar
 from .StatusGroupBox import StatusGroupBox
 from .GlobalSettingsGroupBox import GlobalSettingsGroupBox
 from .PlotWindow import PlotWindow

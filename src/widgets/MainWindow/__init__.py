@@ -8,7 +8,7 @@ from src.widgets.MainWindow._utilities._PlotUtilities import PlotUtilities
 from src.widgets.MainWindow._utilities._ControlUtilities import ControlUtilities
 from src.widgets.MainWindow._utilities._ConfigurationUtilities import ConfigurationUtilities
 from src.manager import Manager
-from src.widgets.CamLabToolBar import CamLabToolBar
+from src.widgets.ToolBar import ToolBar
 from src.widgets.TabInterface import TabInterface
 from src.widgets.StatusGroupBox import StatusGroupBox
 from src.widgets.GlobalSettingsGroupBox import GlobalSettingsGroupBox
@@ -61,7 +61,7 @@ class MainWindow(QMainWindow, QtStyleTools, TabUtilities, PlotUtilities, Control
         self.mainWindowLayout = QVBoxLayout()
 
         # Toolbar.
-        self.toolbar = CamLabToolBar()
+        self.toolbar = ToolBar()
         self.mainWindowLayout.addWidget(self.toolbar)
         
         # Tab interface.
