@@ -185,6 +185,8 @@ class MainWindow(QMainWindow, QtStyleTools):
             self.tabs.removeTab(index)
             widget.setWindowFlags(Qt.Window)
             widget.setWindowTitle(text)
+            widget.setConfiguration(self.configuration)
+            widget.move(400, 400)
             widget.show()
 
     @Slot()

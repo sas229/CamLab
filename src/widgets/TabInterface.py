@@ -30,10 +30,10 @@ class TabInterface(QTabWidget):
 
     @Slot(int)
     def closeTab(self, index):
-        widget = self.widget(index)
-        if isinstance(widget, PlotWindow):
-            widget.close()
-            widget.deleteLater()
-            widget = None
+        # widget = self.widget(index)
+        # if isinstance(widget, PlotWindow):
+        #     widget.close()
+        #     widget.deleteLater()
+        #     widget = None
         self.removeTab(index)
     
