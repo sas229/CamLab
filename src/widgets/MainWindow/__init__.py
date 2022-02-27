@@ -3,10 +3,10 @@ from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, Q
 from PySide6.QtGui import QScreen
 from PySide6.QtCore import Signal, Slot, QThread, QTimer
 from src.local_qt_material import apply_stylesheet, QtStyleTools
-from src.widgets.MainWindow._utilities._TabUtilities import TabUtilities
-from src.widgets.MainWindow._utilities._PlotUtilities import PlotUtilities
-from src.widgets.MainWindow._utilities._ControlUtilities import ControlUtilities
-from src.widgets.MainWindow._utilities._ConfigurationUtilities import ConfigurationUtilities
+from src.widgets.MainWindow._TabUtilities import TabUtilities
+from src.widgets.MainWindow._PlotUtilities import PlotUtilities
+from src.widgets.MainWindow._ControlUtilities import ControlUtilities
+from src.widgets.MainWindow._ConfigurationUtilities import ConfigurationUtilities
 from src.manager import Manager
 from src.widgets.ToolBar import ToolBar
 from src.widgets.TabInterface import TabInterface
@@ -20,7 +20,7 @@ from time import sleep
 
 log = logging.getLogger(__name__)
 
-class MainWindow(QMainWindow, QtStyleTools, TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUtilities):
+class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUtilities, QtStyleTools, QMainWindow):
     running = Signal(bool)
     
     def __init__(self):
