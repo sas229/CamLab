@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QTabWidget, QWidget, QTabBar
 from PySide6.QtCore import Slot, Signal
-from src.widgets import PlotWindow
+from src.widgets.PlotWindow import PlotWindow
 import logging 
 
 log = logging.getLogger(__name__)
@@ -34,6 +34,10 @@ class TabInterface(QTabWidget):
 
     @Slot(int)
     def closeTab(self, index):
+        widget = self.widget(index)
+        # Delete if not a plot widget.
+        if isinstance(widget, PlotWindow):
+            widget.deleteLater()
         self.removeTab(index)
         log.info("Tab removed.")
     

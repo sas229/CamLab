@@ -17,18 +17,19 @@ from datetime import datetime
 log = logging.getLogger(__name__)
 
 class Manager(QObject):
-    updateUI = Signal(dict)
+    # updateUI = Signal(dict)
     configurationChanged = Signal(dict)
-    deviceConfigurationAdded = Signal(str, list)
+    deviceConfigurationTabAdded = Signal(str)
     clearDeviceConfigurationTabs = Signal()
     closePlots = Signal()
-    clearControls = Signal()
+    clearControlTabs = Signal()
     addControlTable = Signal(str, list)
     updateDeviceConfigurationTab = Signal()
     removeControlTable = Signal(str)
     plotWindowChannelsUpdated = Signal()
     existingPlotsFound = Signal()
     outputText = Signal(str)
+    updateFeedbackChannelList = Signal(str, list)
 
     def __init__(self):
         super().__init__()
@@ -36,6 +37,7 @@ class Manager(QObject):
         self.acquisitionModels = {}
         self.acquisitionTables = {}
         self.controlTableModels = {}
+        self.feedbackChannelLists = {}
         self.devices = {}
         self.deviceThreads = {}
         self.refreshing = False
@@ -54,12 +56,12 @@ class Manager(QObject):
             {"channel": "AIN7", "name": "Ch_8", "unit": "V", "slope": 1.0, "offset": 0.00, "connect": False, "autozero": True},
         ]
         self.defaultControlTable = [
-            {"channel": "C1", "name": "C1", "enable": False, "type": 1, "control": 0, "feedback": 0},
-            {"channel": "C2", "name": "C2", "enable": False, "type": 1, "control": 0, "feedback": 0}
+            {"channel": "C1", "name": "C1", "enable": False, "type": "Digital", "control": "Linear", "feedback": "N/A"},
+            {"channel": "C2", "name": "C2", "enable": False, "type": "Digital", "control": "Linear", "feedback": "N/A"}
         ]
         self.controlModeList = ['Digital', 'Digital']
         self.controlActuatorList = ['Linear', 'Linear']
-        self.defaultFeedbackChannel = ['N/A']
+        self.defaultFeedbackChannelList = ['N/A']
 
         # Instantiate the model for the device list.   
         self.deviceTableModel = DeviceTableModel()
@@ -298,11 +300,11 @@ class Manager(QObject):
                 self.manageDeviceThreads(name=device, id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True)
                 self.acquisitionModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
                 self.controlTableModels[name] = ControlTableModel(self.configuration["devices"][name]["control"])
-                self.deviceConfigurationAdded.emit(name, self.defaultFeedbackChannel)
-                self.setListFeedbackCombobox()
+                self.feedbackChannelLists[name] = self.setFeedbackChannelList(name)
+                self.deviceConfigurationTabAdded.emit(name)
             log.info("Configuration loaded.")
         self.updateDeviceConfigurationTab.emit()
-        self.updateUI.emit(self.configuration)
+        self.configurationChanged.emit(self.configuration)
 
     def findDevices(self):
         """Method to find all available devices and return an array of connection properties.
@@ -364,7 +366,7 @@ class Manager(QObject):
                     deviceInformation["address"] = ljm.numberToIP(IP[i])
                 deviceInformation["status"] = True
                 self.deviceTableModel.appendRow(deviceInformation)
-                self.updateUI.emit(self.configuration)
+                self.configurationChanged.emit(self.configuration)
                 
                 # Make a deep copy to avoid pointers in the YAML output.
                 acquisitionTable = copy.deepcopy(self.defaultAcquisitionTable)
@@ -389,9 +391,10 @@ class Manager(QObject):
                 # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
                 self.acquisitionModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
                 self.controlTableModels[name] = ControlTableModel(self.configuration["devices"][name]["control"])
-                self.deviceConfigurationAdded.emit(name, self.defaultFeedbackChannel)
+                self.feedbackChannelLists[name] = self.setFeedbackChannelList(name)
+                self.deviceConfigurationTabAdded.emit(name)
                 self.updateDeviceConfigurationTab.emit()
-                self.updateUI.emit(self.configuration)
+                self.configurationChanged.emit(self.configuration)
         if mode == "USB":
             log.info("Found " + str(numDevices) + " USB device(s).")
         elif mode == "TCP":
@@ -485,7 +488,7 @@ class Manager(QObject):
                     self.configurationChanged.emit(self.configuration)
                     self.settings.setValue("configurationPath", loadConfigurationPath)
                     self.loadDevicesFromConfiguration()
-                    self.setListFeedbackCombobox()
+                    # self.setListFeedbackCombobox()
                     if "plots" in self.configuration:
                         self.existingPlotsFound.emit()
             except FileNotFoundError:
@@ -523,7 +526,7 @@ class Manager(QObject):
     def clearConfiguration(self):
         # Delete all plots first.
         self.closePlots.emit()
-        self.clearControls.emit()
+        self.clearControlTabs.emit()
 
         # Next clear the device list and configuration tabs.
         self.deviceTableModel.clearData()
@@ -536,7 +539,7 @@ class Manager(QObject):
 
         # Initialise the basic default configuration.
         self.initialiseDefaultConfiguration()
-        self.updateUI.emit(self.configuration)
+        self.configurationChanged.emit(self.configuration)
         log.info("Cleared configuration by loading defaults.") 
 
     @Slot(str)
@@ -605,8 +608,8 @@ class Manager(QObject):
                 secondaryUnit = self.configuration["controlWindow"][controlName]["secondaryUnit"][1:-1]
                 feedbackUnit = self.configuration["controlWindow"][controlName]["feedbackUnit"][1:-1]
                 channel = control["channel"]
-                if control["feedback"] == 0:
-                    if control["control"] == 0:
+                if control["feedback"] == "N/A":
+                    if control["control"] == "Linear":
                         genericChannelsData.append(
                         {"plot": False, "name": "Postion SP" , "device": control["name"], "colour": self.setColourDefault(),
                         "value": "0.00", "unit": primaryUnit})
@@ -620,7 +623,7 @@ class Manager(QObject):
                         {"plot": False, "name": "Speed" , "device": control["name"], "colour": self.setColourDefault(),
                         "value": "0.00", "unit": secondaryUnit})
                 else:
-                    if control["control"] == 0:
+                    if control["control"] == "Linear":
                         genericChannelsData.append(
                         {"plot": False, "name": "Postion SP" , "device": control["name"], "colour": self.setColourDefault(),
                         "value": "0.00", "unit": primaryUnit})
@@ -706,17 +709,12 @@ class Manager(QObject):
             channel["colour"] = channelColours[i]
             i = i+1
 
-    def setListFeedbackCombobox(self):
-        # Get enabled device list.
-        enabledDevices = self.deviceTableModel.enabledDevices()
-
+    def setFeedbackChannelList(self, name):
         # Create lists of dicts of enabled channels with default feedback channel as N/A.
         deviceChannelList = []
-        for device in enabledDevices:
-            name = device['name']
-            enabledChannels = self.acquisitionModels[device["name"]].enabledChannels()
-            enabledChannels[0].insert(0, 'N/A')
-            deviceChannelList.append({name : enabledChannels[0]})
+        enabledChannels = self.acquisitionModels[name].enabledChannels()
+        enabledChannels[0].insert(0, 'N/A')
+        deviceChannelList.append({name : enabledChannels[0]})
 
         # For all devices, pass the appropriate feedbackChannelList object.
         for device in deviceChannelList:
@@ -724,33 +722,48 @@ class Manager(QObject):
                 # If value is not empty, pass the feedbackChannelList object, otherwise pass the defaults.
                 if value != []:
                     feedbackChannelList = copy.deepcopy(value)
-                    self.removeControlTable.emit(key)
-                    self.addControlTable.emit(key, feedbackChannelList)
+                    # self.removeControlTable.emit(key)
+                    # self.addControlTable.emit(key, feedbackChannelList)
+                    # self.updateFeedbackChannelList.emit(key, feedbackChannelList)
                 elif value == []:
-                    self.removeControlTable.emit(key)
-                    self.addControlTable.emit(key, self.defaultFeedbackChannel)
+                    # self.removeControlTable.emit(key)
+                    # self.addControlTable.emit(key, self.defaultFeedbackChannelList)
+                    # self.updateFeedbackChannelList.emit(key, self.defaultFeedbackChannelList)
+                    feedbackChannelList = self.defaultFeedbackChannelList
+        return feedbackChannelList
 
-    def resetIndexFeedbackComboBox(self, row, name):
-        # Make a copy of the controls configuration for the current device.
-        controls = copy.deepcopy(self.configuration["devices"][name]["control"])
+    def updateFeedbackComboBox(self, deviceName, row):
+        # Make a deep copy of the current feedback channel list.
+        feedbackChannelList = copy.deepcopy(self.feedbackChannelLists[deviceName])
 
-        # Create a list of boolean indicators for the channels in order to 
-        # calculate the total number of indices required in the combobox.
-        connections = []
-        for channel in self.configuration["devices"][name]["acquisition"]:
-            connections.append(channel['connect'])
-        indexCombo = sum(connections)
+        # Get the updated feedback channel list.
+        updatedFeedbackChannelList = self.setFeedbackChannelList(deviceName)
 
-        # Loop through the combobox options and redefine values.
-        for i in range(len(controls)):
-            # If the removed channel was the feedback channel, set to N/A.
-            if connections[row] == False and controls[i]["feedback"] == indexCombo:
-                self.configuration["devices"][name]["control"][i]["feedback"] = 0
-            # If the removed channel was not the feedback channel, redefine values.
-            elif connections[row] == False and controls[i]["feedback"] != indexCombo:
-                if controls[i]["feedback"] != 0 and indexCombo < controls[i]["feedback"]+1:
-                    self.configuration["devices"][name]["control"][i]["feedback"] = copy.deepcopy(controls[i]["feedback"] - 1)
-            elif connections[row] == True:
-                if indexCombo < controls[i]["feedback"]+1:
-                    self.configuration["devices"][name]["control"][i]["feedback"] = copy.deepcopy(controls[i]["feedback"] + 1)
+        # controlName = deviceName + " C1"
+        # print(self.configuration["devices"][deviceName]["control"][controlName]["feedbackChannel"])
+        # print(feedbackChannelList)
+        # print(updatedFeedbackChannelList)
+
+        # # Make a copy of the controls configuration for the current device.
+        # controls = copy.deepcopy(self.configuration["devices"][name]["control"])
+
+        # # Create a list of boolean indicators for the channels in order to 
+        # # calculate the total number of indices required in the combobox.
+        # connections = []
+        # for channel in self.configuration["devices"][name]["acquisition"]:
+        #     connections.append(channel['connect'])
+        # index = sum(connections)
+
+        # # Loop through the combobox options and redefine values.
+        # for i in range(len(controls)):
+        #     # If the removed channel was the feedback channel, set to N/A.
+        #     if connections[row] == False and controls[i]["feedback"] == index:
+        #         self.configuration["devices"][name]["control"][i]["feedback"] = 0
+        #     # If the removed channel was not the feedback channel, redefine values.
+        #     elif connections[row] == False and controls[i]["feedback"] != index:
+        #         if controls[i]["feedback"] != 0 and index < controls[i]["feedback"]+1:
+        #             self.configuration["devices"][name]["control"][i]["feedback"] = copy.deepcopy(controls[i]["feedback"] - 1)
+        #     elif connections[row] == True:
+        #         if index < controls[i]["feedback"]+1:
+        #             self.configuration["devices"][name]["control"][i]["feedback"] = copy.deepcopy(controls[i]["feedback"] + 1)
 

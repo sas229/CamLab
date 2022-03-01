@@ -130,19 +130,22 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.globalSettingsGroupBox.filenameChanged.connect(self.manager.updateFilename)
 
         # Manager connections.
-        self.manager.updateUI.connect(self.updateUI)
         self.manager.configurationChanged.connect(self.updateUI)
-        self.manager.configurationChanged.connect(self.globalSettingsGroupBox.updateUI)
         self.manager.clearDeviceConfigurationTabs.connect(self.clearDeviceConfigurationTabs)
         self.manager.closePlots.connect(self.closePlots)
-        self.manager.clearControls.connect(self.clearControls)
-        self.manager.deviceConfigurationAdded.connect(self.addDeviceConfigurationTab)
-        self.manager.removeControlTable.connect(self.removeControlTable)
-        self.manager.addControlTable.connect(self.addControlTable)
-        self.manager.updateDeviceConfigurationTab.connect(self.updateDeviceConfigurationTabs)
+        self.manager.clearControlTabs.connect(self.clearControlTabs)
+        self.manager.deviceConfigurationTabAdded.connect(self.addDeviceConfigurationTab)
+        # self.manager.removeControlTable.connect(self.removeControlTable)
+        # self.manager.addControlTable.connect(self.addControlTable)
+        # self.manager.updateFeedbackChannelList.connect(self.updateFeedbackChannelList)
+        # self.manager.updateDeviceConfigurationTab.connect(self.updateDeviceConfigurationTabs)
+
+        # When a device is connected in the device list, spin up a device thread, 
+        # show or hide the configuration tab, and connect to update the plots.
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.manager.manageDeviceThreads)
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.updateDeviceConfigurationTabs)
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.manager.updatePlotWindowChannelsData)
+
         self.manager.timing.actualRate.connect(self.statusGroupBox.update)
         self.manager.plotWindowChannelsUpdated.connect(self.updatePlots)
         self.manager.existingPlotsFound.connect(self.createExistingPlots)
@@ -231,8 +234,11 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         if self.plots and "plots" in self.manager.configuration: 
             self.updatePlots()
 
+        # Update other GIU items.
+        self.globalSettingsGroupBox.updateUI(self.configuration)
         # self.controlWindow.updateUI(self.configuration)
         log.info("Updated UI.")
+
 
     def closeEvent(self, event):
         # Close all plots.

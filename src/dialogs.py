@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 class RefreshDevicesDialog(QProgressDialog):
     
     def __init__(self, parent):
-        super(RefreshDevicesDialog, self).__init__(parent)  
+        super().__init__(parent)  
         self.setParent(parent)
         # self.setWindowTitle("Finding devices...")
         self.setLabel(QLabel("Finding devices..."))
@@ -27,7 +27,7 @@ class ColourPickerDialog(QDialog):
     selectedColour = Signal(QModelIndex, str)
 
     def __init__(self, parent=None):
-        super(ColourPickerDialog, self).__init__(parent)
+        super().__init__(parent)
         self.colourPickerTableModel = ColourPickerTableModel()
         self.colourPickerTableView = ColourPickerTableView()
         self.colourPickerTableView.setModel(self.colourPickerTableModel)
@@ -39,7 +39,7 @@ class ColourPickerDialog(QDialog):
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Popup)
         self.colourPickerTableView.clicked.connect(self.colourSelected)
 
-    #index of colour table
+    # Index of colour table.
     def colourSelected(self, index):
         model = index.model()
         colour = model._data[index.column()][index.row()]
@@ -59,7 +59,7 @@ class ColourPickerDialog(QDialog):
         else:
             super(ColourPickerDialog, self).keyPressEvent(event)
 
-    #Index channel I clicked
+    # Index of the channel clicked.
     def setTargetIndex(self, index):
         self.targetIndex = index
 
