@@ -4,13 +4,14 @@ import logging
 log = logging.getLogger(__name__)
 
 class ControlTableModel(QAbstractTableModel):
-    controlChannelToggled = Signal(int, bool)
-    controlChannelNameChanged = Signal (str, str)
-    controlWidgetChanged = Signal(int, int)
-    controlFeedbackChannelChanged = Signal(int, int)
+    controlChannelToggled = Signal(str, int, bool)
+    controlChannelNameChanged = Signal (str, str, str)
+    controlWidgetChanged = Signal(str, int, int)
+    controlFeedbackChannelChanged = Signal(str, int, int)
     
-    def __init__(self, data=[], parent=None):
+    def __init__(self, device, data=[], parent=None):
         super().__init__(parent)
+        self._device = device
         self._data = data
 
         log.info("Control table model instantiated.")
@@ -35,7 +36,7 @@ class ControlTableModel(QAbstractTableModel):
     def columnCount(self, parent=QModelIndex()):
         if parent.isValid():
             return 0
-        return len(self._data[0])-1
+        return 5
 
     def data(self, index, role=Qt.DisplayRole):
         if role == Qt.TextAlignmentRole:
@@ -64,20 +65,22 @@ class ControlTableModel(QAbstractTableModel):
             item = self._data[index.row()]
             self.index = index.row()
             if index.column() == 0:
-                item["enable"] = value
-                self.controlChannelToggled.emit(index.row(), value)
+                # Only allow the checkbox to be toggled if type and control are specified.
+                if item["type"] != "N/A" and item["control"] != "N/A":
+                    item["enable"] = value
+                    self.controlChannelToggled.emit(self._device, index.row(), value)
             elif index.column() == 1:
-                self.controlChannelNameChanged.emit(item["name"], value)
+                self.controlChannelNameChanged.emit(self._device, item["name"], value)
                 item["name"] = value
             elif index.column() == 2:
                 item["type"] = value
-                self.controlWidgetChanged.emit(index.row(), value)
+                self.controlWidgetChanged.emit(self._device, index.row(), value)
             elif index.column() == 3:
                 item["control"] = value
-                self.controlWidgetChanged.emit(index.row(), value)
+                self.controlWidgetChanged.emit(self._device, index.row(), value)
             elif index.column() == 4:
                 item["feedback"] = value
-                self.controlFeedbackChannelChanged.emit(index.row(), value)
+                self.controlFeedbackChannelChanged.emit(self._device, index.row(), value)
             self.dataChanged.emit(index, index, [])
             return True
         else:
@@ -85,10 +88,11 @@ class ControlTableModel(QAbstractTableModel):
 
     def headerData(self, section, orientation, role):
         if role == Qt.DisplayRole:
-            if orientation == Qt.Horizontal:
-                return self._column_name[section]
-            elif orientation == Qt.Vertical:
-                return self._row_name[section]
+            if section < self.columnCount():
+                if orientation == Qt.Horizontal:
+                    return self._column_name[section]
+                elif orientation == Qt.Vertical:
+                    return self._row_name[section]
 
     def flags(self, index):
         if index.isValid():

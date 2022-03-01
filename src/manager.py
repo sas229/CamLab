@@ -19,22 +19,22 @@ log = logging.getLogger(__name__)
 class Manager(QObject):
     # updateUI = Signal(dict)
     configurationChanged = Signal(dict)
-    deviceConfigurationTabAdded = Signal(str)
+    deviceAdded = Signal(str)
     clearDeviceConfigurationTabs = Signal()
     closePlots = Signal()
     clearControlTabs = Signal()
     addControlTable = Signal(str, list)
-    updateDeviceConfigurationTab = Signal()
+    # updateDeviceConfigurationTab = Signal()
     removeControlTable = Signal(str)
     plotWindowChannelsUpdated = Signal()
     existingPlotsFound = Signal()
     outputText = Signal(str)
-    updateFeedbackChannelList = Signal(str, list)
+    # updateFeedbackChannelList = Signal(str, list)
 
     def __init__(self):
         super().__init__()
         self.configuration = {}
-        self.acquisitionModels = {}
+        self.acquisitionTableModels = {}
         self.acquisitionTables = {}
         self.controlTableModels = {}
         self.feedbackChannelLists = {}
@@ -56,13 +56,35 @@ class Manager(QObject):
             {"channel": "AIN7", "name": "Ch_8", "unit": "V", "slope": 1.0, "offset": 0.00, "connect": False, "autozero": True},
         ]
         self.defaultControlTable = [
-            {"channel": "C1", "name": "C1", "enable": False, "type": "Digital", "control": "Linear", "feedback": "N/A"},
-            {"channel": "C2", "name": "C2", "enable": False, "type": "Digital", "control": "Linear", "feedback": "N/A"}
+            {"channel": "C1", "name": "C1", "enable": False, "type": "N/A", "control": "N/A", "feedback": "N/A"},
+            {"channel": "C2", "name": "C2", "enable": False, "type": "N/A", "control": "N/A", "feedback": "N/A"}
         ]
-        self.controlModeList = ['Digital', 'Digital']
-        self.controlActuatorList = ['Linear', 'Linear']
-        self.defaultFeedbackChannelList = ['N/A']
-
+        self.controlModeList = ["N/A", "Digital"]
+        self.controlActuatorList = ["N/A", "Linear"]
+        self.defaultFeedbackChannelList = ["N/A"]
+        self.defaultControlSettings = {
+            "primaryMinimum": -100.00,
+            "primaryMaximum": 100.00,
+            "primaryLeftLimit": -80.00,
+            "primaryRightLimit": 80.00,
+            "primarySetPoint": 0.00,
+            "primaryProcessVariable": 0.00,
+            "primaryUnit": "(mm)",
+            "secondarySetPoint": 3.000,
+            "secondaryUnit": "(mm/s)",
+            "feedbackMinimum": -20.00,
+            "feedbackMaximum": 100.00,
+            "feedbackLeftLimit": -10.00,
+            "feedbackRightLimit": 90.00,
+            "feedbackSetPoint": 0.00,
+            "feedbackProcessVariable": 0.00,
+            "feedbackUnit": "(N)",
+            "feedbackChannel": "N/A",
+            "KP": 1.00,
+            "KI": 1.00,
+            "KD": 1.00,
+            "proportionalOnMeasurement": False
+        }
         # Instantiate the model for the device list.   
         self.deviceTableModel = DeviceTableModel()
 
@@ -130,7 +152,7 @@ class Manager(QObject):
         for device in enabledDevices:
             deviceName = device["name"]
             # Acquisition channels.
-            channels, names, units, slopes, offsets, autozero = self.acquisitionModels[deviceName].enabledChannels()
+            channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[deviceName].enabledChannels()
             for slope in slopes:
                 slopeline += "\t"
                 slopeline += str(slope)
@@ -148,14 +170,18 @@ class Manager(QObject):
             for control in controls:
                 # Get name of control and units.
                 controlName = deviceName + " " + control["channel"]
-                primaryUnit = self.configuration["controlWindow"][controlName]["primaryUnit"]
-                secondaryUnit = self.configuration["controlWindow"][controlName]["secondaryUnit"]
-                feedbackUnit = self.configuration["controlWindow"][controlName]["feedbackUnit"]
+                if control["channel"] == "C1":
+                    channel = 0
+                elif control["channel"] == "C2":
+                    channel = 1
+                primaryUnit = self.configuration["devices"][name]["control"][channel]["settings"]["primaryUnit"]
+                secondaryUnit = self.configuration["devices"][name]["control"][channel]["settings"]["secondaryUnit"]
+                feedbackUnit = self.configuration["devices"][name]["control"][channel]["settings"]["feedbackUnit"]
                 # Get feedback channel name.
                 feedbackChannelIndex = control["feedback"]
-                feedbackChannel = self.configuration["controlWindow"][controlName]["feedbackChannel"]
+                feedbackChannel = self.configuration["devices"][name]["control"][channel]["settings"]["feedbackChannel"]
                 # For each enabled control add the required header components depending on the actuator type.
-                if control["control"] == 0:
+                if control["control"] == "Linear":
                     if feedbackChannelIndex == 0:
                         slopeline += "\t 1 \t 1 \t 1 \t 1" 
                         offsetline += "\t 0 \t 0 \t 0 \t 0"
@@ -216,7 +242,7 @@ class Manager(QObject):
             name = device["name"]
             
             # Generate addresses for acqusition and set acquisition in device.
-            channels, names, units, slopes, offsets, autozero = self.acquisitionModels[name].enabledChannels()
+            channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[name].enabledChannels()
             addresses = []
             dataTypes = []
             dt = ljm.constants.FLOAT32
@@ -224,7 +250,6 @@ class Manager(QObject):
                 address = int(re.findall(r'\d+', channel)[0])*2 # Multiply by two to get correct LJ address for AIN.
                 addresses.append(address)
                 dataTypes.append(dt)
-            # print(addresses)
             controlRate = self.configuration["global"]["controlRate"]
             self.devices[name].setAcquisition(channels, addresses, dataTypes, slopes, offsets, autozero, controlRate)
             log.info("Acquisition settings set for device named " + name + ".")
@@ -298,12 +323,13 @@ class Manager(QObject):
                 # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
                 self.deviceTableModel.appendRow(deviceInformation)
                 self.manageDeviceThreads(name=device, id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True)
-                self.acquisitionModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
-                self.controlTableModels[name] = ControlTableModel(self.configuration["devices"][name]["control"])
+                self.acquisitionTableModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
+                self.controlTableModels[name] = ControlTableModel(name, self.configuration["devices"][name]["control"])
                 self.feedbackChannelLists[name] = self.setFeedbackChannelList(name)
-                self.deviceConfigurationTabAdded.emit(name)
+                self.addControlSettings(name)
+                self.deviceAdded.emit(name)
             log.info("Configuration loaded.")
-        self.updateDeviceConfigurationTab.emit()
+        # self.updateDeviceConfigurationTab.emit()
         self.configurationChanged.emit(self.configuration)
 
     def findDevices(self):
@@ -315,7 +341,7 @@ class Manager(QObject):
 
         # Clear all tables and re-load the current configuration.
         self.deviceTableModel.clearData()
-        self.acquisitionModels = {}
+        self.acquisitionTableModels = {}
         self.acquisitionTables = {}
         self.controlTableModels = {}
         self.clearDeviceConfigurationTabs.emit()
@@ -389,16 +415,22 @@ class Manager(QObject):
                     self.configuration["devices"][name] = newDevice 
 
                 # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
-                self.acquisitionModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
-                self.controlTableModels[name] = ControlTableModel(self.configuration["devices"][name]["control"])
+                self.acquisitionTableModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
+                self.controlTableModels[name] = ControlTableModel(name, self.configuration["devices"][name]["control"])
                 self.feedbackChannelLists[name] = self.setFeedbackChannelList(name)
-                self.deviceConfigurationTabAdded.emit(name)
-                self.updateDeviceConfigurationTab.emit()
+                self.deviceAdded.emit(name)
+                self.addControlSettings(name)
                 self.configurationChanged.emit(self.configuration)
         if mode == "USB":
             log.info("Found " + str(numDevices) + " USB device(s).")
         elif mode == "TCP":
             log.info("Found " + str(numDevices) + " TCP device(s).")
+
+    def addControlSettings(self, name):
+        #  Configure control settings.
+        for channel in range(self.controlTableModels[name].rowCount()):
+            if "settings" not in self.configuration["devices"][name]["control"][channel]:
+                self.configuration["devices"][name]["control"][channel]["settings"] = copy.deepcopy(self.defaultControlSettings)
 
     @Slot()
     def configure(self):
@@ -472,7 +504,7 @@ class Manager(QObject):
         
         # # Clear all underlying models and tables.
         self.configuration = {}
-        self.acquisitionModels = {}
+        self.acquisitionTableModels = {}
         self.acquisitionTables = {}
         self.controlTableModels = {}
         self.controlTables = {}
@@ -533,7 +565,7 @@ class Manager(QObject):
         self.clearDeviceConfigurationTabs.emit()
         
         # Clear all underlying models and tables. 
-        self.acquisitionModels = {}
+        self.acquisitionTableModels = {}
         self.acquisitionTables = {}
         self.controlTableModels = {}
 
@@ -591,7 +623,7 @@ class Manager(QObject):
         for device in deviceList:
             # Get lists of the enabled channel names and units.
             name = device["name"]
-            channels, names, units, slopes, offsets, autozero = self.acquisitionModels[name].enabledChannels()
+            channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[name].enabledChannels()
 
             # Create a generic channelsData list.
             for i in range(len(channels)):
@@ -603,10 +635,14 @@ class Manager(QObject):
             device = device["name"]
             for control in controls:
                 controlName = name + " " + control["channel"]
+                if control["channel"] == "C1":
+                    channel = 0
+                elif control["channel"] == "C2":
+                    channel = 1
                 # Slice in lines that follows removes the brackets.
-                primaryUnit = self.configuration["controlWindow"][controlName]["primaryUnit"][1:-1]
-                secondaryUnit = self.configuration["controlWindow"][controlName]["secondaryUnit"][1:-1]
-                feedbackUnit = self.configuration["controlWindow"][controlName]["feedbackUnit"][1:-1]
+                primaryUnit = self.configuration["devices"][name]["control"][channel]["settings"]["primaryUnit"][1:-1]
+                secondaryUnit = self.configuration["devices"][name]["control"][channel]["settings"]["secondaryUnit"][1:-1]
+                feedbackUnit = self.configuration["devices"][name]["control"][channel]["settings"]["feedbackUnit"][1:-1]
                 channel = control["channel"]
                 if control["feedback"] == "N/A":
                     if control["control"] == "Linear":
@@ -712,7 +748,7 @@ class Manager(QObject):
     def setFeedbackChannelList(self, name):
         # Create lists of dicts of enabled channels with default feedback channel as N/A.
         deviceChannelList = []
-        enabledChannels = self.acquisitionModels[name].enabledChannels()
+        enabledChannels = self.acquisitionTableModels[name].enabledChannels()
         enabledChannels[0].insert(0, 'N/A')
         deviceChannelList.append({name : enabledChannels[0]})
 

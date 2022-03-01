@@ -15,12 +15,12 @@ class ConfigurationUtilities:
 
         # Add acquisition table to the TabWidget.
         self.acquisitionTableViews[name] = AcquisitionTableView()
-        self.acquisitionTableViews[name].setModel(self.manager.acquisitionModels[name])
+        self.acquisitionTableViews[name].setModel(self.manager.acquisitionTableModels[name])
         self.deviceConfigurationLayout[name].addWidget(self.acquisitionTableViews[name])
 
         # Connections for acquisition table.
-        self.manager.acquisitionModels[name].acquisitionChannelTableUpdated.connect(self.manager.updatePlotWindowChannelsData)
-        self.manager.acquisitionModels[name].acquisitionChannelToggled.connect(self.updateFeedbackComboBox)
+        self.manager.acquisitionTableModels[name].acquisitionChannelTableUpdated.connect(self.manager.updatePlotWindowChannelsData)
+        self.manager.acquisitionTableModels[name].acquisitionChannelToggled.connect(self.updateFeedbackComboBox)
 
         # Add control table label.
         controlLabel = QLabel('Control')
@@ -44,10 +44,19 @@ class ConfigurationUtilities:
         self.deviceConfigurationWidget[name] = QWidget()
         self.deviceConfigurationWidget[name].setLayout(self.deviceConfigurationLayout[name])
 
-        # Add the tab but hidden.
+        # Add the tab and show if device connected boolean is true.
         self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.addTab(self.deviceConfigurationWidget[name], name)
         index = self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.indexOf(self.deviceConfigurationWidget[name])
-        self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.setTabVisible(index, False)
+        enabledDevices = self.manager.deviceTableModel.enabledDevices()
+        for device in enabledDevices:
+            if device["name"] == name:
+                self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.setTabVisible(index, True)
+            else:
+                self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.setTabVisible(index, False)
+        
+        # Instantiate the control widgets and add tabs if enabled boolean is true.
+        for channel in range(self.manager.controlTableModels[name].rowCount()):
+            self.addControlTab(name, channel)
 
     @Slot(str, int, int, bool)
     def updateDeviceConfigurationTabs(self, name, id, connection, connect):
@@ -60,8 +69,10 @@ class ConfigurationUtilities:
         # Get the name of the device.
         tabIndex = self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.currentIndex()
         name = self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.tabText(tabIndex)
+
         # Create an updated feedback channel list for this device.
         feedbackChannelList = self.manager.setFeedbackChannelList(name)
+
         # Get current feedback channels selected for each control channel.
         selectedFeedbackChannels = []
         numChannels = self.manager.controlTableModels[name].rowCount()
@@ -70,51 +81,12 @@ class ConfigurationUtilities:
             if channel not in feedbackChannelList:
                 channel = "N/A"
             selectedFeedbackChannels.append(channel)
+
         # Update feedback channel selector ComboBox.
         self.controlTableViews[name].updateFeedbackChannelList(feedbackChannelList, selectedFeedbackChannels)
-
-        # # Clear the acquisition table TabWidget.
-        # self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.clear()
-
-        # # Get a list of enabled devices and current status.
-        # enabledDevices = self.manager.deviceTableModel.enabledDevices()
-
-        # # If enabled and status is True, add the TabWidget for this device.
-        # for device in enabledDevices:
-        #     connect = device["connect"]
-        #     name = device["name"]
-        #     status = device["status"]
-        #     if status == True and connect == True and name in self.acquisitionTableViews:
-        #         self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.addTab(self.deviceConfigurationWidget[name], name)
-        # # # Update control tabs to remove any deselected devices.
-        # # self.updateControlTabs()
 
     @Slot()
     def clearDeviceConfigurationTabs(self):
         self.deviceConfigurationGroupBox.deviceConfigurationTabWidget.clear()
-
-    # @Slot(str)
-    # def updateFeedbackChannelList(self, name):
-    #     print(name)
-    #     # feedbackChannel    # @Slot(str, list)
-    # # def addControlTable(self, name, defaultFeedbackChannel):
-    # #     # Add acquisition table to dict, update the TabWidget and connect to control widget generation method.
-    # #     self.controlTableViews[name] = ControlTableView(self.manager.controlModeList, self.manager.controlActuatorList, defaultFeedbackChannel)
-    # #     print("Test")
-    # #     self.controlTableViews[name].setModel(self.manager.controlTableModels[name])
-    # #     self.controlTableViews[name].setFixedHeight(89)
-    # #     self.deviceConfigurationLayout[name].addWidget(self.controlTableViews[name])
-    # #     self.manager.controlTableModels[name].controlChannelToggled.connect(self.toggleControlChannel)List = self.manager.setFeedBackChannelList(name)
-    #     print(feedbackChannelList)
-    #     # self.controlTableViews[name].updateFeedbackChannelList(feedbackChannelList)
-
-    @Slot(int, bool)
-    def toggleControlChannel(self, index, state):
-        print(str(index) + str(state))  
-        # self.controlTableViews[name].updateFeedbackChannelList()
-
-    @Slot(str)
-    def removeControlTable(self, name):
-        self.controlTableViews[name].setParent(None)
 
     

@@ -5,6 +5,94 @@ import copy
 
 class ControlUtilities:
 
+    def addControlTab(self, name, channel):
+        controlID = name + " C" + str(channel+1)
+        control = self.manager.configuration["devices"][name]["control"][channel]["control"]
+        controlType = self.manager.configuration["devices"][name]["control"][channel]["type"]
+        controlName = self.manager.configuration["devices"][name]["control"][channel]["name"]
+        
+        # Instantiate the appropriate widget.
+        if control == "Linear" and controlType == "Digital":
+            controlWidget = LinearAxis(controlID)
+        
+        # Connections.
+        controlWidget.enable.connect(self.manager.devices[name].setEnable)
+        controlWidget.secondarySetPointChanged.connect(self.manager.devices[name].setSpeed)
+        controlWidget.positiveJogEnabled.connect(self.manager.devices[name].jogPositiveOn)
+        controlWidget.positiveJogDisabled.connect(self.manager.devices[name].jogPositiveOff)
+        controlWidget.negativeJogEnabled.connect(self.manager.devices[name].jogNegativeOn)
+        controlWidget.negativeJogDisabled.connect(self.manager.devices[name].jogNegativeOff)
+        controlWidget.primaryLeftLimitChanged.connect(self.manager.devices[name].updatePositionLeftLimit)
+        controlWidget.primaryRightLimitChanged.connect(self.manager.devices[name].updatePositionRightLimit)
+        controlWidget.primarySetPointChanged.connect(self.manager.devices[name].moveToPosition)
+        controlWidget.feedbackLeftLimitChanged.connect(self.manager.devices[name].updateFeedbackLeftLimit)
+        controlWidget.feedbackRightLimitChanged.connect(self.manager.devices[name].updateFeedbackRightLimit)
+        controlWidget.feedbackSetPointChanged.connect(self.manager.devices[name].setFeedbackSetPoint)
+        controlWidget.zeroPosition.connect(self.manager.devices[name].zeroPosition)
+        controlWidget.stopCommand.connect(self.manager.devices[name].stopCommand)
+        controlWidget.PIDControl.connect(self.manager.devices[name].setPIDControl)
+        controlWidget.KPChanged.connect(self.manager.devices[name].setKP)
+        controlWidget.KIChanged.connect(self.manager.devices[name].setKI)
+        controlWidget.KDChanged.connect(self.manager.devices[name].setKD)
+        controlWidget.proportionalOnMeasurementChanged.connect(self.manager.devices[name].setPoM)
+        controlWidget.axisWindowClosed.connect(self.windowToTab)
+        self.checkTimer.timeout.connect(self.manager.devices[name].checkConnection)
+        self.running.connect(self.manager.devices[name].setRunning)
+        self.manager.devices[name].updateRunningIndicator.connect(controlWidget.setRunningIndicator)
+        if channel == 0:
+            self.updateTimer.timeout.connect(self.manager.devices[name].updateControlPanelC1)
+            self.manager.devices[name].updateLimitIndicatorC1.connect(controlWidget.setLimitIndicator)
+            self.manager.devices[name].updateConnectionIndicatorC1.connect(controlWidget.setConnectedIndicator)
+            self.manager.devices[name].updateSpeedC1.connect(controlWidget.jog.setSpeed)
+            self.manager.devices[name].updatePositionSetPointC1.connect(controlWidget.setPositionSetPoint)
+            self.manager.devices[name].updateFeedbackSetPointC1.connect(controlWidget.setFeedbackSetPoint)
+            self.manager.devices[name].updatePositionProcessVariableC1.connect(controlWidget.setPositionProcessVariable)
+            self.manager.devices[name].updateFeedbackProcessVariableC1.connect(controlWidget.setFeedbackProcessVariable)
+        elif channel == 1:
+            self.updateTimer.timeout.connect(self.manager.devices[name].updateControlPanelC2)
+            self.manager.devices[name].updateLimitIndicatorC2.connect(controlWidget.setLimitIndicator)
+            self.manager.devices[name].updateConnectionIndicatorC2.connect(controlWidget.setConnectedIndicator)
+            self.manager.devices[name].updateSpeedC2.connect(controlWidget.jog.setSpeed)
+            self.manager.devices[name].updatePositionSetPointC2.connect(controlWidget.setPositionSetPoint)
+            self.manager.devices[name].updateFeedbackSetPointC2.connect(controlWidget.setFeedbackSetPoint)
+            self.manager.devices[name].updatePositionProcessVariableC2.connect(controlWidget.setPositionProcessVariable)
+            self.manager.devices[name].updateFeedbackProcessVariableC2.connect(controlWidget.setFeedbackProcessVariable)
+        
+        # Store the widget.
+        self.controls[controlID] = controlWidget
+
+        # # Check for feedback channel.
+        # if self.manager.configuration["control"][channel]["feedback"] == "N/A":
+        #     self.manager.configuration["control"][channel]["settings"]["enablePIDControl"] = False
+        #     self.manager.configuration["control"][channel]["settings"]["feedbackChannel"] = "N/A"
+        # else:
+        #     self.manager.configuration["control"][channel]["settings"]["feedbackChannel"] = "AIN" + str(control["feedback"])
+        # #  Update control name.
+        # self.manager.configuration["control"][channel]["settings"]["name"] = controlName
+        
+        # Set the configuration.
+        controlWidget.setConfiguration(configuration=self.manager.configuration)
+        self.manager.devices[name].checkConnection()
+        position = self.manager.configuration["devices"][name]["control"][channel]["settings"]["primaryProcessVariable"]
+        channel = "C" + str(channel+1)
+        self.manager.devices[name].setPosition(channel, position)
+
+        # Add widget to tab.
+        self.tabs.addPersistentTab(self.controls[controlID], controlName)
+        index = self.tabs.indexOf(self.controls[controlID])
+        self.tabs.setTabVisible(index, False)
+
+    @Slot(int, bool)
+    def toggleControlChannel(self, device, channel, state):
+        control = device + " C" + str(channel+1)
+        widget = self.controls[control]
+        index =  self.tabs.indexOf(widget)
+        self.tabs.setTabVisible(index, state)
+
+    @Slot(str)
+    def removeControlTable(self, name):
+        self.controlTableViews[name].setParent(None)
+
     @Slot()
     def clearControlTabs(self):
         # Remove all control tabs.

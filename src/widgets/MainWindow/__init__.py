@@ -35,6 +35,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.acquisitionTableViews = {}
         self.controlTableViews = {}
         self.plots = {}
+        self.controls = {}
 
         # Timers.
         self.updateTimer = QTimer()
@@ -134,7 +135,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.manager.clearDeviceConfigurationTabs.connect(self.clearDeviceConfigurationTabs)
         self.manager.closePlots.connect(self.closePlots)
         self.manager.clearControlTabs.connect(self.clearControlTabs)
-        self.manager.deviceConfigurationTabAdded.connect(self.addDeviceConfigurationTab)
+        self.manager.deviceAdded.connect(self.addDeviceConfigurationTab)
         # self.manager.removeControlTable.connect(self.removeControlTable)
         # self.manager.addControlTable.connect(self.addControlTable)
         # self.manager.updateFeedbackChannelList.connect(self.updateFeedbackChannelList)
