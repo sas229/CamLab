@@ -24,7 +24,7 @@ class Manager(QObject):
     closePlots = Signal()
     clearControlTabs = Signal()
     addControlTable = Signal(str, list)
-    # updateDeviceConfigurationTab = Signal()
+    deviceToggled = Signal(str, bool)
     removeControlTable = Signal(str)
     plotWindowChannelsUpdated = Signal()
     existingPlotsFound = Signal()
@@ -55,14 +55,7 @@ class Manager(QObject):
             {"channel": "AIN6", "name": "Ch_7", "unit": "V", "slope": 1.0, "offset": 0.00, "connect": False, "autozero": True},
             {"channel": "AIN7", "name": "Ch_8", "unit": "V", "slope": 1.0, "offset": 0.00, "connect": False, "autozero": True},
         ]
-        self.defaultControlTable = [
-            {"channel": "C1", "name": "C1", "enable": False, "type": "N/A", "control": "N/A", "feedback": "N/A"},
-            {"channel": "C2", "name": "C2", "enable": False, "type": "N/A", "control": "N/A", "feedback": "N/A"}
-        ]
-        self.controlModeList = ["N/A", "Digital"]
-        self.controlActuatorList = ["N/A", "Linear"]
-        self.defaultFeedbackChannelList = ["N/A"]
-        self.defaultControlSettings = {
+        defaultControlSettings = {
             "mode": "tab",
             "x": 0,
             "y": 0,
@@ -85,13 +78,22 @@ class Manager(QObject):
             "feedbackProcessVariable": 0.00,
             "feedbackUnit": "(N)",
             "feedbackIndex": 0,
-            "KP": 1.00,
-            "KI": 1.00,
-            "KD": 1.00,
+            "KP": 0.00,
+            "KI": 0.00,
+            "KD": 0.00,
             "proportionalOnMeasurement": False
         }
-        # Instantiate the model for the device list.   
+        self.defaultControlTable = [
+            {"channel": "C1", "name": "C1", "enable": False, "type": "N/A", "control": "N/A", "feedback": "N/A", "settings": defaultControlSettings},
+            {"channel": "C2", "name": "C2", "enable": False, "type": "N/A", "control": "N/A", "feedback": "N/A", "settings": defaultControlSettings}
+        ]
+        self.controlModeList = ["N/A", "Digital"]
+        self.controlActuatorList = ["N/A", "Linear"]
+        self.defaultFeedbackChannelList = ["N/A"]
+        
+        # Instantiate the model for the device list and connect to device thread manager.   
         self.deviceTableModel = DeviceTableModel()
+        self.deviceTableModel.deviceConnectStatusUpdated.connect(self.manageDeviceThreads)
 
         # Create assembly thread.
         self.assembly = Assembly()
@@ -157,7 +159,7 @@ class Manager(QObject):
         for device in enabledDevices:
             deviceName = device["name"]
             # Acquisition channels.
-            channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[deviceName].enabledChannels()
+            channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[deviceName].acquisitionSettings()
             for slope in slopes:
                 slopeline += "\t"
                 slopeline += str(slope)
@@ -247,7 +249,7 @@ class Manager(QObject):
             name = device["name"]
             
             # Generate addresses for acqusition and set acquisition in device.
-            channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[name].enabledChannels()
+            channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[name].acquisitionSettings()
             addresses = []
             dataTypes = []
             dt = ljm.constants.FLOAT32
@@ -280,6 +282,7 @@ class Manager(QObject):
     def manageDeviceThreads(self, name, id, connection, connect):
         # Create device instance and move to thread if it doesn't already exist.
         if connect == True and name not in self.devices:
+            print("Adding device...")
             self.devices[name] = Device(name, id, connection)
             log.info("Device instance created for device named " + name + ".")
             self.deviceThreads[name] = QThread()
@@ -294,14 +297,24 @@ class Manager(QObject):
             self.devices[name].emitData.connect(self.assembly.updateNewData)
             self.devices[name].updateOffsets.connect(self.updateDeviceOffsets)
             log.info(name + " attached to basic acquisition connections.")
-        
-        elif connect == False:
-            self.device.pop(name)
+
+            # Emit signal.
+            self.deviceAdded.emit(name)
+            # self.deviceToggled.emit(name, connect)
+
+        elif connect == False:  
+            # Emit signal to remove device configuration tab.
+            self.deviceToggled.emit(name, connect)
+
+            # Remove device.
+            # del self.devices[name]
+            self.devices.pop(name)
             log.info("Device instance deleted for device named " + name + ".")
-            self.deviceThreads[name].quit()  
+            self.deviceThreads[name].quit()
+            # sleep(1.0)
             self.deviceThreads.pop(name)
             log.info("Device thread deleted for device named " + name + ".")
-    
+
     def loadDevicesFromConfiguration(self):
         # Find all devices listed in the configuration file.
         if "devices" in self.configuration:
@@ -333,10 +346,10 @@ class Manager(QObject):
                 self.acquisitionTableModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
                 self.controlTableModels[name] = ControlTableModel(name, self.configuration["devices"][name]["control"])
                 self.feedbackChannelLists[name] = self.setFeedbackChannelList(name)
-                self.addControlSettings(name)
-                self.deviceAdded.emit(name)
+                # self.addControlSettings(name)
+                # self.deviceAdded.emit(name)
             log.info("Configuration loaded.")
-        # self.updateDeviceConfigurationTab.emit()
+        # self.deviceToggled.emit(name, connect)
         self.configurationChanged.emit(self.configuration)
 
     def findDevices(self):
@@ -422,11 +435,16 @@ class Manager(QObject):
                     self.configuration["devices"][name] = newDevice 
 
                 # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
+                log.info("Instantiating data models for device.")
                 self.acquisitionTableModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
                 self.controlTableModels[name] = ControlTableModel(name, self.configuration["devices"][name]["control"])
                 self.feedbackChannelLists[name] = self.setFeedbackChannelList(name)
-                self.deviceAdded.emit(name)
-                self.addControlSettings(name)
+                log.info("Data models instantiated for device.")
+            
+                # Addd device to UI.
+                log.info("Adding device to UI.")
+                # self.addControlSettings(name)
+                # self.deviceAdded.emit(name)
                 self.configurationChanged.emit(self.configuration)
         if mode == "USB":
             log.info("Found " + str(numDevices) + " USB device(s).")
@@ -435,6 +453,7 @@ class Manager(QObject):
 
     def addControlSettings(self, name):
         #  Configure control settings.
+        log.info("Adding control settings for device.")
         for channel in range(self.controlTableModels[name].rowCount()):
             if "settings" not in self.configuration["devices"][name]["control"][channel]:
                 self.configuration["devices"][name]["control"][channel]["settings"] = copy.deepcopy(self.defaultControlSettings)
@@ -480,10 +499,10 @@ class Manager(QObject):
         self.configuration = {}
         self.configuration["global"] = {
             "darkMode": True,
-            "controlRate": 1000.00,
-            "skipSamples": 10,
-            "averageSamples": 10,
-            "path": "/data",
+            "controlRate": 100.00,
+            "skipSamples": 1,
+            "averageSamples": 1,
+            "path": "/home/sam/Documents",
             "filename": "junk"
             }
         self.configuration["configurationWindow"] = {
@@ -630,7 +649,7 @@ class Manager(QObject):
         for device in deviceList:
             # Get lists of the enabled channel names and units.
             name = device["name"]
-            channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[name].enabledChannels()
+            channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[name].acquisitionSettings()
 
             # Create a generic channelsData list.
             for i in range(len(channels)):
@@ -753,21 +772,20 @@ class Manager(QObject):
             i = i+1
 
     def setFeedbackChannelList(self, name):
-        # Create lists of dicts of enabled channels with default feedback channel as N/A.
-        deviceChannelList = []
+        # Create lists of enabled channels with default feedback channel as N/A.
+        feedbackChannelList = []
+        feedbackChannelList.append("N/A")
         enabledChannels = self.acquisitionTableModels[name].enabledChannels()
-        enabledChannels[0].insert(0, 'N/A')
-        deviceChannelList.append({name : enabledChannels[0]})
-
-        # For all devices, pass the appropriate feedbackChannelList object.
-        for device in deviceChannelList:
-            for key, value in device.items():
-                # If value is not empty, pass the feedbackChannelList object, otherwise pass the defaults.
-                if value != []:
-                    feedbackChannelList = copy.deepcopy(value)
-                elif value == []:
-                    feedbackChannelList = self.defaultFeedbackChannelList
-        self.feedbackChannelLists[name] = copy.deepcopy(feedbackChannelList)
+        for channel in enabledChannels:
+            feedbackChannelList.append(channel)
+        
+        # Store feedback channel list.
+        if name not in self.feedbackChannelLists:
+            self.feedbackChannelLists = {name: copy.deepcopy(feedbackChannelList)}
+        else:
+            self.feedbackChannelLists[name] = copy.deepcopy(feedbackChannelList)
+        log.info("Feedback channel list created.")
+        print(feedbackChannelList)
         return feedbackChannelList
 
     def updateFeedbackComboBox(self, deviceName, row):
@@ -776,32 +794,3 @@ class Manager(QObject):
 
         # Get the updated feedback channel list.
         updatedFeedbackChannelList = self.setFeedbackChannelList(deviceName)
-
-        # controlName = deviceName + " C1"
-        # print(self.configuration["devices"][deviceName]["control"][controlName]["feedbackChannel"])
-        # print(feedbackChannelList)
-        # print(updatedFeedbackChannelList)
-
-        # # Make a copy of the controls configuration for the current device.
-        # controls = copy.deepcopy(self.configuration["devices"][name]["control"])
-
-        # # Create a list of boolean indicators for the channels in order to 
-        # # calculate the total number of indices required in the combobox.
-        # connections = []
-        # for channel in self.configuration["devices"][name]["acquisition"]:
-        #     connections.append(channel['connect'])
-        # index = sum(connections)
-
-        # # Loop through the combobox options and redefine values.
-        # for i in range(len(controls)):
-        #     # If the removed channel was the feedback channel, set to N/A.
-        #     if connections[row] == False and controls[i]["feedback"] == index:
-        #         self.configuration["devices"][name]["control"][i]["feedback"] = 0
-        #     # If the removed channel was not the feedback channel, redefine values.
-        #     elif connections[row] == False and controls[i]["feedback"] != index:
-        #         if controls[i]["feedback"] != 0 and index < controls[i]["feedback"]+1:
-        #             self.configuration["devices"][name]["control"][i]["feedback"] = copy.deepcopy(controls[i]["feedback"] - 1)
-        #     elif connections[row] == True:
-        #         if index < controls[i]["feedback"]+1:
-        #             self.configuration["devices"][name]["control"][i]["feedback"] = copy.deepcopy(controls[i]["feedback"] + 1)
-

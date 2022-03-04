@@ -48,11 +48,11 @@ class Device(QObject):
         self.statusPIDC1 = False
         self.statusPIDC2 = False
         self.enabledC1 = True
-        self.enabledC2 = False
+        self.enabledC2 = True
         self.motorEnabledC1 = False
         self.motorEnabledC2 = False
         self.feedbackC1 = True
-        self.feedbackC2 = False
+        self.feedbackC2 = True
         self.feedbackIndexC1 = 0
         self.feedbackIndexC2 = 0
         self.running = False
@@ -102,15 +102,18 @@ class Device(QObject):
         self.initialiseSettings()
         self.loadLuaScript()
         self.checkLimits()
+
+        # Set initial speeds.
         self.setSpeed("C1", self.speedC1)
         self.setSpeed("C2", self.speedC2)
 
+        # PID.
         self.PID_C1 = PID()
         self.setTuningsPID("C1")
         self.PID_C2 = PID()
         self.setTuningsPID("C2")
 
-        # Check Clock 0 is disabled.
+        # Check clock 0 is disabled.
         ljm.eWriteName(self.handle,'DIO_EF_CLOCK0_ENABLE',0)
 
     def setTuningsPID(self, channel):
@@ -141,6 +144,22 @@ class Device(QObject):
                 ljm.eWriteName(self.handle, "DIO4_EF_ENABLE", 0)
         elif channel == "C2":
             self.statusPIDC2 = value
+            if value == True:
+                speedLimit = (self.CPR*4000)/(60*self.countsPerUnitC2)
+                self.PID_C2.reset()
+                self.PID_C2.output_limits = (-speedLimit, speedLimit)
+                self.PID_C2.setpoint = self.feedbackSetPointC2
+                self.PID_C2.set_auto_mode(True, last_output=0.001)
+                # self.PID_C2.set_auto_mode(True, last_output=self.speedC2)
+                aNames = ["DIO5_EF_ENABLE", "DIO5_EF_INDEX", "DIO5_EF_OPTIONS", "DIO5_EF_CONFIG_A", "DIO5_EF_ENABLE"]
+                aValues = [0, 0, 2, self.widthC2, 1]
+                numFrames = len(aNames)
+                results = ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
+            else:
+                self.positionSetPointC2 = self.positionProcessVariableC2
+                self.PID_C2.set_auto_mode(False)
+                self.updatePositionSetPointC2.emit(self.positionSetPointC2)
+                ljm.eWriteName(self.handle, "DIO5_EF_ENABLE", 0)
     
     @Slot(str, float)
     def setKP(self, channel, value):
@@ -310,34 +329,6 @@ class Device(QObject):
 
         return freq, roll, width
 
-    def updateClock(self, clock, freq):        
-        # Define appropriate clock settings, selecting the minimum possible divisor 
-        # that does not result in a roll value that exceeds the bit depth of the clock.
-        # Clamp frequency to 426666, which is equivalent to 4000 RPM for a 6400 CPR encoder
-        # with a 16 bit clock and divisor value of 8.
-        core_freq = 80000000
-        max_roll = 2**16
-        divisor = 8
-        width = 10
-        max_freq = 426666
-        min_freq = (core_freq/(divisor*max_roll))
-        if freq > max_freq:
-            freq = max_freq
-        elif freq < min_freq:
-            freq = np.ceil(min_freq)
-        roll = int(min(max(1,core_freq/(freq*divisor)), max_roll))
-        
-        # Updates the clock.
-        aNames = ['DIO_EF_CLOCK' + str(clock) + '_DIVISOR',
-                'DIO_EF_CLOCK' + str(clock) + '_ROLL_VALUE']
-        aValues = [divisor, roll]
-        numFrames = len(aNames)
-        ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
-        
-        # log.info("Clock {clock} set to {freq} Hz.".format(clock=clock, freq=freq))
-
-        return freq, roll, width
-
     def checkConnection(self):
         self.handle = ljm.open(7, self.connection, self.id)
         
@@ -425,21 +416,19 @@ class Device(QObject):
     def setSpeed(self, channel, speed):
         self.handle = ljm.open(7, self.connection, self.id)     
         if channel == "C1":
-            self.speedC1 = speed
-            targetFrequency = speed*self.countsPerUnitC1
-            self.freqC1, self.rollC1, self.widthC1 = self.updateClock(1, targetFrequency)
+            targetFrequency = int(speed*self.countsPerUnitC1)
+            self.freqC1, self.rollC1, self.widthC1 = self.setClock(1, targetFrequency)
             ljm.eWriteName(self.handle, "DIO4_EF_CONFIG_A", self.widthC1)
-            outputSpeed = self.freqC1/self.countsPerUnitC1
-            self.updateSpeedC1.emit(outputSpeed)
+            self.speedC1 = self.freqC1/self.countsPerUnitC1
+            self.updateSpeedC1.emit(self.speedC1)
             if self.movingC1 == True:
                 self.moveToPosition(channel, self.positionSetPointC1)
         if channel == "C2":
-            self.speedC2 = speed
-            targetFrequency = speed*self.countsPerUnitC2 
-            self.freqC2, self.rollC2, self.widthC2 = self.updateClock(2, targetFrequency)
+            targetFrequency = int(speed*self.countsPerUnitC2)
+            self.freqC2, self.rollC2, self.widthC2 = self.setClock(2, targetFrequency)
             ljm.eWriteName(self.handle, "DIO5_EF_CONFIG_A", self.widthC2)
-            outputSpeed = self.freqC2/self.countsPerUnitC2
-            self.updateSpeedC2.emit(outputSpeed)
+            self.speedC2 = self.freqC2/self.countsPerUnitC2
+            self.updateSpeedC2.emit(self.speedC2)
             if self.movingC2 == True:
                 self.moveToPosition(channel, self.positionSetPointC2)
         
@@ -458,15 +447,15 @@ class Device(QObject):
                     self.previousCountC1 = 0
                     self.pulsesC1 = 0
                     self.previousPulsesC1 = 0
-                    # Emit number of pulses required to travel full range of movement.
-                    pulses = int(abs(self.positionRightLimitC1-self.positionLeftLimitC1)*self.countsPerUnitC1)
-                    aNames = ["DIO4_EF_ENABLE", "DIO4", "DIO4_EF_INDEX", "DIO4_EF_OPTIONS", "DIO4_EF_CONFIG_A", "DIO4_EF_CONFIG_C", "DIO4_EF_ENABLE"]
-                    aValues = [0, 0, 2, 1, self.widthC1, pulses, 1]
+                    # Turn on PWM.
+                    aNames = ["DIO4_EF_ENABLE", "DIO4", "DIO4_EF_INDEX", "DIO4_EF_OPTIONS", "DIO4_EF_CONFIG_A", "DIO4_EF_ENABLE"]
+                    aValues = [0, 0, 0, 1, self.widthC1, 1]
                     numFrames = len(aNames)
                     results = ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
                     # Reset pulse in counter.
                     ljm.eReadName(self.handle, "DIO1_EF_READ_A_AND_RESET")
         elif channel == "C2":
+            print("Jog positive C2...")
             if self.running == True and self.maximumLimitC2 == False and self.motorEnabledC2 == True:
                 if self.positionProcessVariableC2 <= self.positionRightLimitC2:
                     # Set direction.
@@ -478,10 +467,9 @@ class Device(QObject):
                     self.previousCountC2 = 0
                     self.pulsesC2 = 0
                     self.previousPulsesC2 = 0
-                    # Emit number of pulses required to travel full range of movement.
-                    pulses = int(abs(self.positionRightLimitC2-self.positionLeftLimitC2)*self.countsPerUnitC2)
-                    aNames = ["DIO5_EF_ENABLE", "DIO5", "DIO5_EF_INDEX", "DIO5_EF_OPTIONS", "DIO5_EF_CONFIG_A", "DIO5_EF_CONFIG_C", "DIO5_EF_ENABLE"]
-                    aValues = [0, 0, 2, 1, self.widthC2, pulses, 1]
+                    # Turn on PWM.
+                    aNames = ["DIO5_EF_ENABLE", "DIO5", "DIO5_EF_INDEX", "DIO5_EF_OPTIONS", "DIO5_EF_CONFIG_A", "DIO5_EF_ENABLE"]
+                    aValues = [0, 0, 0, 2, self.widthC2, 1]
                     numFrames = len(aNames)
                     results = ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
                     # Reset pulse in counter.
@@ -512,10 +500,9 @@ class Device(QObject):
                     self.previousCountC1 = 0
                     self.pulsesC1 = 0
                     self.previousPulsesC1 = 0
-                    # Emit number of pulses required to travel full range of movement.
-                    pulses = int(abs(self.positionRightLimitC1-self.positionLeftLimitC1)*self.countsPerUnitC1)
-                    aNames = ["DIO4_EF_ENABLE", "DIO4", "DIO4_EF_INDEX", "DIO4_EF_OPTIONS", "DIO4_EF_CONFIG_A", "DIO4_EF_CONFIG_C", "DIO4_EF_ENABLE"]
-                    aValues = [0, 0, 2, 1, self.widthC1, pulses, 1]
+                    # Turn on PWM.
+                    aNames = ["DIO4_EF_ENABLE", "DIO4", "DIO4_EF_INDEX", "DIO4_EF_OPTIONS", "DIO4_EF_CONFIG_A", "DIO4_EF_ENABLE"]
+                    aValues = [0, 0, 0, 1, self.widthC1, 1]
                     numFrames = len(aNames)
                     results = ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
                     # Reset pulse in counter.
@@ -532,10 +519,9 @@ class Device(QObject):
                     self.previousCountC2 = 0
                     self.pulsesC2 = 0
                     self.previousPulsesC2 = 0
-                    # Emit number of pulses required to travel full range of movement.
-                    pulses = int(abs(self.positionRightLimitC2-self.positionLeftLimitC2)*self.countsPerUnitC2)
-                    aNames = ["DIO5_EF_ENABLE", "DIO5", "DIO5_EF_INDEX", "DIO5_EF_OPTIONS", "DIO5_EF_CONFIG_A", "DIO5_EF_CONFIG_C", "DIO5_EF_ENABLE"]
-                    aValues = [0, 0, 2, 1, self.widthC2, pulses, 1]
+                    # Turn on PWM.
+                    aNames = ["DIO5_EF_ENABLE", "DIO5", "DIO5_EF_INDEX", "DIO5_EF_OPTIONS", "DIO5_EF_CONFIG_A", "DIO5_EF_ENABLE"]
+                    aValues = [0, 0, 0, 2, self.widthC2, 1]
                     numFrames = len(aNames)
                     results = ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
                     # Reset pulse in counter.
@@ -594,10 +580,9 @@ class Device(QObject):
                 self.previousCountC1 = 0
                 self.pulsesC1 = 0
                 self.previousPulsesC1 = 0
-                # Emit required number of pulses.
-                pulses = int(abs(increment*self.countsPerUnitC1))
-                aNames = ["DIO4_EF_ENABLE", "DIO4", "DIO4_EF_INDEX", "DIO4_EF_OPTIONS", "DIO4_EF_CONFIG_A", "DIO4_EF_CONFIG_C", "DIO4_EF_ENABLE"]
-                aValues = [0, 0, 2, 1, self.widthC1, pulses, 1]
+                # Turn on PWM.
+                aNames = ["DIO4_EF_ENABLE", "DIO4", "DIO4_EF_INDEX", "DIO4_EF_OPTIONS", "DIO4_EF_CONFIG_A", "DIO4_EF_ENABLE"]
+                aValues = [0, 0, 0, 1, self.widthC1, 1]
                 numFrames = len(aNames)
                 results = ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
                 self.movingC1 = True
@@ -619,43 +604,9 @@ class Device(QObject):
                 self.previousCountC2 = 0
                 self.pulsesC2 = 0
                 self.previousPulsesC2 = 0
-                # Emit required number of pulses.
-                pulses = int(abs(increment*self.countsPerUnitC2))
-                aNames = ["DIO5_EF_ENABLE", "DIO5", "DIO5_EF_INDEX", "DIO5_EF_OPTIONS", "DIO5_EF_CONFIG_A", "DIO5_EF_CONFIG_C", "DIO5_EF_ENABLE"]
-                aValues = [0, 0, 2, 1, self.widthC2, pulses, 1]
-                numFrames = len(aNames)
-                results = ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
-                self.movingC2 = True
-                # Reset pulse in counter.
-                ljm.eReadName(self.handle, "DIO3_EF_READ_A_AND_RESET")
-
-    def emitPulses(self, channel):
-        if self.running == True:
-            if channel == "C1" and self.motorEnabledC1 == True:
-                # Reset counters.
-                self.countC1 = 0
-                self.previousCountC1 = 0
-                self.pulsesC1 = 0
-                self.previousPulsesC1 = 0
-                # Emit number of pulses required to travel full range of movement.
-                pulses = int(abs(self.positionRightLimitC1-self.positionLeftLimitC1)*self.countsPerUnitC1)
-                aNames = ["DIO4_EF_ENABLE", "DIO4_EF_INDEX", "DIO4_EF_OPTIONS", "DIO4_EF_CONFIG_A", "DIO4_EF_CONFIG_C", "DIO4_EF_ENABLE"]
-                aValues = [0, 2, 1, self.widthC1, pulses, 1]
-                numFrames = len(aNames)
-                results = ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
-                self.movingC1 = True
-                # Reset pulse in counter.
-                ljm.eReadName(self.handle, "DIO1_EF_READ_A_AND_RESET")
-            elif channel == "C2" and self.motorEnabledC2 == True:
-                # Reset counters.
-                self.countC2 = 0
-                self.previousCountC2 = 0
-                self.pulsesC2 = 0
-                self.previousPulsesC2 = 0
-                # Emit required number of pulses.
-                pulses = int(abs(self.positionRightLimitC2-self.positionLeftLimitC2)*self.countsPerUnitC2)
-                aNames = ["DIO5_EF_ENABLE", "DIO5_EF_INDEX", "DIO5_EF_OPTIONS", "DIO5_EF_CONFIG_A", "DIO5_EF_CONFIG_C", "DIO5_EF_ENABLE"]
-                aValues = [0, 2, 1, self.widthC2, pulses, 1]
+                # Turn on PWM.
+                aNames = ["DIO5_EF_ENABLE", "DIO5", "DIO5_EF_INDEX", "DIO5_EF_OPTIONS", "DIO5_EF_CONFIG_A", "DIO5_EF_ENABLE"]
+                aValues = [0, 0, 0, 2, self.widthC2, 1]
                 numFrames = len(aNames)
                 results = ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
                 self.movingC2 = True
@@ -675,13 +626,13 @@ class Device(QObject):
 
     def getPositionC1(self):
         self.handle = ljm.open(7, self.connection, self.id)
-        self.countC1 = ljm.eReadName(self.handle, "DIO4_EF_READ_A")
+        # self.countC1 = ljm.eReadName(self.handle, "DIO4_EF_READ_A")
         self.pulsesC1 = ljm.eReadName(self.handle, "DIO1_EF_READ_A")
-        if self.countC1 == 0:
-            incrementCount = 0
-        else:
-            incrementCount = (self.countC1-self.previousCountC1)/self.countsPerUnitC1
-        self.previousCountC1 = self.countC1
+        # if self.countC1 == 0:
+        #     incrementCount = 0
+        # else:
+        #     incrementCount = (self.countC1-self.previousCountC1)/self.countsPerUnitC1
+        # self.previousCountC1 = self.countC1
 
         # Check motor status by comparing pulses count output with pulses returned.
         if self.pulsesC1 == 0:
@@ -696,10 +647,10 @@ class Device(QObject):
         elif self.directionC1 == -1:
             self.positionProcessVariableC1 -= incrementPulses
 
-        # Check positional error using feedback pulses and reset motor if required.
-        err = abs(incrementPulses-incrementCount)
-        if err > 1:
-            log.warning("Returned position on C1 does not match demand.")
+        # # Check positional error using feedback pulses and reset motor if required.
+        # err = abs(incrementPulses-incrementCount)
+        # if err > 1:
+        #     log.warning("Returned position on C1 does not match demand.")
         
         # If moving under jog control, stop if target limit.
         if self.jogC1 == True:
@@ -713,13 +664,13 @@ class Device(QObject):
         
     def getPositionC2(self):
         self.handle = ljm.open(7, self.connection, self.id)
-        self.countC2 = ljm.eReadName(self.handle, "DIO5_EF_READ_A")
+        # self.countC2 = ljm.eReadName(self.handle, "DIO5_EF_READ_A")
         self.pulsesC2 = ljm.eReadName(self.handle, "DIO3_EF_READ_A")
-        if self.countC2 == 0:
-            incrementCount = 0
-        else:
-            incrementCount = (self.countC2-self.previousCountC2)/self.countsPerUnitC2
-        self.previousCountC2 = self.countC2
+        # if self.countC2 == 0:
+        #     incrementCount = 0
+        # else:
+        #     incrementCount = (self.countC2-self.previousCountC2)/self.countsPerUnitC2
+        # self.previousCountC2 = self.countC2
 
         # Check motor status by comparing pulses count output with pulses returned.
         if self.pulsesC2 == 0:
@@ -734,10 +685,10 @@ class Device(QObject):
         elif self.directionC2 == -1:
             self.positionProcessVariableC2 -= incrementPulses
 
-        # Check positional error using feedback pulses and reset motor if required.
-        err = abs(incrementPulses-incrementCount)
-        if err > 1:
-            log.warning("Returned position on C2 does not match demand.")
+        # # Check positional error using feedback pulses and reset motor if required.
+        # err = abs(incrementPulses-incrementCount)
+        # if err > 1:
+        #     log.warning("Returned position on C2 does not match demand.")
         
         # If moving under jog control, stop if target limit.
         if self.jogC2 == True:
@@ -888,18 +839,21 @@ class Device(QObject):
             self.getPositionC2()
             # If feedback is available.
             if self.feedbackC1 == True:
-                self.feedbackProcessVariableC1 = data[0]
-                # print(self.feedbackProcessVariableC1)
+                self.feedbackProcessVariableC1 = data[self.feedbackIndexC1-1]
                 if self.statusPIDC1 == True:
                     self.speedSetPointC1 = self.PID_C1(self.feedbackProcessVariableC1)
                     self.directionC1 = np.sign(self.speedSetPointC1)
-                    demandSpeed = int(np.abs(self.speedSetPointC1))
+                    demandSpeed = np.abs(self.speedSetPointC1)
                     self.setDirection("C1", self.directionC1)
                     self.setSpeed("C1", demandSpeed)
             if self.feedbackC2 == True:
                 self.feedbackProcessVariableC2 = data[self.feedbackIndexC2-1]
                 if self.statusPIDC2 == True:
-                    self.speedSetPointC2 = PID_C2(self.feedbackProcessVariableC2)
+                    self.speedSetPointC2 = self.PID_C2(self.feedbackProcessVariableC2)
+                    self.directionC2 = np.sign(self.speedSetPointC2)
+                    demandSpeed = np.abs(self.speedSetPointC2)
+                    self.setDirection("C2", self.directionC2)
+                    self.setSpeed("C2", demandSpeed)
             # Concatenate output data.
             if self.feedbackC1 == False:
                 dataC1 = np.hstack((self.positionSetPointC1, self.positionProcessVariableC1, int(self.directionC1), self.speedC1))

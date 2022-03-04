@@ -1,5 +1,8 @@
 from PySide6.QtCore import Qt, QAbstractTableModel, QModelIndex, Signal
 import operator
+import logging 
+
+log = logging.getLogger(__name__)
 
 class DeviceTableModel(QAbstractTableModel):
     """Methods for data and setData also emit signals to add and remove tabs from the acquisition tab widget when enabled or disabled."""
@@ -16,6 +19,8 @@ class DeviceTableModel(QAbstractTableModel):
             "Address",
             "Status"
         ] 
+
+        log.info("Device table model instantiated.")
 
     def rowCount(self, parent=QModelIndex()):
         if self._data == []:

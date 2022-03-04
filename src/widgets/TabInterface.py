@@ -7,6 +7,7 @@ log = logging.getLogger(__name__)
 
 class TabInterface(QTabWidget):
     tabToWindow = Signal(QWidget, int)
+    removePlot = Signal(str)
 
     def __init__(self):
         super().__init__()
@@ -39,7 +40,10 @@ class TabInterface(QTabWidget):
         widget = self.widget(index)
         # Delete if a plot widget.
         if isinstance(widget, PlotWindow):
-            widget.deleteLater()
+            plotNumber = widget.plotNumber
+            self.removePlot.emit(plotNumber)
+            # widget.setParent(None)
+            # widget.deleteLater()
         self.removeTab(index)
         log.info("Tab removed.")
     

@@ -135,20 +135,19 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.manager.closePlots.connect(self.closePlots)
         self.manager.clearControlTabs.connect(self.clearControlTabs)
         self.manager.deviceAdded.connect(self.addDeviceConfigurationTab)
+        self.manager.deviceToggled.connect(self.updateDeviceConfigurationTab)
         # self.manager.removeControlTable.connect(self.removeControlTable)
         # self.manager.addControlTable.connect(self.addControlTable)
         # self.manager.updateFeedbackChannelList.connect(self.updateFeedbackChannelList)
         # self.manager.updateDeviceConfigurationTab.connect(self.updateDeviceConfigurationTabs)
-
-        # When a device is connected in the device list, spin up a device thread, 
-        # show or hide the configuration tab, and connect to update the plots.
-        self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.manager.manageDeviceThreads)
-        self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.updateDeviceConfigurationTabs)
+        # self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.updateDeviceConfigurationTabs)
 
         self.manager.timing.actualRate.connect(self.statusGroupBox.update)
         self.manager.plotWindowChannelsUpdated.connect(self.updatePlots)
         self.manager.existingPlotsFound.connect(self.createExistingPlots)
         self.manager.outputText.connect(self.statusGroupBox.setOutputText)
+
+        self.tabs.removePlot.connect(self.removePlot)
 
         # Timer connections.
         self.updateTimer.timeout.connect(self.manager.assembly.updatePlotData)

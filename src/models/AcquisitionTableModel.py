@@ -1,4 +1,7 @@
 from PySide6.QtCore import Qt, QAbstractTableModel, QModelIndex, Signal
+import logging 
+
+log = logging.getLogger(__name__)
 
 class AcquisitionTableModel(QAbstractTableModel):
     acquisitionChannelTableUpdated = Signal()
@@ -16,6 +19,8 @@ class AcquisitionTableModel(QAbstractTableModel):
                 "offset",
                 "autozero",
             ]    
+
+        log.info("Acquisition table model instantiated.")
 
     def rowCount(self, parent=QModelIndex()):
         if parent.isValid():
@@ -96,8 +101,8 @@ class AcquisitionTableModel(QAbstractTableModel):
         if index.isValid():
             return Qt.ItemIsEnabled | Qt.ItemIsEditable
 
-    def enabledChannels(self):
-        """Return two lists containing enabled channels, names and units."""
+    def acquisitionSettings(self):
+        """Return lists containing the acquisition settings."""
         enabledChannels = []
         enabledNames = []
         enabledUnits = []
@@ -113,3 +118,11 @@ class AcquisitionTableModel(QAbstractTableModel):
                 enabledOffsets.append(channel["offset"])
                 enabledAutozero.append(channel["autozero"])
         return enabledChannels, enabledNames, enabledUnits, enabledSlopes, enabledOffsets, enabledAutozero
+
+    def enabledChannels(self):
+        """Return a list containing the enabled channels."""
+        enabledChannels = []
+        for channel in self._data:
+            if channel["connect"] == True:
+                enabledChannels.append(channel["channel"])
+        return enabledChannels

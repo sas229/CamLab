@@ -39,8 +39,8 @@ class ConfigurationUtilities:
 
         # Connections for control table.
         self.manager.controlTableModels[name].controlChannelToggled.connect(self.toggleControlChannel)
+        self.manager.controlTableModels[name].controlChannelToggled.connect(self.manager.updatePlotWindowChannelsData)
         self.manager.controlTableModels[name].controlChannelNameChanged.connect(self.updateControlName)
-        self.manager.controlTableModels[name].controlChannelNameChanged.connect(self.manager.updatePlotWindowChannelsData)
         self.manager.controlTableModels[name].controlWidgetChanged.connect(self.changeControlWidget)
         self.manager.controlTableModels[name].controlFeedbackChannelChanged.connect(self.changeControlFeedbackChannel)
 
@@ -61,6 +61,7 @@ class ConfigurationUtilities:
         # Instantiate the control widgets and add tabs if enabled boolean is true.
         for channel in range(self.manager.controlTableModels[name].rowCount()):
             self.addControlTab(name, channel)
+        
 
     @Slot(str, str, str)
     def updateControlName(self, currentName, newName):
@@ -70,7 +71,9 @@ class ConfigurationUtilities:
                 self.tabs.setTabText(index, newName)
 
     @Slot(str, int, int, bool)
-    def updateDeviceConfigurationTabs(self, name, id, connection, connect):
+    def updateDeviceConfigurationTab(self, name, connect):
+        # if name in self.deviceConfigurationWidget:
+        print(connect)
         widget = self.deviceConfigurationWidget[name]
         index = self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.indexOf(widget)
         self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.setTabVisible(index, connect)

@@ -117,6 +117,7 @@ class PlotUtilities:
     def removePlot(self, plotNumber):
         # Pop plot from if "plots" key in dict.
         if plotNumber in self.plots:
+            self.plots[plotNumber].setParent(None)
             self.plots.pop(plotNumber)
         if "plots" in self.manager.configuration:
             self.manager.configuration["plots"].pop(plotNumber)
