@@ -10,10 +10,10 @@ from src.widgets.MainWindow._ConfigurationUtilities import ConfigurationUtilitie
 from src.manager import Manager
 from src.widgets.ToolBar import ToolBar
 from src.widgets.TabInterface import TabInterface
+from src.widgets.ConfigurationTab import ConfigurationTab
+from src.widgets.SequencesTab import SequencesTab
+from src.widgets.StatusTab import StatusTab
 from src.widgets.StatusGroupBox import StatusGroupBox
-from src.widgets.GlobalSettingsGroupBox import GlobalSettingsGroupBox
-from src.widgets.DevicesGroupBox import DevicesGroupBox
-from src.widgets.DeviceConfigurationGroupBox import DeviceConfigurationGroupBox
 from src.log import init_log
 import logging
 from time import sleep
@@ -22,6 +22,7 @@ log = logging.getLogger(__name__)
 
 class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUtilities, QtStyleTools, QMainWindow):
     running = Signal(bool)
+    renameWindow = Signal(str)
     
     def __init__(self):
         super().__init__()
@@ -72,28 +73,19 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         # Status GroupBox.
         self.statusGroupBox = StatusGroupBox()
 
-        # Global settings GroupBox.
-        self.globalSettingsGroupBox = GlobalSettingsGroupBox(self.configuration)
-        
-        # Device table GroupBox.
-        self.devicesGroupBox = DevicesGroupBox(self.configuration)
-        self.devicesGroupBox.deviceTableView.setModel(self.manager.deviceTableModel)
+        # Configuration tab.
+        self.configurationTab = ConfigurationTab(self.configuration)
+        self.configurationTab.devicesGroupBox.deviceTableView.setModel(self.manager.deviceTableModel)
 
-        # Device configuration Groupbox.
-        self.deviceConfigurationGroupBox = DeviceConfigurationGroupBox()
+        # Sequences tab.
+        self.sequencesTab = SequencesTab()
 
-        self.configurationLayout = QGridLayout()
-        self.configurationLayout.setRowStretch(0, 1)
-        self.configurationLayout.addWidget(self.globalSettingsGroupBox, 1, 0, 1, 1)
-        self.configurationLayout.addWidget(self.devicesGroupBox, 2, 0, 1, 1)
-        self.configurationLayout.addWidget(self.deviceConfigurationGroupBox, 1, 1, 2, 1)
-        self.configurationLayout.setRowStretch(self.configurationLayout.rowCount(), 1)
-        
-        self.configurationWidget = QWidget()
-        self.configurationWidget.setLayout(self.configurationLayout)
-        self.tabs.addPersistentTab(self.configurationWidget, "Configuration")
-        self.tabs.addPersistentTab(QWidget(), "Sequences")
-        self.tabs.addPersistentTab(self.statusGroupBox, "Status")
+        # Status tab.
+        self.statusTab = StatusTab()
+
+        self.tabs.addPersistentTab(self.configurationTab, "Configuration")
+        self.tabs.addPersistentTab(self.sequencesTab, "Sequences")
+        self.tabs.addPersistentTab(self.statusTab, "Status")
 
         # Set the central widget of the main window.
         self.centralWidget = QWidget()
@@ -108,8 +100,8 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.toolbar.run.connect(self.start)
         self.toolbar.run.connect(self.statusGroupBox.setInitialTimeDate)
         self.toolbar.addPlotButton.triggered.connect(self.addPlot)
-        self.toolbar.controlPanelButton.triggered.connect(self.openControlPanel)
-        self.toolbar.cameraButton.triggered.connect(self.openCamera)
+        # self.toolbar.controlPanelButton.triggered.connect(self.openControlPanel)
+        # self.toolbar.cameraButton.triggered.connect(self.openCamera)
         self.toolbar.extensionButton.triggered.connect(self.openExtension)
         self.toolbar.refreshButton.triggered.connect(self.manager.refreshDevices)
         self.toolbar.loadConfiguration.connect(self.manager.loadConfiguration)
@@ -123,12 +115,19 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         # Tab interface connections.
         self.tabs.tabToWindow.connect(self.tabToWindow)
 
-        # Global settings connections.
-        self.globalSettingsGroupBox.skipSamplesChanged.connect(self.manager.updateSkipSamples)
-        self.globalSettingsGroupBox.controlRateChanged.connect(self.manager.updateControlRate)
-        self.globalSettingsGroupBox.averageSamplesChanged.connect(self.manager.updateAverageSamples)
-        self.globalSettingsGroupBox.pathChanged.connect(self.manager.updatePath)
-        self.globalSettingsGroupBox.filenameChanged.connect(self.manager.updateFilename)
+        # Configuration tab connections.
+        self.configurationTab.globalSettingsGroupBox.skipSamplesChanged.connect(self.manager.updateSkipSamples)
+        self.configurationTab.globalSettingsGroupBox.controlRateChanged.connect(self.manager.updateControlRate)
+        self.configurationTab.globalSettingsGroupBox.averageSamplesChanged.connect(self.manager.updateAverageSamples)
+        self.configurationTab.globalSettingsGroupBox.pathChanged.connect(self.manager.updatePath)
+        self.configurationTab.globalSettingsGroupBox.filenameChanged.connect(self.manager.updateFilename)
+        self.configurationTab.configurationWindowClosed.connect(self.windowToTab)
+
+        # Sequences tab connections.
+        self.sequencesTab.sequencesWindowClosed.connect(self.windowToTab)
+
+        # Status tab connections.
+        self.statusTab.statusWindowClosed.connect(self.windowToTab)
 
         # Manager connections.
         self.manager.configurationChanged.connect(self.updateUI)
@@ -145,7 +144,6 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         # show or hide the configuration tab, and connect to update the plots.
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.manager.manageDeviceThreads)
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.updateDeviceConfigurationTabs)
-        self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.manager.updatePlotWindowChannelsData)
 
         self.manager.timing.actualRate.connect(self.statusGroupBox.update)
         self.manager.plotWindowChannelsUpdated.connect(self.updatePlots)
@@ -185,15 +183,15 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
             if self.tabs.tabText(index) == "Sequences":
                 self.tabs.setTabVisible(index, True)
 
-    @Slot()
-    def openControlPanel(self):
-        self.controlWindow.show()
-        self.configuration["controlWindow"]["visible"] = True
-        log.info("Control panel opened.")
+    # @Slot()
+    # def openControlPanel(self):
+    #     self.controlWindow.show()
+    #     self.configuration["controlWindow"]["visible"] = True
+    #     log.info("Control panel opened.")
 
-    @Slot()
-    def openCamera(self):
-        log.info("Camera opened.")
+    # @Slot()
+    # def openCamera(self):
+    #     log.info("Camera opened.")
 
     @Slot()
     def openExtension(self):
@@ -235,11 +233,10 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         if self.plots and "plots" in self.manager.configuration: 
             self.updatePlots()
 
-        # Update other GIU items.
-        self.globalSettingsGroupBox.updateUI(self.configuration)
+        # Update other GUI items.
+        self.configurationTab.globalSettingsGroupBox.updateUI(self.configuration)
         # self.controlWindow.updateUI(self.configuration)
         log.info("Updated UI.")
-
 
     def closeEvent(self, event):
         # Close all plots.

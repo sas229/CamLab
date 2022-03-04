@@ -1,13 +1,14 @@
-from PySide6.QtWidgets import QTableView, QHeaderView
+from PySide6.QtWidgets import QTableView, QHeaderView, QAbstractItemView
 from src.delegates import CheckBoxDelegate, StringDelegate, ComboBoxDelegate
 
 class ControlTableView(QTableView):
 
     def __init__(self, controlModeList, controlActuatorList, feedbackChannelList, parent = None):
         super().__init__(parent)
-        self.setSelectionMode(self.SingleSelection)
+        # self.setSelectionMode(self.SingleSelection)
         self.setShowGrid(False)
         self.setAlternatingRowColors(True)
+        self.setSelectionMode(QAbstractItemView.NoSelection)
 
         verticalHeader = self.verticalHeader()
         verticalHeader.hide()
@@ -27,6 +28,8 @@ class ControlTableView(QTableView):
         self.setItemDelegateForColumn(3, self.controlActuatorComboBoxDelegate)
         self.setItemDelegateForColumn(4, self.feedbackChannelListComboBoxDelegate)
 
-    def updateFeedbackChannelList(self, feedbackChannelList, selectedFeedbackChannels):
-        self.feedbackChannelListComboBoxDelegate = ComboBoxDelegate(feedbackChannelList, selectedFeedbackChannels)
+        
+
+    def updateFeedbackChannelList(self, feedbackChannelList):
+        self.feedbackChannelListComboBoxDelegate = ComboBoxDelegate(feedbackChannelList)
         self.setItemDelegateForColumn(4, self.feedbackChannelListComboBoxDelegate)

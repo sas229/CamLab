@@ -1,15 +1,22 @@
 from PySide6.QtCore import Slot, Qt
-from src.widgets.PlotWindow import PlotWindow
 
 class TabUtilities:
     
     @Slot()
     def windowToTab(self, widget):
         if self.tabs.indexOf(widget) == -1:
+            tabType = widget.whatsThis()
             widget.setWindowFlags(Qt.Widget)
-            # If not a PlotWindow, insert in order.
-            if not isinstance(widget, PlotWindow):
-                controlDevice, channel = widget.controlName.split(' ')
+            widget.setTab()
+            # Set order.
+            if tabType == "configuration":
+                self.tabs.insertPersistentTab(0, widget, "Configuration")
+            elif tabType == "sequences":
+                self.tabs.insertPersistentTab(1, widget, "Sequences")
+            elif tabType == "status":
+                self.tabs.insertPersistentTab(2, widget, "Status")
+            elif tabType == "control":
+                controlDevice, channel = widget.ID.split(' ')
                 devices = self.manager.deviceTableModel.enabledDevices()
                 #  For each device get a list of enabled control channels.
                 index = 3
@@ -22,9 +29,10 @@ class TabUtilities:
                         controlName = deviceName + " " + controlChannel
                         if deviceName == controlDevice and controlChannel == channel:
                             self.tabs.insertPersistentTab(index, widget, widget.windowTitle())
+                            return
                         index += 1
             # Otherwise append on end of tab bar.
-            else:
+            elif tabType == "plot":
                 self.tabs.addTab(widget, widget.windowTitle())    
 
     @Slot()
@@ -34,6 +42,6 @@ class TabUtilities:
             self.tabs.removeTab(index)
             widget.setWindowFlags(Qt.Window)
             widget.setWindowTitle(text)
-            widget.setConfiguration(self.configuration)
-            widget.move(400, 400)
+            widget.setWindow()
             widget.show()
+            self.tabs.setCurrentIndex(0)

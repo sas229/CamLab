@@ -22,10 +22,8 @@ class PlotWindow(QWidget, QtStyleTools):
     def __init__(self):
         super().__init__()
         log.info("Plot instantiated.")
+        self.setWhatsThis("plot")
         self.defaultChannelsData = [{"plot": False, "name": "Time", "device": "ALL", "colour": "#35e3e3", "value": "0.00", "unit": "s"}]
-        self.initWidth = 1200
-        self.initHeight = 600
-        self.resize(self.initWidth, self.initHeight)
         self.setMinimumSize(850, 550)
         self.alpha = 50
         self.opacity = 50
@@ -235,6 +233,17 @@ class PlotWindow(QWidget, QtStyleTools):
         self.minimumSelectedAxisLineEdit.returnPressed.connect(self.setNewSelectedAxisRange)
         self.maximumSelectedAxisLineEdit.returnPressed.connect(self.setNewSelectedAxisRange)
 
+    def setWindow(self):
+        x = int(self.configuration["plots"][self.plotNumber]["x"])
+        y = int(self.configuration["plots"][self.plotNumber]["y"])
+        w = int(self.configuration["plots"][self.plotNumber]["width"])
+        h = int(self.configuration["plots"][self.plotNumber]["height"])
+        self.setGeometry(x, y, w, h)
+        self.configuration["plots"][self.plotNumber]["mode"] = "window"
+
+    def setTab(self):
+        self.configuration["plots"][self.plotNumber]["mode"] = "tab"
+        
     def resizeEvent(self, event):
         # Save updated size in configuration.
         self.configuration["plots"][self.plotNumber]["width"] = int(self.width())
@@ -250,11 +259,6 @@ class PlotWindow(QWidget, QtStyleTools):
         # Set the configuration.
         self.configuration = configuration
         if "plots" in self.configuration:
-            x = int(self.configuration["plots"][self.plotNumber]["x"])
-            y = int(self.configuration["plots"][self.plotNumber]["y"])
-            w = int(self.configuration["plots"][self.plotNumber]["width"])
-            h = int(self.configuration["plots"][self.plotNumber]["height"])
-            self.setGeometry(x, y, w, h)
             self.alphaSlider.setValue(int(self.configuration["plots"][self.plotNumber]["alpha"]))
             self.autoCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["auto"]))
             self.autoCommonAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["autoCommonAxis"]))

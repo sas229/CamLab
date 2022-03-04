@@ -30,18 +30,6 @@ class ToolBar(QToolBar):
         self.addPlotButton.setToolTip("Click to add plot.")
         self.addAction(self.addPlotButton)
 
-        # Open control panel  QAction.
-        self.controlPanelButton = QAction()
-        self.controlPanelButton.setIcon(QIcon("icon:/secondaryText/videogame_asset.svg"))
-        self.controlPanelButton.setToolTip("Click to open control panel.")
-        self.addAction(self.controlPanelButton)
-
-        # Open camera QAction.
-        self.cameraButton = QAction()
-        self.cameraButton.setIcon(QIcon("icon:/secondaryText/camera.svg"))
-        self.cameraButton.setToolTip("Click to open camera.")
-        self.addAction(self.cameraButton)
-
         # Open extension QAction.
         self.extensionButton = QAction()
         self.extensionButton.setIcon(QIcon("icon:/secondaryText/extension.svg"))
@@ -78,13 +66,6 @@ class ToolBar(QToolBar):
         self.clearConfigButton.setVisible(True)
         self.addAction(self.clearConfigButton)
 
-        # Add calculated variable QAction.
-        self.addCalculatedVariableButton = QAction()
-        self.addCalculatedVariableButton.setIcon(QIcon("icon:/secondaryText/calculate.svg"))
-        self.addCalculatedVariableButton.setToolTip("Click to add a calculated variable.")
-        self.addCalculatedVariableButton.setVisible(True)
-        self.addAction(self.addCalculatedVariableButton)
-
         # New file QAction.
         self.newFileButton = QAction()
         self.newFileButton.setIcon(QIcon("icon:/secondaryText/restore_page.svg"))
@@ -119,7 +100,6 @@ class ToolBar(QToolBar):
 
         # Connections.
         self.modeButton.triggered.connect(self.changeMode)
-        # self.darkModeButton.triggered.connect(self.updateIcons)
         self.loadConfigButton.triggered.connect(self.emitLoadConfiguration)
         self.saveConfigButton.triggered.connect(self.emitSaveConfiguration)
 
@@ -133,7 +113,6 @@ class ToolBar(QToolBar):
         self.loadConfigButton.setVisible(not self.loadConfigButton.isVisible())
         self.saveConfigButton.setVisible(not self.saveConfigButton.isVisible())
         self.clearConfigButton.setVisible(not self.clearConfigButton.isVisible())
-        self.addCalculatedVariableButton.setVisible(not self.addCalculatedVariableButton.isVisible())
         self.newFileButton.setVisible(not self.newFileButton.isVisible())
         self.autozeroButton.setVisible(not self.autozeroButton.isVisible())
         self.clearPlotsButton.setVisible(not self.clearPlotsButton.isVisible())
@@ -148,14 +127,11 @@ class ToolBar(QToolBar):
         self.darkMode = darkMode
         self.modeButton.setIcon(QIcon("icon:/secondaryText/settings.svg" if self.running else "icon:/secondaryText/play_circle.svg"))
         self.addPlotButton.setIcon(QIcon("icon:/secondaryText/stacked_line_chart.svg"))
-        self.controlPanelButton.setIcon(QIcon("icon:/secondaryText/videogame_asset.svg"))
-        self.cameraButton.setIcon(QIcon("icon:/secondaryText/camera.svg"))
         self.extensionButton.setIcon(QIcon("icon:/secondaryText/extension.svg"))
         self.refreshButton.setIcon(QIcon("icon:/secondaryText/restart_alt.svg"))
         self.loadConfigButton.setIcon(QIcon("icon:/secondaryText/file_upload.svg"))
         self.saveConfigButton.setIcon(QIcon("icon:/secondaryText/file_download.svg"))
         self.clearConfigButton.setIcon(QIcon("icon:/secondaryText/clear.svg"))
-        self.addCalculatedVariableButton.setIcon(QIcon("icon:/secondaryText/calculate.svg"))
         self.newFileButton.setIcon(QIcon("icon:/secondaryText/restore_page.svg"))
         self.autozeroButton.setIcon(QIcon("icon:/secondaryText/exposure_zero.svg"))
         self.clearPlotsButton.setIcon(QIcon("icon:/secondaryText/clear_all.svg"))

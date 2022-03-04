@@ -5,9 +5,9 @@ log = logging.getLogger(__name__)
 
 class ControlTableModel(QAbstractTableModel):
     controlChannelToggled = Signal(str, int, bool)
-    controlChannelNameChanged = Signal (str, str, str)
-    controlWidgetChanged = Signal(str, int, int)
-    controlFeedbackChannelChanged = Signal(str, int, int)
+    controlChannelNameChanged = Signal (str, str)
+    controlWidgetChanged = Signal(str, int, str)
+    controlFeedbackChannelChanged = Signal(str, int, str)
     
     def __init__(self, device, data=[], parent=None):
         super().__init__(parent)
@@ -63,21 +63,26 @@ class ControlTableModel(QAbstractTableModel):
     def setData(self, index, value, role=Qt.EditRole):
         if index.isValid():
             item = self._data[index.row()]
-            self.index = index.row()
             if index.column() == 0:
                 # Only allow the checkbox to be toggled if type and control are specified.
                 if item["type"] != "N/A" and item["control"] != "N/A":
                     item["enable"] = value
                     self.controlChannelToggled.emit(self._device, index.row(), value)
             elif index.column() == 1:
-                self.controlChannelNameChanged.emit(self._device, item["name"], value)
+                self.controlChannelNameChanged.emit(item["name"], value)
                 item["name"] = value
             elif index.column() == 2:
                 item["type"] = value
                 self.controlWidgetChanged.emit(self._device, index.row(), value)
+                if item["enable"] == True and value == "N/A":
+                    item["enable"] = False
+                    self.controlChannelToggled.emit(self._device, index.row(), False)
             elif index.column() == 3:
                 item["control"] = value
                 self.controlWidgetChanged.emit(self._device, index.row(), value)
+                if item["enable"] == True and value == "N/A":
+                    item["enable"] = False
+                    self.controlChannelToggled.emit(self._device, index.row(), False)
             elif index.column() == 4:
                 item["feedback"] = value
                 self.controlFeedbackChannelChanged.emit(self._device, index.row(), value)

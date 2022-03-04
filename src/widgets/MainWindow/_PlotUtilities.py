@@ -36,13 +36,14 @@ class PlotUtilities:
             "manualCommonAxis": False,
             "manualSelectedAxis": False,
             "minCommonAxisRange": 0,
-            "minSelectedAxisRange": 0,
-            "maxCommonAxisRange": 1,
-            "maxSelectedAxisRange": 1,
             "minCommonAxisRangeLock": 0,
+            "minSelectedAxisRange": 0,
             "minSelectedAxisRangeLock": 0,
+            "maxCommonAxisRange": 1,
             "maxCommonAxisRangeLock": 1,
+            "maxSelectedAxisRange": 1,
             "maxSelectedAxisRangeLock": 1,
+            "mode": "tab",
             "opacity": 50,
             "setGrid": False,
             "swap": False,
@@ -94,6 +95,11 @@ class PlotUtilities:
             # self.plots[plotNumber].plotWindowClosed.connect(self.removePlot)
             self.plots[plotNumber].plotWindowClosed.connect(self.windowToTab)
             self.plots[plotNumber].colourUpdated.connect(self.updateChannelColours)
+
+            # Convert tab to window if required by configuration.
+            if self.manager.configuration["plots"][plotNumber]["mode"] == "window":
+                index = self.tabs.indexOf(self.plots[plotNumber])
+                self.tabToWindow(self.plots[plotNumber], index)    
         
         # Update all plot windows to reset configuration.
         self.updatePlots()

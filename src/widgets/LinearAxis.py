@@ -53,7 +53,9 @@ class LinearAxis(QWidget):
         # Inputs.
         self.ID = ID
         self.device = self.ID[0:3]
-        self.channel = int(self.ID[-1])-1
+        self.channel = self.ID[-2:]
+        self.control = int(self.ID[-1])-1
+        self.setWhatsThis("control")
 
         # Variables.
         self.previousPrimaryProcessVariable = 0
@@ -70,7 +72,7 @@ class LinearAxis(QWidget):
         self.feedbackDemand = DemandGroupBox("Demand")
         self.feedbackStatus = SliderGroupBox("Feedback Status")
 
-        # Main layout.
+        # Grid layout.
         self.gridLayout = QGridLayout()
         self.gridLayout.addWidget(self.globalControls, 0, 0, 1, 4)
         self.gridLayout.addWidget(self.settings, 0, 0, 1, 4)
@@ -82,12 +84,12 @@ class LinearAxis(QWidget):
         self.gridLayout.addWidget(self.feedbackDemand, 2, 2)
         self.gridLayout.addWidget(self.feedbackStatus, 2, 3)        
         
+        # Main layout.
         self.layout = QVBoxLayout()
-        self.layout.addStretch()
         self.layout.addLayout(self.gridLayout)
         self.layout.addStretch()
-
         self.setLayout(self.layout)
+        self.setMinimumSize(1400, 565)
 
         # Connections.
         self.positionDemand.setPointLineEdit.returnPressed.connect(self.emitPrimarySetPointChanged)
@@ -128,6 +130,28 @@ class LinearAxis(QWidget):
         self.globalControls.connectedIndicator.toggled.connect(self.emitConnectedChanged)
 
         self.settings.returnButton.clicked.connect(self.hideSettings)
+
+    def moveEvent(self, event):
+        # Save updated position in configuration.
+        position = self.geometry()
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["x"] = int(position.x())
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["y"] = int(position.y())
+
+    def setWindow(self):
+        x = int(self.configuration["devices"][self.device]["control"][self.control]["settings"]["x"])
+        y = int(self.configuration["devices"][self.device]["control"][self.control]["settings"]["y"])
+        w = int(self.configuration["devices"][self.device]["control"][self.control]["settings"]["width"])
+        h = int(self.configuration["devices"][self.device]["control"][self.control]["settings"]["height"])
+        self.setGeometry(x, y, w, h)
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["mode"] = "window"
+
+    def setTab(self):
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["mode"] = "tab"
+
+    @Slot(str, str)
+    def setTitle(self, currentTitle, newTitle):
+        if self.windowTitle() == currentTitle:
+            self.setWindowTitle(newTitle)
 
     def closeEvent(self, event):
         self.axisWindowClosed.emit(self)
@@ -173,7 +197,7 @@ class LinearAxis(QWidget):
         elif enabled == False:
             self.globalControls.settingsButton.setEnabled(True)
             self.globalControls.PIDControlButton.setEnabled(False)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["enable"] = self.globalControls.enableButton.isChecked()
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["enable"] = self.globalControls.enableButton.isChecked()
 
     @Slot()
     def emitPIDControl(self):
@@ -181,28 +205,28 @@ class LinearAxis(QWidget):
         self.PIDControl.emit(self.channel, PIDControl) 
         if PIDControl == True:
             self.emitFeedbackSetPointChanged()
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["PIDControl"] = self.globalControls.PIDControlButton.isChecked()
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["PIDControl"] = self.globalControls.PIDControlButton.isChecked()
 
     @Slot()
     def emitPrimaryUnitChanged(self):
         self.primaryUnitChanged.emit(self.channel)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["primaryUnit"] = self.positionDemand.getUnit()
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["primaryUnit"] = self.positionDemand.getUnit()
 
     @Slot()
     def emitFeedbackUnitChanged(self):
         self.feedbackUnitChanged.emit(self.channel)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["feedbackUnit"] = self.feedbackDemand.getUnit()
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["feedbackUnit"] = self.feedbackDemand.getUnit()
 
     @Slot()
     def emitSecondaryUnitChanged(self):
         self.secondaryUnitChanged.emit(self.channel)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["secondaryUnit"] = self.jog.getUnit()
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["secondaryUnit"] = self.jog.getUnit()
 
     @Slot()
     def emitSecondarySetPointChanged(self):
         value = float(self.jog.speedLineEdit.text())
         self.secondarySetPointChanged.emit(self.channel, value)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["secondarySetPoint"] = round(self.jog.getSpeed(), 3)
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["secondarySetPoint"] = round(self.jog.getSpeed(), 3)
 
     @Slot()
     def emitPositiveJogEnabled(self):
@@ -223,67 +247,67 @@ class LinearAxis(QWidget):
     @Slot()
     def emitProportionalOnMeasurement(self, value):
         self.proportionalOnMeasurementChanged.emit(self.channel, value)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["proportionalOnMeasurement"] = self.PID.getProportionalOnMeasurement()
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["proportionalOnMeasurement"] = self.PID.getProportionalOnMeasurement()
     
     @Slot()
     def emitKPChanged(self, value):
         self.KPChanged.emit(self.channel, value)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["KP"] = round(self.PID.getKP(), 2)
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["KP"] = round(self.PID.getKP(), 2)
         
     @Slot()
     def emitKIChanged(self, value):
         self.KIChanged.emit(self.channel, value)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["KI"] = round(self.PID.getKI(), 2)
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["KI"] = round(self.PID.getKI(), 2)
 
     @Slot()
     def emitKDChanged(self, value):
         self.KDChanged.emit(self.channel, value)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["KD"] = round(self.PID.getKD(), 2)
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["KD"] = round(self.PID.getKD(), 2)
         
     @Slot()
     def emitPrimaryLeftLimitChanged(self, value):
         self.primaryLeftLimitChanged.emit(self.channel, value)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["primaryLeftLimit"] = round(self.positionStatus.getLeftLimit(), 2)
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["primaryLeftLimit"] = round(self.positionStatus.getLeftLimit(), 2)
 
     @Slot()
     def emitPrimaryRightLimitChanged(self, value):
         self.primaryRightLimitChanged.emit(self.channel, value)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["primaryRightLimit"] = round(self.positionStatus.getRightLimit(), 2)
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["primaryRightLimit"] = round(self.positionStatus.getRightLimit(), 2)
         
     @Slot()
     def emitPrimaryMinimumRangeChanged(self, value):
         self.primaryMinimumRangeChanged.emit(self.channel, value)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["primaryMinimum"] = round(self.positionStatus.getMinimumRange(), 2)
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["primaryMinimum"] = round(self.positionStatus.getMinimumRange(), 2)
     
     @Slot()
     def emitPrimaryMaximumRangeChanged(self, value):
         self.primaryMaximumRangeChanged.emit(self.channel, value)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["primaryMaximum"] = round(self.positionStatus.getMaximumRange(), 2)
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["primaryMaximum"] = round(self.positionStatus.getMaximumRange(), 2)
     
     @Slot()
     def emitFeedbackLeftLimitChanged(self, value):
         self.feedbackLeftLimitChanged.emit(self.channel, value)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["feedbackLeftLimit"] = round(self.feedbackStatus.getLeftLimit(), 2)
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["feedbackLeftLimit"] = round(self.feedbackStatus.getLeftLimit(), 2)
     
     @Slot()
     def emitFeedbackRightLimitChanged(self, value):
         self.feedbackRightLimitChanged.emit(self.channel, value)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["feedbackRightLimit"] = round(self.feedbackStatus.getRightLimit(), 2)
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["feedbackRightLimit"] = round(self.feedbackStatus.getRightLimit(), 2)
         
     @Slot()
     def emitFeedbackMinimumRangeChanged(self, value):
         self.feedbackMinimumRangeChanged.emit(self.channel, value)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["feedbackMinimum"] = round(self.feedbackStatus.getMinimumRange(), 2)
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["feedbackMinimum"] = round(self.feedbackStatus.getMinimumRange(), 2)
         
     @Slot()
     def emitFeedbackMaximumRangeChanged(self, value):
         self.feedbackMaximumRangeChanged.emit(self.channel, value)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["feedbackMaximum"] = round(self.feedbackStatus.getMaximumRange(), 2)
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["feedbackMaximum"] = round(self.feedbackStatus.getMaximumRange(), 2)
 
     @Slot()
     def emitConnectedChanged(self):
         self.connectedChanged.emit(self.channel)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["connected"] = self.globalControls.connectedIndicator.isChecked()
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["connected"] = self.globalControls.connectedIndicator.isChecked()
 
     @Slot()
     def adjustPositionSetPoint(self, adjustment):
@@ -327,7 +351,7 @@ class LinearAxis(QWidget):
         value = min(value, self.positionStatus.getRightLimit())
         self.positionStatus.setSetPoint(value)
         self.positionDemand.setPointLineEdit.setText("{value:.2f}".format(value=value))
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["primarySetPoint"] = round(self.positionStatus.getSetPoint(), 2)
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["primarySetPoint"] = round(self.positionStatus.getSetPoint(), 2)
 
     @Slot()
     def setPositionProcessVariable(self, value):
@@ -336,7 +360,7 @@ class LinearAxis(QWidget):
         self.positionDemand.processVariableLineEdit.setText("{value:.2f}".format(value=value))
 
         # Update the configuration.
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["primaryProcessVariable"] = round(self.previousPrimaryProcessVariable, 2)
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["primaryProcessVariable"] = round(self.previousPrimaryProcessVariable, 2)
     
     @Slot()
     def setFeedbackSetPoint(self, value):
@@ -346,7 +370,7 @@ class LinearAxis(QWidget):
         self.feedbackStatus.setSetPoint(value)
         self.feedbackDemand.setPointLineEdit.setText("{value:.2f}".format(value=value))
         # self.feedbackSetPointChanged.emit(self.channel, value)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["feedbackSetPoint"] = round(self.feedbackStatus.getSetPoint(), 2)
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["feedbackSetPoint"] = round(self.feedbackStatus.getSetPoint(), 2)
     
     @Slot()
     def setFeedbackProcessVariable(self, value):
@@ -355,12 +379,12 @@ class LinearAxis(QWidget):
         self.feedbackDemand.processVariableLineEdit.setText("{value:.2f}".format(value=value))
         
         # Update the configuration.
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["feedbackProcessVariable"] = round(self.feedbackDemand.getProcessVariable(), 2)
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["feedbackProcessVariable"] = round(self.feedbackDemand.getProcessVariable(), 2)
 
     @Slot()
     def setPIDControlButtonEnable(self, value):
         self.globalControls.PIDControlButton.setEnabled(value)
-        self.configuration["devices"][self.device]["control"][self.channel]["settings"]["enablePIDControl"] = self.getPIDControlButtonEnable()
+        self.configuration["devices"][self.device]["control"][self.control]["settings"]["enablePIDControl"] = self.getPIDControlButtonEnable()
     
     def getPIDControlButtonEnable(self):
         return self.globalControls.PIDControlButton.isEnabled()
@@ -421,26 +445,27 @@ class LinearAxis(QWidget):
     
     def setConfiguration(self, configuration):
         self.configuration = configuration
-        self.positionStatus.setMinimumRange(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["primaryMinimum"])
-        self.positionStatus.setMaximumRange(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["primaryMaximum"])
-        self.positionStatus.setLeftLimit(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["primaryLeftLimit"])
-        self.positionStatus.setRightLimit(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["primaryRightLimit"])
-        self.setPositionSetPoint(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["primarySetPoint"])
-        self.setPositionProcessVariable(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["primaryProcessVariable"])
-        self.feedbackStatus.setMinimumRange(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["feedbackMinimum"])
-        self.feedbackStatus.setMaximumRange(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["feedbackMaximum"])
-        self.feedbackStatus.setLeftLimit(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["feedbackLeftLimit"])
-        self.feedbackStatus.setRightLimit(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["feedbackRightLimit"])
-        self.setFeedbackSetPoint(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["feedbackSetPoint"])
-        self.setFeedbackProcessVariable(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["feedbackProcessVariable"])
-        self.feedbackDemand.setUnit(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["feedbackUnit"])
-        self.feedbackStatus.setUnit(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["feedbackUnit"])   
-        self.positionDemand.setUnit(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["primaryUnit"])
-        self.positionStatus.setUnit(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["primaryUnit"])
-        self.adjust.setUnit(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["primaryUnit"]) 
-        self.jog.setSpeed(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["secondarySetPoint"])
-        self.jog.setUnit(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["secondaryUnit"])    
-        self.PID.setKP(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["KP"])
-        self.PID.setKI(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["KI"])
-        self.PID.setKD(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["KD"])
-        self.PID.setProportionalOnMeasurement(self.configuration["devices"][self.device]["control"][self.channel]["settings"]["proportionalOnMeasurement"])
+        self.setWindowTitle(self.configuration["devices"][self.device]["control"][self.control]["name"])
+        self.positionStatus.setMinimumRange(self.configuration["devices"][self.device]["control"][self.control]["settings"]["primaryMinimum"])
+        self.positionStatus.setMaximumRange(self.configuration["devices"][self.device]["control"][self.control]["settings"]["primaryMaximum"])
+        self.positionStatus.setLeftLimit(self.configuration["devices"][self.device]["control"][self.control]["settings"]["primaryLeftLimit"])
+        self.positionStatus.setRightLimit(self.configuration["devices"][self.device]["control"][self.control]["settings"]["primaryRightLimit"])
+        self.setPositionSetPoint(self.configuration["devices"][self.device]["control"][self.control]["settings"]["primarySetPoint"])
+        self.setPositionProcessVariable(self.configuration["devices"][self.device]["control"][self.control]["settings"]["primaryProcessVariable"])
+        self.feedbackStatus.setMinimumRange(self.configuration["devices"][self.device]["control"][self.control]["settings"]["feedbackMinimum"])
+        self.feedbackStatus.setMaximumRange(self.configuration["devices"][self.device]["control"][self.control]["settings"]["feedbackMaximum"])
+        self.feedbackStatus.setLeftLimit(self.configuration["devices"][self.device]["control"][self.control]["settings"]["feedbackLeftLimit"])
+        self.feedbackStatus.setRightLimit(self.configuration["devices"][self.device]["control"][self.control]["settings"]["feedbackRightLimit"])
+        self.setFeedbackSetPoint(self.configuration["devices"][self.device]["control"][self.control]["settings"]["feedbackSetPoint"])
+        self.setFeedbackProcessVariable(self.configuration["devices"][self.device]["control"][self.control]["settings"]["feedbackProcessVariable"])
+        self.feedbackDemand.setUnit(self.configuration["devices"][self.device]["control"][self.control]["settings"]["feedbackUnit"])
+        self.feedbackStatus.setUnit(self.configuration["devices"][self.device]["control"][self.control]["settings"]["feedbackUnit"])   
+        self.positionDemand.setUnit(self.configuration["devices"][self.device]["control"][self.control]["settings"]["primaryUnit"])
+        self.positionStatus.setUnit(self.configuration["devices"][self.device]["control"][self.control]["settings"]["primaryUnit"])
+        self.adjust.setUnit(self.configuration["devices"][self.device]["control"][self.control]["settings"]["primaryUnit"]) 
+        self.jog.setSpeed(self.configuration["devices"][self.device]["control"][self.control]["settings"]["secondarySetPoint"])
+        self.jog.setUnit(self.configuration["devices"][self.device]["control"][self.control]["settings"]["secondaryUnit"])    
+        self.PID.setKP(self.configuration["devices"][self.device]["control"][self.control]["settings"]["KP"])
+        self.PID.setKI(self.configuration["devices"][self.device]["control"][self.control]["settings"]["KI"])
+        self.PID.setKD(self.configuration["devices"][self.device]["control"][self.control]["settings"]["KD"])
+        self.PID.setProportionalOnMeasurement(self.configuration["devices"][self.device]["control"][self.control]["settings"]["proportionalOnMeasurement"])

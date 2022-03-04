@@ -19,6 +19,7 @@ class TabInterface(QTabWidget):
         self.tabBarDoubleClicked.connect(self.floatTab)
 
     def floatTab(self, index):
+        # Add logic to only float tab if a plot or control.
         widget = self.widget(index)
         self.tabToWindow.emit(widget, index)
         log.info("Tab converted to window.")
@@ -32,10 +33,11 @@ class TabInterface(QTabWidget):
         self.insertTab(index, widget, name)
         self.tabBar().setTabButton(index, QTabBar.RightSide, None)
 
+
     @Slot(int)
     def closeTab(self, index):
         widget = self.widget(index)
-        # Delete if not a plot widget.
+        # Delete if a plot widget.
         if isinstance(widget, PlotWindow):
             widget.deleteLater()
         self.removeTab(index)

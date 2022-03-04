@@ -16,3 +16,6 @@ from .PIDGroupBox import PIDGroupBox
 from .SettingsGroupBox import SettingsGroupBox
 from .SliderGroupBox import SliderGroupBox
 from .TabInterface import TabInterface
+from .ConfigurationTab import ConfigurationTab
+from .SequencesTab import SequencesTab
+from .StatusTab import StatusTab

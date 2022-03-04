@@ -63,6 +63,11 @@ class Manager(QObject):
         self.controlActuatorList = ["N/A", "Linear"]
         self.defaultFeedbackChannelList = ["N/A"]
         self.defaultControlSettings = {
+            "mode": "tab",
+            "x": 0,
+            "y": 0,
+            "width": 1200,
+            "height": 560,
             "primaryMinimum": -100.00,
             "primaryMaximum": 100.00,
             "primaryLeftLimit": -80.00,
@@ -79,7 +84,7 @@ class Manager(QObject):
             "feedbackSetPoint": 0.00,
             "feedbackProcessVariable": 0.00,
             "feedbackUnit": "(N)",
-            "feedbackChannel": "N/A",
+            "feedbackIndex": 0,
             "KP": 1.00,
             "KI": 1.00,
             "KD": 1.00,
@@ -174,15 +179,15 @@ class Manager(QObject):
                     channel = 0
                 elif control["channel"] == "C2":
                     channel = 1
-                primaryUnit = self.configuration["devices"][name]["control"][channel]["settings"]["primaryUnit"]
-                secondaryUnit = self.configuration["devices"][name]["control"][channel]["settings"]["secondaryUnit"]
-                feedbackUnit = self.configuration["devices"][name]["control"][channel]["settings"]["feedbackUnit"]
-                # Get feedback channel name.
-                feedbackChannelIndex = control["feedback"]
-                feedbackChannel = self.configuration["devices"][name]["control"][channel]["settings"]["feedbackChannel"]
+                primaryUnit = self.configuration["devices"][deviceName]["control"][channel]["settings"]["primaryUnit"]
+                secondaryUnit = self.configuration["devices"][deviceName]["control"][channel]["settings"]["secondaryUnit"]
+                feedbackUnit = self.configuration["devices"][deviceName]["control"][channel]["settings"]["feedbackUnit"]
+                feedbackIndex = self.configuration["devices"][deviceName]["control"][channel]["settings"]["feedbackIndex"]
+                feedbackChannel = self.configuration["devices"][deviceName]["control"][channel]["feedback"]
+                
                 # For each enabled control add the required header components depending on the actuator type.
                 if control["control"] == "Linear":
-                    if feedbackChannelIndex == 0:
+                    if feedbackIndex == 0:
                         slopeline += "\t 1 \t 1 \t 1 \t 1" 
                         offsetline += "\t 0 \t 0 \t 0 \t 0"
                         channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]" 
@@ -264,9 +269,11 @@ class Manager(QObject):
             deviceName = device["name"]
 
             # Control channels.
-            controls = self.controlTableModels[deviceName].enabledControls()
-            for control in controls:
-                self.devices[deviceName].setFeedbackChannels(control["channel"], control["feedback"])
+            enabledControls = self.controlTableModels[deviceName].enabledControls()
+            for control in enabledControls:
+                channel = int(control["channel"][-1])-1
+                feedbackIndex = self.configuration["devices"][deviceName]["control"][channel]["settings"]["feedbackIndex"]
+                self.devices[deviceName].setFeedbackChannels(control["channel"], feedbackIndex)
                 log.info("Feedback channel set to " + str(control["feedback"]) + " for control channel " + control["channel"] + " on " + deviceName + ".")
 
     @Slot(str, int, int, bool)
@@ -758,14 +765,9 @@ class Manager(QObject):
                 # If value is not empty, pass the feedbackChannelList object, otherwise pass the defaults.
                 if value != []:
                     feedbackChannelList = copy.deepcopy(value)
-                    # self.removeControlTable.emit(key)
-                    # self.addControlTable.emit(key, feedbackChannelList)
-                    # self.updateFeedbackChannelList.emit(key, feedbackChannelList)
                 elif value == []:
-                    # self.removeControlTable.emit(key)
-                    # self.addControlTable.emit(key, self.defaultFeedbackChannelList)
-                    # self.updateFeedbackChannelList.emit(key, self.defaultFeedbackChannelList)
                     feedbackChannelList = self.defaultFeedbackChannelList
+        self.feedbackChannelLists[name] = copy.deepcopy(feedbackChannelList)
         return feedbackChannelList
 
     def updateFeedbackComboBox(self, deviceName, row):

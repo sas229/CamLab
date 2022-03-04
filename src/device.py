@@ -53,8 +53,8 @@ class Device(QObject):
         self.motorEnabledC2 = False
         self.feedbackC1 = True
         self.feedbackC2 = False
-        self.feedbackChannelC1 = 0
-        self.feedbackChannelC2 = 0
+        self.feedbackIndexC1 = 0
+        self.feedbackIndexC2 = 0
         self.running = False
         self.jogC1 = False
         self.jogC2 = False
@@ -74,10 +74,10 @@ class Device(QObject):
         self.feedbackSetPointC2 = 0
         self.feedbackProcessVariableC1 = 0
         self.feedbackProcessVariableC2 = 0
-        self.feedbackLeftLimitC1 = 0
-        self.feedbackLeftLimitC2 = 0
-        self.feedbackRightLimitC1 = 0
-        self.feedbackRightLimitC2 = 0
+        self.feedbackLeftLimitC1 = -100
+        self.feedbackLeftLimitC2 = -100
+        self.feedbackRightLimitC1 = 100
+        self.feedbackRightLimitC2 = 100
         self.previousCountC1 = 0
         self.previousCountC2 = 0
         self.previousPulsesC1 = 0
@@ -184,9 +184,9 @@ class Device(QObject):
 
     def setFeedbackChannels(self, channel, feedback):
         if channel == "C1":
-            self.feedbackChannelC1 = feedback
+            self.feedbackIndexC1 = feedback
         elif channel == "C2":
-            self.feedbackChannelC2 = feedback
+            self.feedbackIndexC2 = feedback
 
     def checkLimits(self):
         # Refresh connection.
@@ -556,7 +556,7 @@ class Device(QObject):
         if self.jogC1 == True: 
             self.updatePositionSetPointC1.emit(self.positionProcessVariableC1)
         self.updatePositionProcessVariableC1.emit(self.positionProcessVariableC1)
-        if self.feedbackChannelC1 > 0:
+        if self.feedbackIndexC1 != 0:
             self.updateFeedbackProcessVariableC1.emit(self.feedbackProcessVariableC1)
             if self.statusPIDC1 == True:
                 self.updatePositionSetPointC1.emit(self.positionProcessVariableC1)
@@ -568,7 +568,7 @@ class Device(QObject):
         if self.jogC2 == True:
             self.updatePositionSetPointC2.emit(self.positionProcessVariableC2)
         self.updatePositionProcessVariableC2.emit(self.positionProcessVariableC2)
-        if self.feedbackChannelC2 > 0:
+        if self.feedbackIndexC2 != 0:
             self.updateFeedbackProcessVariableC2.emit(self.feedbackProcessVariableC2)
             if self.statusPIDC1 == True:
                 self.updatePositionSetPointC2.emit(self.positionProcessVariableC2)
@@ -888,15 +888,16 @@ class Device(QObject):
             self.getPositionC2()
             # If feedback is available.
             if self.feedbackC1 == True:
-                self.feedbackProcessVariableC1 = self.data[self.feedbackChannelC1-1]
+                self.feedbackProcessVariableC1 = data[0]
+                # print(self.feedbackProcessVariableC1)
                 if self.statusPIDC1 == True:
                     self.speedSetPointC1 = self.PID_C1(self.feedbackProcessVariableC1)
-                    self.directionC1 = int(np.sign(self.speedSetPointC1))
-                    demandSpeed = np.abs(self.speedSetPointC1)
+                    self.directionC1 = np.sign(self.speedSetPointC1)
+                    demandSpeed = int(np.abs(self.speedSetPointC1))
                     self.setDirection("C1", self.directionC1)
                     self.setSpeed("C1", demandSpeed)
             if self.feedbackC2 == True:
-                self.feedbackProcessVariableC2 = self.data[self.feedbackChannelC2-1]
+                self.feedbackProcessVariableC2 = data[self.feedbackIndexC2-1]
                 if self.statusPIDC2 == True:
                     self.speedSetPointC2 = PID_C2(self.feedbackProcessVariableC2)
             # Concatenate output data.
