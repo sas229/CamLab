@@ -39,12 +39,12 @@ class Device(QObject):
         # Variables
         self.data = np.zeros(2)
         self.CPR = 6400
-        self.KPC1 = 0.0
-        self.KIC1 = 0.0
-        self.KDC1 = 0.0
-        self.KPC2 = 0.0
-        self.KIC2 = 0.0
-        self.KDC2 = 0.0
+        self.KP_C1 = 0.0
+        self.KI_C1 = 0.0
+        self.KD_C1 = 0.0
+        self.KP_C2 = 0.0
+        self.KI_C2 = 0.0
+        self.KD_C2 = 0.0
         self.statusPIDC1 = False
         self.statusPIDC2 = False
         self.enabledC1 = True
@@ -96,94 +96,333 @@ class Device(QObject):
         self.positionLeftLimitStatusC2 = False
         self.positionRightLimitStatusC1 = False
         self.positionRightLimitStatusC2 = False
+        self.max_rpm = 4000
 
         #  Initialise.
-        self.openConnection()
-        self.initialiseSettings()
-        self.loadLuaScript()
-        self.checkLimits()
+        self.open_connection()
+        self.initialise_settings()
+        self.load_lua_script()
+        self.check_limits()
+        self.disable_clock_0()
+        self.set_speed_limit()
 
         # Set initial speeds.
         self.setSpeed("C1", self.speedC1)
         self.setSpeed("C2", self.speedC2)
 
-        # PID.
+        # PID instantiation.
         self.PID_C1 = PID()
-        self.setTuningsPID("C1")
+        self.set_PID_tunings_C1()
         self.PID_C2 = PID()
-        self.setTuningsPID("C2")
+        self.set_PID_tunings_C2()
 
-        # Check clock 0 is disabled.
-        ljm.eWriteName(self.handle,'DIO_EF_CLOCK0_ENABLE',0)
-
-    def setTuningsPID(self, channel):
-        if channel == "C1":
-            self.PID_C1.tunings = (self.KPC1, self.KIC1, self.KDC1)
-        elif channel == "C2":
-            self.PID_C2.tunings = (self.KPC2, self.KIC2, self.KDC2)
-
-    @Slot(str, bool)
-    def setPIDControl(self, channel, value):
-        if channel == "C1":
-            self.statusPIDC1 = value
-            if value == True:
-                speedLimit = (self.CPR*4000)/(60*self.countsPerUnitC1)
-                self.PID_C1.reset()
-                self.PID_C1.output_limits = (-speedLimit, speedLimit)
-                self.PID_C1.setpoint = self.feedbackSetPointC1
-                self.PID_C1.set_auto_mode(True, last_output=0.001)
-                # self.PID_C1.set_auto_mode(True, last_output=self.speedC1)
-                aNames = ["DIO4_EF_ENABLE", "DIO4_EF_INDEX", "DIO4_EF_OPTIONS", "DIO4_EF_CONFIG_A", "DIO4_EF_ENABLE"]
-                aValues = [0, 0, 1, self.widthC1, 1]
-                numFrames = len(aNames)
-                results = ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
-            else:
+    @Slot(str)
+    def set_enable_C1(self, value):
+        """Set enable state for control channel C1."""
+        try:
+            self.handle = ljm.open(7, self.connection, self.id)
+            if value ==  True:
                 self.positionSetPointC1 = self.positionProcessVariableC1
-                self.PID_C1.set_auto_mode(False)
-                self.updatePositionSetPointC1.emit(self.positionSetPointC1)
-                ljm.eWriteName(self.handle, "DIO4_EF_ENABLE", 0)
-        elif channel == "C2":
-            self.statusPIDC2 = value
-            if value == True:
-                speedLimit = (self.CPR*4000)/(60*self.countsPerUnitC2)
-                self.PID_C2.reset()
-                self.PID_C2.output_limits = (-speedLimit, speedLimit)
-                self.PID_C2.setpoint = self.feedbackSetPointC2
-                self.PID_C2.set_auto_mode(True, last_output=0.001)
-                # self.PID_C2.set_auto_mode(True, last_output=self.speedC2)
-                aNames = ["DIO5_EF_ENABLE", "DIO5_EF_INDEX", "DIO5_EF_OPTIONS", "DIO5_EF_CONFIG_A", "DIO5_EF_ENABLE"]
-                aValues = [0, 0, 2, self.widthC2, 1]
-                numFrames = len(aNames)
-                results = ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
+                self.updatePositionSetPointC1.emit(self.positionProcessVariableC1)
+                ljm.eWriteName(self.handle, "EIO0", 1)
+                self.motorEnabledC1 = True
             else:
+                ljm.eWriteName(self.handle, "EIO0", 0)
+                self.motorEnabledC1 = False
+        except ljm.LJMError:
+            # Otherwise log the exception.
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
+        
+    @Slot(str)
+    def set_enable_C2(self, value):
+        """Set enable state for control channel C2."""
+        try:
+            self.handle = ljm.open(7, self.connection, self.id)
+            if value ==  True:
                 self.positionSetPointC2 = self.positionProcessVariableC2
-                self.PID_C2.set_auto_mode(False)
-                self.updatePositionSetPointC2.emit(self.positionSetPointC2)
-                ljm.eWriteName(self.handle, "DIO5_EF_ENABLE", 0)
+                self.updatePositionSetPointC2.emit(self.positionProcessVariableC2)
+                ljm.eWriteName(self.handle, "EIO2", 1)
+                self.motorEnabledC2 = True
+            else:
+                ljm.eWriteName(self.handle, "EIO2", 0)
+                self.motorEnabledC2 = False
+        except ljm.LJMError:
+            # Otherwise log the exception.
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
+
+    def disable_clock_0(self):
+        """Check clock 0 is disabled."""
+        try:
+            self.handle = ljm.open(7, self.connection, self.id)
+            ljm.eWriteName(self.handle,'DIO_EF_CLOCK0_ENABLE',0)
+            log.info("Clock 0 disabled on {device}.".format(device=self.name))
+        except ljm.LJMError:
+            # Otherwise log the exception.
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
+
+    def turn_C1_PWM_on(self):
+        """Turn control channel C1 PWM on."""
+        try:
+            self.handle = ljm.open(7, self.connection, self.id)
+            ljm.eWriteName(self.handle, "DIO4_EF_ENABLE", 1)
+        except ljm.LJMError:
+            # Otherwise log the exception.
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
+
+    def turn_C2_PWM_on(self):
+        """Turn control channel C2 PWM on."""
+        try:
+            self.handle = ljm.open(7, self.connection, self.id)
+            ljm.eWriteName(self.handle, "DIO5_EF_ENABLE", 1)
+        except ljm.LJMError:
+            # Otherwise log the exception.
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
     
-    @Slot(str, float)
-    def setKP(self, channel, value):
-        if channel == "C1":
-            self.KPC1 = value
-        elif channel == "C2":
-            self.KPC2 = value
-        self.setTuningsPID(channel)
+    def turn_C1_PWM_off(self):
+        """Turn control channel C1 PWM off."""
+        try:
+            self.handle = ljm.open(7, self.connection, self.id)
+            ljm.eWriteName(self.handle, "DIO4_EF_ENABLE", 0)
+        except ljm.LJMError:
+            # Otherwise log the exception.
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
 
-    @Slot(str, float)
-    def setKI(self, channel, value):
-        if channel == "C1":
-            self.KIC1 = value
-        elif channel == "C2":
-            self.KIC2 = value
-        self.setTuningsPID(channel)
+    def turn_C2_PWM_off(self):
+        """Turn control channel C2 PWM off."""
+        try:
+            self.handle = ljm.open(7, self.connection, self.id)
+            ljm.eWriteName(self.handle, "DIO5_EF_ENABLE", 0)
+        except ljm.LJMError:
+            # Otherwise log the exception.
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
 
-    @Slot(str, float)
-    def setKD(self, channel, value):
-        if channel == "C1":
-            self.KDC1 = value
-        elif channel == "C2":
-            self.KDC2 = value
-        self.setTuningsPID(channel)
+    def set_PID_tunings_C1(self):
+        """Set PID tunings for control channel C1."""
+        self.PID_C1.tunings = (self.KP_C1, self.KI_C1, self.KD_C1)
+        log.info("PID tunings updated for control channel C1 on {device}.".format(device=self.name))
+
+    def set_PID_tunings_C2(self):
+        """Set PID tunings for control channel C2."""
+        self.PID_C2.tunings = (self.KP_C2, self.KI_C2, self.KD_C2)
+        log.info("PID tunings updated for control channel C2 on {device}.".format(device=self.name))
+
+    def set_clock(self, clock, freq):        
+        """Define appropriate clock settings, selecting the minimum possible divisor 
+        that does not result in a roll value that exceeds the bit depth of the clock.
+        Clamp frequency to 426666, which is equivalent to 4000 RPM for a 6400 CPR encoder
+        with a 16 bit clock and divisor value of 8."""
+        try:
+            core_freq = 80000000
+            max_roll = 2**16
+            divisor = 8
+            width = 10  
+            max_freq = 426666
+            min_freq = (core_freq/(divisor*max_roll))
+            if freq > max_freq:
+                freq = max_freq
+            elif freq < min_freq:
+                freq = np.ceil(min_freq)
+            roll = int(min(max(1,core_freq/(freq*divisor)), max_roll))
+
+            # Set the clock.
+            aNames = ['DIO_EF_CLOCK' + str(clock) + '_ENABLE',
+                    'DIO_EF_CLOCK' + str(clock) + '_DIVISOR',
+                    'DIO_EF_CLOCK' + str(clock) + '_ROLL_VALUE',
+                    'DIO_EF_CLOCK' + str(clock) + '_ENABLE']
+            aValues = [0, divisor, roll, 1]
+            numFrames = len(aNames)
+            self.handle = ljm.open(7, self.connection, self.id)
+            ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
+
+            return freq, roll, width
+
+        except ljm.LJMError:
+            # Otherwise log the exception.
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
+
+    def refresh_connection(self):
+        """Refresh connection to LabJack T7 device."""
+        try:
+            self.handle = ljm.open(7, self.connection, self.id)
+        except ljm.LJMError:
+            # Otherwise log the exception.
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
+
+    def check_connection_C1(self):
+        """Check connection to control device on channel C1."""
+        try:
+            self.handle = ljm.open(7, self.connection, self.id)
+            self.connectedC1 = not bool(int(ljm.eReadName(self.handle, 'FIO0')))
+            self.updateConnectionIndicatorC1.emit(self.connectedC1)
+        except ljm.LJMError:
+            # Otherwise log the exception.
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
+
+    def check_connection_C2(self):
+        """Check connection to control device on channel C2."""
+        try:
+            self.handle = ljm.open(7, self.connection, self.id)
+            self.connectedC2 = not bool(int(ljm.eReadName(self.handle, 'FIO2')))
+            self.updateConnectionIndicatorC2.emit(self.connectedC2)
+        except ljm.LJMError:
+            # Otherwise log the exception.
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
+
+    def check_connections(self):
+        """Check connections to control devices."""
+        self.check_connection_C1()
+        self.check_connection_C2()
+
+    def set_speed_limit(self):
+        """Set speed limit for motors."""
+        self.speed_limit = (self.CPR*self.max_rpm)/(60*self.countsPerUnitC2)
+        log.info("Speed limit set on {device} for {rpm} RPM.".format(device=self.name, rpm=self.max_rpm))
+
+    @Slot(bool)
+    def set_PID_control_C1(self, value):
+        """Set PID state for control channel C1."""
+        self.statusPIDC1 = value
+        if value == True:
+            self.PID_C1.reset()
+            self.PID_C1.output_limits = (-self.speed_limit, self.speed_limit)
+            self.PID_C1.setpoint = self.feedbackSetPointC1
+            self.PID_C1.set_auto_mode(True, last_output=0.001)
+            self.turn_C1_PWM_on()
+            log.info("PID control for control channel C1 on " + self.name + " turned on.")
+        else:
+            self.positionSetPointC1 = self.positionProcessVariableC1
+            self.PID_C1.set_auto_mode(False)
+            self.updatePositionSetPointC1.emit(self.positionSetPointC1)
+            self.turn_C1_PWM_off()
+            log.info("PID control for control channel C1 on " + self.name + " turned off.")
+
+    @Slot(bool)
+    def set_PID_control_C2(self, value):
+        """Set PID state for control channel C2."""
+        self.statusPIDC2 = value
+        if value == True:
+            self.PID_C2.reset()
+            self.PID_C2.output_limits = (-self.speed_limit, self.speed_limit)
+            self.PID_C2.setpoint = self.feedbackSetPointC2
+            self.PID_C2.set_auto_mode(True, last_output=0.001)
+            self.turn_C2_PWM_on()
+            log.info("PID control for control channel C2 on " + self.name + " turned on.")
+        else:
+            self.positionSetPointC2 = self.positionProcessVariableC2
+            self.PID_C2.set_auto_mode(False)
+            self.updatePositionSetPointC1.emit(self.positionSetPointC2)
+            self.turn_C2_PWM_off()
+            log.info("PID control for control channel C2 on " + self.name + " turned off.")
+    
+    @Slot(float)
+    def set_KP_C1(self, value):
+        """Set PID proportional gain for control channel C1."""
+        self.KP_C1 = value
+        self.set_PID_tunings_C1()
+        log.info("PID proportional gain for control channel C1 on {device} changed to {value:.2f}.".format(value=value, device=self.name))
+
+    @Slot(float)
+    def set_KI_C1(self, value):
+        """Set PID integral gain for control channel C1."""
+        self.KI_C1 = value
+        self.set_PID_tunings_C1()
+        log.info("PID integral gain for control channel C1 on {device} changed to {value:.2f}.".format(value=value, device=self.name))
+
+    @Slot(float)
+    def set_KD_C1(self, value):
+        """Set PID derivative gain for control channel C1."""
+        self.KD_C1 = value
+        self.set_PID_tunings_C1()
+        log.info("PID derivative gain for control channel C1 on {device} changed to {value:.2f}.".format(value=value, device=self.name))
+
+    @Slot(float)
+    def set_KP_C2(self, value):
+        """Set PID proportional gain for control channel C2."""
+        self.KP_C2 = value
+        self.set_PID_tunings_C2()
+        log.info("PID proportional gain for control channel C2 on {device} changed to {value:.2f}.".format(value=value, device=self.name))
+
+    @Slot(float)
+    def set_KI_C2(self, value):
+        """Set PID integral gain for control channel C2."""
+        self.KI_C2 = value
+        self.set_PID_tunings_C2()
+        log.info("PID integral gain for control channel C2 on {device} changed to {value:.2f}.".format(value=value, device=self.name))
+
+    @Slot(float)
+    def set_KD_C2(self, value):
+        """Set PID derivative gain for control channel C2."""
+        self.KD_C2 = value
+        self.set_PID_tunings_C2()
+        log.info("PID derivative gain for control channel C2 on {device} changed to {value:.2f}.".format(value=value, device=self.name))
+
+    # @Slot(str, float)
+    # def setKP(self, channel, value):
+    #     if channel == "C1":
+    #         self.KP_C1 = value
+    #     elif channel == "C2":
+    #         self.KPC2 = value
+    #     self.set_PID_tunings(channel)
+
+    # @Slot(str, float)
+    # def setKI(self, channel, value):
+    #     if channel == "C1":
+    #         self.KI_C1 = value
+    #     elif channel == "C2":
+    #         self.KIC2 = value
+    #     self.set_PID_tunings(channel)
+
+    # @Slot(str, float)
+    # def setKD(self, channel, value):
+    #     if channel == "C1":
+    #         self.KD_C1 = value
+    #     elif channel == "C2":
+    #         self.KDC2 = value
+    #     self.set_PID_tunings(channel)
 
     @Slot(str, bool)
     def setPoM(self, channel, value):
@@ -207,57 +446,65 @@ class Device(QObject):
         elif channel == "C2":
             self.feedbackIndexC2 = feedback
 
-    def checkLimits(self):
-        # Refresh connection.
-        self.handle = ljm.open(7, self.connection, self.id)
-        self.limitC1 = False
-        self.limitC2 = False
+    def check_limits(self):
+        try:
+            # Refresh connection.
+            self.handle = ljm.open(7, self.connection, self.id)
+            self.limitC1 = False
+            self.limitC2 = False
 
-        # Check position limits.
-        self.minimumLimitC1 = bool(ljm.eReadName(self.handle, "CIO2"))
-        self.maximumLimitC1 = bool(ljm.eReadName(self.handle, "CIO0"))
-        self.minimumLimitC2 = bool(ljm.eReadName(self.handle, "CIO3"))
-        self.maximumLimitC2 = bool(ljm.eReadName(self.handle, "CIO1"))
-        
-        #  Check if motor moving and stop if moving in the direction of the hard limit for C1.
-        moving = ljm.eReadName(self.handle, "DIO4_EF_ENABLE")
-        if moving == 1 and self.directionC1 == -1 and self.minimumLimitC1 == True:
-            self.stopCommand("C1")
-        elif moving == 1 and self.directionC1 == 1 and self.maximumLimitC1 == True:
-            self.stopCommand("C1")
+            # Check position limits.
+            self.minimumLimitC1 = bool(ljm.eReadName(self.handle, "CIO2"))
+            self.maximumLimitC1 = bool(ljm.eReadName(self.handle, "CIO0"))
+            self.minimumLimitC2 = bool(ljm.eReadName(self.handle, "CIO3"))
+            self.maximumLimitC2 = bool(ljm.eReadName(self.handle, "CIO1"))
+            
+            #  Check if motor moving and stop if moving in the direction of the hard limit for C1.
+            moving = ljm.eReadName(self.handle, "DIO4_EF_ENABLE")
+            if moving == 1 and self.directionC1 == -1 and self.minimumLimitC1 == True:
+                self.stopCommand("C1")
+            elif moving == 1 and self.directionC1 == 1 and self.maximumLimitC1 == True:
+                self.stopCommand("C1")
 
-        #  Check if motor moving and stop if moving in the direction of the hard limit for C2.
-        moving = ljm.eReadName(self.handle, "DIO5_EF_ENABLE")
-        if moving == 1 and self.directionC2 == -1 and self.minimumLimitC2 == True:
-            self.stopCommand("C2")
-        elif moving == 1 and self.directionC2 == 1 and self.maximumLimitC2 == True:
-            self.stopCommand("C2")
+            #  Check if motor moving and stop if moving in the direction of the hard limit for C2.
+            moving = ljm.eReadName(self.handle, "DIO5_EF_ENABLE")
+            if moving == 1 and self.directionC2 == -1 and self.minimumLimitC2 == True:
+                self.stopCommand("C2")
+            elif moving == 1 and self.directionC2 == 1 and self.maximumLimitC2 == True:
+                self.stopCommand("C2")
 
-        # Turn on indicator if on limits.
-        if self.minimumLimitC1 == True or self.maximumLimitC1 == True:
-            self.limitC1 = True
-        if self.minimumLimitC2 == True or self.maximumLimitC2 == True:
-            self.limitC2 = True
+            # Turn on indicator if on limits.
+            if self.minimumLimitC1 == True or self.maximumLimitC1 == True:
+                self.limitC1 = True
+            if self.minimumLimitC2 == True or self.maximumLimitC2 == True:
+                self.limitC2 = True
 
-        # Check feedback limits.
-        if self.feedbackProcessVariableC1 <= self.feedbackLeftLimitC1:
-            self.limitC1 = True
-        if self.feedbackProcessVariableC1 >= self.feedbackRightLimitC1:
-            self.limitC1 = True
-        if self.feedbackProcessVariableC2 <= self.feedbackLeftLimitC2:
-            self.limitC2 = True
-        if self.feedbackProcessVariableC2 >= self.feedbackRightLimitC2:
-            self.limitC2 = True
+            # Check feedback limits.
+            if self.feedbackProcessVariableC1 <= self.feedbackLeftLimitC1:
+                self.limitC1 = True
+            if self.feedbackProcessVariableC1 >= self.feedbackRightLimitC1:
+                self.limitC1 = True
+            if self.feedbackProcessVariableC2 <= self.feedbackLeftLimitC2:
+                self.limitC2 = True
+            if self.feedbackProcessVariableC2 >= self.feedbackRightLimitC2:
+                self.limitC2 = True
 
-        # Set indicator.
-        if self.limitC1 == True:
-            self.updateLimitIndicatorC1.emit(True)
-        else:
-            self.updateLimitIndicatorC1.emit(False)
-        if self.limitC2 == True:
-            self.updateLimitIndicatorC2.emit(True)
-        else:
-            self.updateLimitIndicatorC2.emit(False)
+            # Set indicator.
+            if self.limitC1 == True:
+                self.updateLimitIndicatorC1.emit(True)
+            else:
+                self.updateLimitIndicatorC1.emit(False)
+            if self.limitC2 == True:
+                self.updateLimitIndicatorC2.emit(True)
+            else:
+                self.updateLimitIndicatorC2.emit(False)
+        except ljm.LJMError:
+            # Otherwise log the exception.
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
 
     @Slot(str, float)
     def setPosition(self, channel, value):
@@ -275,70 +522,49 @@ class Device(QObject):
 
     @Slot(str)
     def stopCommand(self, channel):
-        if channel == "C1":
-            ljm.eWriteName(self.handle, "DIO4_EF_ENABLE", 0)
-            self.updatePositionSetPointC1.emit(self.positionProcessVariableC1)
-        elif channel == "C2":
-            ljm.eWriteName(self.handle, "DIO5_EF_ENABLE", 0)
-            self.updatePositionSetPointC2.emit(self.positionProcessVariableC2)
+        try:
+            if channel == "C1":
+                ljm.eWriteName(self.handle, "DIO4_EF_ENABLE", 0)
+                self.updatePositionSetPointC1.emit(self.positionProcessVariableC1)
+            elif channel == "C2":
+                ljm.eWriteName(self.handle, "DIO5_EF_ENABLE", 0)
+                self.updatePositionSetPointC2.emit(self.positionProcessVariableC2)
+            log.info("Control stopped on device " + self.name + " control channel " + channel + ".")
+        except ljm.LJMError:
+            # Otherwise log the exception.
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
 
     @Slot(str)
     def zeroPosition(self, channel):
-        if channel == "C1":
-            self.positionProcessVariableC1 = 0
-            self.positionSetPointC1 = 0
-            self.previousCountC1 = 0
-            self.updatePositionSetPointC1.emit(self.positionProcessVariableC1) 
-            self.updatePositionProcessVariableC1.emit(self.positionProcessVariableC1)
-            ljm.eReadName(self.handle, "DIO1_EF_READ_A_AND_RESET")
-        elif channel == "C2":
-            self.positionProcessVariableC2 = 0
-            self.positionSetPointC2 = 0
-            self.previousCountC2 = 0
-            self.updatePositionSetPointC2.emit(self.positionProcessVariableC2) 
-            self.updatePositionProcessVariableC2.emit(self.positionProcessVariableC2)
-            ljm.eReadName(self.handle, "DIO3_EF_READ_A_AND_RESET")
+        try:
+            if channel == "C1":
+                self.positionProcessVariableC1 = 0
+                self.positionSetPointC1 = 0
+                self.previousCountC1 = 0
+                self.updatePositionSetPointC1.emit(self.positionProcessVariableC1) 
+                self.updatePositionProcessVariableC1.emit(self.positionProcessVariableC1)
+                ljm.eReadName(self.handle, "DIO1_EF_READ_A_AND_RESET")
+            elif channel == "C2":
+                self.positionProcessVariableC2 = 0
+                self.positionSetPointC2 = 0
+                self.previousCountC2 = 0
+                self.updatePositionSetPointC2.emit(self.positionProcessVariableC2) 
+                self.updatePositionProcessVariableC2.emit(self.positionProcessVariableC2)
+                ljm.eReadName(self.handle, "DIO3_EF_READ_A_AND_RESET")
+            log.info("Position zeroed on device " + self.name + " control channel " + channel + ".")
+        except ljm.LJMError:
+            # Otherwise log the exception.
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
 
-    def setClock(self, clock, freq):        
-        # Define appropriate clock settings, selecting the minimum possible divisor 
-        # that does not result in a roll value that exceeds the bit depth of the clock.
-        # Clamp frequency to 426666, which is equivalent to 4000 RPM for a 6400 CPR encoder
-        # with a 16 bit clock and divisor value of 8.
-        core_freq = 80000000
-        max_roll = 2**16
-        divisor = 8
-        width = 10  
-        max_freq = 426666
-        min_freq = (core_freq/(divisor*max_roll))
-        if freq > max_freq:
-            freq = max_freq
-        elif freq < min_freq:
-            freq = np.ceil(min_freq)
-        roll = int(min(max(1,core_freq/(freq*divisor)), max_roll))
-
-        # Set the clock.
-        aNames = ['DIO_EF_CLOCK' + str(clock) + '_ENABLE',
-                'DIO_EF_CLOCK' + str(clock) + '_DIVISOR',
-                'DIO_EF_CLOCK' + str(clock) + '_ROLL_VALUE',
-                'DIO_EF_CLOCK' + str(clock) + '_ENABLE']
-        aValues = [0, divisor, roll, 1]
-        numFrames = len(aNames)
-        ljm.eWriteNames(self.handle, numFrames, aNames, aValues)
-        
-        # log.info("Clock {clock} set to {freq} Hz.".format(clock=clock, freq=freq))
-
-        return freq, roll, width
-
-    def checkConnection(self):
-        self.handle = ljm.open(7, self.connection, self.id)
-        
-        connectedC1 = not bool(int(ljm.eReadName(self.handle, 'FIO0')))
-        self.updateConnectionIndicatorC1.emit(connectedC1)
-
-        connectedC2 = not bool(int(ljm.eReadName(self.handle, 'FIO2')))
-        self.updateConnectionIndicatorC2.emit(connectedC2)
-        
-        return connectedC1, connectedC2
+    
 
     @Slot(str, float)
     def updatePositionLeftLimit(self, channel, value):
@@ -370,54 +596,52 @@ class Device(QObject):
 
     @Slot(str, bool)
     def updatePositionLeftLimitStatus(self, channel, status):
-        self.handle = ljm.open(7, self.connection, self.id)
-        if channel == "C1":
-            self.positionLeftLimitStatusC1 = status
-            if status == True:
-                ljm.eWriteName(self.handle, "DIO4_EF_ENABLE", 0)
-        elif channel == "C2":
-            self.positionLeftLimitStatusC2 = status
-            if status == True:
-                ljm.eWriteName(self.handle, "DIO5_EF_ENABLE", 0)
+        try:
+            # Refresh the connection.
+            self.handle = ljm.open(7, self.connection, self.id)
+            if channel == "C1":
+                self.positionLeftLimitStatusC1 = status
+                if status == True:
+                    ljm.eWriteName(self.handle, "DIO4_EF_ENABLE", 0)
+            elif channel == "C2":
+                self.positionLeftLimitStatusC2 = status
+                if status == True:
+                    ljm.eWriteName(self.handle, "DIO5_EF_ENABLE", 0)
+        except ljm.LJMError:
+            # Otherwise log the exception.
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
     
     @Slot(str, bool)
     def updatePositionRightLimitStatus(self, channel, status):
-        self.handle = ljm.open(7, self.connection, self.id)
-        if channel == "C1":
-            self.positionRightLimitStatusC1 = status
-            if status == True:
-                ljm.eWriteName(self.handle, "DIO4_EF_ENABLE", 0)
-        elif channel == "C2":
-            self.positionRightLimitStatusC2 = status
-            if status == True:
-                ljm.eWriteName(self.handle, "DIO5_EF_ENABLE", 0)
-
-    @Slot(str)
-    def setEnable(self, channel, value):
-        self.handle = ljm.open(7, self.connection, self.id)
-        if channel == "C1" and value == True:
-            self.positionSetPointC1 = self.positionProcessVariableC1
-            self.updatePositionSetPointC1.emit(self.positionProcessVariableC1)
-            ljm.eWriteName(self.handle, "EIO0", 1)
-            self.motorEnabledC1 = True
-        elif channel == "C1" and value == False:
-            ljm.eWriteName(self.handle, "EIO0", 0)
-            self.motorEnabledC1 = False
-        elif channel == "C2" and value == True:
-            self.positionSetPointC2 = self.positionProcessVariableC2
-            self.updatePositionSetPointC2.emit(self.positionProcessVariableC2)
-            ljm.eWriteName(self.handle, "EIO2", 1)
-            self.motorEnabledC2 = True
-        elif channel == "C2" and value == False:
-            ljm.eWriteName(self.handle, "EIO2", 0)
-            self.motorEnabledC2 = False
+        try:
+            # Refresh the connection.
+            self.handle = ljm.open(7, self.connection, self.id)
+            if channel == "C1":
+                self.positionRightLimitStatusC1 = status
+                if status == True:
+                    ljm.eWriteName(self.handle, "DIO4_EF_ENABLE", 0)
+            elif channel == "C2":
+                self.positionRightLimitStatusC2 = status
+                if status == True:
+                    ljm.eWriteName(self.handle, "DIO5_EF_ENABLE", 0)
+        except ljm.LJMError:
+            # Otherwise log the exception.
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
 
     @Slot(str, float)
     def setSpeed(self, channel, speed):
         self.handle = ljm.open(7, self.connection, self.id)     
         if channel == "C1":
             targetFrequency = int(speed*self.countsPerUnitC1)
-            self.freqC1, self.rollC1, self.widthC1 = self.setClock(1, targetFrequency)
+            self.freqC1, self.rollC1, self.widthC1 = self.set_clock(1, targetFrequency)
             ljm.eWriteName(self.handle, "DIO4_EF_CONFIG_A", self.widthC1)
             self.speedC1 = self.freqC1/self.countsPerUnitC1
             self.updateSpeedC1.emit(self.speedC1)
@@ -425,13 +649,13 @@ class Device(QObject):
                 self.moveToPosition(channel, self.positionSetPointC1)
         if channel == "C2":
             targetFrequency = int(speed*self.countsPerUnitC2)
-            self.freqC2, self.rollC2, self.widthC2 = self.setClock(2, targetFrequency)
+            self.freqC2, self.rollC2, self.widthC2 = self.set_clock(2, targetFrequency)
             ljm.eWriteName(self.handle, "DIO5_EF_CONFIG_A", self.widthC2)
             self.speedC2 = self.freqC2/self.countsPerUnitC2
             self.updateSpeedC2.emit(self.speedC2)
             if self.movingC2 == True:
                 self.moveToPosition(channel, self.positionSetPointC2)
-        
+
     @Slot(str)
     def jogPositiveOn(self, channel):
         self.handle = ljm.open(7, self.connection, self.id)
@@ -740,7 +964,7 @@ class Device(QObject):
         self.numFrames = len(self.addresses)
         self.controlRate = controlRate
 
-    def openConnection(self):
+    def open_connection(self):
         # Method to open a device connection
         try:
             self.handle = ljm.open(7, self.connection, self.id)
@@ -753,7 +977,7 @@ class Device(QObject):
             e = sys.exc_info()[1]
             log.warning(e)
 
-    def initialiseSettings(self):
+    def initialise_settings(self):
         # Method to initialise the device.
         if self.handle != None:
             try:
@@ -767,7 +991,7 @@ class Device(QObject):
                 e = sys.exc_info()[1]
                 log.warning(e)
 
-    def loadLuaScript(self):
+    def load_lua_script(self):
         self.script = "src/failsafe.lua"
         self.loadLua()
         self.executeLua()
@@ -825,7 +1049,7 @@ class Device(QObject):
             # Read from the device and apply slope and offsets.
             self.handle = ljm.open(7, self.connection, self.id)
             ljm.eWriteName(self.handle, "USER_RAM0_U16", 1) 
-            self.checkLimits()
+            self.check_limits()
             self.raw = np.asarray(ljm.eReadAddresses(self.handle, self.numFrames, self.addresses, self.dataTypes))
             data = self.slopes*(self.raw - self.offsets)
             self.getPositionC1()

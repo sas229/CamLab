@@ -28,16 +28,16 @@ class LinearAxis(QWidget):
     feedbackLeftLimitStatus = Signal(str, bool)
     feedbackRightLimitStatus = Signal(str, bool)
     secondarySetPointChanged = Signal(str, float)
-    KPChanged = Signal(str, float)
-    KIChanged = Signal(str, float)
-    KDChanged = Signal(str, float)
+    KPChanged = Signal(float)
+    KIChanged = Signal(float)
+    KDChanged = Signal(float)
     proportionalOnMeasurementChanged = Signal(str, bool)
     positiveJogEnabled = Signal(str)
     negativeJogEnabled = Signal(str) 
     positiveJogDisabled = Signal(str)
     negativeJogDisabled = Signal(str) 
-    enable = Signal(str, bool)
-    PIDControl = Signal(str, bool)
+    enable = Signal(bool)
+    PIDControl = Signal(bool)
     zeroPosition = Signal(str)
     primaryUnitChanged = Signal(str)
     feedbackUnitChanged = Signal(str)
@@ -190,7 +190,7 @@ class LinearAxis(QWidget):
     @Slot()
     def emitEnable(self):
         enabled = self.globalControls.enableButton.isChecked()
-        self.enable.emit(self.channel, enabled)
+        self.enable.emit(enabled)
         if enabled == True:
             self.globalControls.settingsButton.setEnabled(False)
             self.globalControls.PIDControlButton.setEnabled(True)
@@ -202,7 +202,7 @@ class LinearAxis(QWidget):
     @Slot()
     def emitPIDControl(self):
         PIDControl = self.globalControls.PIDControlButton.isChecked()
-        self.PIDControl.emit(self.channel, PIDControl) 
+        self.PIDControl.emit(PIDControl) 
         if PIDControl == True:
             self.emitFeedbackSetPointChanged()
         self.configuration["devices"][self.device]["control"][self.control]["settings"]["PIDControl"] = self.globalControls.PIDControlButton.isChecked()
@@ -251,17 +251,17 @@ class LinearAxis(QWidget):
     
     @Slot()
     def emitKPChanged(self, value):
-        self.KPChanged.emit(self.channel, value)
+        self.KPChanged.emit(value)
         self.configuration["devices"][self.device]["control"][self.control]["settings"]["KP"] = round(self.PID.getKP(), 2)
         
     @Slot()
     def emitKIChanged(self, value):
-        self.KIChanged.emit(self.channel, value)
+        self.KIChanged.emit(value)
         self.configuration["devices"][self.device]["control"][self.control]["settings"]["KI"] = round(self.PID.getKI(), 2)
 
     @Slot()
     def emitKDChanged(self, value):
-        self.KDChanged.emit(self.channel, value)
+        self.KDChanged.emit(value)
         self.configuration["devices"][self.device]["control"][self.control]["settings"]["KD"] = round(self.PID.getKD(), 2)
         
     @Slot()

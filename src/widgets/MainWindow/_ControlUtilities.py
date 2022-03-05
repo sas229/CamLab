@@ -19,7 +19,6 @@ class ControlUtilities:
             controlWidget = LinearAxis(controlID)
         
             # Connections.
-            controlWidget.enable.connect(self.manager.devices[name].setEnable)
             controlWidget.secondarySetPointChanged.connect(self.manager.devices[name].setSpeed)
             controlWidget.positiveJogEnabled.connect(self.manager.devices[name].jogPositiveOn)
             controlWidget.positiveJogDisabled.connect(self.manager.devices[name].jogPositiveOff)
@@ -33,17 +32,19 @@ class ControlUtilities:
             controlWidget.feedbackSetPointChanged.connect(self.manager.devices[name].setFeedbackSetPoint)
             controlWidget.zeroPosition.connect(self.manager.devices[name].zeroPosition)
             controlWidget.stopCommand.connect(self.manager.devices[name].stopCommand)
-            controlWidget.PIDControl.connect(self.manager.devices[name].setPIDControl)
-            controlWidget.KPChanged.connect(self.manager.devices[name].setKP)
-            controlWidget.KIChanged.connect(self.manager.devices[name].setKI)
-            controlWidget.KDChanged.connect(self.manager.devices[name].setKD)
+            
             controlWidget.proportionalOnMeasurementChanged.connect(self.manager.devices[name].setPoM)
             controlWidget.axisWindowClosed.connect(self.windowToTab)
-            self.checkTimer.timeout.connect(self.manager.devices[name].checkConnection)
+            self.checkTimer.timeout.connect(self.manager.devices[name].check_connections)
             self.running.connect(self.manager.devices[name].setRunning)
             self.manager.devices[name].updateRunningIndicator.connect(controlWidget.setRunningIndicator)
             self.manager.controlTableModels[name].controlChannelNameChanged.connect(controlWidget.setTitle)
             if channel == 0:
+                controlWidget.enable.connect(self.manager.devices[name].set_enable_C1)
+                controlWidget.PIDControl.connect(self.manager.devices[name].set_PID_control_C1)
+                controlWidget.KPChanged.connect(self.manager.devices[name].set_KP_C1)
+                controlWidget.KIChanged.connect(self.manager.devices[name].set_KI_C1)
+                controlWidget.KDChanged.connect(self.manager.devices[name].set_KD_C1)
                 self.updateTimer.timeout.connect(self.manager.devices[name].updateControlPanelC1)
                 self.manager.devices[name].updateLimitIndicatorC1.connect(controlWidget.setLimitIndicator)
                 self.manager.devices[name].updateConnectionIndicatorC1.connect(controlWidget.setConnectedIndicator)
@@ -53,6 +54,11 @@ class ControlUtilities:
                 self.manager.devices[name].updatePositionProcessVariableC1.connect(controlWidget.setPositionProcessVariable)
                 self.manager.devices[name].updateFeedbackProcessVariableC1.connect(controlWidget.setFeedbackProcessVariable)
             elif channel == 1:
+                controlWidget.enable.connect(self.manager.devices[name].set_enable_C2)
+                controlWidget.PIDControl.connect(self.manager.devices[name].set_PID_control_C2)
+                controlWidget.KPChanged.connect(self.manager.devices[name].set_KP_C2)
+                controlWidget.KIChanged.connect(self.manager.devices[name].set_KI_C2)
+                controlWidget.KDChanged.connect(self.manager.devices[name].set_KD_C2)
                 self.updateTimer.timeout.connect(self.manager.devices[name].updateControlPanelC2)
                 self.manager.devices[name].updateLimitIndicatorC2.connect(controlWidget.setLimitIndicator)
                 self.manager.devices[name].updateConnectionIndicatorC2.connect(controlWidget.setConnectedIndicator)
@@ -64,7 +70,7 @@ class ControlUtilities:
 
             # Set the configuration.
             controlWidget.setConfiguration(configuration=self.manager.configuration)
-            self.manager.devices[name].checkConnection()
+            self.manager.devices[name].check_connections()
             position = self.manager.configuration["devices"][name]["control"][channel]["settings"]["primaryProcessVariable"]
             channelString = "C" + str(channel+1)
             self.manager.devices[name].setPosition(channelString, position)
