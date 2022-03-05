@@ -19,24 +19,14 @@ class ControlUtilities:
             controlWidget = LinearAxis(controlID)
         
             # Connections.
-            controlWidget.secondarySetPointChanged.connect(self.manager.devices[name].setSpeed)
-            controlWidget.positiveJogEnabled.connect(self.manager.devices[name].jogPositiveOn)
-            controlWidget.positiveJogDisabled.connect(self.manager.devices[name].jogPositiveOff)
-            controlWidget.negativeJogEnabled.connect(self.manager.devices[name].jogNegativeOn)
-            controlWidget.negativeJogDisabled.connect(self.manager.devices[name].jogNegativeOff)
             controlWidget.primaryLeftLimitChanged.connect(self.manager.devices[name].updatePositionLeftLimit)
             controlWidget.primaryRightLimitChanged.connect(self.manager.devices[name].updatePositionRightLimit)
-            controlWidget.primarySetPointChanged.connect(self.manager.devices[name].moveToPosition)
             controlWidget.feedbackLeftLimitChanged.connect(self.manager.devices[name].updateFeedbackLeftLimit)
             controlWidget.feedbackRightLimitChanged.connect(self.manager.devices[name].updateFeedbackRightLimit)
-            controlWidget.feedbackSetPointChanged.connect(self.manager.devices[name].setFeedbackSetPoint)
-            controlWidget.zeroPosition.connect(self.manager.devices[name].zeroPosition)
-            controlWidget.stopCommand.connect(self.manager.devices[name].stopCommand)
             
-            controlWidget.proportionalOnMeasurementChanged.connect(self.manager.devices[name].setPoM)
             controlWidget.axisWindowClosed.connect(self.windowToTab)
             self.checkTimer.timeout.connect(self.manager.devices[name].check_connections)
-            self.running.connect(self.manager.devices[name].setRunning)
+            self.running.connect(self.manager.devices[name].set_running)
             self.manager.devices[name].updateRunningIndicator.connect(controlWidget.setRunningIndicator)
             self.manager.controlTableModels[name].controlChannelNameChanged.connect(controlWidget.setTitle)
             if channel == 0:
@@ -45,6 +35,17 @@ class ControlUtilities:
                 controlWidget.KPChanged.connect(self.manager.devices[name].set_KP_C1)
                 controlWidget.KIChanged.connect(self.manager.devices[name].set_KI_C1)
                 controlWidget.KDChanged.connect(self.manager.devices[name].set_KD_C1)
+                controlWidget.proportionalOnMeasurementChanged.connect(self.manager.devices[name].set_pom_C1)
+                controlWidget.secondarySetPointChanged.connect(self.manager.devices[name].set_speed_C1)
+                controlWidget.positiveJogEnabled.connect(self.manager.devices[name].jog_positive_on_C1)
+                controlWidget.positiveJogDisabled.connect(self.manager.devices[name].jog_positive_off_C1)
+                controlWidget.negativeJogEnabled.connect(self.manager.devices[name].jog_negative_on_C1)
+                controlWidget.negativeJogDisabled.connect(self.manager.devices[name].jog_negative_off_C1)
+                controlWidget.feedbackSetPointChanged.connect(self.manager.devices[name].set_feedback_setpoint_C1)
+                controlWidget.primarySetPointChanged.connect(self.manager.devices[name].move_to_position_C1)
+                controlWidget.stopCommand.connect(self.manager.devices[name].stop_command_C1)
+                controlWidget.zeroPosition.connect(self.manager.devices[name].zero_position_C1)
+
                 self.updateTimer.timeout.connect(self.manager.devices[name].updateControlPanelC1)
                 self.manager.devices[name].updateLimitIndicatorC1.connect(controlWidget.setLimitIndicator)
                 self.manager.devices[name].updateConnectionIndicatorC1.connect(controlWidget.setConnectedIndicator)
@@ -59,6 +60,17 @@ class ControlUtilities:
                 controlWidget.KPChanged.connect(self.manager.devices[name].set_KP_C2)
                 controlWidget.KIChanged.connect(self.manager.devices[name].set_KI_C2)
                 controlWidget.KDChanged.connect(self.manager.devices[name].set_KD_C2)
+                controlWidget.proportionalOnMeasurementChanged.connect(self.manager.devices[name].set_pom_C2)
+                controlWidget.secondarySetPointChanged.connect(self.manager.devices[name].set_speed_C2)
+                controlWidget.positiveJogEnabled.connect(self.manager.devices[name].jog_positive_on_C2)
+                controlWidget.positiveJogDisabled.connect(self.manager.devices[name].jog_positive_off_C2)
+                controlWidget.negativeJogEnabled.connect(self.manager.devices[name].jog_negative_on_C2)
+                controlWidget.negativeJogDisabled.connect(self.manager.devices[name].jog_negative_off_C2)
+                controlWidget.feedbackSetPointChanged.connect(self.manager.devices[name].set_feedback_setpoint_C2)
+                controlWidget.primarySetPointChanged.connect(self.manager.devices[name].move_to_position_C2)
+                controlWidget.stopCommand.connect(self.manager.devices[name].stop_command_C2)
+                controlWidget.zeroPosition.connect(self.manager.devices[name].zero_position_C2)
+
                 self.updateTimer.timeout.connect(self.manager.devices[name].updateControlPanelC2)
                 self.manager.devices[name].updateLimitIndicatorC2.connect(controlWidget.setLimitIndicator)
                 self.manager.devices[name].updateConnectionIndicatorC2.connect(controlWidget.setConnectedIndicator)
@@ -68,12 +80,14 @@ class ControlUtilities:
                 self.manager.devices[name].updatePositionProcessVariableC2.connect(controlWidget.setPositionProcessVariable)
                 self.manager.devices[name].updateFeedbackProcessVariableC2.connect(controlWidget.setFeedbackProcessVariable)
 
-            # Set the configuration.
+            # Set the configuration and initial position.
             controlWidget.setConfiguration(configuration=self.manager.configuration)
             self.manager.devices[name].check_connections()
             position = self.manager.configuration["devices"][name]["control"][channel]["settings"]["primaryProcessVariable"]
-            channelString = "C" + str(channel+1)
-            self.manager.devices[name].setPosition(channelString, position)
+            if channel == 0:
+                self.manager.devices[name].set_position_C1(position)
+            elif channel == 1:
+                self.manager.devices[name].set_position_C2(position)
         else:
             controlWidget = QWidget()
 
@@ -103,8 +117,10 @@ class ControlUtilities:
         feedbackChannelList = self.manager.feedbackChannelLists[device]
         feedbackIndex = feedbackChannelList.index(selectedFeedbackChannel)
         self.manager.configuration["devices"][device]["control"][channel]["settings"]["feedbackIndex"] = feedbackIndex
-        control = "C" + str(channel+1)
-        self.manager.devices[device].setFeedbackChannels(control, feedbackIndex)
+        if channel == 0:
+            self.manager.devices[device].set_feedback_channel_C1(feedbackIndex)
+        elif channel == 1:
+            self.manager.devices[device].set_feedback_channel_C2(feedbackIndex)
 
     @Slot(str, int, str)
     def changeControlWidget(self, device, channel, newWidget):

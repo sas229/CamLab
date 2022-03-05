@@ -258,7 +258,7 @@ class Manager(QObject):
                 addresses.append(address)
                 dataTypes.append(dt)
             controlRate = self.configuration["global"]["controlRate"]
-            self.devices[name].setAcquisition(channels, addresses, dataTypes, slopes, offsets, autozero, controlRate)
+            self.devices[name].set_acquisition_variables(channels, addresses, dataTypes, slopes, offsets, autozero, controlRate)
             log.info("Acquisition settings set for device named " + name + ".")
 
     def setDeviceFeedbackChannels(self):
@@ -268,15 +268,18 @@ class Manager(QObject):
 
         # For each device set the acquisition array and execute in a separate thread.
         for device in enabledDevices:
-            deviceName = device["name"]
+            name = device["name"]
 
             # Control channels.
-            enabledControls = self.controlTableModels[deviceName].enabledControls()
+            enabledControls = self.controlTableModels[name].enabledControls()
             for control in enabledControls:
                 channel = int(control["channel"][-1])-1
-                feedbackIndex = self.configuration["devices"][deviceName]["control"][channel]["settings"]["feedbackIndex"]
-                self.devices[deviceName].setFeedbackChannels(control["channel"], feedbackIndex)
-                log.info("Feedback channel set to " + str(control["feedback"]) + " for control channel " + control["channel"] + " on " + deviceName + ".")
+                feedbackIndex = self.configuration["devices"][name]["control"][channel]["settings"]["feedbackIndex"]
+                if channel == 0:
+                    self.devices[name].set_feedback_channel_C1(feedbackIndex)
+                elif channel == 1:
+                    self.devices[name].set_feedback_channel_C2(feedbackIndex)
+                log.info("Feedback channel set to {feedback} for control channel {channel} on {device}.".format(feedback=control["feedback"], channel=control["channel"], device=name))
 
     @Slot(str, int, int, bool)
     def manageDeviceThreads(self, name, id, connection, connect):
@@ -292,7 +295,7 @@ class Manager(QObject):
             log.info("Device thread started for device named " + name + ".")
 
             # Connections.
-            self.timing.controlDevices.connect(self.devices[name].readValues)
+            self.timing.controlDevices.connect(self.devices[name].process)
             self.assembly.autozeroDevices.connect(self.devices[name].recalculateOffsets)
             self.devices[name].emitData.connect(self.assembly.updateNewData)
             self.devices[name].updateOffsets.connect(self.updateDeviceOffsets)

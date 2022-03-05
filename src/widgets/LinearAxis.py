@@ -13,37 +13,37 @@ import logging
 log = logging.getLogger(__name__)
 
 class LinearAxis(QWidget):
-    primarySetPointChanged = Signal(str, float)
+    primarySetPointChanged = Signal(float)
     primaryLeftLimitChanged = Signal(str, float)
     primaryRightLimitChanged = Signal(str, float)
     primaryMinimumRangeChanged = Signal(str, float)
     primaryMaximumRangeChanged = Signal(str, float)
     primaryLeftLimitStatus = Signal(str, bool)
     primaryRightLimitStatus = Signal(str, bool)
-    feedbackSetPointChanged = Signal(str, float)
+    feedbackSetPointChanged = Signal(float)
     feedbackLeftLimitChanged = Signal(str, float)
     feedbackRightLimitChanged = Signal(str, float)
     feedbackMinimumRangeChanged = Signal(str, float)
     feedbackMaximumRangeChanged = Signal(str, float)
     feedbackLeftLimitStatus = Signal(str, bool)
     feedbackRightLimitStatus = Signal(str, bool)
-    secondarySetPointChanged = Signal(str, float)
+    secondarySetPointChanged = Signal(float)
     KPChanged = Signal(float)
     KIChanged = Signal(float)
     KDChanged = Signal(float)
-    proportionalOnMeasurementChanged = Signal(str, bool)
-    positiveJogEnabled = Signal(str)
-    negativeJogEnabled = Signal(str) 
-    positiveJogDisabled = Signal(str)
-    negativeJogDisabled = Signal(str) 
+    proportionalOnMeasurementChanged = Signal(bool)
+    positiveJogEnabled = Signal()
+    negativeJogEnabled = Signal() 
+    positiveJogDisabled = Signal()
+    negativeJogDisabled = Signal() 
     enable = Signal(bool)
     PIDControl = Signal(bool)
-    zeroPosition = Signal(str)
+    zeroPosition = Signal()
     primaryUnitChanged = Signal(str)
     feedbackUnitChanged = Signal(str)
     secondaryUnitChanged = Signal(str)
     connectedChanged = Signal(str)
-    stopCommand = Signal(str)
+    stopCommand = Signal()
     axisWindowClosed = Signal(QWidget)
 
     def __init__(self, ID, *args, **kwargs):
@@ -180,12 +180,12 @@ class LinearAxis(QWidget):
 
     @Slot()
     def emitStopCommand(self):
-        self.stopCommand.emit(self.channel)
+        self.stopCommand.emit()
         self.globalControls.PIDControlButton.setChecked(False)
 
     @Slot()
     def emitZeroPosition(self):
-        self.zeroPosition.emit(self.channel)
+        self.zeroPosition.emit()
         
     @Slot()
     def emitEnable(self):
@@ -225,28 +225,28 @@ class LinearAxis(QWidget):
     @Slot()
     def emitSecondarySetPointChanged(self):
         value = float(self.jog.speedLineEdit.text())
-        self.secondarySetPointChanged.emit(self.channel, value)
+        self.secondarySetPointChanged.emit(value)
         self.configuration["devices"][self.device]["control"][self.control]["settings"]["secondarySetPoint"] = round(self.jog.getSpeed(), 3)
 
     @Slot()
     def emitPositiveJogEnabled(self):
-        self.positiveJogEnabled.emit(self.channel)
+        self.positiveJogEnabled.emit()
     
     @Slot()
     def emitNegativeJogEnabled(self):
-        self.negativeJogEnabled.emit(self.channel)
+        self.negativeJogEnabled.emit()
     
     @Slot()
     def emitPositiveJogDisabled(self):
-        self.positiveJogDisabled.emit(self.channel)
+        self.positiveJogDisabled.emit()
         
     @Slot()
     def emitNegativeJogDisabled(self):
-        self.negativeJogDisabled.emit(self.channel)
+        self.negativeJogDisabled.emit()
     
     @Slot()
     def emitProportionalOnMeasurement(self, value):
-        self.proportionalOnMeasurementChanged.emit(self.channel, value)
+        self.proportionalOnMeasurementChanged.emit(value)
         self.configuration["devices"][self.device]["control"][self.control]["settings"]["proportionalOnMeasurement"] = self.PID.getProportionalOnMeasurement()
     
     @Slot()
@@ -319,12 +319,12 @@ class LinearAxis(QWidget):
     @Slot()
     def updatePositionSetPointLineEdit(self, value):
         self.positionDemand.setPointLineEdit.setText("{value:.2f}".format(value=value))
-        self.primarySetPointChanged.emit(self.channel, value)
+        self.primarySetPointChanged.emit(value)
 
     @Slot()
     def updateFeedbackSetPointLineEdit(self, value):
         self.feedbackDemand.setPointLineEdit.setText("{value:.2f}".format(value=value))
-        self.feedbackSetPointChanged.emit(self.channel, value)
+        self.feedbackSetPointChanged.emit(value)
 
     @Slot()
     def emitPrimarySetPointChanged(self):
@@ -333,7 +333,7 @@ class LinearAxis(QWidget):
         value = min(value, self.positionStatus.getRightLimit())
         self.positionStatus.setSetPoint(value)
         self.positionDemand.setPointLineEdit.setText("{value:.2f}".format(value=value))
-        self.primarySetPointChanged.emit(self.channel, value)
+        self.primarySetPointChanged.emit(value)
 
     @Slot()
     def emitFeedbackSetPointChanged(self):
@@ -342,7 +342,7 @@ class LinearAxis(QWidget):
         value = min(value, self.feedbackStatus.getRightLimit())
         self.feedbackStatus.setSetPoint(value)
         self.feedbackDemand.setPointLineEdit.setText("{value:.2f}".format(value=value))
-        self.feedbackSetPointChanged.emit(self.channel, value)
+        self.feedbackSetPointChanged.emit(value)
 
     @Slot()
     def setPositionSetPoint(self, value):
