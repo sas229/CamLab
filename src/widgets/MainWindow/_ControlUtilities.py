@@ -18,12 +18,7 @@ class ControlUtilities:
         if control == "Linear" and controlType == "Digital":
             controlWidget = LinearAxis(controlID)
         
-            # Connections.
-            controlWidget.primaryLeftLimitChanged.connect(self.manager.devices[name].updatePositionLeftLimit)
-            controlWidget.primaryRightLimitChanged.connect(self.manager.devices[name].updatePositionRightLimit)
-            controlWidget.feedbackLeftLimitChanged.connect(self.manager.devices[name].updateFeedbackLeftLimit)
-            controlWidget.feedbackRightLimitChanged.connect(self.manager.devices[name].updateFeedbackRightLimit)
-            
+            # Connections.          
             controlWidget.axisWindowClosed.connect(self.windowToTab)
             self.checkTimer.timeout.connect(self.manager.devices[name].check_connections)
             self.running.connect(self.manager.devices[name].set_running)
@@ -45,7 +40,10 @@ class ControlUtilities:
                 controlWidget.primarySetPointChanged.connect(self.manager.devices[name].move_to_position_C1)
                 controlWidget.stopCommand.connect(self.manager.devices[name].stop_command_C1)
                 controlWidget.zeroPosition.connect(self.manager.devices[name].zero_position_C1)
-
+                controlWidget.primaryLeftLimitChanged.connect(self.manager.devices[name].update_position_left_limit_C1)
+                controlWidget.primaryRightLimitChanged.connect(self.manager.devices[name].update_position_right_limit_C1)
+                controlWidget.feedbackLeftLimitChanged.connect(self.manager.devices[name].update_feedback_left_limit_C1)
+                controlWidget.feedbackRightLimitChanged.connect(self.manager.devices[name].update_feedback_right_limit_C1)
                 self.updateTimer.timeout.connect(self.manager.devices[name].updateControlPanelC1)
                 self.manager.devices[name].updateLimitIndicatorC1.connect(controlWidget.setLimitIndicator)
                 self.manager.devices[name].updateConnectionIndicatorC1.connect(controlWidget.setConnectedIndicator)
@@ -70,7 +68,10 @@ class ControlUtilities:
                 controlWidget.primarySetPointChanged.connect(self.manager.devices[name].move_to_position_C2)
                 controlWidget.stopCommand.connect(self.manager.devices[name].stop_command_C2)
                 controlWidget.zeroPosition.connect(self.manager.devices[name].zero_position_C2)
-
+                controlWidget.primaryLeftLimitChanged.connect(self.manager.devices[name].update_position_left_limit_C2)
+                controlWidget.primaryRightLimitChanged.connect(self.manager.devices[name].update_position_right_limit_C2)
+                controlWidget.feedbackLeftLimitChanged.connect(self.manager.devices[name].update_feedback_left_limit_C2)
+                controlWidget.feedbackRightLimitChanged.connect(self.manager.devices[name].update_feedback_right_limit_C2)
                 self.updateTimer.timeout.connect(self.manager.devices[name].updateControlPanelC2)
                 self.manager.devices[name].updateLimitIndicatorC2.connect(controlWidget.setLimitIndicator)
                 self.manager.devices[name].updateConnectionIndicatorC2.connect(controlWidget.setConnectedIndicator)
@@ -84,10 +85,13 @@ class ControlUtilities:
             controlWidget.setConfiguration(configuration=self.manager.configuration)
             self.manager.devices[name].check_connections()
             position = self.manager.configuration["devices"][name]["control"][channel]["settings"]["primaryProcessVariable"]
+            speed = self.manager.configuration["devices"][name]["control"][channel]["settings"]["secondarySetPoint"]
             if channel == 0:
                 self.manager.devices[name].set_position_C1(position)
+                self.manager.devices[name].set_speed_C1(speed)
             elif channel == 1:
                 self.manager.devices[name].set_position_C2(position)
+                self.manager.devices[name].set_speed_C2(speed)
         else:
             controlWidget = QWidget()
 

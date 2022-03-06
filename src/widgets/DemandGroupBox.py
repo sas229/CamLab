@@ -44,12 +44,9 @@ class DemandGroupBox(QGroupBox):
 
     def setUnit(self, unit):
         self.unit = unit
-        self.setPointLabel.setText("SP " + self.unit)
-        self.processVariableLabel.setText("PV " + self.unit)
+        self.setPointLabel.setText("SP ({unit})".format(unit=unit))
+        self.processVariableLabel.setText("PV ({unit})".format(unit=unit))
         self.unitChanged.emit()
-
-    def getUnit(self):
-        return self.unit
 
     def setSetPoint(self, value):
         self.setPointLineEdit.setText("{value:.2f}".format(value=value))

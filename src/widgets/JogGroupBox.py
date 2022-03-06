@@ -19,7 +19,6 @@ class JogGroupBox(QGroupBox):
         self.speedLabel = QLabel("Speed")
         self.speedLineEdit = QLineEdit()
         self.speedLineEdit.setValidator(self.doubleValidator)
-        self.speedLineEdit.setText("1.00")
         self.jogDirectionLabel = QLabel("Direction")
         self.jogPlusButton = QPushButton("+")
         self.jogMinusButton = QPushButton("-")
@@ -41,18 +40,17 @@ class JogGroupBox(QGroupBox):
         self.setFixedHeight(200)
         self.setFixedWidth(150)
 
-        # # Connections.
-        # self.speedLineEdit.returnPressed.connect(self.setSpeed)
+        # Connections.
+        self.speedLineEdit.returnPressed.connect(self.setSpeed)
 
     def setUnit(self, unit):
-        self.unit = unit
-        self.speedLabel.setText("Speed " + str(self.unit))
+        self.speedLabel.setText("Speed ({unit})".format(unit=unit))
         self.speedUnitChanged.emit()
-    
-    def getUnit(self):
-        return self.unit
+        self.unit = unit
 
-    def setSpeed(self, value):
+    def setSpeed(self, value=None):
+        if value == None:
+            value = self.getSpeed()
         self.speedLineEdit.setText("{value:.3f}".format(value=value))
 
     def getSpeed(self):

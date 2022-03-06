@@ -66,7 +66,7 @@ class GlobalSettingsGroupBox(QGroupBox):
         self.setPathLayout = QHBoxLayout()
         self.setPathLayout.addWidget(self.setPathButton)
         self.setPathLayout.addWidget(self.setPathAddressLabel, 4)
-        self.setPathLayout.addWidget(self.setFilenameLineEdit)
+        self.setPathLayout.addWidget(self.setFilenameLineEdit, 2)
 
         # Assemble rates layout.
         self.ratesLayout = QGridLayout()

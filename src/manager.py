@@ -67,21 +67,25 @@ class Manager(QObject):
             "primaryRightLimit": 80.00,
             "primarySetPoint": 0.00,
             "primaryProcessVariable": 0.00,
-            "primaryUnit": "(mm)",
+            "primaryUnit": "mm",
             "secondarySetPoint": 3.000,
-            "secondaryUnit": "(mm/s)",
+            "secondaryUnit": "mm/s",
             "feedbackMinimum": -20.00,
             "feedbackMaximum": 100.00,
             "feedbackLeftLimit": -10.00,
             "feedbackRightLimit": 90.00,
             "feedbackSetPoint": 0.00,
             "feedbackProcessVariable": 0.00,
-            "feedbackUnit": "(N)",
+            "feedbackUnit": "N",
             "feedbackIndex": 0,
             "KP": 0.00,
             "KI": 0.00,
             "KD": 0.00,
-            "proportionalOnMeasurement": False
+            "proportionalOnMeasurement": False,
+            "maxRPM": 4000,
+            "CPR": 6400,
+            "PPR": 32,
+            "ratio": 5
         }
         self.defaultControlTable = [
             {"channel": "C1", "name": "C1", "enable": False, "type": "N/A", "control": "N/A", "feedback": "N/A", "settings": defaultControlSettings},
@@ -285,7 +289,6 @@ class Manager(QObject):
     def manageDeviceThreads(self, name, id, connection, connect):
         # Create device instance and move to thread if it doesn't already exist.
         if connect == True and name not in self.devices:
-            print("Adding device...")
             self.devices[name] = Device(name, id, connection)
             log.info("Device instance created for device named " + name + ".")
             self.deviceThreads[name] = QThread()
@@ -788,7 +791,6 @@ class Manager(QObject):
         else:
             self.feedbackChannelLists[name] = copy.deepcopy(feedbackChannelList)
         log.info("Feedback channel list created.")
-        print(feedbackChannelList)
         return feedbackChannelList
 
     def updateFeedbackComboBox(self, deviceName, row):
