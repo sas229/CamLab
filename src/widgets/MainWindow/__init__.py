@@ -50,8 +50,8 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.managerThread.start()
 
         # Set position.
-        x = self.manager.configuration["configurationWindow"]["x"]
-        y = self.manager.configuration["configurationWindow"]["y"]
+        x = self.manager.configuration["mainWindow"]["x"]
+        y = self.manager.configuration["mainWindow"]["y"]
         self.move(x, y)
 
         # Extract the configuration to generate initial UI setup.
@@ -100,8 +100,6 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.toolbar.run.connect(self.start)
         self.toolbar.run.connect(self.statusGroupBox.setInitialTimeDate)
         self.toolbar.addPlotButton.triggered.connect(self.addPlot)
-        # self.toolbar.controlPanelButton.triggered.connect(self.openControlPanel)
-        # self.toolbar.cameraButton.triggered.connect(self.openCamera)
         self.toolbar.extensionButton.triggered.connect(self.openExtension)
         self.toolbar.refreshButton.triggered.connect(self.manager.refreshDevices)
         self.toolbar.loadConfiguration.connect(self.manager.loadConfiguration)
@@ -155,8 +153,8 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
 
     def moveEvent(self, event):
         position = self.geometry()
-        self.configuration["configurationWindow"]["x"] = int(position.x())
-        self.configuration["configurationWindow"]["y"] = int(position.y())
+        self.configuration["mainWindow"]["x"] = int(position.x())
+        self.configuration["mainWindow"]["y"] = int(position.y())
         return
 
     @Slot()
@@ -181,16 +179,6 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
                 self.tabs.setTabVisible(index, True)
             if self.tabs.tabText(index) == "Sequences":
                 self.tabs.setTabVisible(index, True)
-
-    # @Slot()
-    # def openControlPanel(self):
-    #     self.controlWindow.show()
-    #     self.configuration["controlWindow"]["visible"] = True
-    #     log.info("Control panel opened.")
-
-    # @Slot()
-    # def openCamera(self):
-    #     log.info("Camera opened.")
 
     @Slot()
     def openExtension(self):
@@ -234,8 +222,6 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
 
         # Update other GUI items.
         self.configurationTab.globalSettingsGroupBox.updateUI(self.configuration)
-        # self.controlWindow.updateUI(self.configuration)
-        log.info("Updated UI.")
 
     def closeEvent(self, event):
         # Close all plots.

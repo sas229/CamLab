@@ -21,8 +21,7 @@ if __name__ == '__main__':
     # Execute main window.
     main = MainWindow()
     main.show()
-    configurationPath = main.manager.configurationPath
-    main.manager.loadConfiguration(configurationPath)
+    main.setTheme()
     log.info("Timer instantiated.")
     sys.exit(app.exec())
 

@@ -363,6 +363,7 @@ class Manager(QObject):
         USB connections are prioritised over Ethernet and WiFi connections to minimise jitter."""
 
         # Boolean to indicate that the device list is refreshing.
+        self.clearConfiguration()
         self.refreshing = True
 
         # Clear all tables and re-load the current configuration.
@@ -511,80 +512,74 @@ class Manager(QObject):
             "path": "/home/sam/Documents",
             "filename": "junk"
             }
-        self.configuration["configurationWindow"] = {
+        self.configuration["mainWindow"] = {
             "x": 0,
             "y": 0
-        }
-        self.configuration["controlWindow"] = {
-            "x": 0,
-            "y": 0,
-            "width": 1200,
-            "height": 600,
-            "visible": False
         }
         self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
     def loadConfiguration(self, loadConfigurationPath):
-        # Clear the configuration.
-        self.clearConfiguration()
-        time.sleep(1)
+        if loadConfigurationPath != "":
+            # Clear the device list and configuration tabs.
+            self.deviceTableModel.clearData()
+            self.clearDeviceConfigurationTabs.emit()
+            
+            # # Clear all underlying models and tables.
+            self.configuration = {}
+            self.acquisitionTableModels = {}
+            self.acquisitionTables = {}
+            self.controlTableModels = {}
+            self.controlTables = {}
 
-        # Next clear the device list and configuration tabs.
-        self.deviceTableModel.clearData()
-        self.clearDeviceConfigurationTabs.emit()
-        
-        # # Clear all underlying models and tables.
-        self.configuration = {}
-        self.acquisitionTableModels = {}
-        self.acquisitionTables = {}
-        self.controlTableModels = {}
-        self.controlTables = {}
-
-        # Load configuration.
-        if not loadConfigurationPath is None:
-            try:
-                log.info("Loading configuration from " + loadConfigurationPath + " and saving location to QSettings.")
-                with open(loadConfigurationPath, "r") as file:
-                    self.configuration = ruamel.yaml.load(file, Loader=ruamel.yaml.Loader)
-                    log.info("Configuration file parsed.")
-                    self.configurationPath = loadConfigurationPath
-                    self.configurationChanged.emit(self.configuration)
-                    self.settings.setValue("configurationPath", loadConfigurationPath)
-                    self.loadDevicesFromConfiguration()
-                    # self.setListFeedbackCombobox()
-                    if "plots" in self.configuration:
-                        self.existingPlotsFound.emit()
-            except FileNotFoundError:
-                log.warning("Previous configuration file not found.")
-                self.initialiseDefaultConfiguration()
+            # Load configuration.
+            if not loadConfigurationPath is None:
+                try:
+                    log.info("Loading configuration from " + loadConfigurationPath + " and saving location to QSettings.")
+                    with open(loadConfigurationPath, "r") as file:
+                        self.configuration = ruamel.yaml.load(file, Loader=ruamel.yaml.Loader)
+                        log.info("Configuration file parsed.")
+                        self.configurationPath = loadConfigurationPath
+                        self.configurationChanged.emit(self.configuration)
+                        self.settings.setValue("configurationPath", loadConfigurationPath)
+                        self.loadDevicesFromConfiguration()
+                        if "plots" in self.configuration:
+                            self.existingPlotsFound.emit()
+                except FileNotFoundError:
+                    log.warning("Previous configuration file not found.")
+                    self.initialiseDefaultConfiguration()
+        else:
+            log.info("Load configuration cancelled.")
 
     @Slot(str)
     def saveConfiguration(self, saveConfigurationPath):
-        # Make deep copies of the configuration and filter out devices that are not enabled in the device table.
-        configuration = copy.deepcopy(self.configuration)
-        if "devices" in configuration:
-            devices = copy.deepcopy(self.configuration["devices"])
-            enabledDevices = self.deviceTableModel.enabledDevices()
-            enabledDeviceList = []
-            for device in enabledDevices:
-                enabledDeviceList.append(device["name"])
-            for device in configuration["devices"]:
-                if device not in enabledDeviceList:
-                    devices.pop(device)
-            configuration["devices"] = devices
+        if saveConfigurationPath != "":
+            # Make deep copies of the configuration and filter out devices that are not enabled in the device table.
+            configuration = copy.deepcopy(self.configuration)
+            if "devices" in configuration:
+                devices = copy.deepcopy(self.configuration["devices"])
+                enabledDevices = self.deviceTableModel.enabledDevices()
+                enabledDeviceList = []
+                for device in enabledDevices:
+                    enabledDeviceList.append(device["name"])
+                for device in configuration["devices"]:
+                    if device not in enabledDeviceList:
+                        devices.pop(device)
+                configuration["devices"] = devices
 
-        if "plots" in configuration:
-           for plotNumber in configuration["plots"]:
-               for channel in configuration["plots"][plotNumber]["channels"]:
-                   channel['value'] = 0.00
+            if "plots" in configuration:
+                for plotNumber in configuration["plots"]:
+                    for channel in configuration["plots"][plotNumber]["channels"]:
+                        channel['value'] = 0.00
 
-        # Save the yaml file and its path to QSettings.
-        with open(saveConfigurationPath, "w") as file:
-            yaml = ruamel.yaml.YAML()
-            yaml.dump(configuration, file)
-        self.settings.setValue("configurationPath", saveConfigurationPath)
-        log.info("Saved configuration saved at " + saveConfigurationPath)
+            # Save the yaml file and its path to QSettings.
+            with open(saveConfigurationPath, "w") as file:
+                yaml = ruamel.yaml.YAML()
+                yaml.dump(configuration, file)
+            self.settings.setValue("configurationPath", saveConfigurationPath)
+            log.info("Saved configuration saved at " + saveConfigurationPath)
+        else:
+            log.info("Save configuration cancelled.")
 
     @Slot()
     def clearConfiguration(self):
