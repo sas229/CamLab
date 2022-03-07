@@ -19,3 +19,4 @@ from .TabInterface import TabInterface
 from .ConfigurationTab import ConfigurationTab
 from .SequencesTab import SequencesTab
 from .StatusTab import StatusTab
+from .WaitingIndicator import WaitingIndicator

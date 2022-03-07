@@ -29,6 +29,7 @@ class Manager(QObject):
     plotWindowChannelsUpdated = Signal()
     existingPlotsFound = Signal()
     outputText = Signal(str)
+    finishedRefreshingDevices = Signal()
     # updateFeedbackChannelList = Signal(str, list)
 
     def __init__(self):
@@ -97,7 +98,7 @@ class Manager(QObject):
         
         # Instantiate the model for the device list and connect to device thread manager.   
         self.deviceTableModel = DeviceTableModel()
-        self.deviceTableModel.deviceConnectStatusUpdated.connect(self.manageDeviceThreads)
+        self.deviceTableModel.deviceConnectStatusUpdated.connect(self.toggleDeviceConnection)
 
         # Create assembly thread.
         self.assembly = Assembly()
@@ -226,8 +227,8 @@ class Manager(QObject):
         header = byeline + testline + slopeline + offsetline + channelline + nameline
         return header
 
-    def setAcquisitionSettings(self):
-        log.info("Setting acquisition for all devices.")
+    def initialiseDeviceSettings(self):
+        log.info("Initialising setup for enabled devices.")
         # Get a list of enabled devices.
         enabledDevices = self.deviceTableModel.enabledDevices()
 
@@ -248,9 +249,10 @@ class Manager(QObject):
         header = self.createHeader()
         self.assembly.writeHeader(header)
         
-        # For each device set the acquisition array and execute in a separate thread.
+        # For each device set initialise the device and set the acquisition array.
         for device in enabledDevices:
             name = device["name"]
+            self.devices[name].initialise()
             
             # Generate addresses for acqusition and set acquisition in device.
             channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[name].acquisitionSettings()
@@ -263,7 +265,7 @@ class Manager(QObject):
                 dataTypes.append(dt)
             controlRate = self.configuration["global"]["controlRate"]
             self.devices[name].set_acquisition_variables(channels, addresses, dataTypes, slopes, offsets, autozero, controlRate)
-            log.info("Acquisition settings set for device named " + name + ".")
+            log.info("Settings initialised for device named " + name + ".")
 
     def setDeviceFeedbackChannels(self):
         log.info("Setting feedback channels for all devices.")
@@ -286,9 +288,9 @@ class Manager(QObject):
                 log.info("Feedback channel set to {feedback} for control channel {channel} on {device}.".format(feedback=control["feedback"], channel=control["channel"], device=name))
 
     @Slot(str, int, int, bool)
-    def manageDeviceThreads(self, name, id, connection, connect):
+    def createDeviceThread(self, name, id, connection, connect):
         # Create device instance and move to thread if it doesn't already exist.
-        if connect == True and name not in self.devices:
+        if name not in self.devices:
             self.devices[name] = Device(name, id, connection)
             log.info("Device instance created for device named " + name + ".")
             self.deviceThreads[name] = QThread()
@@ -297,29 +299,27 @@ class Manager(QObject):
             self.deviceThreads[name].start()
             log.info("Device thread started for device named " + name + ".")
 
+            # Emit signal.
+            self.deviceAdded.emit(name)
+            self.deviceToggled.emit(name, connect)
+
+    def toggleDeviceConnection(self, name, connect):
+        if connect == True:
             # Connections.
             self.timing.controlDevices.connect(self.devices[name].process)
             self.assembly.autozeroDevices.connect(self.devices[name].recalculateOffsets)
             self.devices[name].emitData.connect(self.assembly.updateNewData)
             self.devices[name].updateOffsets.connect(self.updateDeviceOffsets)
-            log.info(name + " attached to basic acquisition connections.")
-
-            # Emit signal.
-            self.deviceAdded.emit(name)
-            # self.deviceToggled.emit(name, connect)
-
-        elif connect == False:  
-            # Emit signal to remove device configuration tab.
             self.deviceToggled.emit(name, connect)
-
-            # Remove device.
-            # del self.devices[name]
-            self.devices.pop(name)
-            log.info("Device instance deleted for device named " + name + ".")
-            self.deviceThreads[name].quit()
-            # sleep(1.0)
-            self.deviceThreads.pop(name)
-            log.info("Device thread deleted for device named " + name + ".")
+            log.info("Basic signals connected to device {name}.".format(name=name))
+        elif connect == False:
+            # Disconnections.
+            self.timing.controlDevices.disconnect(self.devices[name].process)
+            self.assembly.autozeroDevices.disconnect(self.devices[name].recalculateOffsets)
+            self.devices[name].emitData.disconnect(self.assembly.updateNewData)
+            self.devices[name].updateOffsets.disconnect(self.updateDeviceOffsets)
+            self.deviceToggled.emit(name, connect)
+            log.info("Basic signals disconnected from device {name}.".format(name=name))
 
     def loadDevicesFromConfiguration(self):
         # Find all devices listed in the configuration file.
@@ -348,14 +348,11 @@ class Manager(QObject):
                     log.warning(e)
                 # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
                 self.deviceTableModel.appendRow(deviceInformation)
-                self.manageDeviceThreads(name=device, id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True)
+                self.createDeviceThread(name=device, id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True)
                 self.acquisitionTableModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
                 self.controlTableModels[name] = ControlTableModel(name, self.configuration["devices"][name]["control"])
                 self.feedbackChannelLists[name] = self.setFeedbackChannelList(name)
-                # self.addControlSettings(name)
-                # self.deviceAdded.emit(name)
             log.info("Configuration loaded.")
-        # self.deviceToggled.emit(name, connect)
         self.configurationChanged.emit(self.configuration)
 
     def findDevices(self):
@@ -380,6 +377,7 @@ class Manager(QObject):
 
         # Boolean to indicate that the device list has finished refreshing.
         self.refreshing = False
+        self.finishedRefreshingDevices.emit()
 
     def addLJDevices(self, mode):
         # Get a list of already existing devices.
@@ -448,10 +446,9 @@ class Manager(QObject):
                 self.feedbackChannelLists[name] = self.setFeedbackChannelList(name)
                 log.info("Data models instantiated for device.")
             
-                # Addd device to UI.
+                # Create device thread and add device to UI.
                 log.info("Adding device to UI.")
-                # self.addControlSettings(name)
-                # self.deviceAdded.emit(name)
+                self.createDeviceThread(name=name, id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False)
                 self.configurationChanged.emit(self.configuration)
         if mode == "USB":
             log.info("Found " + str(numDevices) + " USB device(s).")
@@ -480,7 +477,7 @@ class Manager(QObject):
     @Slot()
     def run(self):
         # Set acquisition settings.
-        self.setAcquisitionSettings()
+        self.initialiseDeviceSettings()
 
         # Set feedback channels.
         self.setDeviceFeedbackChannels()
@@ -597,7 +594,9 @@ class Manager(QObject):
         self.controlTableModels = {}
 
         # Initialise the basic default configuration.
+        currentDarkMode = copy.deepcopy(self.configuration["global"]["darkMode"])
         self.initialiseDefaultConfiguration()
+        self.configuration["global"]["darkMode"] = currentDarkMode
         self.configurationChanged.emit(self.configuration)
         log.info("Cleared configuration by loading defaults.") 
 

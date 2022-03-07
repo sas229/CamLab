@@ -98,19 +98,26 @@ class Device(QObject):
         self.position_right_limit_status_C2 = False
         self.max_rpm = 4000
 
-        #  Initialise.
+        # Load Lua failsafe script to turn off PWM.
         self.open_connection()
-        self.initialise_settings()
         self.load_lua_script()
-        self.check_limits()
-        self.disable_clock_0()
-        self.set_speed_limit()
+        self.close_connection()
 
         # PID instantiation.
         self.PID_C1 = PID()
         self.set_PID_tunings_C1()
         self.PID_C2 = PID()
         self.set_PID_tunings_C2()
+
+    @Slot()
+    def initialise(self):
+        #  Initialise device.
+        self.open_connection()
+        self.initialise_settings()
+        
+        self.check_limits()
+        self.disable_clock_0()
+        self.set_speed_limit()
 
     @Slot(str)
     def set_enable_C1(self, value):
@@ -1104,7 +1111,19 @@ class Device(QObject):
         try:
             self.handle = ljm.open(7, self.connection, self.id)
             self.name = ljm.eReadNameString(self.handle, "DEVICE_NAME_DEFAULT")
-            log.info("Connected to " + self.name + ".")
+            log.info("Connected to {name}.".format(name=self.name))
+        except ljm.LJMError:
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
+
+    def close_connection(self):
+        """Method to close the device connection."""
+        try:
+            self.handle = ljm.close(self.handle)
+            log.info("Disconnected from {name}.".format(name=self.name))
         except ljm.LJMError:
             ljme = sys.exc_info()[1]
             log.warning(ljme) 

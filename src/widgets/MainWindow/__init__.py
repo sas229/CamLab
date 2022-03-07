@@ -1,7 +1,7 @@
 import os
-from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QGridLayout
+from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QGridLayout, QDialog
 from PySide6.QtGui import QScreen
-from PySide6.QtCore import Signal, Slot, QThread, QTimer
+from PySide6.QtCore import Signal, Slot, QThread, QTimer, Qt
 from src.local_qt_material import apply_stylesheet, QtStyleTools
 from src.widgets.MainWindow._TabUtilities import TabUtilities
 from src.widgets.MainWindow._PlotUtilities import PlotUtilities
@@ -14,6 +14,7 @@ from src.widgets.ConfigurationTab import ConfigurationTab
 from src.widgets.SequencesTab import SequencesTab
 from src.widgets.StatusTab import StatusTab
 from src.widgets.StatusGroupBox import StatusGroupBox
+from src.dialogs import BusyDialog
 from src.log import init_log
 import logging
 from time import sleep
@@ -23,6 +24,7 @@ log = logging.getLogger(__name__)
 class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUtilities, QtStyleTools, QMainWindow):
     running = Signal(bool)
     renameWindow = Signal(str)
+    emitRefreshDevices = Signal()
     
     def __init__(self):
         super().__init__()
@@ -101,7 +103,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.toolbar.run.connect(self.statusGroupBox.setInitialTimeDate)
         self.toolbar.addPlotButton.triggered.connect(self.addPlot)
         self.toolbar.extensionButton.triggered.connect(self.openExtension)
-        self.toolbar.refreshButton.triggered.connect(self.manager.refreshDevices)
+        self.toolbar.refreshButton.triggered.connect(self.refreshDevices)
         self.toolbar.loadConfiguration.connect(self.manager.loadConfiguration)
         self.toolbar.saveConfiguration.connect(self.manager.saveConfiguration)
         self.toolbar.clearConfigButton.triggered.connect(self.manager.clearConfiguration)
@@ -147,6 +149,9 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
 
         self.tabs.removePlot.connect(self.removePlot)
 
+        self.emitRefreshDevices.connect(self.manager.refreshDevices)
+        self.manager.finishedRefreshingDevices.connect(self.closeBusyDialog)
+
         # Timer connections.
         self.updateTimer.timeout.connect(self.manager.assembly.updatePlotData)
         self.updateUI(self.manager.configuration)
@@ -157,6 +162,16 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.configuration["mainWindow"]["y"] = int(position.y())
         return
 
+    @Slot()
+    def refreshDevices(self):
+        self.emitRefreshDevices.emit()
+        self.busy = BusyDialog(self)
+        self.busy.open()
+
+    @Slot()
+    def closeBusyDialog(self):
+        self.busy.accept()
+        
     @Slot()
     def start(self):
         self.updateTimer.start(100)

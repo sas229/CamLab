@@ -61,7 +61,6 @@ class ConfigurationUtilities:
         # Instantiate the control widgets and add tabs if enabled boolean is true.
         for channel in range(self.manager.controlTableModels[name].rowCount()):
             self.addControlTab(name, channel)
-        
 
     @Slot(str, str, str)
     def updateControlName(self, currentName, newName):
@@ -72,11 +71,10 @@ class ConfigurationUtilities:
 
     @Slot(str, int, int, bool)
     def updateDeviceConfigurationTab(self, name, connect):
-        # if name in self.deviceConfigurationWidget:
-        print(connect)
-        widget = self.deviceConfigurationWidget[name]
-        index = self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.indexOf(widget)
-        self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.setTabVisible(index, connect)
+        if name in self.deviceConfigurationWidget:
+            widget = self.deviceConfigurationWidget[name]
+            index = self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.indexOf(widget)
+            self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.setTabVisible(index, connect)
 
     @Slot()
     def updateFeedbackComboBox(self):

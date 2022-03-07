@@ -6,7 +6,7 @@ log = logging.getLogger(__name__)
 
 class DeviceTableModel(QAbstractTableModel):
     """Methods for data and setData also emit signals to add and remove tabs from the acquisition tab widget when enabled or disabled."""
-    deviceConnectStatusUpdated = Signal(str, int, int, bool)
+    deviceConnectStatusUpdated = Signal(str, bool)
 
     def __init__(self, data=[], parent=None):
         super().__init__(parent)
@@ -59,7 +59,7 @@ class DeviceTableModel(QAbstractTableModel):
             item = self._data[index.row()]
             if index.column() == 0:
                 item["connect"] = value
-                self.deviceConnectStatusUpdated.emit(item['name'], item['id'], item['connection'], item['connect'])
+                self.deviceConnectStatusUpdated.emit(item['name'], item['connect'])
             elif index.column() == 4:
                 item["status"] = value
             self.dataChanged.emit(index, index, [])

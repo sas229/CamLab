@@ -15,7 +15,6 @@ import numpy as np
 log = logging.getLogger(__name__)
 
 class PlotWindow(QWidget, QtStyleTools):
-    # plotWindowClosed = Signal(str)
     plotWindowClosed = Signal(QWidget)
     colourUpdated = Signal(QModelIndex, str)
 
