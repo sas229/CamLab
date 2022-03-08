@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QGroupBox, QLabel, QLineEdit, QCheckBox, QGridLayout, QVBoxLayout
+from PySide6.QtWidgets import QWidget, QGroupBox, QLabel, QLineEdit, QCheckBox, QGridLayout, QVBoxLayout, QLayout
 from PySide6.QtGui import QDoubleValidator
 from PySide6.QtCore import Signal, Slot
 from src.widgets.GlobalControlsGroupBox import GlobalControlsGroupBox
@@ -43,12 +43,14 @@ class LinearAxis(QWidget):
     stopCommand = Signal()
     axisWindowClosed = Signal(QWidget)
 
-    def __init__(self, ID, *args, **kwargs):
+    def __init__(self, ID, feedback=False, *args, **kwargs):
         super().__init__(*args, **kwargs)              
         log.info("Linear axis instantiated.")
 
         # Inputs.
         self.ID = ID
+        self.controlType = "Linear"
+        self.feedback = feedback
         self.device = self.ID[0:3]
         self.channel = self.ID[-2:]
         self.control = int(self.ID[-1])-1
@@ -84,9 +86,8 @@ class LinearAxis(QWidget):
         # Main layout.
         self.layout = QVBoxLayout()
         self.layout.addLayout(self.gridLayout)
-        self.layout.addStretch()
+        self.layout.addStretch()  
         self.setLayout(self.layout)
-        self.setMinimumSize(1400, 565)
 
         # Connections.
         self.positionDemand.setPointLineEdit.returnPressed.connect(self.emitPrimarySetPointChanged)
@@ -132,19 +133,35 @@ class LinearAxis(QWidget):
         self.settings.speedUnitChanged.connect(self.updateSecondaryUnit)
         self.settings.feedbackUnitChanged.connect(self.updateFeedbackUnit)
 
-    def moveEvent(self, event):
-        # Save updated position in configuration.
-        position = self.geometry()
-        self.controlConfiguration["settings"]["x"] = int(position.x())
-        self.controlConfiguration["settings"]["y"] = int(position.y())
+    @Slot(bool)
+    def toggleFeedbackControl(self, feedback):
+        self.PID.setVisible(feedback)
+        self.feedbackDemand.setVisible(feedback)
+        self.feedbackStatus.setVisible(feedback)
+        self.feedback = feedback
+        if self.controlConfiguration["settings"]["mode"] == "window":
+            self.setWindow()
 
     def setWindow(self):
         x = int(self.controlConfiguration["settings"]["x"])
         y = int(self.controlConfiguration["settings"]["y"])
         w = int(self.controlConfiguration["settings"]["width"])
-        h = int(self.controlConfiguration["settings"]["height"])
+        # Fix the height depending on whether feedback is enabled. 
+        if self.feedback == False:
+            h = 354
+        else:
+            h = 564
+        self.setFixedHeight(h)
         self.setGeometry(x, y, w, h)
         self.controlConfiguration["settings"]["mode"] = "window"
+
+    def moveEvent(self, event):
+        # Save updated position in configuration.
+        position = self.geometry()
+        self.controlConfiguration["settings"]["x"] = int(position.x())
+        self.controlConfiguration["settings"]["y"] = int(position.y())
+        self.controlConfiguration["settings"]["width"] = int(self.width())
+        self.controlConfiguration["settings"]["height"] = int(self.height())
 
     def setTab(self):
         self.controlConfiguration["settings"]["mode"] = "tab"
@@ -238,6 +255,7 @@ class LinearAxis(QWidget):
 
     @Slot()
     def updatePrimaryUnit(self, unit):
+        self.adjust.setUnit(unit)
         self.positionDemand.setUnit(unit)
         self.positionStatus.setUnit(unit)
         self.controlConfiguration["settings"]["primaryUnit"] = unit
@@ -518,3 +536,4 @@ class LinearAxis(QWidget):
         self.settings.setPositionUnit(self.controlConfiguration["settings"]["primaryUnit"])
         self.settings.setSpeedUnit(self.controlConfiguration["settings"]["secondaryUnit"])
         self.settings.setFeedbackUnit(self.controlConfiguration["settings"]["feedbackUnit"])
+        self.toggleFeedbackControl(self.feedback)

@@ -103,20 +103,17 @@ class Device(QObject):
         self.load_lua_script()
         self.close_connection()
 
-        # PID instantiation.
+        # Instantiate PID controllers.
         self.PID_C1 = PID()
-        self.set_PID_tunings_C1()
         self.PID_C2 = PID()
-        self.set_PID_tunings_C2()
 
     @Slot()
     def initialise(self):
         #  Initialise device.
         self.open_connection()
-        self.initialise_settings()
-        
-        self.check_limits()
         self.disable_clock_0()
+        self.initialise_settings()
+        self.check_limits()
         self.set_speed_limit()
 
     @Slot(str)
@@ -468,8 +465,8 @@ class Device(QObject):
         try:
             # Refresh connection.
             self.handle = ljm.open(7, self.connection, self.id)
-            self.limitC1 = False
-            self.limitC2 = False
+            self.limit_C1 = False
+            self.limit_C2 = False
 
             # Check position limits.
             self.minimumLimitC1 = bool(ljm.eReadName(self.handle, "CIO2"))
@@ -493,26 +490,36 @@ class Device(QObject):
 
             # Turn on indicator if on limits.
             if self.minimumLimitC1 == True or self.maximumLimitC1 == True:
-                self.limitC1 = True
+                self.limit_C1 = True
             if self.minimumLimitC2 == True or self.maximumLimitC2 == True:
-                self.limitC2 = True
+                self.limit_C2 = True
+
+            # Check position limits.
+            if self.position_process_variable_C1 <= self.position_left_limit_C1:
+                self.limit_C1 = True
+            if self.position_process_variable_C1 >= self.position_right_limit_C1:
+                self.limit_C1 = True
+            if self.position_process_variable_C2 <= self.position_left_limit_C2:
+                self.limit_C2 = True
+            if self.position_process_variable_C2 >= self.position_right_limit_C2:
+                self.limit_C2 = True
 
             # Check feedback limits.
             if self.feedback_process_variable_C1 <= self.feedback_left_limit_C1:
-                self.limitC1 = True
+                self.limit_C1 = True
             if self.feedback_process_variable_C1 >= self.feedback_right_limit_C1:
-                self.limitC1 = True
+                self.limit_C1 = True
             if self.feedback_process_variable_C2 <= self.feedback_left_limit_C2:
-                self.limitC2 = True
+                self.limit_C2 = True
             if self.feedback_process_variable_C2 >= self.feedback_right_limit_C2:
-                self.limitC2 = True
+                self.limit_C2 = True
 
             # Set indicator.
-            if self.limitC1 == True:
+            if self.limit_C1 == True:
                 self.updateLimitIndicatorC1.emit(True)
             else:
                 self.updateLimitIndicatorC1.emit(False)
-            if self.limitC2 == True:
+            if self.limit_C2 == True:
                 self.updateLimitIndicatorC2.emit(True)
             else:
                 self.updateLimitIndicatorC2.emit(False)
@@ -715,8 +722,8 @@ class Device(QObject):
         self.handle = ljm.open(7, self.connection, self.id)     
         target_frequency = int(speed*self.counts_per_unit_C1)
         self.freqC1, self.rollC1, self.width_C1 = self.set_clock(1, target_frequency)
-        ljm.eWriteName(self.handle, "DIO4_EF_CONFIG_A", self.width_C1)
         self.speed_C1 = self.freqC1/self.counts_per_unit_C1
+        log.info("Speed on control channel C1 set to {speed}.".format(speed=speed))
 
     @Slot(float)
     def set_speed_C2(self, speed=0.0):
@@ -724,8 +731,8 @@ class Device(QObject):
         self.handle = ljm.open(7, self.connection, self.id) 
         target_frequency = int(speed*self.counts_per_unit_C2)
         self.freqC2, self.rollC2, self.width_C2 = self.set_clock(2, target_frequency)
-        ljm.eWriteName(self.handle, "DIO5_EF_CONFIG_A", self.width_C2)
         self.speed_C2 = self.freqC2/self.counts_per_unit_C2
+        log.info("Speed on control channel C2 set to {speed}.".format(speed=speed))
 
     def reset_pulse_counter_C1(self):
         """Reste C1 pulse counter."""
@@ -895,7 +902,7 @@ class Device(QObject):
         self.updatePositionProcessVariableC2.emit(self.position_process_variable_C2)
         if self.feedback_index_C2 != 0:
             self.updateFeedbackProcessVariableC2.emit(self.feedback_process_variable_C2)
-            if self.status_PID_C1 == True:
+            if self.status_PID_C2 == True:
                 self.updateSpeedC2.emit(self.speed_C2)
                 self.updatePositionSetPointC2.emit(self.position_process_variable_C2)
             elif self.status_PID_C2 == False:
@@ -995,7 +1002,7 @@ class Device(QObject):
         """Read pulses for control channel C2."""
         try:
             self.handle = ljm.open(7, self.connection, self.id)
-            self.pulses_C1 = ljm.eReadName(self.handle, "DIO3_EF_READ_A")
+            self.pulses_C2 = ljm.eReadName(self.handle, "DIO3_EF_READ_A")
         except ljm.LJMError:
             ljme = sys.exc_info()[1]
             log.warning(ljme) 
@@ -1023,8 +1030,8 @@ class Device(QObject):
 
     def check_position_C1(self):
         """Check position for control channel C1."""
-        # If moving under jog control, stop if at limit.
-        if self.jog_C1 == True:
+        # If moving under jog or PID control, stop if at limit.
+        if self.jog_C1 == True or self.status_PID_C1 == True:
             if self.direction_C1 == -1 and self.position_process_variable_C1 < self.position_left_limit_C1:
                 self.turn_off_PWM_C1()
                 self.jog_C1 = False
@@ -1058,8 +1065,8 @@ class Device(QObject):
     
     def check_position_C2(self):
         """Check position for control channel C2."""
-        # If moving under jog control, stop if at limit.
-        if self.jog_C2 == True:
+        # If moving under jog or PID control, stop if at limit.
+        if self.jog_C2 == True or self.status_PID_C2 == True:
             if self.direction_C2 == -1 and self.position_process_variable_C2 < self.position_left_limit_C2:
                 self.turn_off_PWM_C2()
                 self.jog_C2 = False
@@ -1137,8 +1144,8 @@ class Device(QObject):
             try:
                 self.configure_ADC()
                 self.configure_pulse_counters()
-                self.set_speed_C1()
-                self.set_speed_C2()
+                self.set_speed_C1(self.speed_C1)
+                self.set_speed_C2(self.speed_C2)
             except ljm.LJMError:
                 ljme = sys.exc_info()[1]
                 log.warning(ljme) 

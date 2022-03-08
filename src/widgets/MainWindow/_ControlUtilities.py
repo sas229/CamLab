@@ -13,12 +13,17 @@ class ControlUtilities:
         controlType = self.manager.configuration["devices"][name]["control"][channel]["type"]
         controlName = self.manager.configuration["devices"][name]["control"][channel]["name"]
         controlChannel = self.manager.configuration["devices"][name]["control"][channel]["channel"]
+        controlFeedback = self.manager.configuration["devices"][name]["control"][channel]["feedback"]
         
         # Instantiate the appropriate widget.
         if control == "Linear" and controlType == "Digital":
-            controlWidget = LinearAxis(controlID)
+            if controlFeedback != "N/A": 
+                feedback = True
+            else:
+                feedback = False
+            controlWidget = LinearAxis(controlID, feedback)
         
-            # Connections.          
+            # Connections. 
             controlWidget.axisWindowClosed.connect(self.windowToTab)
             self.checkTimer.timeout.connect(self.manager.devices[name].check_connections)
             self.running.connect(self.manager.devices[name].set_running)
@@ -118,13 +123,27 @@ class ControlUtilities:
 
     @Slot(str, int, str)
     def changeControlFeedbackChannel(self, device, channel, selectedFeedbackChannel):
+        """Change control feedback channel."""
+        # Set feedback channel.
         feedbackChannelList = self.manager.feedbackChannelLists[device]
         feedbackIndex = feedbackChannelList.index(selectedFeedbackChannel)
         self.manager.configuration["devices"][device]["control"][channel]["settings"]["feedbackIndex"] = feedbackIndex
         if channel == 0:
-            self.manager.devices[device].set_feedback_channel_C1(feedbackIndex)
+            if device in self.manager.devices:
+                self.manager.devices[device].set_feedback_channel_C1(feedbackIndex)
         elif channel == 1:
-            self.manager.devices[device].set_feedback_channel_C2(feedbackIndex)
+            if device in self.manager.devices:
+                self.manager.devices[device].set_feedback_channel_C2(feedbackIndex)
+        
+        # Toggle feedback control.
+        if selectedFeedbackChannel != "N/A":
+            feedback = True
+        else:
+            feedback = False
+        controlID = device + " C" + str(channel+1)
+        if self.controls[controlID].controlType == "Linear":
+            self.controls[controlID].toggleFeedbackControl(feedback)
+
 
     @Slot(str, int, str)
     def changeControlWidget(self, device, channel, newWidget):

@@ -156,6 +156,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.updateTimer.timeout.connect(self.manager.assembly.updatePlotData)
         self.updateUI(self.manager.configuration)
 
+
     def moveEvent(self, event):
         position = self.geometry()
         self.configuration["mainWindow"]["x"] = int(position.x())

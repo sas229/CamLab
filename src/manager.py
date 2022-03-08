@@ -1,4 +1,4 @@
-from PySide6.QtCore import QObject, Signal, Slot, QSettings, QThread, QModelIndex, QDate, Qt
+from PySide6.QtCore import QObject, Signal, Slot, QSettings, QThread, QModelIndex, QDate, Qt, QTimer
 from src.models import DeviceTableModel, AcquisitionTableModel, ChannelsTableModel, ControlTableModel
 from src.device import Device
 from src.assembly import Assembly
@@ -61,7 +61,7 @@ class Manager(QObject):
             "x": 0,
             "y": 0,
             "width": 1200,
-            "height": 560,
+            "height": 300,
             "primaryMinimum": -100.00,
             "primaryMaximum": 100.00,
             "primaryLeftLimit": -80.00,
@@ -299,9 +299,9 @@ class Manager(QObject):
             self.deviceThreads[name].start()
             log.info("Device thread started for device named " + name + ".")
 
-            # Emit signal.
-            self.deviceAdded.emit(name)
-            self.deviceToggled.emit(name, connect)
+        # Emit signal to add tab for device to configuration.
+        self.deviceAdded.emit(name)
+        self.deviceToggled.emit(name, connect)
 
     def toggleDeviceConnection(self, name, connect):
         if connect == True:
@@ -380,80 +380,88 @@ class Manager(QObject):
         self.finishedRefreshingDevices.emit()
 
     def addLJDevices(self, mode):
-        # Get a list of already existing devices.
-        existingDevices = self.deviceTableModel._data
-        ID_Existing = []
-        for device in existingDevices:
-            ID_Existing.append(device["id"])
-        
-        # Scan for devices.
-        if mode == "USB":
-            log.info("Scanning for additional USB devices.")
-            info = ljm.listAll(7, 1)
-        elif mode == "TCP": 
-            log.info("Scanning for additional TCP devices.")
-            info = ljm.listAll(7, 2)
-        numDevices = info[0]
-        connectionType = info[2]
-        ID = info[3]
-        IP = info[4]
-
-        # Add devices if not already in device list.
-        for i in range(numDevices):
-            if ID[i] not in ID_Existing:
-                deviceInformation = {}
-                deviceInformation["connect"] = False
-                if mode == "USB":
-                    handle = ljm.open(7, 1, ID[i])
-                elif mode == "TCP":
-                    handle = ljm.open(7, 2, ID[i])
-                deviceInformation["name"] = ljm.eReadNameString(handle, "DEVICE_NAME_DEFAULT")
-                ljm.close(handle)
-                deviceInformation["id"] = ID[i]
-                deviceInformation["connection"] = connectionType[i]
-                if mode == "USB":
-                    deviceInformation["address"] = "N/A"
-                elif mode == "TCP":
-                    deviceInformation["address"] = ljm.numberToIP(IP[i])
-                deviceInformation["status"] = True
-                self.deviceTableModel.appendRow(deviceInformation)
-                self.configurationChanged.emit(self.configuration)
-                
-                # Make a deep copy to avoid pointers in the YAML output.
-                acquisitionTable = copy.deepcopy(self.defaultAcquisitionTable)
-                controlTable = copy.deepcopy(self.defaultControlTable)
-                controlTable[0]["name"] = deviceInformation["name"] + " C1"
-                controlTable[1]["name"] = deviceInformation["name"] + " C2"
-                newDevice = {
-                    "id": deviceInformation["id"],
-                    "connection": deviceInformation["connection"],
-                    "address": deviceInformation["address"],
-                    "acquisition": acquisitionTable,
-                    "control" : controlTable
-                }
-
-                # If no previous devices are configured, add the "devices" key to the configuration.
-                name = deviceInformation["name"]
-                if "devices" not in self.configuration:
-                    self.configuration["devices"] = {name: newDevice} 
-                else:
-                    self.configuration["devices"][name] = newDevice 
-
-                # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
-                log.info("Instantiating data models for device.")
-                self.acquisitionTableModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
-                self.controlTableModels[name] = ControlTableModel(name, self.configuration["devices"][name]["control"])
-                self.feedbackChannelLists[name] = self.setFeedbackChannelList(name)
-                log.info("Data models instantiated for device.")
+        try:
+            # Get a list of already existing devices.
+            existingDevices = self.deviceTableModel._data
+            ID_Existing = []
+            for device in existingDevices:
+                ID_Existing.append(device["id"])
             
-                # Create device thread and add device to UI.
-                log.info("Adding device to UI.")
-                self.createDeviceThread(name=name, id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False)
-                self.configurationChanged.emit(self.configuration)
-        if mode == "USB":
-            log.info("Found " + str(numDevices) + " USB device(s).")
-        elif mode == "TCP":
-            log.info("Found " + str(numDevices) + " TCP device(s).")
+            # Searching for devices.
+            if mode == "USB":
+                log.info("Searching for additional USB devices.")
+                info = ljm.listAll(7, 1)
+            elif mode == "TCP": 
+                log.info("Searching for additional TCP devices.")
+                info = ljm.listAll(7, 2)
+            numDevices = info[0]
+            connectionType = info[2]
+            ID = info[3]
+            IP = info[4]
+
+            # Add devices if not already in device list.
+            for i in range(numDevices):
+                if ID[i] not in ID_Existing:
+                    deviceInformation = {}
+                    deviceInformation["connect"] = False
+                    if mode == "USB":
+                        handle = ljm.open(7, 1, ID[i])
+                    elif mode == "TCP":
+                        handle = ljm.open(7, 2, ID[i])
+                    deviceInformation["name"] = ljm.eReadNameString(handle, "DEVICE_NAME_DEFAULT")
+                    ljm.close(handle)
+                    deviceInformation["id"] = ID[i]
+                    deviceInformation["connection"] = connectionType[i]
+                    if mode == "USB":
+                        deviceInformation["address"] = "N/A"
+                    elif mode == "TCP":
+                        deviceInformation["address"] = ljm.numberToIP(IP[i])
+                    deviceInformation["status"] = True
+                    self.deviceTableModel.appendRow(deviceInformation)
+                    self.configurationChanged.emit(self.configuration)
+                    
+                    # Make a deep copy to avoid pointers in the YAML output.
+                    acquisitionTable = copy.deepcopy(self.defaultAcquisitionTable)
+                    controlTable = copy.deepcopy(self.defaultControlTable)
+                    controlTable[0]["name"] = deviceInformation["name"] + " C1"
+                    controlTable[1]["name"] = deviceInformation["name"] + " C2"
+                    newDevice = {
+                        "id": deviceInformation["id"],
+                        "connection": deviceInformation["connection"],
+                        "address": deviceInformation["address"],
+                        "acquisition": acquisitionTable,
+                        "control" : controlTable
+                    }
+
+                    # If no previous devices are configured, add the "devices" key to the configuration.
+                    name = deviceInformation["name"]
+                    if "devices" not in self.configuration:
+                        self.configuration["devices"] = {name: newDevice} 
+                    else:
+                        self.configuration["devices"][name] = newDevice 
+
+                    # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
+                    log.info("Instantiating data models for device.")
+                    self.acquisitionTableModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
+                    self.controlTableModels[name] = ControlTableModel(name, self.configuration["devices"][name]["control"])
+                    self.feedbackChannelLists[name] = self.setFeedbackChannelList(name)
+                    log.info("Data models instantiated for device.")
+                
+                    # Create device thread and add device to UI.
+                    log.info("Adding device to UI.")
+                    self.createDeviceThread(name=name, id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False)
+                    self.configurationChanged.emit(self.configuration)
+            if mode == "USB":
+                message = "Found {n} USB device(s)...".format(n=numDevices)
+            elif mode == "TCP":
+                message = "Found {n} TCP device(s)...".format(n=numDevices)
+            log.info(message)
+        except ljm.LJMError:
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
 
     def addControlSettings(self, name):
         #  Configure control settings.
@@ -666,9 +674,9 @@ class Manager(QObject):
                 elif control["channel"] == "C2":
                     channel = 1
                 # Slice in lines that follows removes the brackets.
-                primaryUnit = self.configuration["devices"][name]["control"][channel]["settings"]["primaryUnit"][1:-1]
-                secondaryUnit = self.configuration["devices"][name]["control"][channel]["settings"]["secondaryUnit"][1:-1]
-                feedbackUnit = self.configuration["devices"][name]["control"][channel]["settings"]["feedbackUnit"][1:-1]
+                primaryUnit = self.configuration["devices"][name]["control"][channel]["settings"]["primaryUnit"]
+                secondaryUnit = self.configuration["devices"][name]["control"][channel]["settings"]["secondaryUnit"]
+                feedbackUnit = self.configuration["devices"][name]["control"][channel]["settings"]["feedbackUnit"]
                 channel = control["channel"]
                 if control["feedback"] == "N/A":
                     if control["control"] == "Linear":
