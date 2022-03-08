@@ -141,8 +141,9 @@ class ControlUtilities:
         else:
             feedback = False
         controlID = device + " C" + str(channel+1)
-        if self.controls[controlID].controlType == "Linear":
-            self.controls[controlID].toggleFeedbackControl(feedback)
+        if hasattr(self.controls[controlID], "controlType"):
+            if self.controls[controlID].controlType == "Linear":
+                self.controls[controlID].toggleFeedbackControl(feedback)
 
 
     @Slot(str, int, str)
