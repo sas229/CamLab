@@ -6,8 +6,8 @@ local checkInterval = LJ.CheckInterval
 local read = MB.R
 local write = MB.W
 
--- Check the failsafe register every 100ms.
-LJ.IntervalConfig(0, 100)
+-- Check the failsafe register every 1000ms.
+LJ.IntervalConfig(0, 1000)
 
 -- Main loop.
 while true do

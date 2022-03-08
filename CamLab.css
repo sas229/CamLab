@@ -1,3 +1,12 @@
+QTabBar::close-button {{
+  image: url(icon:/secondaryText/close.svg);
+}}
+
+QTabBar::close-button:hover {{
+  image: url(icon:/primary/close.svg);
+}}
+
+
 QGroupBox {{
     background-color: {QTMATERIAL_SECONDARYLIGHTCOLOR};
 }} 

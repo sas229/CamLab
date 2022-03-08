@@ -11,6 +11,7 @@ class Timing(QObject):
 
     def __init__(self):
         super().__init__()
+        self.running = False
 
     def start(self, rate):
         log.info("Starting device timer.")
@@ -32,8 +33,9 @@ class Timing(QObject):
             skippedIntervals = ljm.waitForNextInterval(1)
 
     def stop(self):
-        self.running = False
-        log.info("Stopped device timer.")
+        if self.running == True:
+            self.running = False
+            log.info("Stopped device timer.")
 
 
 

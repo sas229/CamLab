@@ -217,7 +217,7 @@ class SliderGroupBox(QGroupBox):
     def setUnit(self, unit):
         # Set units for labels.
         self.unit = unit
-        self.leftLimitLabel.setText("Limit " + self.unit)
-        self.rightLimitLabel.setText("Limit " + self.unit)
-        self.minimumRangeLabel.setText("Minimum " + self.unit)
-        self.maximumRangeLabel.setText("Maximum " + self.unit)
+        self.leftLimitLabel.setText("Limit ({unit})".format(unit=unit))
+        self.rightLimitLabel.setText("Limit ({unit})".format(unit=unit))
+        self.minimumRangeLabel.setText("Minimum ({unit})".format(unit=unit))
+        self.maximumRangeLabel.setText("Maximum ({unit})".format(unit=unit))

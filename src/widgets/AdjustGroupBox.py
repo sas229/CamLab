@@ -58,4 +58,4 @@ class AdjustGroupBox(QGroupBox):
 
     def setUnit(self, unit):
         self.unit = unit
-        self.incrementLabel.setText("Increment " + self.unit)
+        self.incrementLabel.setText("Increment ({unit})".format(unit=unit))

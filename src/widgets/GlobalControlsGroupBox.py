@@ -13,10 +13,11 @@ class GlobalControlsGroupBox(QGroupBox):
         self.enableButton.setEnabled(False)
         self.stopButton = QPushButton("Stop")
         self.stopButton.setFixedWidth(125)
-        self.stopButton.setEnabled(False)
+        self.stopButton.setVisible(False)
         self.PIDControlButton = QPushButton("PID Control")
         self.PIDControlButton.setFixedWidth(125)
         self.PIDControlButton.setCheckable(True)
+        self.PIDControlButton.setVisible(False)
         self.settingsButton = QPushButton("Settings")
         self.settingsButton.setFixedWidth(125)
         self.zeroButton = QPushButton("Zero")
@@ -100,15 +101,15 @@ class GlobalControlsGroupBox(QGroupBox):
     @Slot()
     def setZeroButtonState(self):
         if self.enableButton.isEnabled() == False:
-            self.zeroButton.setEnabled(False)
+            self.zeroButton.setVisible(False)
         elif self.enableButton.isChecked() == True:
-            self.zeroButton.setEnabled(False)
+            self.zeroButton.setVisible(False)
         else:
-            self.zeroButton.setEnabled(True)
+            self.zeroButton.setVisible(True)
 
     @Slot()
     def setStopButtonState(self):
         if self.enableButton.isChecked() == True:
-            self.stopButton.setEnabled(True)
+            self.stopButton.setVisible(True)
         else:
-            self.stopButton.setEnabled(False)
+            self.stopButton.setVisible(False)

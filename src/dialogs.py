@@ -1,33 +1,38 @@
-from PySide6.QtWidgets import QDialog, QProgressDialog, QVBoxLayout, QLabel
+from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QDialogButtonBox
 from PySide6.QtGui import QCursor
 from PySide6.QtCore import Signal, QSize, QModelIndex, Qt
 from src.models import ColourPickerTableModel
 from src.views import ColourPickerTableView
+from src.widgets.WaitingIndicator import WaitingIndicator 
 import logging
+from time import sleep
 
 log = logging.getLogger(__name__)
 
-class RefreshDevicesDialog(QProgressDialog):
-    
-    def __init__(self, parent):
-        super(RefreshDevicesDialog, self).__init__(parent)  
-        self.setParent(parent)
-        # self.setWindowTitle("Finding devices...")
-        self.setLabel(QLabel("Finding devices..."))
-        # self.setModal(False)
-        self.setRange(0,0)
-        # self.setCancelButton(None)
+class BusyDialog(QDialog):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedSize(400, 100)
         self.setWindowModality(Qt.ApplicationModal)
-        self.setWindowFlags(Qt.FramelessWindowHint)
-        self.exec()
-        # self.setVisible(False)
-        # self.setWindowFlags(Qt.CustomizeWindowHint)   
+        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
+
+        self.message = QLabel("Scanning for devices...")
+        self.waitingIndicator = WaitingIndicator(centerOnParent=False)
+        self.waitingIndicator.start()
+
+        self.layout = QHBoxLayout()
+        self.layout.addSpacing(20)
+        self.layout.addWidget(self.waitingIndicator)
+        self.layout.addSpacing(20)
+        self.layout.addWidget(self.message)
+        self.setLayout(self.layout)
 
 class ColourPickerDialog(QDialog):
     selectedColour = Signal(QModelIndex, str)
 
     def __init__(self, parent=None):
-        super(ColourPickerDialog, self).__init__(parent)
+        super().__init__(parent)
         self.colourPickerTableModel = ColourPickerTableModel()
         self.colourPickerTableView = ColourPickerTableView()
         self.colourPickerTableView.setModel(self.colourPickerTableModel)
@@ -39,7 +44,6 @@ class ColourPickerDialog(QDialog):
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Popup)
         self.colourPickerTableView.clicked.connect(self.colourSelected)
 
-    #index of colour table
     def colourSelected(self, index):
         model = index.model()
         colour = model._data[index.column()][index.row()]
@@ -59,7 +63,6 @@ class ColourPickerDialog(QDialog):
         else:
             super(ColourPickerDialog, self).keyPressEvent(event)
 
-    #Index channel I clicked
     def setTargetIndex(self, index):
         self.targetIndex = index
 

@@ -4,7 +4,7 @@ import os
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QCheckBox, QTabWidget, QLabel, QLineEdit, QGridLayout, QComboBox, QSlider
 from PySide6.QtGui import QIcon, QAction, QCursor, QDoubleValidator, QFont
 from PySide6.QtCore import Signal, Slot, Qt, QModelIndex, QEvent, QLocale
-from qt_material import apply_stylesheet, QtStyleTools
+from src.local_qt_material import apply_stylesheet, QtStyleTools
 from src.models import ChannelsTableModel, ColourPickerTableModel
 from src.views import ChannelsTableView, ColourPickerTableView
 from src.dialogs import ColourPickerDialog
@@ -15,15 +15,14 @@ import numpy as np
 log = logging.getLogger(__name__)
 
 class PlotWindow(QWidget, QtStyleTools):
-    plotWindowClosed = Signal(str)
+    plotWindowClosed = Signal(QWidget)
     colourUpdated = Signal(QModelIndex, str)
 
     def __init__(self):
         super().__init__()
+        log.info("Plot instantiated.")
+        self.setWhatsThis("plot")
         self.defaultChannelsData = [{"plot": False, "name": "Time", "device": "ALL", "colour": "#35e3e3", "value": "0.00", "unit": "s"}]
-        self.initWidth = 1200
-        self.initHeight = 800
-        self.resize(self.initWidth, self.initHeight)
         self.setMinimumSize(850, 550)
         self.alpha = 50
         self.opacity = 50
@@ -233,6 +232,17 @@ class PlotWindow(QWidget, QtStyleTools):
         self.minimumSelectedAxisLineEdit.returnPressed.connect(self.setNewSelectedAxisRange)
         self.maximumSelectedAxisLineEdit.returnPressed.connect(self.setNewSelectedAxisRange)
 
+    def setWindow(self):
+        x = int(self.configuration["plots"][self.plotNumber]["x"])
+        y = int(self.configuration["plots"][self.plotNumber]["y"])
+        w = int(self.configuration["plots"][self.plotNumber]["width"])
+        h = int(self.configuration["plots"][self.plotNumber]["height"])
+        self.setGeometry(x, y, w, h)
+        self.configuration["plots"][self.plotNumber]["mode"] = "window"
+
+    def setTab(self):
+        self.configuration["plots"][self.plotNumber]["mode"] = "tab"
+        
     def resizeEvent(self, event):
         # Save updated size in configuration.
         self.configuration["plots"][self.plotNumber]["width"] = int(self.width())
@@ -247,71 +257,67 @@ class PlotWindow(QWidget, QtStyleTools):
     def setConfiguration(self, configuration):
         # Set the configuration.
         self.configuration = configuration
-        x = int(self.configuration["plots"][self.plotNumber]["x"])
-        y = int(self.configuration["plots"][self.plotNumber]["y"])
-        w = int(self.configuration["plots"][self.plotNumber]["width"])
-        h = int(self.configuration["plots"][self.plotNumber]["height"])
-        self.setGeometry(x, y, w, h)
-        self.alphaSlider.setValue(int(self.configuration["plots"][self.plotNumber]["alpha"]))
-        self.autoCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["auto"]))
-        self.autoCommonAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["autoCommonAxis"]))
-        self.autoSelectedAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["autoSelectedAxis"]))
-        self.invertCommonAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["invertCommonAxis"]))
-        self.invertSelectedAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["invertSelectedAxis"]))
-        self.lockCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["lock"]))
-        self.lockCommonAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["lockCommonAxis"]))
-        self.lockSelectedAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["lockSelectedAxis"]))
-        self.logCommonAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["logCommonAxis"]))
-        self.logSelectedAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["logSelectedAxis"]))
-        self.manualCommonAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["manualCommonAxis"]))
-        self.manualSelectedAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["manualSelectedAxis"]))
-        self.minCommonAxis = self.configuration["plots"][self.plotNumber]["minCommonAxisRange"]
-        self.maxCommonAxis = self.configuration["plots"][self.plotNumber]["maxCommonAxisRange"]
-        self.minSelectedAxis = self.configuration["plots"][self.plotNumber]["minSelectedAxisRange"]
-        self.maxSelectedAxis = self.configuration["plots"][self.plotNumber]["maxSelectedAxisRange"]
-        self.minCommonAxisLock = self.configuration["plots"][self.plotNumber]["minCommonAxisRangeLock"]
-        self.maxCommonAxisLock = self.configuration["plots"][self.plotNumber]["maxCommonAxisRangeLock"]
-        self.minSelectedAxisLock = self.configuration["plots"][self.plotNumber]["minSelectedAxisRangeLock"]
-        self.maxSelectedAxisLock = self.configuration["plots"][self.plotNumber]["maxSelectedAxisRangeLock"]
-        if bool(self.lockCommonAxisCheckBox.checkState()) == False and bool(self.lockSelectedAxisCheckBox.checkState()) == False:
-            self.maximumCommonAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["maxCommonAxisRange"]))
-            self.maximumSelectedAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["maxSelectedAxisRange"]))
-            self.minimumCommonAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["minCommonAxisRange"]))
-            self.minimumSelectedAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["minSelectedAxisRange"]))
-        elif bool(self.lockCommonAxisCheckBox.checkState()) == True and bool(self.lockSelectedAxisCheckBox.checkState()) == False:
-            self.maximumCommonAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["maxCommonAxisRangeLock"]))
-            self.maximumSelectedAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["maxSelectedAxisRangeLock"]))
-            self.minimumCommonAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["minCommonAxisRange"]))
-            self.minimumSelectedAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["minSelectedAxisRange"]))
-        elif bool(self.lockCommonAxisCheckBox.checkState()) == False and bool(self.lockSelectedAxisCheckBox.checkState()) == True:
-            self.maximumCommonAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["maxCommonAxisRange"]))
-            self.maximumSelectedAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["maxSelectedAxisRange"]))
-            self.minimumCommonAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["minCommonAxisRangeLock"]))
-            self.minimumSelectedAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["minSelectedAxisRangeLock"]))
-        self.opacitySlider.setValue(int(self.configuration["plots"][self.plotNumber]["opacity"]))
-        self.gridCheckBox.setChecked(int(self.configuration["plots"][self.plotNumber]["setGrid"]))
-        self.swapCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["swap"]))
-        self.setChannelsModel(self.configuration["plots"][self.plotNumber]["channels"])
-        self.numChannels = len(self.channelsModel._data)
-        self.plotData = np.zeros((1, self.numChannels))        
-        self.setLock()
-        self.setAutoMode()
-        self.setManualCommonAxisMode()
-        self.setManualSelectedAxisMode()
-        self.setNewCommonAxisRange()
-        self.setNewSelectedAxisRange()
-        self.setGrid()
-        self.setLogCommonAxis()
-        self.setLogSelectedAxis()
-        self.setInvertCommonAxis()
-        self.setInvertSelectedAxis()
-        self.fillCommonChannelComboBox()
-        self.setSwap()
-        self.setAxesLabels()
-        self.updatePlot()
-        self.darkMode = self.configuration["global"]["darkMode"]
-        self.setDarkMode()
-        # log.info("Configuration set.")
+        if "plots" in self.configuration:
+            self.alphaSlider.setValue(int(self.configuration["plots"][self.plotNumber]["alpha"]))
+            self.autoCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["auto"]))
+            self.autoCommonAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["autoCommonAxis"]))
+            self.autoSelectedAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["autoSelectedAxis"]))
+            self.invertCommonAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["invertCommonAxis"]))
+            self.invertSelectedAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["invertSelectedAxis"]))
+            self.lockCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["lock"]))
+            self.lockCommonAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["lockCommonAxis"]))
+            self.lockSelectedAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["lockSelectedAxis"]))
+            self.logCommonAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["logCommonAxis"]))
+            self.logSelectedAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["logSelectedAxis"]))
+            self.manualCommonAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["manualCommonAxis"]))
+            self.manualSelectedAxisCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["manualSelectedAxis"]))
+            self.minCommonAxis = self.configuration["plots"][self.plotNumber]["minCommonAxisRange"]
+            self.maxCommonAxis = self.configuration["plots"][self.plotNumber]["maxCommonAxisRange"]
+            self.minSelectedAxis = self.configuration["plots"][self.plotNumber]["minSelectedAxisRange"]
+            self.maxSelectedAxis = self.configuration["plots"][self.plotNumber]["maxSelectedAxisRange"]
+            self.minCommonAxisLock = self.configuration["plots"][self.plotNumber]["minCommonAxisRangeLock"]
+            self.maxCommonAxisLock = self.configuration["plots"][self.plotNumber]["maxCommonAxisRangeLock"]
+            self.minSelectedAxisLock = self.configuration["plots"][self.plotNumber]["minSelectedAxisRangeLock"]
+            self.maxSelectedAxisLock = self.configuration["plots"][self.plotNumber]["maxSelectedAxisRangeLock"]
+            if bool(self.lockCommonAxisCheckBox.checkState()) == False and bool(self.lockSelectedAxisCheckBox.checkState()) == False:
+                self.maximumCommonAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["maxCommonAxisRange"]))
+                self.maximumSelectedAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["maxSelectedAxisRange"]))
+                self.minimumCommonAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["minCommonAxisRange"]))
+                self.minimumSelectedAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["minSelectedAxisRange"]))
+            elif bool(self.lockCommonAxisCheckBox.checkState()) == True and bool(self.lockSelectedAxisCheckBox.checkState()) == False:
+                self.maximumCommonAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["maxCommonAxisRangeLock"]))
+                self.maximumSelectedAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["maxSelectedAxisRangeLock"]))
+                self.minimumCommonAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["minCommonAxisRange"]))
+                self.minimumSelectedAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["minSelectedAxisRange"]))
+            elif bool(self.lockCommonAxisCheckBox.checkState()) == False and bool(self.lockSelectedAxisCheckBox.checkState()) == True:
+                self.maximumCommonAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["maxCommonAxisRange"]))
+                self.maximumSelectedAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["maxSelectedAxisRange"]))
+                self.minimumCommonAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["minCommonAxisRangeLock"]))
+                self.minimumSelectedAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["minSelectedAxisRangeLock"]))
+            self.opacitySlider.setValue(int(self.configuration["plots"][self.plotNumber]["opacity"]))
+            self.gridCheckBox.setChecked(int(self.configuration["plots"][self.plotNumber]["setGrid"]))
+            self.swapCheckBox.setChecked(bool(self.configuration["plots"][self.plotNumber]["swap"]))
+            self.setChannelsModel(self.configuration["plots"][self.plotNumber]["channels"])
+            self.numChannels = len(self.channelsModel._data)
+            self.plotData = np.zeros((1, self.numChannels))        
+            self.setLock()
+            self.setAutoMode()
+            self.setManualCommonAxisMode()
+            self.setManualSelectedAxisMode()
+            self.setNewCommonAxisRange()
+            self.setNewSelectedAxisRange()
+            self.setGrid()
+            self.setLogCommonAxis()
+            self.setLogSelectedAxis()
+            self.setInvertCommonAxis()
+            self.setInvertSelectedAxis()
+            self.fillCommonChannelComboBox()
+            self.setSwap()
+            self.setAxesLabels()
+            self.updatePlot()
+            self.darkMode = self.configuration["global"]["darkMode"]
+            self.setDarkMode()
+            # log.info("Configuration set.")
 
     def updateConfiguration(self):
         # Update the configuration based on current GUI settings.
@@ -817,7 +823,8 @@ class PlotWindow(QWidget, QtStyleTools):
         self.colourUpdated.emit(index, colour)
 
     def closeEvent(self, event):
-        self.plotWindowClosed.emit(self.plotNumber)
+        # self.plotWindowClosed.emit(self.plotNumber)
+        self.plotWindowClosed.emit(self)
 
     def setChannelsModel(self, channelsData):
         self.channelsModel = ChannelsTableModel(channelsData)
