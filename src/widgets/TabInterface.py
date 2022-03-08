@@ -34,7 +34,6 @@ class TabInterface(QTabWidget):
         self.insertTab(index, widget, name)
         self.tabBar().setTabButton(index, QTabBar.RightSide, None)
 
-
     @Slot(int)
     def closeTab(self, index):
         widget = self.widget(index)

@@ -125,7 +125,7 @@ class ToolBar(QToolBar):
     def updateIcons(self, darkMode):
         # Change appearance between light and dark modes.
         self.darkMode = darkMode
-        self.modeButton.setIcon(QIcon("icon:/secondaryText/settings.svg" if self.running else "icon:/secondaryText/play_circle.svg"))
+        self.modeButton.setIcon(QIcon("icon:/secondaryText/stop.svg" if self.running else "icon:/secondaryText/play_circle.svg"))
         self.addPlotButton.setIcon(QIcon("icon:/secondaryText/stacked_line_chart.svg"))
         self.extensionButton.setIcon(QIcon("icon:/secondaryText/extension.svg"))
         self.refreshButton.setIcon(QIcon("icon:/secondaryText/restart_alt.svg"))

@@ -22,7 +22,8 @@ class ControlTableModel(QAbstractTableModel):
                 "name",
                 "type",
                 "control",
-                "feedback"
+                "feedback",
+                "enable"
             ]
 
     def rowCount(self, parent=QModelIndex()):
@@ -36,7 +37,7 @@ class ControlTableModel(QAbstractTableModel):
     def columnCount(self, parent=QModelIndex()):
         if parent.isValid():
             return 0
-        return 5
+        return 6
 
     def data(self, index, role=Qt.DisplayRole):
         if role == Qt.TextAlignmentRole:
@@ -45,7 +46,7 @@ class ControlTableModel(QAbstractTableModel):
             if index.isValid():
                 item = self._data[index.row()]
                 if index.column() == 0:
-                    return item["enable"]
+                    return item["channel"]
                 elif index.column() == 1:
                     return item["name"]
                 elif index.column() == 2:
@@ -54,21 +55,18 @@ class ControlTableModel(QAbstractTableModel):
                     return item["control"]
                 elif index.column() == 4:
                     return item["feedback"]
+                elif index.column() == 5:
+                    return item["enable"]
         elif role == Qt.CheckStateRole:
             if index.isValid():
-                if index.column()==0:
+                if index.column()==5:
                     item = self._data[index.row()]
                     return Qt.Checked if item["enable"] else Qt.Unchecked
 
     def setData(self, index, value, role=Qt.EditRole):
         if index.isValid():
             item = self._data[index.row()]
-            if index.column() == 0:
-                # Only allow the checkbox to be toggled if type and control are specified.
-                if item["type"] != "N/A" and item["control"] != "N/A":
-                    item["enable"] = value
-                    self.controlChannelToggled.emit(self._device, index.row(), value)
-            elif index.column() == 1:
+            if index.column() == 1:
                 self.controlChannelNameChanged.emit(item["name"], value)
                 item["name"] = value
             elif index.column() == 2:
@@ -86,6 +84,11 @@ class ControlTableModel(QAbstractTableModel):
             elif index.column() == 4:
                 item["feedback"] = value
                 self.controlFeedbackChannelChanged.emit(self._device, index.row(), value)
+            elif index.column() == 5:
+                # Only allow the checkbox to be toggled if type and control are specified.
+                if item["type"] != "N/A" and item["control"] != "N/A":
+                    item["enable"] = value
+                    self.controlChannelToggled.emit(self._device, index.row(), value)
             self.dataChanged.emit(index, index, [])
             return True
         else:
@@ -100,8 +103,11 @@ class ControlTableModel(QAbstractTableModel):
                     return self._row_name[section]
 
     def flags(self, index):
-        if index.isValid():
+        if index.column() == 0:
+            return Qt.ItemIsEnabled
+        elif index.isValid():
             return Qt.ItemIsEnabled | Qt.ItemIsEditable
+        
 
     def enabledControls(self):
         """Method to return a list of dicts of enabled controls."""

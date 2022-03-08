@@ -2,6 +2,9 @@ from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
 from src.views import AcquisitionTableView, ControlTableView
 from src.widgets.LinearAxis import LinearAxis
+import logging
+
+log = logging.getLogger(__name__)
 
 class ConfigurationUtilities:
 
@@ -62,19 +65,30 @@ class ConfigurationUtilities:
         for channel in range(self.manager.controlTableModels[name].rowCount()):
             self.addControlTab(name, channel)
 
-    @Slot(str, str, str)
+        log.info("Device configuration tab added for {device}.".format(device=name))
+
+    @Slot(str, str)
     def updateControlName(self, currentName, newName):
         # Update tab names.
         for index in range(self.tabs.count()):
             if self.tabs.tabText(index) == currentName:
                 self.tabs.setTabText(index, newName)
 
-    @Slot(str, int, int, bool)
+    @Slot(str, bool)
     def updateDeviceConfigurationTab(self, name, connect):
         if name in self.deviceConfigurationWidget:
             widget = self.deviceConfigurationWidget[name]
             index = self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.indexOf(widget)
             self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.setTabVisible(index, connect)
+
+    @Slot(str, bool)
+    def updateControlVisibility(self, name, show):
+        controlID = device + " C1"
+        if controlID in self.controls:
+            self.controls[controlID].setVisible(show)
+        controlID = device + " C2"
+        if controlID in self.controls:
+            self.controls[controlID].setVisible(show)
 
     @Slot()
     def updateFeedbackComboBox(self):

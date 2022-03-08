@@ -32,7 +32,7 @@ class CheckBoxDelegate(QItemDelegate):
             string = item[self._key]
             adjRect = QRect()
             adjRect.setCoords(x1, y1, x2, y2)
-            dx = -int((x1-x2)/2)-10
+            dx = -int((x1-x2)/2)-5
             adjRect.adjust(dx,0,dx,0)
             self.drawDisplay(painter, option, adjRect, string)
 

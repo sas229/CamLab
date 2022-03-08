@@ -136,6 +136,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.manager.clearControlTabs.connect(self.clearControlTabs)
         self.manager.deviceAdded.connect(self.addDeviceConfigurationTab)
         self.manager.deviceToggled.connect(self.updateDeviceConfigurationTab)
+        self.manager.deviceToggled.connect(self.updateControlVisibility)
         # self.manager.removeControlTable.connect(self.removeControlTable)
         # self.manager.addControlTable.connect(self.addControlTable)
         # self.manager.updateFeedbackChannelList.connect(self.updateFeedbackChannelList)
@@ -156,6 +157,8 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.updateTimer.timeout.connect(self.manager.assembly.updatePlotData)
         self.updateUI(self.manager.configuration)
 
+        # Check for and, if found, load previous configuration.
+        self.manager.checkForPreviousConfiguration()
 
     def moveEvent(self, event):
         position = self.geometry()

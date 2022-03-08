@@ -143,6 +143,7 @@ class LinearAxis(QWidget):
             self.setWindow()
 
     def setWindow(self):
+        # Set the window size.
         x = int(self.controlConfiguration["settings"]["x"])
         y = int(self.controlConfiguration["settings"]["y"])
         w = int(self.controlConfiguration["settings"]["width"])
@@ -156,12 +157,17 @@ class LinearAxis(QWidget):
         self.controlConfiguration["settings"]["mode"] = "window"
 
     def moveEvent(self, event):
-        # Save updated position in configuration.
-        position = self.geometry()
-        self.controlConfiguration["settings"]["x"] = int(position.x())
-        self.controlConfiguration["settings"]["y"] = int(position.y())
-        self.controlConfiguration["settings"]["width"] = int(self.width())
-        self.controlConfiguration["settings"]["height"] = int(self.height())
+        # Save updated position in configuration if currently in window mode.
+        if self.controlConfiguration["settings"]["mode"] == "window":
+            position = self.geometry()
+            self.controlConfiguration["settings"]["x"] = int(position.x())
+            self.controlConfiguration["settings"]["y"] = int(position.y())  
+
+    def resizeEvent(self, event):
+        # Save updated size in configuration if currently in window mode.
+        if self.controlConfiguration["settings"]["mode"] == "window":
+            self.controlConfiguration["settings"]["width"] = int(self.width())
+            self.controlConfiguration["settings"]["height"] = int(self.height())
 
     def setTab(self):
         self.controlConfiguration["settings"]["mode"] = "tab"

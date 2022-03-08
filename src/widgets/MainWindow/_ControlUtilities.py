@@ -4,6 +4,9 @@ from PySide6.QtGui import QIcon
 from src.widgets.LinearAxis import LinearAxis
 from src.widgets.PlotWindow import PlotWindow
 import copy
+import logging
+
+log = logging.getLogger(__name__)
 
 class ControlUtilities:
 
@@ -97,29 +100,26 @@ class ControlUtilities:
             elif channel == 1:
                 self.manager.devices[name].set_position_C2(position)
                 self.manager.devices[name].set_speed_C2(speed)
-        else:
-            controlWidget = QWidget()
 
-        # Store the widget.
-        self.controls[controlID] = controlWidget
+            # Store the widget.
+            self.controls[controlID] = controlWidget
 
-        # Add widget to tab and show if control enabled.
-        self.tabs.addPersistentTab(self.controls[controlID], controlName)
-        index = self.tabs.indexOf(self.controls[controlID])
-        self.tabs.setTabVisible(index, False)
-        self.controls[controlID].setVisible(False)
-        enabledControls = self.manager.controlTableModels[name].enabledControls()
-        for control in enabledControls:
-            if control["channel"] == controlChannel:
-                self.tabs.setTabVisible(index, True)
-
-        # Convert tab to window if required by configuration.
-        if self.manager.configuration["devices"][name]["control"][channel]["settings"]["mode"] == "window":
-            self.tabToWindow(self.controls[controlID], index)
-            self.controls[controlID].setVisible(False)   
+            # Add widget to tab and show if control enabled.
+            self.tabs.addPersistentTab(self.controls[controlID], controlName)
+            index = self.tabs.indexOf(self.controls[controlID])
+            self.tabs.setTabVisible(index, False)
+            enabledControls = self.manager.controlTableModels[name].enabledControls()
             for control in enabledControls:
-                if control["channel"] == controlChannel: 
-                    self.controls[controlID].setVisible(True)
+                if control["channel"] == controlChannel:
+                    self.tabs.setTabVisible(index, True)
+
+            # Convert tab to window if required by configuration.
+            if self.manager.configuration["devices"][name]["control"][channel]["settings"]["mode"] == "window":
+                self.tabToWindow(self.controls[controlID], index)
+                self.controls[controlID].setVisible(False)   
+                for control in enabledControls:
+                    if control["channel"] == controlChannel: 
+                        self.controls[controlID].setVisible(True)
 
     @Slot(str, int, str)
     def changeControlFeedbackChannel(self, device, channel, selectedFeedbackChannel):
@@ -166,6 +166,8 @@ class ControlUtilities:
         index =  self.tabs.indexOf(widget)
         self.tabs.setTabVisible(index, state)
         self.controls[controlID].setVisible(state)
+        self.tabs.setCurrentIndex(index)
+        self.tabs.setCurrentIndex(0)
 
     @Slot()
     def clearControlTabs(self):
@@ -177,3 +179,12 @@ class ControlUtilities:
             if not isinstance(widget, PlotWindow):
                 if text != "Status" and text != "Configuration" and text != "Sequences":
                     self.tabs.removeTab(index)
+
+    @Slot(str, bool)
+    def updateControlVisibility(self, device, show):
+        controlID = device + " C1"
+        if controlID in self.controls:
+            self.controls[controlID].setVisible(show)
+        controlID = device + " C2"
+        if controlID in self.controls:
+            self.controls[controlID].setVisible(show)

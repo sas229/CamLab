@@ -841,46 +841,50 @@ class Device(QObject):
     @Slot(str)
     def jog_positive_off_C1(self):
         """Turn positive jog off for control channel C1."""
-        self.handle = ljm.open(7, self.connection, self.id)
-        self.jog_C1 = False
-        self.turn_off_PWM_C1()
-        sleep(0.1)
-        self.get_position_C1()
-        self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
-        log.info("Jog positive turned off for control channel C1 on {device}.".format(device=self.name))
+        if self.jog_C1 == True:
+            self.handle = ljm.open(7, self.connection, self.id)
+            self.jog_C1 = False
+            self.turn_off_PWM_C1()
+            sleep(0.1)
+            self.get_position_C1()
+            self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
+            log.info("Jog positive turned off for control channel C1 on {device}.".format(device=self.name))
 
     @Slot(str)
     def jog_positive_off_C2(self):
         """Turn positive jog off for control channel C2."""
-        self.handle = ljm.open(7, self.connection, self.id)
-        self.jog_C2 = False
-        self.turn_off_PWM_C2()
-        sleep(0.1)
-        self.get_position_C2()
-        self.updatePositionSetPointC2.emit(self.position_process_variable_C2)
-        log.info("Jog positive turned off for control channel C2 on {device}.".format(device=self.name))
+        if self.jog_C2 == True:
+            self.handle = ljm.open(7, self.connection, self.id)
+            self.jog_C2 = False
+            self.turn_off_PWM_C2()
+            sleep(0.1)
+            self.get_position_C2()
+            self.updatePositionSetPointC2.emit(self.position_process_variable_C2)
+            log.info("Jog positive turned off for control channel C2 on {device}.".format(device=self.name))
 
     @Slot(str)
     def jog_negative_off_C1(self):
         """Turn negative jog off for control channel C1."""
-        self.handle = ljm.open(7, self.connection, self.id)
-        self.jog_C1 = False
-        self.turn_off_PWM_C1()
-        sleep(0.1)
-        self.get_position_C1()
-        self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
-        log.info("Jog negative turned off for control channel C1 on {device}.".format(device=self.name))
+        if self.jog_C1 == True:
+            self.handle = ljm.open(7, self.connection, self.id)
+            self.jog_C1 = False
+            self.turn_off_PWM_C1()
+            sleep(0.1)
+            self.get_position_C1()
+            self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
+            log.info("Jog negative turned off for control channel C1 on {device}.".format(device=self.name))
 
     @Slot(str)
     def jog_negative_off_C2(self):
         """Turn negative jog off for control channel C2."""
-        self.handle = ljm.open(7, self.connection, self.id)
-        self.jog_C2 = False
-        self.turn_off_PWM_C2()
-        sleep(0.1)
-        self.get_position_C2()
-        self.updatePositionSetPointC2.emit(self.position_process_variable_C2)
-        log.info("Jog negative turned off for control channel C2 on {device}.".format(device=self.name))
+        if self.jog_C2 == True:
+            self.handle = ljm.open(7, self.connection, self.id)
+            self.jog_C2 = False
+            self.turn_off_PWM_C2()
+            sleep(0.1)
+            self.get_position_C2()
+            self.updatePositionSetPointC2.emit(self.position_process_variable_C2)
+            log.info("Jog negative turned off for control channel C2 on {device}.".format(device=self.name))
 
     @Slot()
     def updateControlPanelC1(self):

@@ -30,7 +30,6 @@ class Manager(QObject):
     existingPlotsFound = Signal()
     outputText = Signal(str)
     finishedRefreshingDevices = Signal()
-    # updateFeedbackChannelList = Signal(str, list)
 
     def __init__(self):
         super().__init__()
@@ -116,8 +115,12 @@ class Manager(QObject):
         log.info("Timing thread created.")
         self.timing.moveToThread(self.timingThread)
         self.timingThread.start()
-        log.info("Timing thread started.")           
+        log.info("Timing thread started.")   
 
+        # Load default configuration initially.
+        self.initialiseDefaultConfiguration() 
+
+    def checkForPreviousConfiguration(self):
         # Load last used configuration file.
         log.info("Finding previous YAML file location from QSettings.")
         self.settings = QSettings("CamLab", "Settings")
@@ -125,8 +128,6 @@ class Manager(QObject):
         self.findConfigurationPath()
         if self.configurationPath != None:
             self.loadConfiguration(self.configurationPath)
-        else:
-            self.initialiseDefaultConfiguration()
 
     @Slot(str, list, list)
     def updateDeviceOffsets(self, name, channels, newOffsets):
@@ -348,10 +349,11 @@ class Manager(QObject):
                     log.warning(e)
                 # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
                 self.deviceTableModel.appendRow(deviceInformation)
-                self.createDeviceThread(name=device, id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True)
                 self.acquisitionTableModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
                 self.controlTableModels[name] = ControlTableModel(name, self.configuration["devices"][name]["control"])
                 self.feedbackChannelLists[name] = self.setFeedbackChannelList(name)
+                self.createDeviceThread(name=device, id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True)
+                self.toggleDeviceConnection(device, deviceInformation["connect"])
             log.info("Configuration loaded.")
         self.configurationChanged.emit(self.configuration)
 
