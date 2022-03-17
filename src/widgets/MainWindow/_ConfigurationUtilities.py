@@ -81,15 +81,6 @@ class ConfigurationUtilities:
             index = self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.indexOf(widget)
             self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.setTabVisible(index, connect)
 
-    @Slot(str, bool)
-    def updateControlVisibility(self, name, show):
-        controlID = device + " C1"
-        if controlID in self.controls:
-            self.controls[controlID].setVisible(show)
-        controlID = device + " C2"
-        if controlID in self.controls:
-            self.controls[controlID].setVisible(show)
-
     @Slot()
     def updateFeedbackComboBox(self):
         # Get the name of the device.

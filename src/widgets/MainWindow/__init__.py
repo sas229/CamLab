@@ -11,7 +11,7 @@ from src.manager import Manager
 from src.widgets.ToolBar import ToolBar
 from src.widgets.TabInterface import TabInterface
 from src.widgets.ConfigurationTab import ConfigurationTab
-from src.widgets.SequencesTab import SequencesTab
+from src.widgets.SequenceTab import SequenceTab
 from src.widgets.StatusTab import StatusTab
 from src.widgets.StatusGroupBox import StatusGroupBox
 from src.dialogs import BusyDialog
@@ -80,13 +80,13 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.configurationTab.devicesGroupBox.deviceTableView.setModel(self.manager.deviceTableModel)
 
         # Sequences tab.
-        self.sequencesTab = SequencesTab()
+        self.sequenceTab = SequenceTab()
 
         # Status tab.
         self.statusTab = StatusTab()
 
         self.tabs.addPersistentTab(self.configurationTab, "Configuration")
-        self.tabs.addPersistentTab(self.sequencesTab, "Sequences")
+        self.tabs.addPersistentTab(self.sequenceTab, "Sequence")
         self.tabs.addPersistentTab(self.statusTab, "Status")
 
         # Set the central widget of the main window.
@@ -124,7 +124,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.configurationTab.configurationWindowClosed.connect(self.windowToTab)
 
         # Sequences tab connections.
-        self.sequencesTab.sequencesWindowClosed.connect(self.windowToTab)
+        self.sequenceTab.sequenceWindowClosed.connect(self.windowToTab)
 
         # Status tab connections.
         self.statusTab.statusWindowClosed.connect(self.windowToTab)
@@ -232,8 +232,10 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.configuration = newConfiguration
         self.darkMode = self.configuration["global"]["darkMode"]
         self.setTheme()
+        
         # Update icon colours as a function of the darkMode boolean.
         self.toolbar.updateIcons(self.darkMode)
+        self.sequenceTab.updateTab()
 
         # Update the UI of plot windows if they exist.
         if self.plots and "plots" in self.manager.configuration: 

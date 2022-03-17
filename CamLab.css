@@ -1,3 +1,23 @@
+SequenceToolBar QToolButton {{
+  background: {QTMATERIAL_SECONDARYCOLOR};
+  border: 0px;
+  height: 30px;
+  margin: 0px;
+  padding: 5px;
+  border-right: 10px solid {QTMATERIAL_SECONDARYCOLOR};
+  border-left: 10px solid {QTMATERIAL_SECONDARYCOLOR};
+}}
+
+SequenceToolBar QToolButton:hover {{
+  background: {QTMATERIAL_SECONDARYLIGHTCOLOR};
+  border-right: 10px solid {QTMATERIAL_SECONDARYLIGHTCOLOR};
+  border-left: 10px solid {QTMATERIAL_SECONDARYLIGHTCOLOR};
+}}
+
+SequenceToolBar {{
+  background-color: {QTMATERIAL_SECONDARYCOLOR};
+}}
+
 QTabBar::close-button {{
   image: url(icon:/secondaryText/close.svg);
 }}

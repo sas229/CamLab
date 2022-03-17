@@ -17,6 +17,10 @@ from .SettingsGroupBox import SettingsGroupBox
 from .SliderGroupBox import SliderGroupBox
 from .TabInterface import TabInterface
 from .ConfigurationTab import ConfigurationTab
-from .SequencesTab import SequencesTab
+from .SequenceTab import SequenceTab
 from .StatusTab import StatusTab
 from .WaitingIndicator import WaitingIndicator
+from .CommandBuilder import CommandBuilder
+from .CommandPreview import CommandPreview
+from .CommandTree import CommandTree
+from .SequenceToolBar import SequenceToolBar
