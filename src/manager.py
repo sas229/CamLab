@@ -339,7 +339,17 @@ class Manager(QObject):
                     handle = ljm.open(7, int(deviceInformation["connection"]), int(deviceInformation["id"]))
                     name = ljm.eReadNameString(handle, "DEVICE_NAME_DEFAULT")
                     ljm.close(handle)
-                    deviceInformation["status"] = True                  
+                    deviceInformation["status"] = True     
+                    
+                    # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
+                    self.deviceTableModel.appendRow(deviceInformation)
+                    self.acquisitionTableModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
+                    self.controlTableModels[name] = ControlTableModel(name, self.configuration["devices"][name]["control"])
+                    self.feedbackChannelLists[name] = self.setFeedbackChannelList(name)
+                    self.createDeviceThread(name=device, id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True)
+                    self.toggleDeviceConnection(device, deviceInformation["connect"])
+                    log.info("Configuration loaded.")
+                    self.configurationChanged.emit(self.configuration)             
                 except ljm.LJMError:
                     # Otherwise log the exception and set the device status to false.
                     ljme = sys.exc_info()[1]
@@ -347,15 +357,6 @@ class Manager(QObject):
                 except Exception:
                     e = sys.exc_info()[1]
                     log.warning(e)
-                # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
-                self.deviceTableModel.appendRow(deviceInformation)
-                self.acquisitionTableModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
-                self.controlTableModels[name] = ControlTableModel(name, self.configuration["devices"][name]["control"])
-                self.feedbackChannelLists[name] = self.setFeedbackChannelList(name)
-                self.createDeviceThread(name=device, id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True)
-                self.toggleDeviceConnection(device, deviceInformation["connect"])
-            log.info("Configuration loaded.")
-        self.configurationChanged.emit(self.configuration)
 
     def findDevices(self):
         """Method to find all available devices and return an array of connection properties.
