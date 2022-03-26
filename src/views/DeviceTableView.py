@@ -25,6 +25,7 @@ class DeviceTableView(QTableView):
 
         self.setItemDelegateForColumn(0, self.nameCheckBoxDelegate)
         self.setItemDelegateForColumn(1, self.stringDelegate)
-        self.setItemDelegateForColumn(2, self.connectionIconDelegate)
-        self.setItemDelegateForColumn(3, self.stringDelegate)
-        self.setItemDelegateForColumn(4, self.statusIconDelegate)
+        self.setItemDelegateForColumn(2, self.stringDelegate)
+        self.setItemDelegateForColumn(3, self.connectionIconDelegate)
+        self.setItemDelegateForColumn(4, self.stringDelegate)
+        self.setItemDelegateForColumn(5, self.statusIconDelegate)

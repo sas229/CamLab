@@ -331,10 +331,12 @@ class Manager(QObject):
                 deviceInformation = {}
                 deviceInformation["connect"] = True
                 deviceInformation["name"] = device
+                deviceInformation["type"] = self.configuration["devices"][device]["type"]
                 deviceInformation["id"] = self.configuration["devices"][device]["id"]
                 deviceInformation["connection"] = self.configuration["devices"][device]["connection"]
                 deviceInformation["address"] = self.configuration["devices"][device]["address"]
                 deviceInformation["status"] = False
+                # if deviceInformation["type"] == "LabJack T7":
                 # Try to connect to each device using the ID.
                 try:
                     # If the connection is successful, set the device status to true.
@@ -383,6 +385,8 @@ class Manager(QObject):
         print("Adding Galaxy camera devices...")
         device_manager = gx.DeviceManager()
         dev_num, dev_info_list = device_manager.update_device_list()
+
+
         cam = device_manager.open_device_by_user_id("TOM")
         cam.BalanceWhiteAuto.set(gx.GxAutoEntry.CONTINUOUS)
         cam.stream_on()
@@ -427,6 +431,7 @@ class Manager(QObject):
                     deviceInformation["name"] = ljm.eReadNameString(handle, "DEVICE_NAME_DEFAULT")
                     ljm.close(handle)
                     deviceInformation["id"] = ID[i]
+                    deviceInformation["type"] = "LabJack T7"
                     deviceInformation["connection"] = connectionType[i]
                     if mode == "USB":
                         deviceInformation["address"] = "N/A"
@@ -443,6 +448,7 @@ class Manager(QObject):
                     controlTable[1]["name"] = deviceInformation["name"] + " C2"
                     newDevice = {
                         "id": deviceInformation["id"],
+                        "type": deviceInformation["type"],
                         "connection": deviceInformation["connection"],
                         "address": deviceInformation["address"],
                         "acquisition": acquisitionTable,

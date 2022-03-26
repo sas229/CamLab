@@ -14,6 +14,7 @@ class DeviceTableModel(QAbstractTableModel):
         self._data = data
         self._column_name = [
             "Name",
+            "Type",
             "ID",
             "Connection",
             "Address",
@@ -42,12 +43,14 @@ class DeviceTableModel(QAbstractTableModel):
                     if index.column() == 0:
                         return item["connect"]
                     elif index.column() == 1:
-                        return item["id"]
+                        return item["type"]
                     elif index.column() == 2:
-                        return item["connection"]
+                        return item["id"]
                     elif index.column() == 3:
-                        return item["address"]
+                        return item["connection"]
                     elif index.column() == 4:
+                        return item["address"]
+                    elif index.column() == 5:
                         return item["status"]
         elif role == Qt.CheckStateRole and index.column()==0:
             if index.isValid():
@@ -60,7 +63,7 @@ class DeviceTableModel(QAbstractTableModel):
             if index.column() == 0:
                 item["connect"] = value
                 self.deviceConnectStatusUpdated.emit(item['name'], item['connect'])
-            elif index.column() == 4:
+            elif index.column() == 5:
                 item["status"] = value
             self.dataChanged.emit(index, index, [])
             return True
