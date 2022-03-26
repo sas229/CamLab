@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QItemDelegate, QStyle, QLineEdit
 from PySide6.QtGui import QDoubleValidator
-from PySide6.QtCore import Qt, QLocale
+from PySide6.QtCore import Qt, QLocale, QRect
 
 class FloatValidatorDelegate(QItemDelegate):
     """
@@ -24,3 +24,13 @@ class FloatValidatorDelegate(QItemDelegate):
         # Change the underlying data model by updating the value as a float.
         value = float(editor.text())        
         model.setData(index, value, Qt.EditRole)
+
+    def paint(self, painter, option, index):
+        # Override paint method to put centered text in cell.
+        x1, y1, x2, y2 = option.rect.getCoords()
+        rect = QRect()
+        rect.setCoords(x1, y1, x2, y2)
+        model = index.model()
+        string = str(model.data(index, role=Qt.DisplayRole))
+        option.displayAlignment = Qt.AlignCenter
+        self.drawDisplay(painter, option, rect, string)

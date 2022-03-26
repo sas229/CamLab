@@ -41,8 +41,6 @@ class TabInterface(QTabWidget):
         if isinstance(widget, PlotWindow):
             plotNumber = widget.plotNumber
             self.removePlot.emit(plotNumber)
-            # widget.setParent(None)
-            # widget.deleteLater()
         self.removeTab(index)
         log.info("Tab removed.")
     

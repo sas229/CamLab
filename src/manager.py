@@ -13,6 +13,8 @@ import numpy as np
 import time
 import re
 from datetime import datetime
+import src.local_gxipy as gx
+from PIL import Image
 
 log = logging.getLogger(__name__)
 
@@ -366,21 +368,32 @@ class Manager(QObject):
         self.clearConfiguration()
         self.refreshing = True
 
-        # Clear all tables and re-load the current configuration.
-        self.deviceTableModel.clearData()
-        self.acquisitionTableModels = {}
-        self.acquisitionTables = {}
-        self.controlTableModels = {}
-        self.clearDeviceConfigurationTabs.emit()
-        self.loadDevicesFromConfiguration()
-
         # Add LabJack USB devices, then TCP devices (USB preferred due to reduced latency).
         self.addLJDevices("USB")
         self.addLJDevices("TCP")
 
+        # Add Galaxy camera devices.
+        self.addGalaxyDevices()
+
         # Boolean to indicate that the device list has finished refreshing.
         self.refreshing = False
         self.finishedRefreshingDevices.emit()
+
+    def addGalaxyDevices(self):
+        print("Adding Galaxy camera devices...")
+        device_manager = gx.DeviceManager()
+        dev_num, dev_info_list = device_manager.update_device_list()
+        cam = device_manager.open_device_by_user_id("TOM")
+        cam.BalanceWhiteAuto.set(gx.GxAutoEntry.CONTINUOUS)
+        cam.stream_on()
+        raw_image = cam.data_stream[0].get_image()
+        rgb_image = raw_image.convert("RGB")
+        numpy_image = rgb_image.get_numpy_array()
+        img = Image.fromarray(numpy_image, 'RGB')
+        img.save("Test.png", "PNG")
+        img.show()
+        cam.stream_off()
+        cam.close_device()
 
     def addLJDevices(self, mode):
         try:

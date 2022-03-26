@@ -15,12 +15,14 @@ class ControlTableView(QTableView):
         horizontalHeader = self.horizontalHeader()
         horizontalHeader.setSectionResizeMode(QHeaderView.Stretch)
 
+        self.channelDelegate = StringDelegate()
         self.nameDelegate = StringDelegate()
         self.controlModeComboBoxDelegate = ComboBoxDelegate(controlModeList)
         self.controlActuatorComboBoxDelegate = ComboBoxDelegate(controlActuatorList)
         self.feedbackChannelListComboBoxDelegate = ComboBoxDelegate(feedbackChannelList)
         self.checkBoxDelegate = CheckBoxDelegate()
         
+        self.setItemDelegateForColumn(0, self.channelDelegate)
         self.setItemDelegateForColumn(1, self.nameDelegate)
         self.setItemDelegateForColumn(2, self.controlModeComboBoxDelegate)
         self.setItemDelegateForColumn(3, self.controlActuatorComboBoxDelegate)

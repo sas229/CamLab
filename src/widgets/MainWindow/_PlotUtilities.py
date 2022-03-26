@@ -67,7 +67,6 @@ class PlotUtilities:
         # Connections.
         self.manager.configurationChanged.connect(self.plots[plotNumber].setConfiguration)
         self.manager.assembly.plotDataChanged.connect(self.plots[plotNumber].updatePlotData)
-        # self.plots[plotNumber].plotWindowClosed.connect(self.removePlot)
         self.plots[plotNumber].plotWindowClosed.connect(self.windowToTab)
         self.plots[plotNumber].colourUpdated.connect(self.updateChannelColours)
 
@@ -92,7 +91,6 @@ class PlotUtilities:
             # Connections.
             self.manager.configurationChanged.connect(self.plots[plotNumber].setConfiguration)
             self.manager.assembly.plotDataChanged.connect(self.plots[plotNumber].updatePlotData)
-            # self.plots[plotNumber].plotWindowClosed.connect(self.removePlot)
             self.plots[plotNumber].plotWindowClosed.connect(self.windowToTab)
             self.plots[plotNumber].colourUpdated.connect(self.updateChannelColours)
 
@@ -126,6 +124,9 @@ class PlotUtilities:
                 del self.manager.configuration["plots"]
     
     def closePlots(self):
+        # Close windows into tabs.
+        for plotNumber in self.plots:
+            self.plots[plotNumber].close()
         # Remove plot tabs.
         tabs = self.tabs.count()
         for index in reversed(range(tabs)):

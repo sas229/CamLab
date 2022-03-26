@@ -15,6 +15,9 @@ qtrangeslider = "*"
 numpy = "*"
 scipy = "*"
 simple-pid = "*"
+harvester = "*"
+harvesters = "*"
+pillow = "*"
 
 [dev-packages]
 

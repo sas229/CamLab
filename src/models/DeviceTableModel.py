@@ -103,9 +103,3 @@ class DeviceTableModel(QAbstractTableModel):
             if device["connect"] == True and device["status"] == True:
                 enabledDevices.append(device)
         return enabledDevices   
-    
-    def redrawIcons(self):
-        """Method to redraw icons as a workaround."""
-        index_begin = self.index(0, 0)
-        index_end = self.index(self.rowCount(), self.columnCount())
-        self.dataChanged.emit(index_begin, index_end, [])

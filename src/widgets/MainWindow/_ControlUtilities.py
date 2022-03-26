@@ -171,6 +171,9 @@ class ControlUtilities:
 
     @Slot()
     def clearControlTabs(self):
+        # Close windows into tabs.
+        for controlID in self.controls:
+            self.controls[controlID].close()
         # Remove all control tabs.
         tabs = self.tabs.count()
         for index in reversed(range(tabs)):

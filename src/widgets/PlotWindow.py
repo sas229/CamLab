@@ -823,7 +823,6 @@ class PlotWindow(QWidget, QtStyleTools):
         self.colourUpdated.emit(index, colour)
 
     def closeEvent(self, event):
-        # self.plotWindowClosed.emit(self.plotNumber)
         self.plotWindowClosed.emit(self)
 
     def setChannelsModel(self, channelsData):
