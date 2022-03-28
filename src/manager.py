@@ -375,7 +375,7 @@ class Manager(QObject):
         self.addLJDevices("TCP")
 
         # Add Galaxy camera devices.
-        self.addGalaxyDevices()
+        # self.addGalaxyDevices()
 
         # Boolean to indicate that the device list has finished refreshing.
         self.refreshing = False
