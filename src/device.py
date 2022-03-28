@@ -1,6 +1,5 @@
 from PySide6.QtCore import QObject, Signal, Slot
 import logging
-import ruamel.yaml
 from labjack import ljm
 import numpy as np
 import time

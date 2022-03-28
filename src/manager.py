@@ -291,10 +291,13 @@ class Manager(QObject):
                 log.info("Feedback channel set to {feedback} for control channel {channel} on {device}.".format(feedback=control["feedback"], channel=control["channel"], device=name))
 
     @Slot(str, int, int, bool)
-    def createDeviceThread(self, name, id, connection, connect):
+    def createDeviceThread(self, name, deviceType, id, connection, connect):
         # Create device instance and move to thread if it doesn't already exist.
         if name not in self.devices:
-            self.devices[name] = Device(name, id, connection)
+            if deviceType == "LabJack T7":
+                self.devices[name] = Device(name, id, connection)
+            elif deviceType == "Camera":
+                self.devices[name] = Camera(name, id, connection)
             log.info("Device instance created for device named " + name + ".")
             self.deviceThreads[name] = QThread()
             log.info("Device thread created for device named " + name + ".")
@@ -331,36 +334,41 @@ class Manager(QObject):
                 deviceInformation = {}
                 deviceInformation["connect"] = True
                 deviceInformation["name"] = device
+                deviceInformation["model"] = self.configuration["devices"][device]["model"]
                 deviceInformation["type"] = self.configuration["devices"][device]["type"]
                 deviceInformation["id"] = self.configuration["devices"][device]["id"]
                 deviceInformation["connection"] = self.configuration["devices"][device]["connection"]
                 deviceInformation["address"] = self.configuration["devices"][device]["address"]
                 deviceInformation["status"] = False
-                # if deviceInformation["type"] == "LabJack T7":
-                # Try to connect to each device using the ID.
-                try:
-                    # If the connection is successful, set the device status to true.
-                    handle = ljm.open(7, int(deviceInformation["connection"]), int(deviceInformation["id"]))
-                    name = ljm.eReadNameString(handle, "DEVICE_NAME_DEFAULT")
-                    ljm.close(handle)
-                    deviceInformation["status"] = True     
-                    
-                    # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
-                    self.deviceTableModel.appendRow(deviceInformation)
-                    self.acquisitionTableModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
-                    self.controlTableModels[name] = ControlTableModel(name, self.configuration["devices"][name]["control"])
-                    self.feedbackChannelLists[name] = self.setFeedbackChannelList(name)
-                    self.createDeviceThread(name=device, id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True)
-                    self.toggleDeviceConnection(device, deviceInformation["connect"])
-                    log.info("Configuration loaded.")
-                    self.configurationChanged.emit(self.configuration)             
-                except ljm.LJMError:
-                    # Otherwise log the exception and set the device status to false.
-                    ljme = sys.exc_info()[1]
-                    log.warning(ljme) 
-                except Exception:
-                    e = sys.exc_info()[1]
-                    log.warning(e)
+                # Try to connect to each device and add to configuration if present.
+                if deviceInformation["type"] == "Hub":
+                    if deviceInformation["model"] == "LabJack T7":
+                        try:
+                            # If the connection is successful, set the device status to true.
+                            handle = ljm.open(7, int(deviceInformation["connection"]), int(deviceInformation["id"]))
+                            name = ljm.eReadNameString(handle, "DEVICE_NAME_DEFAULT")
+                            ljm.close(handle)
+                            deviceInformation["status"] = True     
+                            
+                            # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
+                            self.deviceTableModel.appendRow(deviceInformation)
+                            self.acquisitionTableModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
+                            self.controlTableModels[name] = ControlTableModel(name, self.configuration["devices"][name]["control"])
+                            self.feedbackChannelLists[name] = self.setFeedbackChannelList(name)
+                            self.createDeviceThread(name=device, deviceType="LabJack T7", id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True)
+                            self.toggleDeviceConnection(device, deviceInformation["connect"])
+                            log.info("Configuration loaded.")
+                            self.configurationChanged.emit(self.configuration)             
+                        except ljm.LJMError:
+                            # Otherwise log the exception and set the device status to false.
+                            ljme = sys.exc_info()[1]
+                            log.warning(ljme) 
+                        except Exception:
+                            e = sys.exc_info()[1]
+                            log.warning(e)
+                elif deviceInformation["type"] == "Camera":
+                    print("Camera loaded from configuration...")
+                    # Execute commands to add camera to configuration...
 
     def findDevices(self):
         """Method to find all available devices and return an array of connection properties.
@@ -375,31 +383,95 @@ class Manager(QObject):
         self.addLJDevices("TCP")
 
         # Add Galaxy camera devices.
-        # self.addGalaxyDevices()
+        self.addGalaxyDevices()
 
         # Boolean to indicate that the device list has finished refreshing.
         self.refreshing = False
         self.finishedRefreshingDevices.emit()
 
     def addGalaxyDevices(self):
-        print("Adding Galaxy camera devices...")
-        device_manager = gx.DeviceManager()
-        dev_num, dev_info_list = device_manager.update_device_list()
+        # Add Galaxy camera devices.
+        try:
+            # Get a list of already existing devices.
+            existingDevices = self.deviceTableModel._data
+            ID_Existing = []
+            for device in existingDevices:
+                ID_Existing.append(device["id"])
 
+            # Instantiate a Galaxy device manager and update the device list.
+            device_manager = gx.DeviceManager()
+            numDevices, device_list = device_manager.update_device_list()
 
-        cam = device_manager.open_device_by_user_id("TOM")
-        cam.BalanceWhiteAuto.set(gx.GxAutoEntry.CONTINUOUS)
-        cam.stream_on()
-        raw_image = cam.data_stream[0].get_image()
-        rgb_image = raw_image.convert("RGB")
-        numpy_image = rgb_image.get_numpy_array()
-        img = Image.fromarray(numpy_image, 'RGB')
-        img.save("Test.png", "PNG")
-        img.show()
-        cam.stream_off()
-        cam.close_device()
+            # Add devices if not already in device list.
+            for device in device_list:
+                if device["sn"] not in ID_Existing:
+                    deviceInformation = {}
+                    deviceInformation["connect"] = False
+                    deviceInformation["name"] = device["user_id"]
+                    deviceInformation["id"] = device["sn"]
+                    deviceInformation["model"] = device["model_name"]
+                    deviceInformation["type"] = "Camera"
+                    if device["device_class"] == 3:
+                        mode = "USB"
+                        deviceInformation["connection"] = 1
+                        deviceInformation["address"] = "N/A"
+                    elif device["device_class"] == 2:
+                        mode = "GigE"
+                        deviceInformation["connection"] = 3
+                        deviceInformation["address"] = device["ip"]
+                    deviceInformation["status"] = True
+                    self.deviceTableModel.appendRow(deviceInformation)
+
+                    # Make a deep copy to avoid pointers in the YAML output.
+                    newDevice = {
+                        "id": deviceInformation["id"],
+                        "model": deviceInformation["model"],
+                        "type": deviceInformation["type"],
+                        "connection": deviceInformation["connection"],
+                        "address": deviceInformation["address"]
+                    }
+
+                    # If no previous devices are configured, add the "devices" key to the configuration.
+                    name = deviceInformation["name"]
+                    if "devices" not in self.configuration:
+                        self.configuration["devices"] = {name: newDevice} 
+                    else:
+                        self.configuration["devices"][name] = newDevice 
+
+                    # Instantiate acquisition and control table models.
+                    log.info("Instantiating data models for device.")
+                    # Commands to instantiate data models for device control...
+                    log.info("Data models instantiated for device.")
+                
+                    # Create device thread and add device to UI.
+                    log.info("Adding device to UI.")
+                    # self.createDeviceThread(name=name, deviceType="Camera", id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False)
+                    self.configurationChanged.emit(self.configuration)
+
+                    # Log message.
+                    if mode == "USB":
+                        message = "Found a USB3 camera device with ID number {number}.".format(number=deviceInformation["id"])
+                    elif mode == "TCP":
+                        message = "Found a GigE camera device with ID number {number}.".format(number=deviceInformation["id"])
+                    log.info(message)
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
+
+        # cam = device_manager.open_device_by_user_id("TOM")
+        # cam.BalanceWhiteAuto.set(gx.GxAutoEntry.CONTINUOUS)
+        # cam.stream_on()
+        # raw_image = cam.data_stream[0].get_image()
+        # rgb_image = raw_image.convert("RGB")
+        # numpy_image = rgb_image.get_numpy_array()
+        # img = Image.fromarray(numpy_image, 'RGB')
+        # img.save("Test.png", "PNG")
+        # img.show()
+        # cam.stream_off()
+        # cam.close_device()
 
     def addLJDevices(self, mode):
+        # Add LabJack devices.
         try:
             # Get a list of already existing devices.
             existingDevices = self.deviceTableModel._data
@@ -431,7 +503,8 @@ class Manager(QObject):
                     deviceInformation["name"] = ljm.eReadNameString(handle, "DEVICE_NAME_DEFAULT")
                     ljm.close(handle)
                     deviceInformation["id"] = ID[i]
-                    deviceInformation["type"] = "LabJack T7"
+                    deviceInformation["model"] = "LabJack T7"
+                    deviceInformation["type"] = "Hub"
                     deviceInformation["connection"] = connectionType[i]
                     if mode == "USB":
                         deviceInformation["address"] = "N/A"
@@ -448,6 +521,7 @@ class Manager(QObject):
                     controlTable[1]["name"] = deviceInformation["name"] + " C2"
                     newDevice = {
                         "id": deviceInformation["id"],
+                        "model": deviceInformation["model"],
                         "type": deviceInformation["type"],
                         "connection": deviceInformation["connection"],
                         "address": deviceInformation["address"],
@@ -462,7 +536,7 @@ class Manager(QObject):
                     else:
                         self.configuration["devices"][name] = newDevice 
 
-                    # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
+                    # Instantiate acquisition and control table models.
                     log.info("Instantiating data models for device.")
                     self.acquisitionTableModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
                     self.controlTableModels[name] = ControlTableModel(name, self.configuration["devices"][name]["control"])
@@ -471,13 +545,15 @@ class Manager(QObject):
                 
                     # Create device thread and add device to UI.
                     log.info("Adding device to UI.")
-                    self.createDeviceThread(name=name, id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False)
+                    self.createDeviceThread(name=name, deviceType="LabJack T7", id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False)
                     self.configurationChanged.emit(self.configuration)
-            if mode == "USB":
-                message = "Found {n} USB device(s)...".format(n=numDevices)
-            elif mode == "TCP":
-                message = "Found {n} TCP device(s)...".format(n=numDevices)
-            log.info(message)
+            
+                    # Log message.
+                    if mode == "USB":
+                        message = "Found a USB LabJack T7 device with ID number {number}.".format(number=deviceInformation["id"])
+                    elif mode == "TCP":
+                        message = "Found a TCP LabJack T7 device with ID number {number}.".format(number=deviceInformation["id"])
+                    log.info(message)
         except ljm.LJMError:
             ljme = sys.exc_info()[1]
             log.warning(ljme) 

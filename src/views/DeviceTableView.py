@@ -1,12 +1,10 @@
 from PySide6.QtWidgets import QTableView, QHeaderView
-from src.delegates import CheckBoxDelegate, ConnectionIconDelegate, StatusIconDelegate, StringDelegate
+from src.delegates import CheckBoxDelegate, ConnectionIconDelegate, StatusIconDelegate, StringDelegate, DeviceIconDelegate
 
 class DeviceTableView(QTableView):
 
-    def __init__(self, configuration, data=[], parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
-        self.configuration = configuration
-        self.darkMode = self.configuration["global"]["darkMode"]
         self.setSelectionBehavior(self.SelectRows)
         self.setSelectionMode(self.SingleSelection)
         self.setShowGrid(False)
@@ -16,16 +14,19 @@ class DeviceTableView(QTableView):
         verticalHeader.hide()
         verticalHeader.setDefaultSectionSize(25)
         horizontalHeader = self.horizontalHeader()
-        horizontalHeader.setSectionResizeMode(QHeaderView.Stretch)
+        horizontalHeader.setSectionResizeMode(QHeaderView.ResizeToContents)
+        horizontalHeader.setStretchLastSection(True)
 
         self.nameCheckBoxDelegate = CheckBoxDelegate("name")
         self.stringDelegate = StringDelegate()
         self.connectionIconDelegate = ConnectionIconDelegate() 
         self.statusIconDelegate = StatusIconDelegate()
+        self.deviceIconDelegate = DeviceIconDelegate()
 
         self.setItemDelegateForColumn(0, self.nameCheckBoxDelegate)
-        self.setItemDelegateForColumn(1, self.stringDelegate)
+        self.setItemDelegateForColumn(1, self.deviceIconDelegate)
         self.setItemDelegateForColumn(2, self.stringDelegate)
-        self.setItemDelegateForColumn(3, self.connectionIconDelegate)
-        self.setItemDelegateForColumn(4, self.stringDelegate)
+        self.setItemDelegateForColumn(3, self.stringDelegate)
+        self.setItemDelegateForColumn(4, self.connectionIconDelegate)
         self.setItemDelegateForColumn(5, self.statusIconDelegate)
+        self.setItemDelegateForColumn(6, self.stringDelegate)

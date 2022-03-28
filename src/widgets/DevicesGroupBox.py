@@ -14,7 +14,13 @@ class DevicesGroupBox(QGroupBox):
         self.setTitle("Devices")
 
         # Create device table view.
-        self.deviceTableView = DeviceTableView(self.configuration)
+        self.deviceTableView = DeviceTableView()
+        self.deviceTableView.setColumnWidth(0, 50)
+        self.deviceTableView.setColumnWidth(1, 50)
+        self.deviceTableView.setColumnWidth(2, 30)
+        self.deviceTableView.setColumnWidth(3, 50)
+        self.deviceTableView.setColumnWidth(4, 150)
+        self.deviceTableView.setColumnWidth(5, 50)
 
         # Create layout.
         self.layout = QVBoxLayout()

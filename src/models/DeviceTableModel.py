@@ -15,10 +15,11 @@ class DeviceTableModel(QAbstractTableModel):
         self._column_name = [
             "Name",
             "Type",
+            "Model",
             "ID",
-            "Connection",
-            "Address",
-            "Status"
+            "Cxn",
+            "Conn",
+            "Address"
         ] 
 
         log.info("Device table model instantiated.")
@@ -31,7 +32,7 @@ class DeviceTableModel(QAbstractTableModel):
     def columnCount(self, parent=QModelIndex()):
         if self._data == []:
             return 0
-        return 5
+        return 7
     
     def data(self, index, role):
         if role == Qt.TextAlignmentRole:
@@ -45,13 +46,15 @@ class DeviceTableModel(QAbstractTableModel):
                     elif index.column() == 1:
                         return item["type"]
                     elif index.column() == 2:
-                        return item["id"]
+                        return item["model"]
                     elif index.column() == 3:
-                        return item["connection"]
+                        return item["id"]
                     elif index.column() == 4:
-                        return item["address"]
+                        return item["connection"]
                     elif index.column() == 5:
                         return item["status"]
+                    elif index.column() == 6:
+                        return item["address"]
         elif role == Qt.CheckStateRole and index.column()==0:
             if index.isValid():
                 item = self._data[index.row()]
@@ -63,7 +66,7 @@ class DeviceTableModel(QAbstractTableModel):
             if index.column() == 0:
                 item["connect"] = value
                 self.deviceConnectStatusUpdated.emit(item['name'], item['connect'])
-            elif index.column() == 5:
+            elif index.column() == 6:
                 item["status"] = value
             self.dataChanged.emit(index, index, [])
             return True
