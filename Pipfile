@@ -5,18 +5,13 @@ name = "pypi"
 
 [packages]
 pyside6 = "*"
-qt-material = "*"
 colorlog = "*"
-pyqtgraph = "*"
 "ruamel.yaml" = "*"
 labjack = "*"
 labjack-ljm = "*"
-qtrangeslider = "*"
 numpy = "*"
 scipy = "*"
 simple-pid = "*"
-harvester = "*"
-harvesters = "*"
 pillow = "*"
 
 [dev-packages]
