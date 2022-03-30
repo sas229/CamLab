@@ -97,9 +97,11 @@ class Device(QObject):
         self.position_right_limit_status_C1 = False
         self.position_right_limit_status_C2 = False
         self.max_rpm = 4000
+        self.current_data = np.empty(0)
 
-        # Load Lua failsafe script to turn off PWM.
+        # Disable clock 0 and load Lua failsafe script to turn off PWM.
         self.open_connection()
+        self.disable_clock_0()
         self.load_lua_script()
         self.close_connection()
 
@@ -111,7 +113,6 @@ class Device(QObject):
     def initialise(self):
         #  Initialise device.
         self.open_connection()
-        self.disable_clock_0()
         self.initialise_settings()
         self.check_limits()
         self.set_speed_limit()
@@ -1226,9 +1227,15 @@ class Device(QObject):
         elif self.feedback_C2 == True:
             self.data_C2 = np.hstack((self.position_setpoint_C2, self.position_process_variable_C2, int(self.direction_C2), self.speed_C2, self.feedback_setpoint_C2, self.feedback_process_variable_C2))
         if self.enabled_C1 == True:
-            self.current_data = np.concatenate((self.current_data, self.data_C1))
+            if self.current_data.size == 0:
+                self.current_data = self.data_C1
+            else:
+                self.current_data = np.concatenate((self.current_data, self.data_C1))
         if self.enabled_C2 == True:
-            self.current_data = np.concatenate((self.current_data, self.data_C2))
+            if self.current_data.size == 0:
+                self.current_data = self.data_C2
+            else:
+                self.current_data = np.concatenate((self.current_data, self.data_C2))
         self.data = self.current_data
         self.emitData.emit(self.name, self.data)
 
@@ -1239,8 +1246,9 @@ class Device(QObject):
             self.handle = ljm.open(7, self.connection, self.id)
             ljm.eWriteName(self.handle, "USER_RAM0_U16", 1) 
             self.check_limits()
-            self.raw = np.asarray(ljm.eReadAddresses(self.handle, self.numFrames, self.addresses, self.dataTypes))
-            self.current_data = self.slopes*(self.raw - self.offsets)
+            if len(self.addresses) > 0:
+                self.raw = np.asarray(ljm.eReadAddresses(self.handle, self.numFrames, self.addresses, self.dataTypes))
+                self.current_data = self.slopes*(self.raw - self.offsets)
             self.get_position_C1()
             self.get_position_C2()
             self.check_position_C1()

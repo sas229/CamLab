@@ -29,9 +29,10 @@ class CameraUtilities:
     @Slot(str, bool)
     def updatePreviewVisibility(self, name, connect):
         """Update preview visibility."""
-        index = self.tabs.indexOf(self.previews[name])
-        if connect == True:
-            if self.deviceConfigurationWidget[name].previewButton.isChecked() == True:
-                self.tabs.setTabVisible(index, True)
-        elif connect == False:
-            self.tabs.setTabVisible(index, False)
+        if name in self.previews:
+            index = self.tabs.indexOf(self.previews[name])
+            if connect == True:
+                if self.deviceConfigurationWidget[name].previewButton.isChecked() == True:
+                    self.tabs.setTabVisible(index, True)
+            elif connect == False:
+                self.tabs.setTabVisible(index, False)
