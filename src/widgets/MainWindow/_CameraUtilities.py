@@ -27,7 +27,7 @@ class CameraUtilities:
         self.previews[name].previewWindowClosed.connect(self.windowToTab)        
 
     @Slot(str, bool)
-    def toggleCameraTab(self, name, connect):
+    def updatePreviewVisibility(self, name, connect):
         """Update preview visibility."""
         index = self.tabs.indexOf(self.previews[name])
         if connect == True:
