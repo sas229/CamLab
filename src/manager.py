@@ -3,6 +3,7 @@ from src.models import DeviceTableModel, AcquisitionTableModel, ChannelsTableMod
 from src.device import Device
 from src.assembly import Assembly
 from src.timing import Timing
+from src.camera import Camera
 import copy
 import logging
 import ruamel.yaml
@@ -19,12 +20,11 @@ from PIL import Image
 log = logging.getLogger(__name__)
 
 class Manager(QObject):
-    # updateUI = Signal(dict)
     configurationChanged = Signal(dict)
-    deviceAdded = Signal(str)
+    deviceAdded = Signal(str, str)
     clearDeviceConfigurationTabs = Signal()
     closePlots = Signal()
-    clearControlTabs = Signal()
+    clearTabs = Signal()
     addControlTable = Signal(str, list)
     deviceToggled = Signal(str, bool)
     removeControlTable = Signal(str)
@@ -96,7 +96,17 @@ class Manager(QObject):
         self.controlModeList = ["N/A", "Digital"]
         self.controlActuatorList = ["N/A", "Linear"]
         self.defaultFeedbackChannelList = ["N/A"]
-        
+        self.defaultCameraSettings = {
+            "autoWhiteBalance": "Continuous",
+        }
+        self.defaultPreviewSettings = {
+            "mode": "tab",
+            "x": 0,
+            "y": 0,
+            "width": 1200,
+            "height": 600,
+        }
+
         # Instantiate the model for the device list and connect to device thread manager.   
         self.deviceTableModel = DeviceTableModel()
         self.deviceTableModel.deviceConnectStatusUpdated.connect(self.toggleDeviceConnection)
@@ -292,9 +302,9 @@ class Manager(QObject):
 
     @Slot(str, int, int, bool)
     def createDeviceThread(self, name, deviceType, id, connection, connect):
-        # Create device instance and move to thread if it doesn't already exist.
+        """Create device instance and move to thread if it doesn't already exist."""
         if name not in self.devices:
-            if deviceType == "LabJack T7":
+            if deviceType == "Hub":
                 self.devices[name] = Device(name, id, connection)
             elif deviceType == "Camera":
                 self.devices[name] = Camera(name, id, connection)
@@ -306,24 +316,31 @@ class Manager(QObject):
             log.info("Device thread started for device named " + name + ".")
 
         # Emit signal to add tab for device to configuration.
-        self.deviceAdded.emit(name)
+        self.deviceAdded.emit(name, deviceType)
         self.deviceToggled.emit(name, connect)
 
     def toggleDeviceConnection(self, name, connect):
+        """Toggle device connection status."""
         if connect == True:
             # Connections.
-            self.timing.controlDevices.connect(self.devices[name].process)
-            self.assembly.autozeroDevices.connect(self.devices[name].recalculateOffsets)
-            self.devices[name].emitData.connect(self.assembly.updateNewData)
-            self.devices[name].updateOffsets.connect(self.updateDeviceOffsets)
+            if self.devices[name].type == "Hub":
+                self.timing.controlDevices.connect(self.devices[name].process)
+                self.assembly.autozeroDevices.connect(self.devices[name].recalculateOffsets)
+                self.devices[name].emitData.connect(self.assembly.updateNewData)
+                self.devices[name].updateOffsets.connect(self.updateDeviceOffsets)
+            # elif self.devices[name].type == "Camera":
+            #     self.timing.controlDevices.connect(self.devices[name].save_image)
             self.deviceToggled.emit(name, connect)
             log.info("Basic signals connected to device {name}.".format(name=name))
         elif connect == False:
             # Disconnections.
-            self.timing.controlDevices.disconnect(self.devices[name].process)
-            self.assembly.autozeroDevices.disconnect(self.devices[name].recalculateOffsets)
-            self.devices[name].emitData.disconnect(self.assembly.updateNewData)
-            self.devices[name].updateOffsets.disconnect(self.updateDeviceOffsets)
+            if self.devices[name].type == "Hub":
+                self.timing.controlDevices.disconnect(self.devices[name].process)
+                self.assembly.autozeroDevices.disconnect(self.devices[name].recalculateOffsets)
+                self.devices[name].emitData.disconnect(self.assembly.updateNewData)
+                self.devices[name].updateOffsets.disconnect(self.updateDeviceOffsets)
+            # elif self.devices[name].type == "Camera":
+            #     self.timing.controlDevices.disconnect(self.devices[name].save_image)
             self.deviceToggled.emit(name, connect)
             log.info("Basic signals disconnected from device {name}.".format(name=name))
 
@@ -355,10 +372,8 @@ class Manager(QObject):
                             self.acquisitionTableModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
                             self.controlTableModels[name] = ControlTableModel(name, self.configuration["devices"][name]["control"])
                             self.feedbackChannelLists[name] = self.setFeedbackChannelList(name)
-                            self.createDeviceThread(name=device, deviceType="LabJack T7", id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True)
-                            self.toggleDeviceConnection(device, deviceInformation["connect"])
-                            log.info("Configuration loaded.")
-                            self.configurationChanged.emit(self.configuration)             
+                            self.createDeviceThread(name=device, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True)
+                            self.toggleDeviceConnection(device, deviceInformation["connect"])           
                         except ljm.LJMError:
                             # Otherwise log the exception and set the device status to false.
                             ljme = sys.exc_info()[1]
@@ -367,9 +382,24 @@ class Manager(QObject):
                             e = sys.exc_info()[1]
                             log.warning(e)
                 elif deviceInformation["type"] == "Camera":
-                    print("Camera loaded from configuration...")
-                    # Execute commands to add camera to configuration...
-
+                    try:
+                        # If the connection is successful, set the device status to true.
+                        device_manager = gx.DeviceManager()
+                        numDevices, device_list = device_manager.update_device_list()
+                        cam = device_manager.open_device_by_sn(deviceInformation["id"])
+                        cam.close_device()
+                        deviceInformation["status"] = True     
+                        
+                        # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
+                        self.deviceTableModel.appendRow(deviceInformation)
+                        self.createDeviceThread(name=device, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True)
+                        self.toggleDeviceConnection(device, deviceInformation["connect"])          
+                    except Exception:
+                        e = sys.exc_info()[1]
+                        log.warning(e)
+                log.info("Configuration loaded.")
+                self.configurationChanged.emit(self.configuration)  
+                
     def findDevices(self):
         """Method to find all available devices and return an array of connection properties.
         USB connections are prioritised over Ethernet and WiFi connections to minimise jitter."""
@@ -423,12 +453,16 @@ class Manager(QObject):
                     self.deviceTableModel.appendRow(deviceInformation)
 
                     # Make a deep copy to avoid pointers in the YAML output.
+                    cameraSettings = copy.deepcopy(self.defaultCameraSettings)
+                    previewSettings = copy.deepcopy(self.defaultPreviewSettings)
                     newDevice = {
                         "id": deviceInformation["id"],
                         "model": deviceInformation["model"],
                         "type": deviceInformation["type"],
                         "connection": deviceInformation["connection"],
-                        "address": deviceInformation["address"]
+                        "address": deviceInformation["address"],
+                        "settings": cameraSettings,
+                        "preview": previewSettings
                     }
 
                     # If no previous devices are configured, add the "devices" key to the configuration.
@@ -445,7 +479,7 @@ class Manager(QObject):
                 
                     # Create device thread and add device to UI.
                     log.info("Adding device to UI.")
-                    # self.createDeviceThread(name=name, deviceType="Camera", id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False)
+                    self.createDeviceThread(name=name, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False)
                     self.configurationChanged.emit(self.configuration)
 
                     # Log message.
@@ -457,18 +491,6 @@ class Manager(QObject):
         except Exception:
             e = sys.exc_info()[1]
             log.warning(e)
-
-        # cam = device_manager.open_device_by_user_id("TOM")
-        # cam.BalanceWhiteAuto.set(gx.GxAutoEntry.CONTINUOUS)
-        # cam.stream_on()
-        # raw_image = cam.data_stream[0].get_image()
-        # rgb_image = raw_image.convert("RGB")
-        # numpy_image = rgb_image.get_numpy_array()
-        # img = Image.fromarray(numpy_image, 'RGB')
-        # img.save("Test.png", "PNG")
-        # img.show()
-        # cam.stream_off()
-        # cam.close_device()
 
     def addLJDevices(self, mode):
         # Add LabJack devices.
@@ -514,7 +536,7 @@ class Manager(QObject):
                     self.deviceTableModel.appendRow(deviceInformation)
                     self.configurationChanged.emit(self.configuration)
                     
-                    # Make a deep copy to avoid pointers in the YAML output.
+                    # Make a deep copy toab avoid pointers in the YAML output.
                     acquisitionTable = copy.deepcopy(self.defaultAcquisitionTable)
                     controlTable = copy.deepcopy(self.defaultControlTable)
                     controlTable[0]["name"] = deviceInformation["name"] + " C1"
@@ -545,7 +567,7 @@ class Manager(QObject):
                 
                     # Create device thread and add device to UI.
                     log.info("Adding device to UI.")
-                    self.createDeviceThread(name=name, deviceType="LabJack T7", id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False)
+                    self.createDeviceThread(name=name, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False)
                     self.configurationChanged.emit(self.configuration)
             
                     # Log message.
@@ -688,7 +710,7 @@ class Manager(QObject):
     def clearConfiguration(self):
         # Delete all plots first.
         self.closePlots.emit()
-        self.clearControlTabs.emit()
+        self.clearTabs.emit()
 
         # Next clear the device list and configuration tabs.
         self.deviceTableModel.clearData()

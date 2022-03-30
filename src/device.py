@@ -30,6 +30,7 @@ class Device(QObject):
 
     def __init__(self, name, id, connection):
         super().__init__()
+        self.type = "Hub"
         self.name = name
         self.id = id 
         self.connection = connection

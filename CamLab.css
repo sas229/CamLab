@@ -26,6 +26,9 @@ QTabBar::close-button:hover {{
   image: url(icon:/primary/close.svg);
 }}
 
+CameraSettings QGroupBox {{
+  background-color: {QTMATERIAL_SECONDARYDARKCOLOR};
+}} 
 
 QGroupBox {{
     background-color: {QTMATERIAL_SECONDARYLIGHTCOLOR};

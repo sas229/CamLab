@@ -1,7 +1,8 @@
 from PySide6.QtCore import Slot
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QGridLayout, QLabel, QCheckBox, QLineEdit, QComboBox
 from src.views import AcquisitionTableView, ControlTableView
 from src.widgets.LinearAxis import LinearAxis
+from src.widgets.CameraSettings import CameraSettings
 import logging
 
 log = logging.getLogger(__name__)
@@ -9,13 +10,42 @@ log = logging.getLogger(__name__)
 class ConfigurationUtilities:
 
     @Slot(str)
-    def addDeviceConfigurationTab(self, name):
+    def addDeviceConfigurationTab(self, name, deviceType):
+        if deviceType == "Hub":
+            self.addLabJackT7ConfigurationTab(name)
+        elif deviceType == "Camera":
+            self.addCameraConfigurationTab(name)
+
+    def addCameraConfigurationTab(self, name):
+        # Instantiate widget.
+        self.deviceConfigurationWidget[name] = CameraSettings(name)
+
+        # Add the tab and show if device connected boolean is true.
+        self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.addTab(self.deviceConfigurationWidget[name], name)
+        index = self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.indexOf(self.deviceConfigurationWidget[name])
+        enabledDevices = self.manager.deviceTableModel.enabledDevices()
+        for device in enabledDevices:
+            if device["name"] == name:
+                self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.setTabVisible(index, True)
+            else:
+                self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.setTabVisible(index, False)
+        
+        # Instantiate the camera widget and add tab if enabled boolean is true.
+        self.addCameraTab(name)
+        self.deviceConfigurationWidget[name].showCameraPreview.connect(self.showCameraTab)
+        self.deviceConfigurationWidget[name].hideCameraPreview.connect(self.hideCameraTab)
+        self.previewTimer.timeout.connect(self.manager.devices[name].capture_image)
+        self.manager.devices[name].previewImage.connect(self.previews[name].set_image)
+
+        log.info("Device configuration tab added for {device}.".format(device=name))
+        
+    def addLabJackT7ConfigurationTab(self, name):
         # Create layout.
         self.deviceConfigurationLayout[name] = QVBoxLayout()
 
         # Add acquisition table label.
-        acquisitionLabel = QLabel('Acquisition')
-        self.deviceConfigurationLayout[name].addWidget(acquisitionLabel)
+        self.acquisitionLabel = QLabel('Acquisition')
+        self.deviceConfigurationLayout[name].addWidget(self.acquisitionLabel)
 
         # Add acquisition table to the TabWidget.
         self.acquisitionTableViews[name] = AcquisitionTableView()
@@ -61,12 +91,12 @@ class ConfigurationUtilities:
             else:
                 self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.setTabVisible(index, False)
         
-        # Instantiate the control widgets and add tabs if enabled boolean is true.
+        # Instantiate the control widgets and add tabs.
         for channel in range(self.manager.controlTableModels[name].rowCount()):
             self.addControlTab(name, channel)
 
         log.info("Device configuration tab added for {device}.".format(device=name))
-
+        
     @Slot(str, str)
     def updateControlName(self, currentName, newName):
         # Update tab names.

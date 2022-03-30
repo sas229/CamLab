@@ -25,7 +25,7 @@ class GlobalSettingsGroupBox(QGroupBox):
         self.setPathButton = QPushButton("Set Path")
         self.setPathAddressLabel = QLineEdit()
         self.setPathAddressLabel.setText(self.configuration["global"]["path"])
-        self.setPathAddressLabel.setEnabled(False)
+        self.setPathAddressLabel.setReadOnly(True)
         self.setFilenameLineEdit = QLineEdit()
         self.setFilenameLineEdit.setText(self.configuration["global"]["filename"])
 

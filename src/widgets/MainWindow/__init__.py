@@ -7,6 +7,7 @@ from src.widgets.MainWindow._TabUtilities import TabUtilities
 from src.widgets.MainWindow._PlotUtilities import PlotUtilities
 from src.widgets.MainWindow._ControlUtilities import ControlUtilities
 from src.widgets.MainWindow._ConfigurationUtilities import ConfigurationUtilities
+from src.widgets.MainWindow._CameraUtilities import CameraUtilities
 from src.manager import Manager
 from src.widgets.ToolBar import ToolBar
 from src.widgets.TabInterface import TabInterface
@@ -21,7 +22,7 @@ from time import sleep
 
 log = logging.getLogger(__name__)
 
-class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUtilities, QtStyleTools, QMainWindow):
+class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUtilities, CameraUtilities, QtStyleTools, QMainWindow):
     running = Signal(bool)
     renameWindow = Signal(str)
     emitRefreshDevices = Signal()
@@ -39,11 +40,14 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.controlTableViews = {}
         self.plots = {}
         self.controls = {}
+        self.previews = {}
 
         # Timers.
         self.updateTimer = QTimer()
         self.checkTimer = QTimer()
         self.checkTimer.start(1000)
+        self.previewTimer = QTimer()
+        self.previewTimer.start(100)
 
         # Instantiate the manager object and thread.
         self.manager = Manager()
@@ -133,10 +137,11 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.manager.configurationChanged.connect(self.updateUI)
         self.manager.clearDeviceConfigurationTabs.connect(self.clearDeviceConfigurationTabs)
         self.manager.closePlots.connect(self.closePlots)
-        self.manager.clearControlTabs.connect(self.clearControlTabs)
+        self.manager.clearTabs.connect(self.clearTabs)
         self.manager.deviceAdded.connect(self.addDeviceConfigurationTab)
         self.manager.deviceToggled.connect(self.updateDeviceConfigurationTab)
         self.manager.deviceToggled.connect(self.updateControlVisibility)
+        self.manager.deviceToggled.connect(self.updatePreviewVisibility)
         # self.manager.removeControlTable.connect(self.removeControlTable)
         # self.manager.addControlTable.connect(self.addControlTable)
         # self.manager.updateFeedbackChannelList.connect(self.updateFeedbackChannelList)
@@ -232,7 +237,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.configuration = newConfiguration
         self.darkMode = self.configuration["global"]["darkMode"]
         self.setTheme()
-        
+
         # Update icon colours as a function of the darkMode boolean.
         self.toolbar.updateIcons(self.darkMode)
         self.sequenceTab.updateTab()

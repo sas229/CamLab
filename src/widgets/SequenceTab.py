@@ -9,7 +9,7 @@ class SequenceTab(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setWhatsThis("sequences")
+        self.setWhatsThis("sequence")
 
         self.commandBuilder = CommandBuilder("Command Builder")
         self.commandBuilder.setVisible(False)

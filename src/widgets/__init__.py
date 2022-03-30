@@ -24,3 +24,5 @@ from .CommandBuilder import CommandBuilder
 from .CommandPreview import CommandPreview
 from .CommandTree import CommandTree
 from .SequenceToolBar import SequenceToolBar
+from .CameraSettings import CameraSettings
+from .CameraTab import CameraTab

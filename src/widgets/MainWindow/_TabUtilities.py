@@ -11,8 +11,8 @@ class TabUtilities:
             # Set order.
             if tabType == "configuration":
                 self.tabs.insertPersistentTab(0, widget, "Configuration")
-            elif tabType == "sequences":
-                self.tabs.insertPersistentTab(1, widget, "Sequences")
+            elif tabType == "sequence":
+                self.tabs.insertPersistentTab(1, widget, "Sequence")
             elif tabType == "status":
                 self.tabs.insertPersistentTab(2, widget, "Status")
             elif tabType == "control":
@@ -34,7 +34,8 @@ class TabUtilities:
             # Otherwise append on end of tab bar.
             elif tabType == "plot":
                 self.tabs.addTab(widget, widget.windowTitle())    
-
+            elif tabType == "camera":
+                self.tabs.addPersistentTab(widget, widget.windowTitle())
     @Slot()
     def tabToWindow(self, widget, index):
         if index != -1:

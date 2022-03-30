@@ -1,6 +1,5 @@
 from PySide6.QtWidgets import QWidget
 from PySide6.QtCore import Slot
-from PySide6.QtGui import QIcon
 from src.widgets.LinearAxis import LinearAxis
 from src.widgets.PlotWindow import PlotWindow
 import copy
@@ -175,7 +174,7 @@ class ControlUtilities:
         self.tabs.setCurrentIndex(0)
 
     @Slot()
-    def clearControlTabs(self):
+    def clearTabs(self):
         # Close windows into tabs.
         for controlID in self.controls:
             self.controls[controlID].close()
@@ -185,7 +184,7 @@ class ControlUtilities:
             widget = self.tabs.widget(index)
             text = self.tabs.tabText(index)
             if not isinstance(widget, PlotWindow):
-                if text != "Status" and text != "Configuration" and text != "Sequences":
+                if text != "Status" and text != "Configuration" and text != "Sequence":
                     self.tabs.removeTab(index)
 
     @Slot(str, bool)

@@ -132,3 +132,4 @@ dmypy.json
 CamLab.log
 *.yaml
 Pipfile.lock
+Test.png
