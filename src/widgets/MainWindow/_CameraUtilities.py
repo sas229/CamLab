@@ -24,25 +24,14 @@ class CameraUtilities:
         self.tabs.setTabVisible(index, False)
 
         # Connections.
-        self.previews[name].previewWindowClosed.connect(self.windowToTab)
-
-    @Slot(str)
-    def showCameraTab(self, name):
-        """Show camera tab."""
-        index = self.tabs.indexOf(self.previews[name])
-        self.tabs.setTabVisible(index, True)
-
-    @Slot(str)
-    def hideCameraTab(self, name):
-        """Hide camera tab."""
-        index = self.tabs.indexOf(self.previews[name])
-        self.tabs.setTabVisible(index, False)
+        self.previews[name].previewWindowClosed.connect(self.windowToTab)        
 
     @Slot(str, bool)
-    def updatePreviewVisibility(self, name, connect):
+    def toggleCameraTab(self, name, connect):
         """Update preview visibility."""
+        index = self.tabs.indexOf(self.previews[name])
         if connect == True:
             if self.deviceConfigurationWidget[name].previewButton.isChecked() == True:
-                self.showCameraTab(name)
+                self.tabs.setTabVisible(index, True)
         elif connect == False:
-            self.hideCameraTab(name)
+            self.tabs.setTabVisible(index, False)

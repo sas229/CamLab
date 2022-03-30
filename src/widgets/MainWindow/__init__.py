@@ -141,7 +141,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.manager.deviceAdded.connect(self.addDeviceConfigurationTab)
         self.manager.deviceToggled.connect(self.updateDeviceConfigurationTab)
         self.manager.deviceToggled.connect(self.updateControlVisibility)
-        self.manager.deviceToggled.connect(self.updatePreviewVisibility)
+        self.manager.deviceToggled.connect(self.toggleCameraTab)
         # self.manager.removeControlTable.connect(self.removeControlTable)
         # self.manager.addControlTable.connect(self.addControlTable)
         # self.manager.updateFeedbackChannelList.connect(self.updateFeedbackChannelList)

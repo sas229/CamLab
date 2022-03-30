@@ -32,8 +32,7 @@ class ConfigurationUtilities:
         
         # Instantiate the camera widget and add tab if enabled boolean is true.
         self.addCameraTab(name)
-        self.deviceConfigurationWidget[name].showCameraPreview.connect(self.showCameraTab)
-        self.deviceConfigurationWidget[name].hideCameraPreview.connect(self.hideCameraTab)
+        self.deviceConfigurationWidget[name].toggleCameraPreview.connect(self.toggleCameraTab)
         self.previewTimer.timeout.connect(self.manager.devices[name].capture_image)
         self.manager.devices[name].previewImage.connect(self.previews[name].set_image)
 

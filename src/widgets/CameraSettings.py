@@ -2,8 +2,7 @@ from PySide6.QtWidgets import QWidget, QGroupBox, QVBoxLayout, QGridLayout, QLab
 from PySide6.QtCore import Slot, Signal
 
 class CameraSettings(QWidget):
-    showCameraPreview = Signal(str)
-    hideCameraPreview = Signal(str)
+    toggleCameraPreview = Signal(str, bool)
     
     def __init__(self, name, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -167,9 +166,9 @@ class CameraSettings(QWidget):
 
     def toggle_preview(self):
         if self.previewButton.isChecked() == True:
-            self.showCameraPreview.emit(self.name)
+            self.toggleCameraPreview.emit(self.name, True)
         elif self.previewButton.isChecked() == False:
-            self.hideCameraPreview.emit(self.name)
+            self.toggleCameraPreview.emit(self.name, False)
 
     def toggle_exposure_time(self, index):
         if index == 2:
