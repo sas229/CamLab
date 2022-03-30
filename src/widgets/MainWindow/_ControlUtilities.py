@@ -164,6 +164,11 @@ class ControlUtilities:
 
     @Slot(int, bool)
     def toggleControlChannel(self, device, channel, state):
+        # Toggle enable in Device class for toggled control channel.
+        if channel == 0:
+            self.manager.devices[device].enabled_C1 = state
+        elif channel == 1:
+            self.manager.devices[device].enabled_C2 = state
         # Toggle the control channel tab.
         controlID = device + " C" + str(channel+1)
         widget = self.controls[controlID]

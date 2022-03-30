@@ -47,8 +47,8 @@ class Device(QObject):
         self.KD_C2 = 0.0
         self.status_PID_C1 = False
         self.status_PID_C2 = False
-        self.enabled_C1 = True
-        self.enabled_C2 = True
+        self.enabled_C1 = False
+        self.enabled_C2 = False
         self.motor_enabled_C1 = False
         self.motor_enabled_C2 = False
         self.feedback_C1 = False
@@ -1222,6 +1222,7 @@ class Device(QObject):
 
     def send_data(self):
         """Send output data."""
+        # Assemble output data for each control channel with or without feedback.
         if self.feedback_C1 == False:
             self.data_C1 = np.hstack((self.position_setpoint_C1, self.position_process_variable_C1, int(self.direction_C1), self.speed_C1))
         elif self.feedback_C1 == True:
@@ -1230,6 +1231,7 @@ class Device(QObject):
             self.data_C2 = np.hstack((self.position_setpoint_C2, self.position_process_variable_C2, int(self.direction_C2), self.speed_C2))
         elif self.feedback_C2 == True:
             self.data_C2 = np.hstack((self.position_setpoint_C2, self.position_process_variable_C2, int(self.direction_C2), self.speed_C2, self.feedback_setpoint_C2, self.feedback_process_variable_C2))
+        # If control channel enabled, concatenate data.
         if self.enabled_C1 == True:
             if self.current_data.size == 0:
                 self.current_data = self.data_C1
@@ -1241,6 +1243,7 @@ class Device(QObject):
             else:
                 self.current_data = np.concatenate((self.current_data, self.data_C2))
         self.data = self.current_data
+        # Emit data signal.
         self.emitData.emit(self.name, self.data)
 
     def process(self):
@@ -1253,6 +1256,8 @@ class Device(QObject):
             if len(self.addresses) > 0:
                 self.raw = np.asarray(ljm.eReadAddresses(self.handle, self.numFrames, self.addresses, self.dataTypes))
                 self.current_data = self.slopes*(self.raw - self.offsets)
+            else: 
+                self.current_data = np.empty(0)
             self.get_position_C1()
             self.get_position_C2()
             self.check_position_C1()
