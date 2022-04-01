@@ -1,5 +1,4 @@
 from PySide6.QtWidgets import QWidget, QGroupBox, QLabel, QLineEdit, QCheckBox, QGridLayout, QVBoxLayout, QLayout
-from PySide6.QtGui import QDoubleValidator
 from PySide6.QtCore import Signal, Slot
 from src.widgets.GlobalControlsGroupBox import GlobalControlsGroupBox
 from src.widgets.SettingsGroupBox import SettingsGroupBox

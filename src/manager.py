@@ -158,7 +158,7 @@ class Manager(QObject):
         path = str(self.configuration["global"]["path"])
         filename = str(self.configuration["global"]["filename"])
         date = str(initialDate.toString(Qt.ISODate))
-        time = str("{hours:02}:{minutes:02}:{seconds:02}".format(hours=initialTime.hour, minutes=initialTime.minute, seconds=initialTime.second))
+        time = str("{hours:02}-{minutes:02}-{seconds:02}".format(hours=initialTime.hour, minutes=initialTime.minute, seconds=initialTime.second))
         ext = ".txt"
         output = path + "/" + filename + "_" + date + "_" + time + "_1" + ext
         self.outputText.emit(output)
@@ -176,63 +176,65 @@ class Manager(QObject):
         enabledDevices = self.deviceTableModel.enabledDevices()
         for device in enabledDevices:
             deviceName = device["name"]
-            # Acquisition channels.
-            channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[deviceName].acquisitionSettings()
-            for slope in slopes:
-                slopeline += "\t"
-                slopeline += str(slope)
-            for offset in offsets:
-                offsetline += "\t"
-                offsetline += str(offset)
-            for channel in channels:
-                channelline += "\t"
-                channelline += str(channel) + " [" + str(deviceName) + "]"
-            for i in range(len(names)):
-                nameline += "\t"
-                nameline += str(names[i]) + " (" + str(units[i]) + ")"
-            # Control channels.
-            controls = self.controlTableModels[deviceName].enabledControls()
-            for control in controls:
-                # Get name of control and units.
-                controlName = deviceName + " " + control["channel"]
-                if control["channel"] == "C1":
-                    channel = 0
-                elif control["channel"] == "C2":
-                    channel = 1
-                primaryUnit = self.configuration["devices"][deviceName]["control"][channel]["settings"]["primaryUnit"]
-                secondaryUnit = self.configuration["devices"][deviceName]["control"][channel]["settings"]["secondaryUnit"]
-                feedbackUnit = self.configuration["devices"][deviceName]["control"][channel]["settings"]["feedbackUnit"]
-                feedbackIndex = self.configuration["devices"][deviceName]["control"][channel]["settings"]["feedbackIndex"]
-                feedbackChannel = self.configuration["devices"][deviceName]["control"][channel]["feedback"]
-                
-                # For each enabled control add the required header components depending on the actuator type.
-                if control["control"] == "Linear":
-                    if feedbackIndex == 0:
-                        slopeline += "\t 1 \t 1 \t 1 \t 1" 
-                        offsetline += "\t 0 \t 0 \t 0 \t 0"
-                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]" 
-                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]"
-                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]"
-                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]" 
-                        nameline += "\t Position SP " + str(primaryUnit)
-                        nameline += "\t Position PV " + str(primaryUnit)
-                        nameline += "\t Direction (-)"
-                        nameline += "\t Speed " + str(secondaryUnit)
-                    else:
-                        slopeline += "\t 1 \t 1 \t 1 \t 1 \t 1 \t 1" 
-                        offsetline += "\t 0 \t 0 \t 0 \t 0 \t 0 \t 0"
-                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]" 
-                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]"
-                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]"
-                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]" 
-                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]"
-                        channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]" 
-                        nameline += "\t Position SP " + str(primaryUnit)
-                        nameline += "\t Position PV " + str(primaryUnit)
-                        nameline += "\t Direction (-)"
-                        nameline += "\t Speed " + str(secondaryUnit)
-                        nameline += "\t Feedback SP " + str(feedbackUnit)
-                        nameline += "\t Feedback PV " + str(feedbackUnit)
+            deviceType = device["type"] 
+            if deviceType == "Hub":
+                # Acquisition channels.
+                channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[deviceName].acquisitionSettings()
+                for slope in slopes:
+                    slopeline += "\t"
+                    slopeline += str(slope)
+                for offset in offsets:
+                    offsetline += "\t"
+                    offsetline += str(offset)
+                for channel in channels:
+                    channelline += "\t"
+                    channelline += str(channel) + " [" + str(deviceName) + "]"
+                for i in range(len(names)):
+                    nameline += "\t"
+                    nameline += str(names[i]) + " (" + str(units[i]) + ")"
+                # Control channels.
+                controls = self.controlTableModels[deviceName].enabledControls()
+                for control in controls:
+                    # Get name of control and units.
+                    controlName = deviceName + " " + control["channel"]
+                    if control["channel"] == "C1":
+                        channel = 0
+                    elif control["channel"] == "C2":
+                        channel = 1
+                    primaryUnit = self.configuration["devices"][deviceName]["control"][channel]["settings"]["primaryUnit"]
+                    secondaryUnit = self.configuration["devices"][deviceName]["control"][channel]["settings"]["secondaryUnit"]
+                    feedbackUnit = self.configuration["devices"][deviceName]["control"][channel]["settings"]["feedbackUnit"]
+                    feedbackIndex = self.configuration["devices"][deviceName]["control"][channel]["settings"]["feedbackIndex"]
+                    feedbackChannel = self.configuration["devices"][deviceName]["control"][channel]["feedback"]
+                    
+                    # For each enabled control add the required header components depending on the actuator type.
+                    if control["control"] == "Linear":
+                        if feedbackIndex == 0:
+                            slopeline += "\t 1 \t 1 \t 1 \t 1" 
+                            offsetline += "\t 0 \t 0 \t 0 \t 0"
+                            channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]" 
+                            channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]"
+                            channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]"
+                            channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]" 
+                            nameline += "\t Position SP " + str(primaryUnit)
+                            nameline += "\t Position PV " + str(primaryUnit)
+                            nameline += "\t Direction (-)"
+                            nameline += "\t Speed " + str(secondaryUnit)
+                        else:
+                            slopeline += "\t 1 \t 1 \t 1 \t 1 \t 1 \t 1" 
+                            offsetline += "\t 0 \t 0 \t 0 \t 0 \t 0 \t 0"
+                            channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]" 
+                            channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]"
+                            channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]"
+                            channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]" 
+                            channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]"
+                            channelline += "\t" + str(control["channel"]) + " [" + str(deviceName) + "]" 
+                            nameline += "\t Position SP " + str(primaryUnit)
+                            nameline += "\t Position PV " + str(primaryUnit)
+                            nameline += "\t Direction (-)"
+                            nameline += "\t Speed " + str(secondaryUnit)
+                            nameline += "\t Feedback SP " + str(feedbackUnit)
+                            nameline += "\t Feedback PV " + str(feedbackUnit)
         slopeline += "\n"
         offsetline += "\n\n"
         channelline += "\n\n"
@@ -265,20 +267,22 @@ class Manager(QObject):
         # For each device set initialise the device and set the acquisition array.
         for device in enabledDevices:
             name = device["name"]
+            deviceType = device["type"] 
             self.devices[name].initialise()
             
             # Generate addresses for acqusition and set acquisition in device.
-            channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[name].acquisitionSettings()
-            addresses = []
-            dataTypes = []
-            dt = ljm.constants.FLOAT32
-            for channel in channels:
-                address = int(re.findall(r'\d+', channel)[0])*2 # Multiply by two to get correct LJ address for AIN.
-                addresses.append(address)
-                dataTypes.append(dt)
-            controlRate = self.configuration["global"]["controlRate"]
-            self.devices[name].set_acquisition_variables(channels, addresses, dataTypes, slopes, offsets, autozero, controlRate)
-            log.info("Settings initialised for device named " + name + ".")
+            if deviceType == "Hub":
+                channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[name].acquisitionSettings()
+                addresses = []
+                dataTypes = []
+                dt = ljm.constants.FLOAT32
+                for channel in channels:
+                    address = int(re.findall(r'\d+', channel)[0])*2 # Multiply by two to get correct LJ address for AIN.
+                    addresses.append(address)
+                    dataTypes.append(dt)
+                controlRate = self.configuration["global"]["controlRate"]
+                self.devices[name].set_acquisition_variables(channels, addresses, dataTypes, slopes, offsets, autozero, controlRate)
+                log.info("Settings initialised for device named " + name + ".")
 
     def setDeviceFeedbackChannels(self):
         log.info("Setting feedback channels for all devices.")
@@ -288,17 +292,19 @@ class Manager(QObject):
         # For each device set the acquisition array and execute in a separate thread.
         for device in enabledDevices:
             name = device["name"]
+            deviceType = device["type"]
 
             # Control channels.
-            enabledControls = self.controlTableModels[name].enabledControls()
-            for control in enabledControls:
-                channel = int(control["channel"][-1])-1
-                feedbackIndex = self.configuration["devices"][name]["control"][channel]["settings"]["feedbackIndex"]
-                if channel == 0:
-                    self.devices[name].set_feedback_channel_C1(feedbackIndex)
-                elif channel == 1:
-                    self.devices[name].set_feedback_channel_C2(feedbackIndex)
-                log.info("Feedback channel set to {feedback} for control channel {channel} on {device}.".format(feedback=control["feedback"], channel=control["channel"], device=name))
+            if deviceType == "Hub":
+                enabledControls = self.controlTableModels[name].enabledControls()
+                for control in enabledControls:
+                    channel = int(control["channel"][-1])-1
+                    feedbackIndex = self.configuration["devices"][name]["control"][channel]["settings"]["feedbackIndex"]
+                    if channel == 0:
+                        self.devices[name].set_feedback_channel_C1(feedbackIndex)
+                    elif channel == 1:
+                        self.devices[name].set_feedback_channel_C2(feedbackIndex)
+                    log.info("Feedback channel set to {feedback} for control channel {channel} on {device}.".format(feedback=control["feedback"], channel=control["channel"], device=name))
 
     @Slot(str, int, int, bool)
     def createDeviceThread(self, name, deviceType, id, connection, connect):
@@ -328,8 +334,10 @@ class Manager(QObject):
                 self.assembly.autozeroDevices.connect(self.devices[name].recalculateOffsets)
                 self.devices[name].emitData.connect(self.assembly.updateNewData)
                 self.devices[name].updateOffsets.connect(self.updateDeviceOffsets)
-            # elif self.devices[name].type == "Camera":
-            #     self.timing.controlDevices.connect(self.devices[name].save_image)
+            elif self.devices[name].type == "Camera":
+                self.devices[name].emitData.connect(self.assembly.updateNewData)
+                self.timing.controlDevices.connect(self.devices[name].save_image)
+                self.devices[name].saveImage.connect(self.assembly.save_image)
             self.deviceToggled.emit(name, connect)
             log.info("Basic signals connected to device {name}.".format(name=name))
         elif connect == False:
@@ -339,8 +347,10 @@ class Manager(QObject):
                 self.assembly.autozeroDevices.disconnect(self.devices[name].recalculateOffsets)
                 self.devices[name].emitData.disconnect(self.assembly.updateNewData)
                 self.devices[name].updateOffsets.disconnect(self.updateDeviceOffsets)
-            # elif self.devices[name].type == "Camera":
-            #     self.timing.controlDevices.disconnect(self.devices[name].save_image)
+            elif self.devices[name].type == "Camera":
+                self.devices[name].emitData.disconnect(self.assembly.updateNewData)
+                self.timing.controlDevices.disconnect(self.devices[name].save_image)
+                self.devices[name].saveImage.disconnect(self.assembly.save_image)
             self.deviceToggled.emit(name, connect)
             log.info("Basic signals disconnected from device {name}.".format(name=name))
 

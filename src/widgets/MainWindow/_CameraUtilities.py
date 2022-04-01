@@ -18,10 +18,9 @@ class CameraUtilities:
         self.previews.update({name: cameraTab})
 
         # Add widget to tab and show if control enabled.
-        tabName = "Preview (" + name + ")"
-        self.tabs.addPersistentTab(self.previews[name], tabName) 
+        self.tabs.addPersistentTab(self.previews[name], name) 
         index = self.tabs.indexOf(self.previews[name])
-        self.tabs.setTabVisible(index, False)
+        self.tabs.setTabVisible(index, True)
 
         # Connections.
         self.previews[name].previewWindowClosed.connect(self.windowToTab)        
@@ -32,7 +31,6 @@ class CameraUtilities:
         if name in self.previews:
             index = self.tabs.indexOf(self.previews[name])
             if connect == True:
-                if self.deviceConfigurationWidget[name].previewButton.isChecked() == True:
-                    self.tabs.setTabVisible(index, True)
+                self.tabs.setTabVisible(index, True)
             elif connect == False:
                 self.tabs.setTabVisible(index, False)

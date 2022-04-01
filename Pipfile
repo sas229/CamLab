@@ -13,6 +13,7 @@ numpy = "*"
 scipy = "*"
 simple-pid = "*"
 pillow = "*"
+opencv-contrib-python = "*"
 
 [dev-packages]
 

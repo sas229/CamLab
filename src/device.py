@@ -1244,10 +1244,10 @@ class Device(QObject):
                 self.current_data = np.concatenate((self.current_data, self.data_C2))
         self.data = self.current_data
         # Emit data signal.
-        self.emitData.emit(self.name, self.data)
+        self.emitData.emit(self.name, np.atleast_2d(self.data))    
 
     def process(self):
-        """Method to process cylcical commands."""
+        """Method to process timed commands."""
         try:
             # Read from the device and apply slope and offsets.
             self.handle = ljm.open(7, self.connection, self.id)

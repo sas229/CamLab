@@ -4,6 +4,7 @@ from src.views import AcquisitionTableView, ControlTableView
 from src.widgets.LinearAxis import LinearAxis
 from src.widgets.CameraSettings import CameraSettings
 import logging
+from time import sleep
 
 log = logging.getLogger(__name__)
 
@@ -32,9 +33,33 @@ class ConfigurationUtilities:
         
         # Instantiate the camera widget and add tab if enabled boolean is true.
         self.addCameraTab(name)
-        self.deviceConfigurationWidget[name].toggleCameraPreview.connect(self.updatePreviewVisibility)
-        self.previewTimer.timeout.connect(self.manager.devices[name].capture_image)
+
+        # Connections.
         self.manager.devices[name].previewImage.connect(self.previews[name].set_image)
+        self.previews[name].getImage.connect(self.manager.devices[name].capture_image)
+        self.deviceConfigurationWidget[name].setImageMode.connect(self.manager.devices[name].set_image_mode)
+        self.manager.devices[name].setImageMode.connect(self.deviceConfigurationWidget[name].set_image_mode)
+        self.deviceConfigurationWidget[name].setAutoWhiteBalanceMode.connect(self.manager.devices[name].set_auto_white_balance_mode)
+        self.deviceConfigurationWidget[name].setAutoExposureMode.connect(self.manager.devices[name].set_auto_exposure_mode)
+        self.manager.devices[name].setExposureTime.connect(self.deviceConfigurationWidget[name].set_exposure_time)
+        self.deviceConfigurationWidget[name].setExposureTime.connect(self.manager.devices[name].set_exposure_time)
+        self.deviceConfigurationWidget[name].setGain.connect(self.manager.devices[name].set_gain)
+        self.manager.devices[name].setGain.connect(self.deviceConfigurationWidget[name].set_gain)
+        self.deviceConfigurationWidget[name].setAutoGain.connect(self.manager.devices[name].set_auto_gain)
+        self.deviceConfigurationWidget[name].setBinningMode.connect(self.manager.devices[name].set_binning_mode)
+        self.deviceConfigurationWidget[name].setBinning.connect(self.manager.devices[name].set_binning)
+        self.deviceConfigurationWidget[name].setAcquisitionMode.connect(self.manager.devices[name].set_acquisition_mode)
+        self.deviceConfigurationWidget[name].setAcquisitionRate.connect(self.manager.devices[name].set_acquisition_rate)
+        self.manager.devices[name].setAcquisitionRate.connect(self.deviceConfigurationWidget[name].set_acquisition_rate)
+
+        self.manager.timing.controlDevices.connect(self.manager.devices[name].save_image)
+        self.manager.devices[name].saveImage.connect(self.manager.assembly.save_image)
+
+        # Initialise settings.
+        self.manager.devices[name].initialise()
+        # sleep(1.0)
+        # self.startCameraPreview.emit()
+        self.previews[name].getImage.emit()
 
         log.info("Device configuration tab added for {device}.".format(device=name))
         

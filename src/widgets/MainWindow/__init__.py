@@ -26,6 +26,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
     running = Signal(bool)
     renameWindow = Signal(str)
     emitRefreshDevices = Signal()
+    startCameraPreview = Signal()
     
     def __init__(self):
         super().__init__()
@@ -245,9 +246,6 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         # Update the UI of plot windows if they exist.
         if self.plots and "plots" in self.manager.configuration: 
             self.updatePlots()
-
-        # Update other GUI items.
-        self.configurationTab.globalSettingsGroupBox.updateUI(self.configuration)
 
     def closeEvent(self, event):
         # Close all plots.

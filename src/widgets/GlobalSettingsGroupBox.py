@@ -25,7 +25,7 @@ class GlobalSettingsGroupBox(QGroupBox):
         self.setPathButton = QPushButton("Set Path")
         self.setPathAddressLabel = QLineEdit()
         self.setPathAddressLabel.setText(self.configuration["global"]["path"])
-        self.setPathAddressLabel.setReadOnly(True)
+        self.setPathAddressLabel.setEnabled(False)
         self.setFilenameLineEdit = QLineEdit()
         self.setFilenameLineEdit.setText(self.configuration["global"]["filename"])
 
@@ -111,8 +111,10 @@ class GlobalSettingsGroupBox(QGroupBox):
 
     def emitControlRate(self):
         # Method to emit the new control rate.
-        newControlRate =self.controlRateLineEdit.text()
-        self.controlRateChanged.emit(newControlRate)
+        newControlRate = float(self.controlRateLineEdit.text())
+        text = "{value:.2f}".format(value=newControlRate)
+        self.controlRateLineEdit.setText(text)
+        self.controlRateChanged.emit(text)
     
     def emitAverageSamples(self):
         # Method to emit the new number of samples to average.

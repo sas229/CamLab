@@ -4,6 +4,8 @@ import numpy as np
 from time import time
 from scipy.ndimage import uniform_filter1d
 from datetime import datetime
+from PIL import Image
+import cv2
 
 log = logging.getLogger(__name__)
 
@@ -19,6 +21,8 @@ class Assembly(QObject):
         self.fileCount = 1
         self.data = {}
         self.offsets = []
+        self.arucoDict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
+        self.arucoParams = cv2.aruco.DetectorParameters_create()
 
     def settings(self, rate, skip, average):
         self.skip = int(skip)
@@ -68,7 +72,6 @@ class Assembly(QObject):
                 deviceData = self.data[name][0:numTimesteps,:]
                 self.data[name] = np.delete(self.data[name], range(numTimesteps), axis=0)
                 if count == 0:
-                    # assembledData = np.column_stack((timesteps, deviceData))
                     assembledData = deviceData.copy()
                 else:
                     assembledData = np.column_stack((assembledData, deviceData))
@@ -89,7 +92,8 @@ class Assembly(QObject):
 
             # Add save data functionality in here.
             np.savetxt(self.file, processedData, fmt='%8.3f', delimiter='\t', newline='\n')
-
+            print(processedData)
+            
             if np.shape(self.plotData)[0] > 0:
                 self.plotData = np.vstack((self.plotData, processedData)) 
             else: 
@@ -97,6 +101,21 @@ class Assembly(QObject):
             self.time += n*self.DeltaT
             self.count += numTimesteps
             self.plotDataChanged.emit(self.plotData)
+    
+    @Slot(str, np.ndarray)
+    def save_image(self, image_name, image_array):
+        """Save image with given filename prepended with output file details."""
+        filepath = self.path + "/" + self.filename + "_" + self.date + "_" + self.timestart + "_" + image_name
+        # self.detect_aruco(image_array)
+        img = Image.fromarray(image_array, 'RGB')
+        img.save(filepath, "JPEG")
+        
+    def detect_aruco(self, image_array):
+        corners, ids, rejected = cv2.aruco.detectMarkers(image_array, self.arucoDict,
+            parameters=self.arucoParams)
+        marker_image = cv2.aruco.drawDetectedMarkers(image_array, corners)
+        print(len(corners))
+        return marker_image
 
     def clearAllData(self):
         self.data = {}

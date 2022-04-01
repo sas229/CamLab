@@ -1,7 +1,6 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
 from PySide6.QtCore import Signal, Slot
 import src.local_pyqtgraph.pyqtgraph as pg
-from PIL import Image
 import numpy as np
 import logging
 
@@ -9,6 +8,7 @@ logging.getLogger("PIL").setLevel(logging.WARNING)
 
 class CameraTab(QWidget):
     previewWindowClosed = Signal(QWidget)
+    getImage = Signal()
 
     def __init__(self, name):
         super().__init__()
@@ -21,7 +21,6 @@ class CameraTab(QWidget):
         self.viewBox = self.preview.addViewBox()
         self.viewBox.setAspectLocked(True)
         self.imageItem = pg.ImageItem(axisOrder="row-major")
-        self.imageItem.setAutoDownsample(active=True)
         self.viewBox.addItem(self.imageItem)
 
         self.label = QLabel("Live Preview")
@@ -32,22 +31,13 @@ class CameraTab(QWidget):
 
         self.setLayout(self.layout)
 
-        # Test image.
-        image = Image.open("Test.png")
-        image = image.transpose(Image.TRANSVERSE)
-        numpy_image = np.asarray(image)
-        self.set_image(numpy_image)
-
     @Slot(np.ndarray)
     def set_image(self, image):
         """Set image in ImageItem."""
         image = np.flipud(image)
         self.imageItem.setImage(image=image)
-        self.update_background()
-
-    def update_background(self):
-        """Update background."""
         self.preview.setBackground(None)
+        self.getImage.emit()        
 
     def setWindow(self):
         x = int(self.configuration["preview"]["x"])

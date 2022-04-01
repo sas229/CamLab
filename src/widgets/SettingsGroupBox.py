@@ -29,7 +29,7 @@ class SettingsGroupBox(QGroupBox):
         self.PPRLineEdit.setValidator(self.intValidator)
         self.PPRLineEdit.setFixedWidth(100)
 
-        self.ratioLabel = QLabel("PPR")
+        self.ratioLabel = QLabel("Ratio")
         self.ratioLineEdit = QLineEdit()
         self.ratioLineEdit.setValidator(self.doubleValidator)
         self.ratioLineEdit.setFixedWidth(100)
