@@ -338,6 +338,7 @@ class Manager(QObject):
                 self.devices[name].emitData.connect(self.assembly.updateNewData)
                 self.timing.controlDevices.connect(self.devices[name].save_image)
                 self.devices[name].saveImage.connect(self.assembly.save_image)
+                self.devices[name].stop_stream = False
             self.deviceToggled.emit(name, connect)
             log.info("Basic signals connected to device {name}.".format(name=name))
         elif connect == False:
@@ -351,6 +352,7 @@ class Manager(QObject):
                 self.devices[name].emitData.disconnect(self.assembly.updateNewData)
                 self.timing.controlDevices.disconnect(self.devices[name].save_image)
                 self.devices[name].saveImage.disconnect(self.assembly.save_image)
+                self.devices[name].stop_stream = True
             self.deviceToggled.emit(name, connect)
             log.info("Basic signals disconnected from device {name}.".format(name=name))
 

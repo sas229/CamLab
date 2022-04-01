@@ -233,7 +233,6 @@ class CameraSettings(QWidget):
 
     def get_binning(self, text):
         value = int(text)
-        print(value)
         self.setBinning.emit(value)
 
     @Slot(str)

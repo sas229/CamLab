@@ -35,8 +35,8 @@ class ConfigurationUtilities:
         self.addCameraTab(name)
 
         # Connections.
-        self.manager.devices[name].previewImage.connect(self.previews[name].set_image)
         self.previews[name].getImage.connect(self.manager.devices[name].capture_image)
+        self.manager.devices[name].previewImage.connect(self.previews[name].set_image)
         self.deviceConfigurationWidget[name].setImageMode.connect(self.manager.devices[name].set_image_mode)
         self.manager.devices[name].setImageMode.connect(self.deviceConfigurationWidget[name].set_image_mode)
         self.deviceConfigurationWidget[name].setAutoWhiteBalanceMode.connect(self.manager.devices[name].set_auto_white_balance_mode)
@@ -52,14 +52,11 @@ class ConfigurationUtilities:
         self.deviceConfigurationWidget[name].setAcquisitionRate.connect(self.manager.devices[name].set_acquisition_rate)
         self.manager.devices[name].setAcquisitionRate.connect(self.deviceConfigurationWidget[name].set_acquisition_rate)
 
-        self.manager.timing.controlDevices.connect(self.manager.devices[name].save_image)
-        self.manager.devices[name].saveImage.connect(self.manager.assembly.save_image)
-
         # Initialise settings.
         self.manager.devices[name].initialise()
-        # sleep(1.0)
-        # self.startCameraPreview.emit()
-        self.previews[name].getImage.emit()
+
+        # Start stream.
+        self.manager.devices[name].capture_image()
 
         log.info("Device configuration tab added for {device}.".format(device=name))
         
