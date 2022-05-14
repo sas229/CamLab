@@ -1,7 +1,8 @@
 import os
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QTabWidget
-from src.local_qt_material import apply_stylesheet, QtStyleTools
+from local_qt_material import apply_stylesheet, QtStyleTools
 import logging
+from pathlib import Path
 
 log = logging.getLogger(__name__)
 
@@ -42,7 +43,11 @@ class ControlWindow(QWidget, QtStyleTools):
         else:
             self.apply_stylesheet(self, theme='light_blue.xml')
         stylesheet = self.styleSheet()
-        with open('src/CamLab.css') as file:
+        
+        # Get css directory.
+        bundle_dir = Path(__file__).parents[1]
+        path_to_css = os.path.abspath(os.path.join(bundle_dir,"CamLab.css"))
+        with open(path_to_css) as file:
             self.setStyleSheet(stylesheet + file.read().format(**os.environ))
 
     def resizeEvent(self, event):

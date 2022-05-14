@@ -1,8 +1,8 @@
 from PySide6.QtWidgets import QWidget, QGridLayout
 from PySide6.QtCore import Signal
-from src.widgets.GlobalSettingsGroupBox import GlobalSettingsGroupBox
-from src.widgets.DevicesGroupBox import DevicesGroupBox
-from src.widgets.DeviceConfigurationGroupBox import DeviceConfigurationGroupBox
+from widgets.GlobalSettingsGroupBox import GlobalSettingsGroupBox
+from widgets.DevicesGroupBox import DevicesGroupBox
+from widgets.DeviceConfigurationGroupBox import DeviceConfigurationGroupBox
 
 class ConfigurationTab(QWidget):
     configurationWindowClosed = Signal(QWidget)

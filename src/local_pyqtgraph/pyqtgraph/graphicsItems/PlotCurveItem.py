@@ -837,7 +837,7 @@ class PlotCurveItem(GraphicsObject):
             # If Qt is built to dynamically load OpenGL, then the projection and
             # modelview matrices are not setup.
             # https://doc.qt.io/qt-6/windows-graphics.html
-            # https://code.woboq.org/qt6/qtbase/src/opengl/qopenglpaintengine.cpp.html
+            # https://code.woboq.org/qt6/qtbase/opengl/qopenglpaintengine.cpp.html
             # Technically, we could enable it for all platforms, but for now, just
             # enable it where it is required, i.e. Windows
             gl.glMatrixMode(gl.GL_PROJECTION)

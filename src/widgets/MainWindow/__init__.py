@@ -1,24 +1,25 @@
-import os
+import os, sys
 from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QGridLayout, QDialog
 from PySide6.QtGui import QScreen
 from PySide6.QtCore import Signal, Slot, QThread, QTimer, Qt
-from src.local_qt_material import apply_stylesheet, QtStyleTools
-from src.widgets.MainWindow._TabUtilities import TabUtilities
-from src.widgets.MainWindow._PlotUtilities import PlotUtilities
-from src.widgets.MainWindow._ControlUtilities import ControlUtilities
-from src.widgets.MainWindow._ConfigurationUtilities import ConfigurationUtilities
-from src.widgets.MainWindow._CameraUtilities import CameraUtilities
-from src.manager import Manager
-from src.widgets.ToolBar import ToolBar
-from src.widgets.TabInterface import TabInterface
-from src.widgets.ConfigurationTab import ConfigurationTab
-from src.widgets.SequenceTab import SequenceTab
-from src.widgets.StatusTab import StatusTab
-from src.widgets.StatusGroupBox import StatusGroupBox
-from src.dialogs import BusyDialog
-from src.log import init_log
+from local_qt_material import apply_stylesheet, QtStyleTools
+from widgets.MainWindow._TabUtilities import TabUtilities
+from widgets.MainWindow._PlotUtilities import PlotUtilities
+from widgets.MainWindow._ControlUtilities import ControlUtilities
+from widgets.MainWindow._ConfigurationUtilities import ConfigurationUtilities
+from widgets.MainWindow._CameraUtilities import CameraUtilities
+from manager import Manager
+from widgets.ToolBar import ToolBar
+from widgets.TabInterface import TabInterface
+from widgets.ConfigurationTab import ConfigurationTab
+from widgets.SequenceTab import SequenceTab
+from widgets.StatusTab import StatusTab
+from widgets.StatusGroupBox import StatusGroupBox
+from dialogs import BusyDialog
+from log import init_log
 import logging
 from time import sleep
+from pathlib import Path
 
 log = logging.getLogger(__name__)
 
@@ -224,7 +225,11 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         else:
             self.apply_stylesheet(self, theme='light_blue.xml')
         stylesheet = self.styleSheet()
-        with open('src/CamLab.css') as file:
+        
+        # Get css directory.
+        bundle_dir = Path(__file__).parents[2]
+        path_to_css = os.path.abspath(os.path.join(bundle_dir,"CamLab.css"))
+        with open(path_to_css) as file:
             self.setStyleSheet(stylesheet + file.read().format(**os.environ))
 
     @Slot(dict)

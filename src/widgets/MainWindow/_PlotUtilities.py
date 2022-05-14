@@ -1,5 +1,5 @@
 from PySide6.QtCore import Slot, QModelIndex
-from src.widgets.PlotWindow import PlotWindow
+from widgets.PlotWindow import PlotWindow
 import copy
 
 class PlotUtilities:

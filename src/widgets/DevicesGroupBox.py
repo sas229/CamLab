@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QGroupBox, QVBoxLayout
-from src.views import DeviceTableView
+from views import DeviceTableView
 import logging
 
 log = logging.getLogger(__name__)

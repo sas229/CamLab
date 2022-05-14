@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QWidget
 from PySide6.QtCore import Slot
 from PySide6.QtGui import QIcon
-from src.widgets.CameraTab import CameraTab
+from widgets.CameraTab import CameraTab
 import copy
 import logging
 

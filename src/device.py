@@ -1212,7 +1212,7 @@ class Device(QObject):
     def load_lua_script(self):
         """Method to load the Lua script into the device."""
         try:
-            self.script = "src/failsafe.lua"
+            self.script = "failsafe.lua"
             with open(self.script, "r") as f:
                 lua = f.read()
             lua_length = len(lua)

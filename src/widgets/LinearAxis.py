@@ -1,12 +1,12 @@
 from PySide6.QtWidgets import QWidget, QGroupBox, QLabel, QLineEdit, QCheckBox, QGridLayout, QVBoxLayout, QLayout
 from PySide6.QtCore import Signal, Slot
-from src.widgets.GlobalControlsGroupBox import GlobalControlsGroupBox
-from src.widgets.SettingsGroupBox import SettingsGroupBox
-from src.widgets.JogGroupBox import JogGroupBox
-from src.widgets.AdjustGroupBox import AdjustGroupBox
-from src.widgets.PIDGroupBox import PIDGroupBox
-from src.widgets.DemandGroupBox import DemandGroupBox
-from src.widgets.SliderGroupBox import SliderGroupBox
+from widgets.GlobalControlsGroupBox import GlobalControlsGroupBox
+from widgets.SettingsGroupBox import SettingsGroupBox
+from widgets.JogGroupBox import JogGroupBox
+from widgets.AdjustGroupBox import AdjustGroupBox
+from widgets.PIDGroupBox import PIDGroupBox
+from widgets.DemandGroupBox import DemandGroupBox
+from widgets.SliderGroupBox import SliderGroupBox
 import logging
 
 log = logging.getLogger(__name__)

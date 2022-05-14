@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QTableView, QHeaderView
-from src.delegates import CheckBoxDelegate, ConnectionIconDelegate, StatusIconDelegate, StringDelegate, DeviceIconDelegate
+from delegates import CheckBoxDelegate, ConnectionIconDelegate, StatusIconDelegate, StringDelegate, DeviceIconDelegate
 
 class DeviceTableView(QTableView):
 

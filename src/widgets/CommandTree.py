@@ -1,8 +1,8 @@
 import os
 from PySide6.QtWidgets import QGroupBox, QWidget, QVBoxLayout
-from src.models.CommandTreeModel import CommandTreeModel
-from src.views.CommandTreeView import CommandTreeView
-from src.widgets.SequenceToolBar import SequenceToolBar
+from models.CommandTreeModel import CommandTreeModel
+from views.CommandTreeView import CommandTreeView
+from widgets.SequenceToolBar import SequenceToolBar
 
 class CommandTree(QGroupBox):
 

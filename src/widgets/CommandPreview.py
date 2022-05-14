@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QVBoxLayout, QGroupBox
 from PySide6.QtCore import Slot
 import numpy as np
-import src.local_pyqtgraph.pyqtgraph as pg
+import local_pyqtgraph.pyqtgraph as pg
 from scipy import signal
 import re
 import os

@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QTableView
-from src.delegates import ColouredBackgroundDelegate
+from delegates import ColouredBackgroundDelegate
 
 class ColourPickerTableView(QTableView):
 

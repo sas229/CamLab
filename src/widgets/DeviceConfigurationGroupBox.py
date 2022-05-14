@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QGroupBox, QVBoxLayout, QTabWidget
-from src.views import AcquisitionTableView
+from views import AcquisitionTableView
 import logging
 
 log = logging.getLogger(__name__)

@@ -1,7 +1,7 @@
 from PySide6.QtCore import QObject, Signal, Slot
 import logging
 import numpy as np
-import src.local_gxipy as gx
+import local_gxipy as gx
 import sys
 import cv2
 from PIL import Image, ImageDraw, ImageColor

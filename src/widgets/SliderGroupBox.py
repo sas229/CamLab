@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QGroupBox, QLabel, QLineEdit, QVBoxLayout, QHBoxLayout
 from PySide6.QtGui import QDoubleValidator
 from PySide6.QtCore import Slot, Qt, Signal
-from src.widgets.LinearSlider import LinearSlider
+from widgets.LinearSlider import LinearSlider
 
 class SliderGroupBox(QGroupBox):
     leftLimitChanged = Signal(float)

@@ -3,12 +3,22 @@
 
 block_cipher = None
 
+added_files = [
+    ('src/CamLab.css', '.'),
+    ('src/assets', 'assets'),
+    ('src/delegates', 'delegates'),
+    ('src/local_gxipy', 'local_gxipy'),
+    ('src/local_pyqtgraph', 'local_pyqtgraph'),
+    ('src/local_qt_material', 'local_qt_material'),
+    ('src/models', 'models'),
+    ('src/views', 'views'),
+]
 
 a = Analysis(
     ['src/main.py'],
     pathex=[],
     binaries=[],
-    datas=[('src', '.')],
+    datas=added_files,
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -19,6 +29,7 @@ a = Analysis(
     cipher=block_cipher,
     noarchive=False,
 )
+
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(

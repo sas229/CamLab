@@ -4,13 +4,14 @@ import os
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QCheckBox, QTabWidget, QLabel, QLineEdit, QGridLayout, QComboBox, QSlider
 from PySide6.QtGui import QIcon, QAction, QCursor, QDoubleValidator, QFont
 from PySide6.QtCore import Signal, Slot, Qt, QModelIndex, QEvent, QLocale
-from src.local_qt_material import apply_stylesheet, QtStyleTools
-from src.models import ChannelsTableModel, ColourPickerTableModel
-from src.views import ChannelsTableView, ColourPickerTableView
-from src.dialogs import ColourPickerDialog
+from local_qt_material import apply_stylesheet, QtStyleTools
+from models import ChannelsTableModel, ColourPickerTableModel
+from views import ChannelsTableView, ColourPickerTableView
+from dialogs import ColourPickerDialog
 import logging
-import src.local_pyqtgraph.pyqtgraph as pg
+import local_pyqtgraph.pyqtgraph as pg
 import numpy as np
+from pathlib import Path
 
 log = logging.getLogger(__name__)
 
@@ -801,7 +802,11 @@ class PlotWindow(QWidget, QtStyleTools):
         else:
             self.apply_stylesheet(self, theme='light_blue.xml')
         stylesheet = self.styleSheet()
-        with open('src/CamLab.css') as file:
+        
+        # Get css directory.
+        bundle_dir = Path(__file__).parents[1]
+        path_to_css = os.path.abspath(os.path.join(bundle_dir,"CamLab.css"))
+        with open(path_to_css) as file:
             self.setStyleSheet(stylesheet + file.read().format(**os.environ))
 
         self.plot.setBackground(os.environ['QTMATERIAL_SECONDARYLIGHTCOLOR'])

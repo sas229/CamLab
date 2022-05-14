@@ -2090,7 +2090,7 @@ def arrayToQPath(x, y, connect='all', finiteCheck=True):
     ...
     cStart(i4)   fillRule(i4)
     
-    see: https://github.com/qt/qtbase/blob/dev/src/gui/painting/qpainterpath.cpp
+    see: https://github.com/qt/qtbase/blob/dev/gui/painting/qpainterpath.cpp
 
     All values are big endian--pack using struct.pack('>d') or struct.pack('>i')
     This binary format may change in future versions of Qt

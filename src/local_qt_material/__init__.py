@@ -6,7 +6,7 @@ from pathlib import Path
 import platform
 from xml.dom.minidom import parse
 
-from src.local_qt_material.resources import ResourseGenerator, RESOURCES_PATH
+from local_qt_material.resources import ResourseGenerator, RESOURCES_PATH
 GUI = True
 
 if 'PySide2' in sys.modules:

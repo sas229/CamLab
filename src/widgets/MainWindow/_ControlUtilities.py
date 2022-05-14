@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QWidget
 from PySide6.QtCore import Slot
-from src.widgets.LinearAxis import LinearAxis
-from src.widgets.PlotWindow import PlotWindow
+from widgets.LinearAxis import LinearAxis
+from widgets.PlotWindow import PlotWindow
 import copy
 import logging
 

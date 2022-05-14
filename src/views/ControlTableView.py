@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QTableView, QHeaderView, QAbstractItemView
-from src.delegates import CheckBoxDelegate, StringDelegate, ComboBoxDelegate
+from delegates import CheckBoxDelegate, StringDelegate, ComboBoxDelegate
 
 class ControlTableView(QTableView):
 

@@ -1,8 +1,8 @@
 from PySide6.QtCore import Slot
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QGridLayout, QLabel, QCheckBox, QLineEdit, QComboBox
-from src.views import AcquisitionTableView, ControlTableView
-from src.widgets.LinearAxis import LinearAxis
-from src.widgets.CameraSettings import CameraSettings
+from views import AcquisitionTableView, ControlTableView
+from widgets.LinearAxis import LinearAxis
+from widgets.CameraSettings import CameraSettings
 import logging
 from time import sleep
 

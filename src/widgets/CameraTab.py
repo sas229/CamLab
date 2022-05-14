@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget, QGridLayout, QLabel
 from PySide6.QtCore import Signal, Slot
-import src.local_pyqtgraph.pyqtgraph as pg
+import local_pyqtgraph.pyqtgraph as pg
 import numpy as np
 import logging
 import os

@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QTabWidget, QWidget, QTabBar
 from PySide6.QtCore import Slot, Signal
-from src.widgets.PlotWindow import PlotWindow
+from widgets.PlotWindow import PlotWindow
 import logging 
 
 log = logging.getLogger(__name__)

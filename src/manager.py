@@ -1,9 +1,9 @@
 from PySide6.QtCore import QObject, Signal, Slot, QSettings, QThread, QModelIndex, QDate, Qt, QTimer
-from src.models import DeviceTableModel, AcquisitionTableModel, ChannelsTableModel, ControlTableModel
-from src.device import Device
-from src.assembly import Assembly
-from src.timing import Timing
-from src.camera import Camera
+from models import DeviceTableModel, AcquisitionTableModel, ChannelsTableModel, ControlTableModel
+from device import Device
+from assembly import Assembly
+from timing import Timing
+from camera import Camera
 import copy
 import logging
 import ruamel.yaml
@@ -14,7 +14,7 @@ import numpy as np
 import time
 import re
 from datetime import datetime
-import src.local_gxipy as gx
+import local_gxipy as gx
 
 log = logging.getLogger(__name__)
 

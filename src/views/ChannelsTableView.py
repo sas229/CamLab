@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QTableView
-from src.delegates import CheckBoxDelegate
+from delegates import CheckBoxDelegate
 
 class ChannelsTableView(QTableView):
 

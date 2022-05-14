@@ -1,8 +1,8 @@
 from PySide6.QtWidgets import QWidget, QGridLayout
 from PySide6.QtCore import Signal
-from src.widgets.CommandBuilder import CommandBuilder
-from src.widgets.CommandPreview import CommandPreview
-from src.widgets.CommandTree import CommandTree
+from widgets.CommandBuilder import CommandBuilder
+from widgets.CommandPreview import CommandPreview
+from widgets.CommandTree import CommandTree
 
 class SequenceTab(QWidget):
     sequenceWindowClosed = Signal(QWidget)

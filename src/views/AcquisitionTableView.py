@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QTableView, QHeaderView
-from src.delegates import CheckBoxDelegate, FloatValidatorDelegate, StringDelegate
+from delegates import CheckBoxDelegate, FloatValidatorDelegate, StringDelegate
 
 class AcquisitionTableView(QTableView):
 

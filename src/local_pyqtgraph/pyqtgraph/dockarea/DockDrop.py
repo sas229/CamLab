@@ -23,7 +23,7 @@ class DockDrop(object):
     
     def dragEnterEvent(self, ev):
         src = ev.source()
-        if hasattr(src, 'implements') and src.implements('dock'):
+        if hasattr(src, 'implements') and implements('dock'):
             #print "drag enter accept"
             ev.accept()
         else:
