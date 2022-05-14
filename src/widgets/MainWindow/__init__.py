@@ -224,7 +224,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         else:
             self.apply_stylesheet(self, theme='light_blue.xml')
         stylesheet = self.styleSheet()
-        with open('CamLab.css') as file:
+        with open('src/CamLab.css') as file:
             self.setStyleSheet(stylesheet + file.read().format(**os.environ))
 
     @Slot(dict)
