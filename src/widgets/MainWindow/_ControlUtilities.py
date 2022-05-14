@@ -33,6 +33,7 @@ class ControlUtilities:
             self.running.connect(self.manager.devices[name].set_running)
             self.manager.devices[name].updateRunningIndicator.connect(controlWidget.setRunningIndicator)
             self.manager.controlTableModels[name].controlChannelNameChanged.connect(controlWidget.setTitle)
+            self.statusTab.runSequence.clicked.connect(self.manager.devices[name].run_sequence)
             if channel == 0:
                 controlWidget.enable.connect(self.manager.devices[name].set_enable_C1)
                 controlWidget.PIDControl.connect(self.manager.devices[name].set_PID_control_C1)

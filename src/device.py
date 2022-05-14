@@ -98,6 +98,7 @@ class Device(QObject):
         self.position_right_limit_status_C2 = False
         self.max_rpm = 4000
         self.current_data = np.empty(0)
+        self.sequence_running = False
 
         # Disable clock 0 and load Lua failsafe script to turn off PWM.
         self.open_connection()
@@ -109,6 +110,41 @@ class Device(QObject):
         self.PID_C1 = PID()
         self.PID_C2 = PID()
 
+    @Slot()
+    def run_sequence(self):
+        # Hacky code to do a simple sequence on control channel C1 - only for Jonathan's usage!
+        if self.running == True and self.motor_enabled_C1 == True:
+            self.sequenceChannel = "C1"
+            self.setpoint_list = [50, 0, 50, 0, 50, 0, 50, 0, 50, 0]
+            self.setpoint_index = 0
+            self.sequence_running = True
+            self.current_setpoint = self.setpoint_list[self.setpoint_index]
+            self.direction_C1 = np.sign(self.position_process_variable_C1 - self.current_setpoint)
+            self.move_to_position_C1(self.current_setpoint)
+            self.updatePositionSetPointC1.emit(self.current_setpoint)
+            log.info("Running sequence.")
+
+    def check_setpoint_C1(self):
+        try:
+            completed = ljm.eReadName(self.handle, "DIO4_EF_READ_A")
+            target = ljm.eReadName(self.handle, "DIO4_EF_READ_B")
+            if target == completed:
+                log.info("Moving to next setpoint in sequence.")
+                self.setpoint_index += 1
+                if self.setpoint_index < len(self.setpoint_list):
+                    self.current_setpoint = self.setpoint_list[self.setpoint_index]
+                    self.move_to_position_C1(self.current_setpoint)
+                    self.updatePositionSetPointC1.emit(self.current_setpoint)
+                else:
+                    log.info("Sequence finished.")
+                    self.sequence_running = False
+        except ljm.LJMError:
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
+        
     def set_enabled_C1(self, value):
         self.enabled_C1 = value
 
@@ -1265,10 +1301,14 @@ class Device(QObject):
                 self.current_data = self.slopes*(self.raw - self.offsets)
             else: 
                 self.current_data = np.empty(0)
+            # Check position.
             self.get_position_C1()
             self.get_position_C2()
             self.check_position_C1()
             self.check_position_C2()
+            # Check setpoint.
+            if self.sequence_running == True:
+                self.check_setpoint_C1()
             # If feedback is available.
             if self.feedback_C1 == True:
                 self.update_PID_C1()

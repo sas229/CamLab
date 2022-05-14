@@ -143,11 +143,6 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.manager.deviceToggled.connect(self.updateDeviceConfigurationTab)
         self.manager.deviceToggled.connect(self.updateControlVisibility)
         self.manager.deviceToggled.connect(self.updatePreviewVisibility)
-        # self.manager.removeControlTable.connect(self.removeControlTable)
-        # self.manager.addControlTable.connect(self.addControlTable)
-        # self.manager.updateFeedbackChannelList.connect(self.updateFeedbackChannelList)
-        # self.manager.updateDeviceConfigurationTab.connect(self.updateDeviceConfigurationTabs)
-        # self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.updateDeviceConfigurationTabs)
 
         self.manager.timing.actualRate.connect(self.statusGroupBox.update)
         self.manager.plotWindowChannelsUpdated.connect(self.updatePlots)
