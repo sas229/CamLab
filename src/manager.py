@@ -15,7 +15,6 @@ import time
 import re
 from datetime import datetime
 import src.local_gxipy as gx
-from pathlib import Path
 
 log = logging.getLogger(__name__)
 
@@ -664,15 +663,15 @@ class Manager(QObject):
             log.info("Configuration file path found at " + str(self.configurationPath))
     
     def initialiseDefaultConfiguration(self):
-        home_dir = Path.home()
-        home_dir_str = str( home_dir )
+        """Initialise default configuration."""
+        home_dir = os.path.expanduser( '~' )
         self.configuration = {}
         self.configuration["global"] = {
             "darkMode": True,
             "controlRate": 100.00,
             "skipSamples": 1,
             "averageSamples": 1,
-            "path": home_dir_str,
+            "path": home_dir,
             "filename": "junk"
             }
         self.configuration["mainWindow"] = {
