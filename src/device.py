@@ -6,6 +6,7 @@ import time
 import sys
 from time import sleep
 from simple_pid import PID
+from pathlib import Path
 
 log = logging.getLogger(__name__)
 
@@ -1212,6 +1213,8 @@ class Device(QObject):
     def load_lua_script(self):
         """Method to load the Lua script into the device."""
         try:
+            bundle_dir = Path(__file__).parents[0]
+            path_to_lua = os.path.abspath(os.path.join(bundle_dir,"failsafe.lua"))
             self.script = "failsafe.lua"
             with open(self.script, "r") as f:
                 lua = f.read()
