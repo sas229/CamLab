@@ -935,6 +935,7 @@ class Device(QObject):
 
     @Slot()
     def updateControlPanelC1(self):
+        """Update control panel for channel C1."""
         if self.jog_C1 == True: 
             self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
         self.updatePositionProcessVariableC1.emit(self.position_process_variable_C1)
@@ -948,6 +949,7 @@ class Device(QObject):
         
     @Slot()
     def updateControlPanelC2(self):   
+        """Update control panel for channel C2."""
         if self.jog_C2 == True:
             self.updatePositionSetPointC2.emit(self.position_process_variable_C2)
         self.updatePositionProcessVariableC2.emit(self.position_process_variable_C2)
@@ -961,6 +963,7 @@ class Device(QObject):
     
     @Slot(str, float)
     def move_to_position_C1(self, position):
+        """Move to demanded position for channel C1."""
         if self.running == True and self.motor_enabled_C1 == True:
             # Calculate increment.
             currentPosition = self.position_process_variable_C1
@@ -985,6 +988,7 @@ class Device(QObject):
 
     @Slot(str, float)
     def move_to_position_C2(self, position):
+        """Move to demanded position for channel C2."""
         if self.running == True and self.motor_enabled_C2 == True:
             # Calculate increment.
             currentPosition = self.position_process_variable_C2
@@ -1324,7 +1328,7 @@ class Device(QObject):
             log.warning(e)
 
     @Slot()
-    def recalculateOffsets(self):
+    def recalculate_offsets(self):
         """Method to autozero channels as required by the configuration."""
         # Autozero as required.
         adjustOffsets = (self.raw-self.offsets)*self.autozero

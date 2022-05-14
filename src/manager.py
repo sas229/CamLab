@@ -352,7 +352,7 @@ class Manager(QObject):
             # Connections.
             if self.devices[name].type == "Hub":
                 self.timing.controlDevices.connect(self.devices[name].process)
-                self.assembly.autozeroDevices.connect(self.devices[name].recalculateOffsets)
+                self.assembly.autozeroDevices.connect(self.devices[name].recalculate_offsets)
                 self.devices[name].emitData.connect(self.assembly.updateNewData)
                 self.devices[name].updateOffsets.connect(self.updateDeviceOffsets)
             elif self.devices[name].type == "Camera":
@@ -366,7 +366,7 @@ class Manager(QObject):
             # Disconnections.
             if self.devices[name].type == "Hub":
                 self.timing.controlDevices.disconnect(self.devices[name].process)
-                self.assembly.autozeroDevices.disconnect(self.devices[name].recalculateOffsets)
+                self.assembly.autozeroDevices.disconnect(self.devices[name].recalculate_offsets)
                 self.devices[name].emitData.disconnect(self.assembly.updateNewData)
                 self.devices[name].updateOffsets.disconnect(self.updateDeviceOffsets)
             elif self.devices[name].type == "Camera":
