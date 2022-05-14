@@ -36,24 +36,30 @@ class ConfigurationUtilities:
 
         # Connections.
         self.previews[name].getImage.connect(self.manager.devices[name].capture_image)
-        self.manager.devices[name].previewImage.connect(self.previews[name].set_image)
+
         self.deviceConfigurationWidget[name].setImageMode.connect(self.manager.devices[name].set_image_mode)
-        self.manager.devices[name].setImageMode.connect(self.deviceConfigurationWidget[name].set_image_mode)
         self.deviceConfigurationWidget[name].setAutoWhiteBalanceMode.connect(self.manager.devices[name].set_auto_white_balance_mode)
         self.deviceConfigurationWidget[name].setAutoExposureMode.connect(self.manager.devices[name].set_auto_exposure_mode)
-        self.manager.devices[name].setExposureTime.connect(self.deviceConfigurationWidget[name].set_exposure_time)
         self.deviceConfigurationWidget[name].setExposureTime.connect(self.manager.devices[name].set_exposure_time)
         self.deviceConfigurationWidget[name].setGain.connect(self.manager.devices[name].set_gain)
-        self.manager.devices[name].setGain.connect(self.deviceConfigurationWidget[name].set_gain)
         self.deviceConfigurationWidget[name].setAutoGain.connect(self.manager.devices[name].set_auto_gain)
         self.deviceConfigurationWidget[name].setBinningMode.connect(self.manager.devices[name].set_binning_mode)
         self.deviceConfigurationWidget[name].setBinning.connect(self.manager.devices[name].set_binning)
         self.deviceConfigurationWidget[name].setAcquisitionMode.connect(self.manager.devices[name].set_acquisition_mode)
         self.deviceConfigurationWidget[name].setAcquisitionRate.connect(self.manager.devices[name].set_acquisition_rate)
-        self.manager.devices[name].setAcquisitionRate.connect(self.deviceConfigurationWidget[name].set_acquisition_rate)
+
+        self.deviceConfigurationWidget[name].calibrateButton.clicked.connect(self.manager.devices[name].calibrate)
+
+        self.manager.devices[name].previewImage.connect(self.previews[name].set_image)
+
+        # self.manager.devices[name].updateImageMode.connect(self.deviceConfigurationWidget[name].update_image_mode)
+        self.manager.devices[name].updateExposureTime.connect(self.deviceConfigurationWidget[name].update_exposure_time)
+        self.manager.devices[name].updateGain.connect(self.deviceConfigurationWidget[name].update_gain)
+        self.manager.devices[name].updateAcquisitionRate.connect(self.deviceConfigurationWidget[name].update_acquisition_rate)
 
         # Initialise settings.
-        self.manager.devices[name].initialise()
+        self.deviceConfigurationWidget[name].setConfiguration(self.manager.configuration)
+        sleep(1.0)
 
         # Start stream.
         self.manager.devices[name].capture_image()

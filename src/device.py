@@ -109,6 +109,12 @@ class Device(QObject):
         self.PID_C1 = PID()
         self.PID_C2 = PID()
 
+    def set_enabled_C1(self, value):
+        self.enabled_C1 = value
+
+    def set_enabled_C2(self, value):
+        self.enabled_C2 = value
+
     @Slot()
     def initialise(self):
         #  Initialise device.
@@ -1126,7 +1132,6 @@ class Device(QObject):
         """Method to open a device connection."""
         try:
             self.handle = ljm.open(7, self.connection, self.id)
-            self.name = ljm.eReadNameString(self.handle, "DEVICE_NAME_DEFAULT")
             log.info("Connected to {name}.".format(name=self.name))
         except ljm.LJMError:
             ljme = sys.exc_info()[1]
@@ -1155,6 +1160,8 @@ class Device(QObject):
                 self.configure_pulse_counters()
                 self.set_speed_C1(self.speed_C1)
                 self.set_speed_C2(self.speed_C2)
+                self.enabled_C1 = False
+                self.enabled_C2 = False
             except ljm.LJMError:
                 ljme = sys.exc_info()[1]
                 log.warning(ljme) 

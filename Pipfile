@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pyside6 = "*"
 colorlog = "*"
 "ruamel.yaml" = "*"
 labjack = "*"
@@ -14,6 +13,10 @@ scipy = "*"
 simple-pid = "*"
 pillow = "*"
 opencv-contrib-python = "*"
+pyside6 = "*"
+jinja2 = "*"
+pyinstaller = "*"
+pyqtgraph = "*"
 
 [dev-packages]
 

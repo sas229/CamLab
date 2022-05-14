@@ -22,6 +22,10 @@ class CameraUtilities:
         index = self.tabs.indexOf(self.previews[name])
         self.tabs.setTabVisible(index, True)
 
+        # Convert tab to window if required by configuration.
+        if self.manager.configuration["devices"][name]["preview"]["mode"] == "window":
+            self.tabToWindow(self.previews[name], index)
+
         # Connections.
         self.previews[name].previewWindowClosed.connect(self.windowToTab)        
 

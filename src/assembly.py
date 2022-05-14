@@ -92,7 +92,6 @@ class Assembly(QObject):
 
             # Add save data functionality in here.
             np.savetxt(self.file, processedData, fmt='%8.3f', delimiter='\t', newline='\n')
-            print(processedData)
             
             if np.shape(self.plotData)[0] > 0:
                 self.plotData = np.vstack((self.plotData, processedData)) 

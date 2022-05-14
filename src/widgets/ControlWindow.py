@@ -1,8 +1,6 @@
 import os
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QTabWidget
-# from PySide6.QtGui import QIcon, QAction, QCursor, QDoubleValidator, QFont
-# from PySide6.QtCore import Signal, Slot, Qt, QModelIndex, QEvent, QLocale
-from qt_material import apply_stylesheet, QtStyleTools
+from src.local_qt_material import apply_stylesheet, QtStyleTools
 import logging
 
 log = logging.getLogger(__name__)

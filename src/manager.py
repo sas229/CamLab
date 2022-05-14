@@ -15,7 +15,6 @@ import time
 import re
 from datetime import datetime
 import src.local_gxipy as gx
-from PIL import Image
 
 log = logging.getLogger(__name__)
 
@@ -97,7 +96,16 @@ class Manager(QObject):
         self.controlActuatorList = ["N/A", "Linear"]
         self.defaultFeedbackChannelList = ["N/A"]
         self.defaultCameraSettings = {
+            "acquisitionMode": "Maximum",
+            "acquisitionRate": 10.00,
+            "autoExposureMode": "Continuous",
+            "autoGain": "On",
             "autoWhiteBalance": "Continuous",
+            "binningMode": "Off",
+            "binningValue": 1,
+            "exposureTime": 10000,
+            "gain": 5.0,
+            "imageMode": "RGB"
         }
         self.defaultPreviewSettings = {
             "mode": "tab",
@@ -268,10 +276,13 @@ class Manager(QObject):
         for device in enabledDevices:
             name = device["name"]
             deviceType = device["type"] 
-            self.devices[name].initialise()
             
             # Generate addresses for acqusition and set acquisition in device.
             if deviceType == "Hub":
+                # Initialise device.
+                self.devices[name].initialise()
+                
+                # Set acquisition data.
                 channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[name].acquisitionSettings()
                 addresses = []
                 dataTypes = []
@@ -282,6 +293,16 @@ class Manager(QObject):
                     dataTypes.append(dt)
                 controlRate = self.configuration["global"]["controlRate"]
                 self.devices[name].set_acquisition_variables(channels, addresses, dataTypes, slopes, offsets, autozero, controlRate)
+                
+                # For enabled contols, set boolean in device instance in order to output appropriate control variables for plotting.
+                enabledControls = self.controlTableModels[name].enabledControls()
+                for control in enabledControls:
+                    channel = control["channel"]
+                    if channel == "C1":
+                        self.devices[name].set_enabled_C1(True)
+                    elif channel == "C2":
+                        self.devices[name].set_enabled_C2(True)
+
                 log.info("Settings initialised for device named " + name + ".")
 
     def setDeviceFeedbackChannels(self):
@@ -376,16 +397,18 @@ class Manager(QObject):
                             # If the connection is successful, set the device status to true.
                             handle = ljm.open(7, int(deviceInformation["connection"]), int(deviceInformation["id"]))
                             name = ljm.eReadNameString(handle, "DEVICE_NAME_DEFAULT")
+                            if name != device:
+                                log.warning("LabJack T7 device has incorrect name set in register.")
                             ljm.close(handle)
                             deviceInformation["status"] = True     
                             
                             # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
                             self.deviceTableModel.appendRow(deviceInformation)
-                            self.acquisitionTableModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
-                            self.controlTableModels[name] = ControlTableModel(name, self.configuration["devices"][name]["control"])
-                            self.feedbackChannelLists[name] = self.setFeedbackChannelList(name)
+                            self.acquisitionTableModels[device] = AcquisitionTableModel(self.configuration["devices"][device]["acquisition"])
+                            self.controlTableModels[device] = ControlTableModel(device, self.configuration["devices"][device]["control"])
+                            self.feedbackChannelLists[device] = self.setFeedbackChannelList(device)
                             self.createDeviceThread(name=device, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True)
-                            self.toggleDeviceConnection(device, deviceInformation["connect"])           
+                            self.toggleDeviceConnection(device, deviceInformation["connect"])       
                         except ljm.LJMError:
                             # Otherwise log the exception and set the device status to false.
                             ljme = sys.exc_info()[1]
@@ -710,6 +733,7 @@ class Manager(QObject):
                         channel['value'] = 0.00
 
             # Save the yaml file and its path to QSettings.
+            ruamel.yaml.representer.RoundTripRepresenter.ignore_aliases = lambda x, y: True
             with open(saveConfigurationPath, "w") as file:
                 yaml = ruamel.yaml.YAML()
                 yaml.dump(configuration, file)

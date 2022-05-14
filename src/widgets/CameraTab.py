@@ -1,10 +1,11 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
+from PySide6.QtWidgets import QWidget, QGridLayout, QLabel
 from PySide6.QtCore import Signal, Slot
 import src.local_pyqtgraph.pyqtgraph as pg
 import numpy as np
 import logging
+import os
 
-logging.getLogger("PIL").setLevel(logging.WARNING)
+log = logging.getLogger(__name__)
 
 class CameraTab(QWidget):
     previewWindowClosed = Signal(QWidget)
@@ -25,9 +26,9 @@ class CameraTab(QWidget):
 
         self.label = QLabel("Live Preview")
 
-        self.layout = QVBoxLayout()
-        self.layout.addWidget(self.label)
-        self.layout.addWidget(self.preview)
+        self.layout = QGridLayout()
+        self.layout.addWidget(self.label, 0, 0)
+        self.layout.addWidget(self.preview, 1, 0)
 
         self.setLayout(self.layout)
 
@@ -37,33 +38,40 @@ class CameraTab(QWidget):
         image = np.flipud(image)
         self.imageItem.setImage(image=image)
         self.preview.setBackground(None)
-        self.getImage.emit()        
+        self.getImage.emit()
 
     def setWindow(self):
-        x = int(self.configuration["preview"]["x"])
-        y = int(self.configuration["preview"]["y"])
-        w = int(self.configuration["preview"]["width"])
-        h = int(self.configuration["preview"]["height"])
+        x = int(self.cameraConfiguration["preview"]["x"])
+        y = int(self.cameraConfiguration["preview"]["y"])
+        w = int(self.cameraConfiguration["preview"]["width"])
+        h = int(self.cameraConfiguration["preview"]["height"])
         self.setGeometry(x, y, w, h)
-        self.configuration["preview"]["mode"] = "window"
+        self.cameraConfiguration["preview"]["mode"] = "window"
 
     def setTab(self):
-        self.configuration["preview"]["mode"] = "tab"
+        self.cameraConfiguration["preview"]["mode"] = "tab"
+
+    @Slot(str, str)
+    def setTitle(self, currentTitle, newTitle):
+        if self.windowTitle() == currentTitle:
+            self.setWindowTitle(newTitle)
         
     def resizeEvent(self, event):
         # Save updated size in configuration.
-        self.configuration["preview"]["width"] = int(self.width())
-        self.configuration["preview"]["height"] = int(self.height())
+        if self.cameraConfiguration["preview"]["mode"] == "window":
+            self.cameraConfiguration["preview"]["width"] = int(self.width())
+            self.cameraConfiguration["preview"]["height"] = int(self.height())
 
     def moveEvent(self, event):
         # Save updated position in configuration.
-        position = self.geometry()
-        self.configuration["preview"]["x"] = int(position.x())
-        self.configuration["preview"]["y"] = int(position.y())
+        if self.cameraConfiguration["preview"]["mode"] == "window":
+            position = self.geometry()
+            self.cameraConfiguration["preview"]["x"] = int(position.x())
+            self.cameraConfiguration["preview"]["y"] = int(position.y())
         
     def setConfiguration(self, configuration):
         # Set the configuration.
-        self.configuration = configuration["devices"][self.name]
+        self.cameraConfiguration = configuration["devices"][self.name]
 
     def closeEvent(self, event):
         self.previewWindowClosed.emit(self)
