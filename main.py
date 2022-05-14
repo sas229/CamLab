@@ -16,7 +16,7 @@ if __name__ == '__main__':
     app.setOrganizationName("CUED")
     app.setOrganizationDomain("Civil")
     app.setApplicationName("CamLab")
-    app.setWindowIcon(QIcon("assets/NRFIS.svg"))
+    app.setWindowIcon(QIcon("src/assets/NRFIS.svg"))
 
     # Execute main window.
     main = MainWindow()
