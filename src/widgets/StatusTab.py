@@ -8,8 +8,8 @@ class StatusTab(QWidget):
         super().__init__()
         self.setWhatsThis("status")
 
-        self.runSequence = QPushButton("Run Sequence")
-        self.runSequence.setFixedWidth(150)
+        self.runSequence = QPushButton("Run Jonathan's Sequence")
+        self.runSequence.setFixedWidth(250)
 
         self.layout = QGridLayout()
         self.layout.addWidget(self.runSequence, 0, 0)
