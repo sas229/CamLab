@@ -18,19 +18,10 @@ if __name__ == '__main__':
     app.setOrganizationDomain("Civil")
     app.setApplicationName("CamLab")
     
-    # Get directory.
+    # Get directory of icon.
     bundle_dir = getattr(sys, "_MEIPASS", os.path.abspath(os.path.dirname(__file__)))
-    icon_dir = os.path.abspath(os.path.join(bundle_dir,"assets"))   
-
-    # Set app icon.   
-    app_icon = QIcon()
-    app_icon.addFile(os.path.abspath(os.path.join(icon_dir,"CamLab_16_16.png")), QSize(16,16))
-    app_icon.addFile(os.path.abspath(os.path.join(icon_dir,"CamLab_24_24.png")), QSize(24,24))
-    app_icon.addFile(os.path.abspath(os.path.join(icon_dir,"CamLab_32_32.png")), QSize(32,32))
-    app_icon.addFile(os.path.abspath(os.path.join(icon_dir,"CamLab_48_48.png")), QSize(48,48))
-    app_icon.addFile(os.path.abspath(os.path.join(icon_dir,"CamLab_256_256.png")), QSize(256,256))
-    app_icon.addFile(os.path.abspath(os.path.join(icon_dir,"CamLab.png")), QSize(683,683))
-    app.setWindowIcon(app_icon)
+    icon_path = os.path.abspath(os.path.join(bundle_dir,"assets/NRFIS.png"))   
+    app.setWindowIcon(QIcon(icon_path))
 
     # Execute main window.
     main = MainWindow()
