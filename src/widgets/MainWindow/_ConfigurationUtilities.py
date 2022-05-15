@@ -70,19 +70,6 @@ class ConfigurationUtilities:
         # Create layout.
         self.deviceConfigurationLayout[name] = QVBoxLayout()
 
-        # Add acquisition table label.
-        self.acquisitionLabel = QLabel('Acquisition')
-        self.deviceConfigurationLayout[name].addWidget(self.acquisitionLabel)
-
-        # Add acquisition table to the TabWidget.
-        self.acquisitionTableViews[name] = AcquisitionTableView()
-        self.acquisitionTableViews[name].setModel(self.manager.acquisitionTableModels[name])
-        self.deviceConfigurationLayout[name].addWidget(self.acquisitionTableViews[name])
-
-        # Connections for acquisition table.
-        self.manager.acquisitionTableModels[name].acquisitionChannelTableUpdated.connect(self.manager.updatePlotWindowChannelsData)
-        self.manager.acquisitionTableModels[name].acquisitionChannelToggled.connect(self.updateFeedbackComboBox)
-
         # Add control table label.
         controlLabel = QLabel('Control')
         self.deviceConfigurationLayout[name].addWidget(controlLabel)
@@ -104,6 +91,19 @@ class ConfigurationUtilities:
         self.manager.controlTableModels[name].controlWidgetChanged.connect(self.changeControlWidget)
         self.manager.controlTableModels[name].controlFeedbackChannelChanged.connect(self.changeControlFeedbackChannel)
 
+        # Add acquisition table label.
+        self.acquisitionLabel = QLabel('Acquisition')
+        self.deviceConfigurationLayout[name].addWidget(self.acquisitionLabel)
+
+        # Add acquisition table to the TabWidget.
+        self.acquisitionTableViews[name] = AcquisitionTableView()
+        self.acquisitionTableViews[name].setModel(self.manager.acquisitionTableModels[name])
+        self.deviceConfigurationLayout[name].addWidget(self.acquisitionTableViews[name])
+
+        # Connections for acquisition table.
+        self.manager.acquisitionTableModels[name].acquisitionChannelTableUpdated.connect(self.manager.updatePlotWindowChannelsData)
+        self.manager.acquisitionTableModels[name].acquisitionChannelToggled.connect(self.updateFeedbackComboBox)
+        
         # Set layout within widget.
         self.deviceConfigurationWidget[name] = QWidget()
         self.deviceConfigurationWidget[name].setLayout(self.deviceConfigurationLayout[name])

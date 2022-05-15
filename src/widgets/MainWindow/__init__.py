@@ -93,7 +93,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
 
         self.tabs.addPersistentTab(self.configurationTab, "Configuration")
         # self.tabs.addPersistentTab(self.sequenceTab, "Sequence")
-        self.tabs.addPersistentTab(self.statusTab, "Status")
+        # self.tabs.addPersistentTab(self.statusTab, "Status")
 
         # Set the central widget of the main window.
         self.centralWidget = QWidget()

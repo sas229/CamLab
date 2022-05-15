@@ -1,6 +1,6 @@
 from labjack import ljm
 
-# Open first found LabJack
+# Open LabJack T7 device.
 handle = ljm.openS("T7", "ANY", "470019440")
 
 info = ljm.getHandleInfo(handle)

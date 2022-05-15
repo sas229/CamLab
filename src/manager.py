@@ -507,10 +507,10 @@ class Manager(QObject):
                     else:
                         self.configuration["devices"][name] = newDevice 
 
-                    # Instantiate acquisition and control table models.
-                    log.info("Instantiating data models for device.")
-                    # Commands to instantiate data models for device control...
-                    log.info("Data models instantiated for device.")
+                    # # Instantiate acquisition and control table models.
+                    # log.info("Instantiating data models for device.")
+                    # # Commands to instantiate data models for device control.
+                    # log.info("Data models instantiated for device.")
                 
                     # Create device thread and add device to UI.
                     log.info("Adding device to UI.")
@@ -571,7 +571,7 @@ class Manager(QObject):
                     self.deviceTableModel.appendRow(deviceInformation)
                     self.configurationChanged.emit(self.configuration)
                     
-                    # Make a deep copy toab avoid pointers in the YAML output.
+                    # Make a deep copy to avoid references in the YAML output.
                     acquisitionTable = copy.deepcopy(self.defaultAcquisitionTable)
                     controlTable = copy.deepcopy(self.defaultControlTable)
                     controlTable[0]["name"] = deviceInformation["name"] + " C1"
