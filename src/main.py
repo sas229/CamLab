@@ -13,7 +13,7 @@ if __name__ == '__main__':
 
     # Get directory.
     bundle_dir = getattr(sys, "_MEIPASS", os.path.abspath(os.path.dirname(__file__)))
-    path_to_icon = os.path.abspath(os.path.join(bundle_dir,"assets/NRFIS.png"))
+    path_to_icon = os.path.abspath(os.path.join(bundle_dir,"assets/NRFIS.ico"))
 
     # Generate application instance.
     app = QApplication(sys.argv)
