@@ -7,6 +7,7 @@ import sys
 from time import sleep
 from simple_pid import PID
 from pathlib import Path
+import os
 
 log = logging.getLogger(__name__)
 
