@@ -47,8 +47,6 @@ def init_log():
         format="%(asctime)s | %(funcName)s | %(levelname)s: %(message)s",
         level=logging.DEBUG
     )
-    print(home_dir)
-    print(log_file)
 
     # Output full log.
     fh = logging.FileHandler(log_file)
