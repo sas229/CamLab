@@ -1,3 +1,0 @@
-[submodule "local_pyqtgraph"]
-	path = local_pyqtgraph
-	url = https://github.com/pyqtgraph/pyqtgraph.git
