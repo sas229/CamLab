@@ -274,3 +274,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.managerThread.quit()
         log.info("Manager thread stopped.")
         log.info('Closing CamLab.')
+        handlers = log.handlers[:]
+        for handler in handlers:
+            handler.close()
+            log.removeHandler(handler)
