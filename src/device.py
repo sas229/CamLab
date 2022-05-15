@@ -6,8 +6,6 @@ import time
 import sys
 from time import sleep
 from simple_pid import PID
-from pathlib import Path
-import os
 
 log = logging.getLogger(__name__)
 
@@ -1212,13 +1210,33 @@ class Device(QObject):
                 log.warning(e)
 
     def load_lua_script(self):
-        """Method to load the Lua script into the device."""
+        """Method to load the Lua failsafe script into the device."""
         try:
-            bundle_dir = Path(__file__).parents[0]
-            path_to_lua = os.path.abspath(os.path.join(bundle_dir,"failsafe.lua"))
-            self.script = "failsafe.lua"
-            with open(self.script, "r") as f:
-                lua = f.read()
+            lua =(
+                "-- Declarations.\n"
+                "failsafe = 0\n"
+                "-- Functions.\n"
+                "local checkInterval = LJ.CheckInterval\n"
+                "local read = MB.R\n"
+                "local write = MB.W\n"
+                "-- Check the failsafe register every 1000ms.\n"
+                "LJ.IntervalConfig(0, 1000)\n"
+                "-- Main loop.\n"
+                "while true do\n"
+                "   if checkInterval(0) then\n"
+                "       -- Check USER_RAM for communications boolean.\n"
+                "       failsafe = read(46180, 0)\n"
+                "       if failsafe == 1 then\n"
+                "           -- Communication confirmed. Reset register.\n"
+                "           write(46180, 0, 0)\n"
+                "       else\n"
+                "           -- Communication lost. Stop output movement.\n"
+                "           write(44008, 1, 0)\n"
+                "           write(44010, 1, 0)\n"
+                "       end\n"
+                "   end\n"
+                "end\n"
+                )
             lua_length = len(lua)
 
             # Disable a running script by writing 0 to LUA_RUN twice. Wait for the Lua VM to shut down (and some T7 firmware versions need
