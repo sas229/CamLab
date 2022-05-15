@@ -9,7 +9,7 @@ def init_log():
     operating_system = platform.system()
     home_dir = os.path.expanduser( '~' )
     if operating_system == "Windows":
-        log_dir = os.path.abspath(os.path.join(home_dir,"AppData"))
+        log_dir = os.path.abspath(os.path.join(home_dir,"AppData/CamLab"))
         isdir = os.path.isdir(log_dir) 
         if isdir == False:
             os.mkdir(log_dir)
