@@ -55,6 +55,7 @@ class ConfigurationUtilities:
         # self.manager.devices[name].updateImageMode.connect(self.deviceConfigurationWidget[name].update_image_mode)
         self.manager.devices[name].updateExposureTime.connect(self.deviceConfigurationWidget[name].update_exposure_time)
         self.manager.devices[name].updateGain.connect(self.deviceConfigurationWidget[name].update_gain)
+        self.manager.devices[name].updateImageMode.connect(self.deviceConfigurationWidget[name].update_mode)
         self.manager.devices[name].updateAcquisitionRate.connect(self.deviceConfigurationWidget[name].update_acquisition_rate)
 
         # Initialise settings.
@@ -103,7 +104,7 @@ class ConfigurationUtilities:
         # Connections for acquisition table.
         self.manager.acquisitionTableModels[name].acquisitionChannelTableUpdated.connect(self.manager.updatePlotWindowChannelsData)
         self.manager.acquisitionTableModels[name].acquisitionChannelToggled.connect(self.updateFeedbackComboBox)
-        
+
         # Set layout within widget.
         self.deviceConfigurationWidget[name] = QWidget()
         self.deviceConfigurationWidget[name].setLayout(self.deviceConfigurationLayout[name])

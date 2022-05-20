@@ -1,5 +1,5 @@
 from PySide6.QtCore import QObject, Signal, Slot, QSettings, QThread, QModelIndex, QDate, Qt, QTimer
-from models import DeviceTableModel, AcquisitionTableModel, ChannelsTableModel, ControlTableModel
+from models import DeviceTableModel, AcquisitionTableModel, ControlTableModel
 from device import Device
 from assembly import Assembly
 from timing import Timing
@@ -243,6 +243,16 @@ class Manager(QObject):
                             nameline += "\t Speed " + str(secondaryUnit)
                             nameline += "\t Feedback SP " + str(feedbackUnit)
                             nameline += "\t Feedback PV " + str(feedbackUnit)
+            elif deviceType == "Camera":
+                # If a camera, add header for image number.
+                slopeline += "\t"
+                slopeline += "N/A"
+                offsetline += "\t"
+                offsetline += "N/A"
+                channelline += "\t"
+                channelline += "IMG#" + " [" + str(deviceName) + "]"
+                nameline += "\t"
+                nameline += "n (-)"
         slopeline += "\n"
         offsetline += "\n\n"
         channelline += "\n\n"
@@ -370,10 +380,10 @@ class Manager(QObject):
                 self.devices[name].emitData.disconnect(self.assembly.updateNewData)
                 self.devices[name].updateOffsets.disconnect(self.updateDeviceOffsets)
             elif self.devices[name].type == "Camera":
+                self.devices[name].stop_stream = True
                 self.devices[name].emitData.disconnect(self.assembly.updateNewData)
                 self.timing.controlDevices.disconnect(self.devices[name].save_image)
                 self.devices[name].saveImage.disconnect(self.assembly.save_image)
-                self.devices[name].stop_stream = True
             self.deviceToggled.emit(name, connect)
             log.info("Basic signals disconnected from device {name}.".format(name=name))
 
@@ -634,12 +644,12 @@ class Manager(QObject):
         self.timing.stop()
         
         # Clear all previous data.
-        self.assembly.clearAllData()
         log.info("Configuring devices.")
     
     @Slot()
     def run(self):
         # Set acquisition settings.
+        self.assembly.clearAllData()
         self.initialiseDeviceSettings()
 
         # Set feedback channels.
@@ -815,61 +825,67 @@ class Manager(QObject):
         for device in deviceList:
             # Get lists of the enabled channel names and units.
             name = device["name"]
-            channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[name].acquisitionSettings()
+            if self.devices[name].type == "Hub":
+                channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[name].acquisitionSettings()
 
-            # Create a generic channelsData list.
-            for i in range(len(channels)):
+                # Create a generic channelsData list.
+                for i in range(len(channels)):
+                    genericChannelsData.append(
+                        {"plot": False, "name": names[i], "device": device["name"], "colour": self.setColourDefault(),
+                        "value": "0.00", "unit": units[i]})
+
+                # Control channels.
+                controls = self.controlTableModels[name].enabledControls()
+                device = device["name"]
+                for control in controls:
+                    controlName = name + " " + control["channel"]
+                    if control["channel"] == "C1":
+                        channel = 0
+                    elif control["channel"] == "C2":
+                        channel = 1
+                    # Slice in lines that follows removes the brackets.
+                    primaryUnit = self.configuration["devices"][name]["control"][channel]["settings"]["primaryUnit"]
+                    secondaryUnit = self.configuration["devices"][name]["control"][channel]["settings"]["secondaryUnit"]
+                    feedbackUnit = self.configuration["devices"][name]["control"][channel]["settings"]["feedbackUnit"]
+                    channel = control["channel"]
+                    if control["feedback"] == "N/A":
+                        if control["control"] == "Linear":
+                            genericChannelsData.append(
+                            {"plot": False, "name": "Postion SP" , "device": control["name"], "colour": self.setColourDefault(),
+                            "value": "0.00", "unit": primaryUnit})
+                            genericChannelsData.append(
+                            {"plot": False, "name": "Postion PV" , "device": control["name"], "colour": self.setColourDefault(),
+                            "value": "0.00", "unit": primaryUnit})
+                            genericChannelsData.append(
+                            {"plot": False, "name": "Direction" , "device": control["name"], "colour": self.setColourDefault(),
+                            "value": "0.00", "unit": "-"})
+                            genericChannelsData.append(
+                            {"plot": False, "name": "Speed" , "device": control["name"], "colour": self.setColourDefault(),
+                            "value": "0.00", "unit": secondaryUnit})
+                    else:
+                        if control["control"] == "Linear":
+                            genericChannelsData.append(
+                            {"plot": False, "name": "Postion SP" , "device": control["name"], "colour": self.setColourDefault(),
+                            "value": "0.00", "unit": primaryUnit})
+                            genericChannelsData.append(
+                            {"plot": False, "name": "Postion PV" , "device": control["name"], "colour": self.setColourDefault(),
+                            "value": "0.00", "unit": primaryUnit})
+                            genericChannelsData.append(
+                            {"plot": False, "name": "Direction" , "device": control["name"], "colour": self.setColourDefault(),
+                            "value": "0.00", "unit": "-"})
+                            genericChannelsData.append(
+                            {"plot": False, "name": "Speed" , "device": control["name"], "colour": self.setColourDefault(),
+                            "value": "0.00", "unit": secondaryUnit})
+                            genericChannelsData.append(
+                            {"plot": False, "name": "Feedback SP" , "device": control["name"], "colour": self.setColourDefault(),
+                            "value": "0.00", "unit": feedbackUnit})
+                            genericChannelsData.append(
+                            {"plot": False, "name": "Feedback PV" , "device": control["name"], "colour": self.setColourDefault(),
+                            "value": "0.00", "unit": feedbackUnit})
+            elif self.devices[name].type == "Camera":
                 genericChannelsData.append(
-                    {"plot": False, "name": names[i], "device": device["name"], "colour": self.setColourDefault(),
-                     "value": "0.00", "unit": units[i]})
-            # Control channels.
-            controls = self.controlTableModels[name].enabledControls()
-            device = device["name"]
-            for control in controls:
-                controlName = name + " " + control["channel"]
-                if control["channel"] == "C1":
-                    channel = 0
-                elif control["channel"] == "C2":
-                    channel = 1
-                # Slice in lines that follows removes the brackets.
-                primaryUnit = self.configuration["devices"][name]["control"][channel]["settings"]["primaryUnit"]
-                secondaryUnit = self.configuration["devices"][name]["control"][channel]["settings"]["secondaryUnit"]
-                feedbackUnit = self.configuration["devices"][name]["control"][channel]["settings"]["feedbackUnit"]
-                channel = control["channel"]
-                if control["feedback"] == "N/A":
-                    if control["control"] == "Linear":
-                        genericChannelsData.append(
-                        {"plot": False, "name": "Postion SP" , "device": control["name"], "colour": self.setColourDefault(),
-                        "value": "0.00", "unit": primaryUnit})
-                        genericChannelsData.append(
-                        {"plot": False, "name": "Postion PV" , "device": control["name"], "colour": self.setColourDefault(),
-                        "value": "0.00", "unit": primaryUnit})
-                        genericChannelsData.append(
-                        {"plot": False, "name": "Direction" , "device": control["name"], "colour": self.setColourDefault(),
-                        "value": "0.00", "unit": "-"})
-                        genericChannelsData.append(
-                        {"plot": False, "name": "Speed" , "device": control["name"], "colour": self.setColourDefault(),
-                        "value": "0.00", "unit": secondaryUnit})
-                else:
-                    if control["control"] == "Linear":
-                        genericChannelsData.append(
-                        {"plot": False, "name": "Postion SP" , "device": control["name"], "colour": self.setColourDefault(),
-                        "value": "0.00", "unit": primaryUnit})
-                        genericChannelsData.append(
-                        {"plot": False, "name": "Postion PV" , "device": control["name"], "colour": self.setColourDefault(),
-                        "value": "0.00", "unit": primaryUnit})
-                        genericChannelsData.append(
-                        {"plot": False, "name": "Direction" , "device": control["name"], "colour": self.setColourDefault(),
-                        "value": "0.00", "unit": "-"})
-                        genericChannelsData.append(
-                        {"plot": False, "name": "Speed" , "device": control["name"], "colour": self.setColourDefault(),
-                        "value": "0.00", "unit": secondaryUnit})
-                        genericChannelsData.append(
-                        {"plot": False, "name": "Feedback SP" , "device": control["name"], "colour": self.setColourDefault(),
-                        "value": "0.00", "unit": feedbackUnit})
-                        genericChannelsData.append(
-                        {"plot": False, "name": "Feedback PV" , "device": control["name"], "colour": self.setColourDefault(),
-                        "value": "0.00", "unit": feedbackUnit})
+                {"plot": False, "name": "n" , "device": device["name"], "colour": self.setColourDefault(),
+                "value": "0", "unit": "-"})
         return genericChannelsData
 
     @Slot()

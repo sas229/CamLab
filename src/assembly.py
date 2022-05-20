@@ -63,7 +63,7 @@ class Assembly(QObject):
         numTimesteps = min(numTimesteps)
         numTimesteps = numTimesteps - (numTimesteps % self.skip)
 
-        # Pop numTimesteps of data from each data object onto assembledData if more than 0.
+        # Pop numTimesteps of data from each data object onto saveData and plotData if more than 0.
         if numTimesteps > 0:
             deviceData = []
             count = 0
@@ -71,32 +71,48 @@ class Assembly(QObject):
                 name = device["name"]
                 deviceData = self.data[name][0:numTimesteps,:]
                 self.data[name] = np.delete(self.data[name], range(numTimesteps), axis=0)
+                
+                # Perform averaging of data if appropriate.
+                processedData = deviceData
+                if device["type"] == "Hub":
+                    if self.average > 1:
+                        processedData = uniform_filter1d(processedData, size=self.average, axis=0, mode='nearest')
+
                 if count == 0:
-                    assembledData = deviceData.copy()
+                    if device["type"] == "Camera":
+                        saveData = processedData[:,0].copy()
+                        plotData = processedData[:,1].copy()
+                    else:
+                        saveData = processedData.copy()
+                        plotData = processedData.copy()
                 else:
-                    assembledData = np.column_stack((assembledData, deviceData))
+                    if device["type"] == "Camera":
+                        saveData = np.column_stack((saveData, processedData[:,0]))
+                        plotData = np.column_stack((plotData, processedData[:,1]))
+                    else:
+                        saveData = np.column_stack((saveData, processedData))
+                        plotData = np.column_stack((plotData, processedData))
                 count += 1
 
-            # Perform averaging.
-            processedData = assembledData
-            if self.average > 1:
-                processedData = uniform_filter1d(processedData, size=self.average, axis=0, mode='nearest')
-            if self.skip > 1: 
-                processedData = processedData[::self.skip,:].copy()
+            # # If skip value greater than 0, skip values.
+            # if self.skip > 1: 
+            #     saveData = saveData[::self.skip,:].copy()
 
             # Add timestamp.
-            n = np.shape(processedData)[0]
+            n = np.shape(saveData)[0]
             timesteps = np.arange(0, n, 1)*self.DeltaT
             timesteps += self.time
-            processedData = np.column_stack((timesteps, processedData))
+            saveData = np.column_stack((timesteps, saveData))
+            plotData = np.column_stack((timesteps, plotData))
 
-            # Add save data functionality in here.
-            np.savetxt(self.file, processedData, fmt='%8.3f', delimiter='\t', newline='\n')
+            # Save data.
+            np.savetxt(self.file, saveData, fmt='%8.3f', delimiter='\t', newline='\n')
             
+            # Plot data.
             if np.shape(self.plotData)[0] > 0:
-                self.plotData = np.vstack((self.plotData, processedData)) 
+                self.plotData = np.vstack((self.plotData, plotData)) 
             else: 
-                self.plotData = processedData
+                self.plotData = plotData
             self.time += n*self.DeltaT
             self.count += numTimesteps
             self.plotDataChanged.emit(self.plotData)
@@ -106,7 +122,7 @@ class Assembly(QObject):
         """Save image with given filename prepended with output file details."""
         filepath = self.path + "/" + self.filename + "_" + self.date + "_" + self.timestart + "_" + image_name
         # self.detect_aruco(image_array)
-        img = Image.fromarray(image_array, 'RGB')
+        img = Image.fromarray(image_array)
         img.save(filepath, "JPEG")
         
     def detect_aruco(self, image_array):

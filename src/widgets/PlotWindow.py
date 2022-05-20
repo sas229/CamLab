@@ -708,7 +708,7 @@ class PlotWindow(QWidget, QtStyleTools):
                 self.lines[i].setData([],[])
             elif swap == False:
                 self.lines[i].setAlpha(alphaValue/100, False)
-                self.lines[i].setData(self.plotData[:,self.commonChannel], self.plotData[:,i], pen=pen)
+                self.lines[i].setData(self.plotData[:,self.commonChannel], self.plotData[:,i], pen=pen, connect="finite")
                 if logCommonAxis == True:
                     self.plot.setLogMode(x=True)
                 elif logCommonAxis == False:
@@ -719,7 +719,7 @@ class PlotWindow(QWidget, QtStyleTools):
                     self.plot.setLogMode(y=False)
             elif swap == True:
                 self.lines[i].setAlpha(alphaValue/100, False)
-                self.lines[i].setData(self.plotData[:,i], self.plotData[:,self.commonChannel], pen=pen)
+                self.lines[i].setData(self.plotData[:,i], self.plotData[:,self.commonChannel], pen=pen, connect="finite")
                 if logCommonAxis == True:
                     self.plot.setLogMode(y=True)
                 elif logCommonAxis == False:

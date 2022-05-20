@@ -315,6 +315,11 @@ class CameraSettings(QWidget):
     def update_gain(self, value):
         text = "{value:.2f}".format(value=value)
         self.gainLineEdit.setText(text)
+
+    @Slot(str)
+    def update_mode(self, text):
+        index = self.imageModeComboBox.findText(text)
+        self.imageModeComboBox.setCurrentIndex(index)
         
     def initialise_exposure_time(self, value):
         self.setExposureTime.emit(value)

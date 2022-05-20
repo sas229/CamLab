@@ -15,6 +15,7 @@ class Camera(QObject):
     previewImage = Signal(np.ndarray)
     saveImage = Signal(str, np.ndarray)
     updateExposureTime = Signal(int)
+    updateImageMode = Signal(str)
     updateGain = Signal(float)
     updateAcquisitionRate = Signal(float)
     emitData = Signal(str, np.ndarray)
@@ -203,12 +204,14 @@ class Camera(QObject):
             if self.preview_count > self.previous_preview_count:
                 self.image_name = self.name + "_" + str(self.save_count) + ".jpg"
                 self.saveImage.emit(self.image_name, self.numpy_image)
-                self.emitData.emit(self.name, np.atleast_2d(self.save_count))
+                data = np.array([self.save_count, self.save_count])
+                self.emitData.emit(self.name, data)
                 self.save_count += 1
                 self.previous_preview_count = 0
                 self.preview_count = 0
             else:
-                self.emitData.emit(self.name, np.atleast_2d(np.nan))
+                data = np.array([np.nan, self.save_count])
+                self.emitData.emit(self.name, data)
         except Exception:
             e = sys.exc_info()[1]
             log.warning(e)
@@ -219,6 +222,7 @@ class Camera(QObject):
         try:
             if self.cam.PixelColorFilter.is_implemented() is False and mode == "RGB":
                 self.mode = "Mono"
+                self.updateImageMode.emit("Mono")
             else:
                 self.mode = mode
             log.info("Image mode on {device} set to {mode}.".format(device=self.name, mode=mode))
@@ -229,12 +233,15 @@ class Camera(QObject):
     @Slot(str)
     def set_auto_white_balance_mode(self, mode):
         try:
-            if mode == "Continuous":
-                self.cam.BalanceWhiteAuto.set(gx.GxAutoEntry.CONTINUOUS)
-            elif mode == "Once":
-                self.cam.BalanceWhiteAuto.set(gx.GxAutoEntry.ONCE)
-            elif mode == "Off":
-                self.cam.BalanceWhiteAuto.set(gx.GxAutoEntry.OFF)
+            if self.cam.PixelColorFilter.is_implemented() is True:
+                if mode == "Continuous":
+                    self.cam.BalanceWhiteAuto.set(gx.GxAutoEntry.CONTINUOUS)
+                elif mode == "Once":
+                    self.cam.BalanceWhiteAuto.set(gx.GxAutoEntry.ONCE)
+                elif mode == "Off":
+                    self.cam.BalanceWhiteAuto.set(gx.GxAutoEntry.OFF)
+            else:
+                self.updateImageMode.emit("Mono")
         except Exception:
             e = sys.exc_info()[1]
             log.warning(e)
