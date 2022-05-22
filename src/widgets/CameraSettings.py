@@ -165,9 +165,9 @@ class CameraSettings(QWidget):
         # Calibration and tracking layout.
         self.calibrationGroupBoxLayout = QGridLayout()
 
-        self.calibrationGroupBoxLayout.addWidget(self.calibrateButton, 0, 0)
+        # self.calibrationGroupBoxLayout.addWidget(self.calibrateButton, 0, 0)
 
-        self.calibrationGroupBoxLayout.addWidget(self.trackingButton, 1, 0)
+        # self.calibrationGroupBoxLayout.addWidget(self.trackingButton, 1, 0)
 
         # self.calibrationGroupBoxLayout.addWidget(self.trackingLabel, n, 0)
         # self.calibrationGroupBoxLayout.addWidget(self.dictionaryLabel, n, 1)

@@ -196,54 +196,54 @@ class CommandBuilder(QGroupBox):
         self.setLayout(self.commandLayout)
         
         # Connections.
-        self.nameLineEdit.returnPressed.connect(self.nameSelected)
-        self.deviceComboBox.currentTextChanged.connect(self.deviceSelected)
-        self.channelComboBox.currentTextChanged.connect(self.channelSelected)
-        self.variableComboBox.currentTextChanged.connect(self.variableSelected)
-        self.commandComboBox.currentTextChanged.connect(self.commandSelected)
-        self.rateLineEdit.returnPressed.connect(self.enableAmplitudeInput)
-        self.amplitudeLineEdit.returnPressed.connect(self.amplitudeSelected)
-        self.repeatSpinBox.valueChanged.connect(self.repeatSelected)
-        self.offsetLineEdit.returnPressed.connect(self.offsetSelected)
-        self.triggerComboBox.currentTextChanged.connect(self.triggerSelected)
-        self.triggerValueLineEdit.returnPressed.connect(self.showOptions)
-        self.clearButton.clicked.connect(self.clearCommand)
-        self.addButton.clicked.connect(self.addCommand)
+        self.nameLineEdit.returnPressed.connect(self.name_selected)
+        self.deviceComboBox.currentTextChanged.connect(self.device_selected)
+        self.channelComboBox.currentTextChanged.connect(self.channel_selected)
+        self.variableComboBox.currentTextChanged.connect(self.variable_selected)
+        self.commandComboBox.currentTextChanged.connect(self.command_selected)
+        self.rateLineEdit.returnPressed.connect(self.enable_amplitude_input)
+        self.amplitudeLineEdit.returnPressed.connect(self.amplitude_selected)
+        self.repeatSpinBox.valueChanged.connect(self.repeat_selected)
+        self.offsetLineEdit.returnPressed.connect(self.offset_selected)
+        self.triggerComboBox.currentTextChanged.connect(self.trigger_selected)
+        self.triggerValueLineEdit.returnPressed.connect(self.show_options)
+        self.clearButton.clicked.connect(self.clear_command)
+        self.addButton.clicked.connect(self.add_command)
 
-    def updateIcons(self):
+    def update_icons(self):
         # Change appearance between light and dark modes.
         self.fileLoadButton.setIcon(QIcon("icon:/secondaryText/input.svg"))
         self.clearButton.setIcon(QIcon("icon:/secondaryText/clear.svg"))
         self.addButton.setIcon(QIcon("icon:/secondaryText/add.svg"))
 
-    def previewCommand(self):
+    def preview_command(self):
         if self.finaliseLabel.isVisible() == True:
-            self.createCommand()
+            self.create_command()
             self.commandPreview.emit(self.command)
         else:
             self.clearPreview.emit()
 
-    def addCommand(self):
-        self.createCommand()
+    def add_command(self):
+        self.create_command()
         self.addCommandToSequence.emit(self.command)
 
     @Slot()
-    def showOptions(self):
-        self.createCommand()
+    def show_options(self):
+        self.create_command()
         self.finaliseLabel.setVisible(True)
         self.clearButton.setVisible(True)
         self.addButton.setVisible(True)
     
     @Slot()
-    def repeatSelected(self):
+    def repeat_selected(self):
         if self.finaliseLabel.isVisible() == True:
-            self.createCommand()
+            self.create_command()
             self.commandPreview.emit(self.command)
         else:
             self.clearPreview.emit()
 
     @Slot()
-    def amplitudeSelected(self):
+    def amplitude_selected(self):
         if self.commandComboBox.currentText() == "Triangle":
             self.offsetLabel.setVisible(True)
             self.offsetLineEdit.setVisible(True)
@@ -253,7 +253,7 @@ class CommandBuilder(QGroupBox):
         else:
             self.triggerLabel.setVisible(True)
             self.triggerComboBox.setVisible(True)
-        self.previewCommand()
+        self.preview_command()
 
     def resetBuilder(self, currentIndex):
         # Hide all other widgets, reset ComboBoxes and re-initialise defaults in LineEdits. 
@@ -267,10 +267,10 @@ class CommandBuilder(QGroupBox):
                     widget.setText("")
                 if isinstance(widget, QSpinBox):
                     widget.setValue(1)
-        self.previewCommand()
+        self.preview_command()
 
     @Slot()
-    def nameSelected(self):
+    def name_selected(self):
         # Show device ComboBox.
         text = self.nameLineEdit.text()
         if text != "":
@@ -279,10 +279,10 @@ class CommandBuilder(QGroupBox):
         else:
             currentIndex = self.commandLayout.indexOf(self.nameLineEdit)
             self.resetBuilder(currentIndex)
-        self.previewCommand()
+        self.preview_command()
 
     @Slot(str)
-    def deviceSelected(self, text):
+    def device_selected(self, text):
         # Show channel ComboBox.
         if text != "Select":
             self.channelLabel.setVisible(True)
@@ -290,10 +290,10 @@ class CommandBuilder(QGroupBox):
         else:
             currentIndex = self.commandLayout.indexOf(self.deviceComboBox)
             self.resetBuilder(currentIndex)
-        self.previewCommand()
+        self.preview_command()
 
     @Slot(str)
-    def channelSelected(self, text):
+    def channel_selected(self, text):
         # Show variable ComboBox.
         if text != "Select":
             self.variableLabel.setVisible(True)
@@ -301,9 +301,9 @@ class CommandBuilder(QGroupBox):
         else:
             currentIndex = self.commandLayout.indexOf(self.channelComboBox)
             self.resetBuilder(currentIndex)
-        self.previewCommand()
+        self.preview_command()
 
-    def setUnits(self):
+    def set_units(self):
         # Set units.
         if self.variableComboBox.currentText() == "Position":
             text = "Rate " + "(" +self.positionRateUnit + ")"
@@ -343,7 +343,7 @@ class CommandBuilder(QGroupBox):
         self.triggerValueLabel.setText(unit)
 
     @Slot(str)
-    def variableSelected(self, text):
+    def variable_selected(self, text):
         # Show command ComboBox.
         if text != "Select":
             self.commandLabel.setVisible(True)
@@ -353,22 +353,22 @@ class CommandBuilder(QGroupBox):
             self.resetBuilder(currentIndex)
 
         # Update preview or clear it.
-        self.previewCommand()
+        self.preview_command()
 
-        self.setUnits()
+        self.set_units()
 
     @Slot(str)
-    def commandSelected(self, text):
+    def command_selected(self, text):
         currentIndex = self.commandLayout.indexOf(self.commandComboBox)
         self.resetBuilder(currentIndex)
         if text == "Ramp":
-            self.enableRateInput()
+            self.enable_rate_input()
         elif text == "Demand":
-            self.enableAmplitudeInput()
+            self.enable_amplitude_input()
         elif text == "Triangle":
-            self.enableRateInput()
+            self.enable_rate_input()
         elif text == "Sine":
-            self.enableRateInput()
+            self.enable_rate_input()
         elif text == "File":
             self.fileLoadLabel.setVisible(True)
             self.fileLoadButton.setVisible(True)
@@ -376,16 +376,16 @@ class CommandBuilder(QGroupBox):
             self.filePathLineEdit.setVisible(True)
     
     @Slot(str)
-    def offsetSelected(self):
+    def offset_selected(self):
         self.offset = float(self.offsetLineEdit.text())
-        self.enableRepeatInput()
-        self.showOptions()
+        self.enable_repeat_input()
+        self.show_options()
 
         # Update preview or clear it.
-        self.previewCommand()
+        self.preview_command()
 
     @Slot(str)
-    def triggerSelected(self, text):
+    def trigger_selected(self, text):
         if text == "Select":
             self.triggerValueLabel.setVisible(False)
             self.triggerValueLineEdit.setVisible(False)
@@ -393,14 +393,14 @@ class CommandBuilder(QGroupBox):
             self.clearButton.setVisible(False)
             self.addButton.setVisible(False)
         elif text == "Completion":
-            self.createCommand()
+            self.create_command()
             self.triggerValueLabel.setVisible(False)
             self.triggerValueLineEdit.setVisible(False)
             self.finaliseLabel.setVisible(True)
             self.clearButton.setVisible(True)
             self.addButton.setVisible(True)
         elif text == "Immediate":
-            self.createCommand()
+            self.create_command()
             self.triggerValueLabel.setVisible(False)
             self.triggerValueLineEdit.setVisible(False)
             self.finaliseLabel.setVisible(True)
@@ -412,35 +412,35 @@ class CommandBuilder(QGroupBox):
             self.finaliseLabel.setVisible(False)
             self.clearButton.setVisible(False)
             self.addButton.setVisible(False)
-        self.previewCommand()
-        self.setUnits() 
+        self.preview_command()
+        self.set_units() 
 
     @Slot()
-    def enableRepeatInput(self):
+    def enable_repeat_input(self):
         self.repeatLabel.setVisible(True)
         self.repeatSpinBox.setVisible(True)
-        self.previewCommand()
+        self.preview_command()
 
     @Slot()
-    def enablePhaseInput(self):
+    def enable_phase_input(self):
         self.offsetLabel.setVisible(True)
         self.offsetLineEdit.setVisible(True)
-        self.previewCommand()
+        self.preview_command()
 
     @Slot()
-    def enableRateInput(self):
+    def enable_rate_input(self):
         self.rateLabel.setVisible(True)
         self.rateLineEdit.setVisible(True)
-        self.previewCommand()
+        self.preview_command()
 
     @Slot()
-    def enableAmplitudeInput(self):
+    def enable_amplitude_input(self):
         self.amplitudeLabel.setVisible(True)
         self.amplitudeLineEdit.setVisible(True)
-        self.previewCommand()
+        self.preview_command()
 
     @Slot()
-    def createCommand(self):
+    def create_command(self):
         self.command = {}
         for index in range(self.commandLayout.count()):
             widget = self.commandLayout.itemAt(index).widget()
@@ -457,7 +457,7 @@ class CommandBuilder(QGroupBox):
                     self.command[name] = int(widget.value())
 
     @Slot()
-    def clearCommand(self):
+    def clear_command(self):
         self.resetBuilder(1)
         self.nameLineEdit.setText("")
         self.clearPreview.emit()

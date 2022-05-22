@@ -21,6 +21,7 @@ class Assembly(QObject):
         self.fileCount = 1
         self.data = {}
         self.offsets = []
+        self.enabledDevices = []
         self.arucoDict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
         self.arucoParams = cv2.aruco.DetectorParameters_create()
 
@@ -57,65 +58,67 @@ class Assembly(QObject):
     def updatePlotData(self):
         # Compute the minumum number of rows in the data item within each device dict.
         numTimesteps = []
-        for device in self.enabledDevices:
-            name = device["name"]
-            numTimesteps.append(np.shape(self.data[name])[0])
-        numTimesteps = min(numTimesteps)
-        numTimesteps = numTimesteps - (numTimesteps % self.skip)
-
-        # Pop numTimesteps of data from each data object onto saveData and plotData if more than 0.
-        if numTimesteps > 0:
-            deviceData = []
-            count = 0
+        if len(self.enabledDevices) > 0:
             for device in self.enabledDevices:
                 name = device["name"]
-                deviceData = self.data[name][0:numTimesteps,:]
-                self.data[name] = np.delete(self.data[name], range(numTimesteps), axis=0)
+                numTimesteps.append(np.shape(self.data[name])[0])
+        
+            numTimesteps = min(numTimesteps)
+            numTimesteps = numTimesteps - (numTimesteps % self.skip)
+
+            # Pop numTimesteps of data from each data object onto saveData and plotData if more than 0.
+            if numTimesteps > 0:
+                deviceData = []
+                count = 0
+                for device in self.enabledDevices:
+                    name = device["name"]
+                    deviceData = self.data[name][0:numTimesteps,:]
+                    self.data[name] = np.delete(self.data[name], range(numTimesteps), axis=0)
+                    
+                    # Perform averaging of data if appropriate.
+                    processedData = deviceData
+                    if device["type"] == "Hub":
+                        if self.average > 1:
+                            processedData = uniform_filter1d(processedData, size=self.average, axis=0, mode='nearest')
+
+                    if count == 0:
+                        if device["type"] == "Camera":
+                            saveData = processedData[:,0].copy()
+                            plotData = processedData[:,1].copy()
+                        else:
+                            saveData = processedData.copy()
+                            plotData = processedData.copy()
+                    else:
+                        if device["type"] == "Camera":
+                            saveData = np.column_stack((saveData, processedData[:,0]))
+                            plotData = np.column_stack((plotData, processedData[:,1]))
+                        else:
+                            saveData = np.column_stack((saveData, processedData))
+                            plotData = np.column_stack((plotData, processedData))
+                    count += 1
+
+                # # If skip value greater than 0, skip values.
+                # if self.skip > 1: 
+                #     saveData = saveData[::self.skip,:].copy()
+
+                # Add timestamp.
+                n = np.shape(saveData)[0]
+                timesteps = np.arange(0, n, 1)*self.DeltaT
+                timesteps += self.time
+                saveData = np.column_stack((timesteps, saveData))
+                plotData = np.column_stack((timesteps, plotData))
+
+                # Save data.
+                np.savetxt(self.file, saveData, fmt='%8.3f', delimiter='\t', newline='\n')
                 
-                # Perform averaging of data if appropriate.
-                processedData = deviceData
-                if device["type"] == "Hub":
-                    if self.average > 1:
-                        processedData = uniform_filter1d(processedData, size=self.average, axis=0, mode='nearest')
-
-                if count == 0:
-                    if device["type"] == "Camera":
-                        saveData = processedData[:,0].copy()
-                        plotData = processedData[:,1].copy()
-                    else:
-                        saveData = processedData.copy()
-                        plotData = processedData.copy()
-                else:
-                    if device["type"] == "Camera":
-                        saveData = np.column_stack((saveData, processedData[:,0]))
-                        plotData = np.column_stack((plotData, processedData[:,1]))
-                    else:
-                        saveData = np.column_stack((saveData, processedData))
-                        plotData = np.column_stack((plotData, processedData))
-                count += 1
-
-            # # If skip value greater than 0, skip values.
-            # if self.skip > 1: 
-            #     saveData = saveData[::self.skip,:].copy()
-
-            # Add timestamp.
-            n = np.shape(saveData)[0]
-            timesteps = np.arange(0, n, 1)*self.DeltaT
-            timesteps += self.time
-            saveData = np.column_stack((timesteps, saveData))
-            plotData = np.column_stack((timesteps, plotData))
-
-            # Save data.
-            np.savetxt(self.file, saveData, fmt='%8.3f', delimiter='\t', newline='\n')
-            
-            # Plot data.
-            if np.shape(self.plotData)[0] > 0:
-                self.plotData = np.vstack((self.plotData, plotData)) 
-            else: 
-                self.plotData = plotData
-            self.time += n*self.DeltaT
-            self.count += numTimesteps
-            self.plotDataChanged.emit(self.plotData)
+                # Plot data.
+                if np.shape(self.plotData)[0] > 0:
+                    self.plotData = np.vstack((self.plotData, plotData)) 
+                else: 
+                    self.plotData = plotData
+                self.time += n*self.DeltaT
+                self.count += numTimesteps
+                self.plotDataChanged.emit(self.plotData)
     
     @Slot(str, np.ndarray)
     def save_image(self, image_name, image_array):

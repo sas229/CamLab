@@ -39,11 +39,11 @@ class CommandTree(QGroupBox):
 
         self.setFixedWidth(387)
 
-    def appendCommand(self, command):
+    def append_command(self, command):
         self.commandTreeModel.appendCommand(command)
         self.commandTreeView.setSpanningColumns()
 
-    def updateBackground(self):
+    def update_background(self):
         color = os.environ['QTMATERIAL_SECONDARYCOLOR']
         style = "background-color:" + color + ";"
         self.background.setStyleSheet(style)

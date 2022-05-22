@@ -18,7 +18,8 @@ class ToolBar(QToolBar):
 
         # Mode QAction.
         self.modeButton = QAction(parent=None)
-        self.modeButton.setToolTip("Click to run acquisition and control.")
+        self.modeButton.setToolTip("Add devices to enable.")
+        self.modeButton.setEnabled(False)
         self.addAction(self.modeButton)
 
         self.addSeparator()
@@ -92,12 +93,22 @@ class ToolBar(QToolBar):
         self.loadConfigButton.triggered.connect(self.emitLoadConfiguration)
         self.saveConfigButton.triggered.connect(self.emitSaveConfiguration)
 
+    @Slot()
+    def enableModeButton(self):
+        self.modeButton.setEnabled(True)
+        self.modeButton.setToolTip("Click to stop and configure." if self.running else "Click to run acquisition and control.")
+
+    @Slot()
+    def disableModeButton(self):
+        self.modeButton.setEnabled(False)
+        self.modeButton.setToolTip("Add devices to enable.")
+
     def changeMode(self):
         # Toggle running property, modeButton ToolTip and icon and visible state for all other ToolButtons as required.
         log.info("Acquisition and control mode enabled." if self.running else "Configuration mode enabled")
         self.running = not self.running
         self.modeButton.setIcon(QIcon("icon:/secondaryText/stop.svg" if self.running else "icon:/secondaryText/play_circle.svg"))
-        self.modeButton.setToolTip("Click to run acquisition and control." if self.running else "Click to stop.")
+        self.modeButton.setToolTip("Click to stop and configure." if self.running else "Click to run acquisition and control.")
         self.refreshButton.setVisible(not self.refreshButton.isVisible())
         self.loadConfigButton.setVisible(not self.loadConfigButton.isVisible())
         self.saveConfigButton.setVisible(not self.saveConfigButton.isVisible())

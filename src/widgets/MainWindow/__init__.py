@@ -144,6 +144,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.manager.deviceToggled.connect(self.updateDeviceConfigurationTab)
         self.manager.deviceToggled.connect(self.updateControlVisibility)
         self.manager.deviceToggled.connect(self.updatePreviewVisibility)
+        self.manager.deviceTableModel.numberDevicesEnabled.connect(self.updateModeEnable)
 
         self.manager.timing.actualRate.connect(self.statusGroupBox.update)
         self.manager.plotWindowChannelsUpdated.connect(self.updatePlots)
@@ -162,7 +163,16 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         # Check for and, if found, load previous configuration.
         self.manager.checkForPreviousConfiguration()
 
+    @Slot(int)
+    def updateModeEnable(self, number):
+        """Update mode button enable based on the number of enabled devices."""
+        if number > 0:
+            self.toolbar.enableModeButton()
+        elif number == 0:
+            self.toolbar.disableModeButton()
+
     def moveEvent(self, event):
+        """Get current position after move."""
         position = self.geometry()
         self.configuration["mainWindow"]["x"] = int(position.x())
         self.configuration["mainWindow"]["y"] = int(position.y())
@@ -241,7 +251,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
 
         # Update icon colours as a function of the darkMode boolean.
         self.toolbar.updateIcons(self.darkMode)
-        self.sequenceTab.updateTab()
+        self.sequenceTab.update_tab()
 
         # Update the UI of plot windows if they exist.
         if self.plots and "plots" in self.manager.configuration: 

@@ -24,27 +24,30 @@ class SequenceTab(QWidget):
         self.setLayout(self.layout)
 
         # Connections.
-        self.commandBuilder.commandPreview.connect(self.commandPreview.previewCommand)
-        self.commandBuilder.clearPreview.connect(self.commandPreview.clearPreview)
-        self.commandBuilder.addCommandToSequence.connect(self.commandTree.appendCommand)
-        self.commandBuilder.addCommandToSequence.connect(self.hideBuilder)
+        self.commandBuilder.commandPreview.connect(self.commandPreview.preview_command)
+        self.commandBuilder.clearPreview.connect(self.commandPreview.clear_preview)
+        self.commandBuilder.addCommandToSequence.connect(self.commandTree.append_command)
+        self.commandBuilder.addCommandToSequence.connect(self.hide_builder)
 
-        self.commandTree.toolbar.addButton.triggered.connect(self.showBuilder)
+        self.commandTree.toolbar.addButton.triggered.connect(self.show_builder)
 
-    def showBuilder(self):
-        self.commandBuilder.clearCommand()
+    def show_builder(self):
+        self.commandBuilder.clear_command()
         self.commandBuilder.setVisible(True)
         self.commandTree.setVisible(False)
 
-    def hideBuilder(self):
+    def hide_builder(self):
         self.commandBuilder.setVisible(False)
         self.commandTree.setVisible(True)
 
-    def updateTab(self):
-        self.commandTree.toolbar.updateIcons()
-        self.commandBuilder.updateIcons()
-        self.commandTree.updateBackground()
-        self.commandPreview.updateColours()
+    def save_sequence(self):
+        print("Test")
+
+    def update_tab(self):
+        self.commandTree.toolbar.update_icons()
+        self.commandBuilder.update_icons()
+        self.commandTree.update_background()
+        self.commandPreview.update_colours()
 
     def closeEvent(self, event):
         self.sequenceWindowClosed.emit(self)

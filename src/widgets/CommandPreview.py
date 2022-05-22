@@ -12,9 +12,9 @@ class CommandPreview(QGroupBox):
         super().__init__(*args, **kwargs)
 
         self.preview = pg.PlotWidget(self)
-        styles = self.setStyle()
+        styles = self.set_style()
         self.preview.setMenuEnabled(enableMenu=False)
-        self.updateColours()
+        self.update_colours()
         self.dT = 0.01
         
         self.layout = QVBoxLayout()
@@ -23,30 +23,30 @@ class CommandPreview(QGroupBox):
         self.preview.setLabel('left', 'Value', **styles)
         self.preview.setLabel('bottom', 'Time', units = 's', **styles)
 
-    def updateColours(self):
+    def update_colours(self):
         self.preview.setBackground(os.environ['QTMATERIAL_SECONDARYLIGHTCOLOR'])
         self.preview.getAxis('left').setTextPen(os.environ['QTMATERIAL_SECONDARYTEXTCOLOR'])
         self.preview.getAxis('bottom').setTextPen(os.environ['QTMATERIAL_SECONDARYTEXTCOLOR'])
 
     @Slot(np.ndarray, np.ndarray, str)
-    def updatePreview(self, time, values, unit):
+    def update_preview(self, time, values, unit):
         self.preview.clear()
         self.preview.plot(time, values, pen ='r')
-        styles = self.setStyle()
+        styles = self.set_style()
         self.preview.setLabel('left', 'Value', units = unit, **styles)
 
     @Slot()
-    def clearPreview(self):
+    def clear_preview(self):
         self.preview.clear()
-        styles = self.setStyle()
+        styles = self.set_style()
         self.preview.setLabel('left', 'Value', **styles)
-        self.setStyle()
+        self.set_style()
 
-    def setStyle(self):
+    def set_style(self):
         return {'color': os.environ['QTMATERIAL_SECONDARYTEXTCOLOR'], 'font-size': '16px'}
 
     @Slot()
-    def previewCommand(self, command):
+    def preview_command(self, command):
         self.command = command
         if self.command["variable"] == "Position":
             unit = "mm"
@@ -60,12 +60,12 @@ class CommandPreview(QGroupBox):
             elapsedTime = amplitude/rate
             time = np.arange(0, elapsedTime, self.dT)
             values = time*rate
-            self.updatePreview(time, values, unit)
+            self.update_preview(time, values, unit)
         elif self.command["command"] == "Demand":
             amplitude = self.command["amplitude"]
             time = np.asarray([-1, 0, 0, 1])
             values = np.asarray([0, 0, amplitude, amplitude])
-            self.updatePreview(time, values, unit)
+            self.update_preview(time, values, unit)
         elif self.command["command"] == "Triangle":
             amplitude = self.command["amplitude"]
             rate = self.command["rate"]
@@ -79,7 +79,7 @@ class CommandPreview(QGroupBox):
                 begin = values[firstZeroIndex:]
                 end = values[:firstZeroIndex]
                 values = np.hstack((begin, end))
-            self.updatePreview(time, values, unit)
+            self.update_preview(time, values, unit)
         elif self.command["command"] == "Sine":
             amplitude = self.command["amplitude"]
             rate = self.command["rate"]
@@ -96,4 +96,4 @@ class CommandPreview(QGroupBox):
                 begin = values[firstZeroIndex:]
                 end = values[:firstZeroIndex]
                 values = np.hstack((begin, end))
-            self.updatePreview(time, values, unit)
+            self.update_preview(time, values, unit)

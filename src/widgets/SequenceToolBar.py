@@ -48,7 +48,7 @@ class SequenceToolBar(QToolBar):
         self.addAction(self.saveSequenceButton)
 
     @Slot()
-    def updateIcons(self):
+    def update_icons(self):
         # Change appearance between light and dark modes.
         self.loadSequenceButton.setIcon(QIcon("icon:/secondaryText/read_more.svg"))
         self.saveSequenceButton.setIcon(QIcon("icon:/secondaryText/save_alt.svg"))
