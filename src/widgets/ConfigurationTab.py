@@ -11,6 +11,7 @@ class ConfigurationTab(QWidget):
         super().__init__()
         self.setWhatsThis("configuration")
         self.configuration = configuration
+        self.configurationMainWindow = configuration["mainWindow"]
 
         # Global settings GroupBox.
         self.globalSettingsGroupBox = GlobalSettingsGroupBox(self.configuration)
@@ -28,6 +29,17 @@ class ConfigurationTab(QWidget):
         self.layout.addWidget(self.deviceConfigurationGroupBox, 1, 1, 2, 1)
         self.layout.setRowStretch(self.layout.rowCount(), 1)
         self.setLayout(self.layout)
+
+    def setWindow(self):
+        x = int(self.configuration["x"])
+        y = int(self.configuration["y"])
+        w = int(self.configuration["width"])
+        h = int(self.configuration["height"])
+        self.setGeometry(x, y, w, h)
+        self.configuration["mode"] = "window"
+
+    def setTab(self):
+        self.configuration["mode"] = "tab"
 
     def closeEvent(self, event):
         self.configurationWindowClosed.emit(self)

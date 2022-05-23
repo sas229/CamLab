@@ -777,36 +777,6 @@ class Manager(QObject):
         self.configurationChanged.emit(self.configuration)
         log.info("Cleared configuration by loading defaults.") 
 
-    @Slot(str)
-    def updateControlRate(self, newControlRate):
-        self.configuration["global"]["controlRate"] = float(newControlRate)
-        self.configurationChanged.emit(self.configuration) 
-        # log.info("New control rate = " + newControlRate + " Hz")
-
-    @Slot(str)
-    def updateSkipSamples(self, newSkipSamples):
-        self.configuration["global"]["skipSamples"] = int(newSkipSamples)
-        self.configurationChanged.emit(self.configuration) 
-        # log.info("New acquisition rate = " + newSkipSamples + " Hz")
-
-    @Slot(str)
-    def updateAverageSamples(self, newAverageSamples):
-        self.configuration["global"]["averageSamples"] = int(newAverageSamples)
-        self.configurationChanged.emit(self.configuration) 
-        # log.info("New average samples = " + newAverageSamples)
-        
-    @Slot(str)
-    def updatePath(self, newPath):
-        self.configuration["global"]["path"] = str(newPath)
-        self.configurationChanged.emit(self.configuration) 
-        log.info("New path = " + newPath)
-
-    @Slot(str)
-    def updateFilename(self, newFilename):
-        self.configuration["global"]["filename"] = str(newFilename)
-        self.configurationChanged.emit(self.configuration) 
-        # log.info("New filename = " + newFilename)
-
     @Slot(bool)
     def updateDarkMode(self, newDarkMode):
         self.configuration["global"]["darkMode"] = newDarkMode

@@ -122,11 +122,6 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.tabs.tab_to_window.connect(self.tab_to_window)
 
         # Configuration tab connections.
-        self.configurationTab.globalSettingsGroupBox.skipSamplesChanged.connect(self.manager.updateSkipSamples)
-        self.configurationTab.globalSettingsGroupBox.controlRateChanged.connect(self.manager.updateControlRate)
-        self.configurationTab.globalSettingsGroupBox.averageSamplesChanged.connect(self.manager.updateAverageSamples)
-        self.configurationTab.globalSettingsGroupBox.pathChanged.connect(self.manager.updatePath)
-        self.configurationTab.globalSettingsGroupBox.filenameChanged.connect(self.manager.updateFilename)
         self.configurationTab.configurationWindowClosed.connect(self.window_to_tab)
 
         # Sequences tab connections.
@@ -136,8 +131,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.statusTab.statusWindowClosed.connect(self.window_to_tab)
 
         # Manager connections.
-        self.manager.configurationChanged.connect(self.update_UI)
-        self.manager.configurationChanged.connect(self.configurationTab.globalSettingsGroupBox.update_UI)
+        self.manager.configurationChanged.connect(self.set_configuration)
         self.manager.clear_device_configuration_tabs.connect(self.clear_device_configuration_tabs)
         self.manager.close_plots.connect(self.close_plots)
         self.manager.clear_tabs.connect(self.clear_tabs)
@@ -159,9 +153,9 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
 
         # Timer connections.
         self.updateTimer.timeout.connect(self.manager.assembly.updatePlotData)
-        self.update_UI(self.manager.configuration)
 
-        # Check for and, if found, load previous configuration.
+        # Set initial configuration.
+        self.set_configuration(self.manager.configuration)      
         self.manager.checkForPreviousConfiguration()
 
     @Slot(int)
@@ -224,7 +218,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.darkMode = self.manager.configuration["global"]["darkMode"]
 
         # Update the UI
-        self.update_UI(self.manager.configuration)
+        self.set_configuration(self.manager.configuration)
         log.info("Dark mode changed.")
 
     def set_theme(self):
@@ -244,9 +238,10 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
             self.setStyleSheet(stylesheet + file.read().format(**os.environ))
 
     @Slot(dict)
-    def update_UI(self, newConfiguration):
+    def set_configuration(self, newConfiguration):
         """Method to forcibly update the UI."""
         self.configuration = newConfiguration
+        self.configurationTab.globalSettingsGroupBox.set_configuration(self.configuration)
         self.darkMode = self.configuration["global"]["darkMode"]
         self.set_theme()
 
