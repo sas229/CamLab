@@ -43,6 +43,7 @@ class DeviceTableModel(QAbstractTableModel):
                 if self._data != []:
                     item = self._data[index.row()]
                     if index.column() == 0:
+                        self.numberDevicesEnabled.emit(len(self.enabledDevices()))
                         return item["connect"]
                     elif index.column() == 1:
                         return item["type"]

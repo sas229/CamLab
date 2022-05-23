@@ -3,7 +3,8 @@ from PySide6.QtCore import Slot, Qt
 class TabUtilities:
     
     @Slot()
-    def windowToTab(self, widget):
+    def window_to_tab(self, widget):
+        """Method to convert window to tab."""
         if self.tabs.indexOf(widget) == -1:
             tabType = widget.whatsThis()
             widget.setWindowFlags(Qt.Widget)
@@ -37,7 +38,8 @@ class TabUtilities:
             elif tabType == "camera":
                 self.tabs.addPersistentTab(widget, widget.windowTitle())
     @Slot()
-    def tabToWindow(self, widget, index):
+    def tab_to_window(self, widget, index):
+        """Method to convert tab to window."""
         if index != -1:
             text = self.tabs.tabText(index)
             self.tabs.removeTab(index)

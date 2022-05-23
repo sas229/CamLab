@@ -23,9 +23,9 @@ class GlobalSettingsGroupBox(QGroupBox):
         # Set path inputs.
         self.setPathLabel = QLabel("Output")
         self.setPathButton = QPushButton("Set Path")
-        self.setPathAddressLabel = QLineEdit()
-        self.setPathAddressLabel.setText(self.configuration["global"]["path"])
-        self.setPathAddressLabel.setEnabled(False)
+        self.setPathAddressLineEdit = QLineEdit()
+        self.setPathAddressLineEdit.setText(self.configuration["global"]["path"])
+        self.setPathAddressLineEdit.setEnabled(False)
         self.setFilenameLineEdit = QLineEdit()
         self.setFilenameLineEdit.setText(self.configuration["global"]["filename"])
 
@@ -65,7 +65,7 @@ class GlobalSettingsGroupBox(QGroupBox):
         # Assemble path layout.
         self.setPathLayout = QHBoxLayout()
         self.setPathLayout.addWidget(self.setPathButton)
-        self.setPathLayout.addWidget(self.setPathAddressLabel, 4)
+        self.setPathLayout.addWidget(self.setPathAddressLineEdit, 4)
         self.setPathLayout.addWidget(self.setFilenameLineEdit, 2)
 
         # Assemble rates layout.
@@ -95,13 +95,13 @@ class GlobalSettingsGroupBox(QGroupBox):
         self.setFilenameLineEdit.editingFinished.connect(self.emitFilename)
     
     @Slot()
-    def updateUI(self, newConfiguration):
+    def update_UI(self, newConfiguration):
         # Method to update UI after configuration changes.
         self.configuration = newConfiguration
         self.skipSamplesLineEdit.setText(str(self.configuration["global"]["skipSamples"]))
         self.controlRateLineEdit.setText(str(self.configuration["global"]["controlRate"]))
         self.averageSamplesLineEdit.setText(str(self.configuration["global"]["averageSamples"]))
-        self.setPathAddressLabel.setText(self.configuration["global"]["path"])
+        self.setPathAddressLineEdit.setText(self.configuration["global"]["path"])
         self.setFilenameLineEdit.setText(self.configuration["global"]["filename"])
 
     def emitSkipSamples(self):
@@ -124,7 +124,7 @@ class GlobalSettingsGroupBox(QGroupBox):
     def emitPath(self):
         # Method to emit the new path.
         loadPath = QFileDialog.getExistingDirectory(self, 'Select the directory in which to save data')
-        self.setPathAddressLabel.setText(loadPath)
+        self.setPathAddressLineEdit.setText(loadPath)
         self.pathChanged.emit(loadPath)
 
     def emitFilename(self):

@@ -64,7 +64,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
 
         # Extract the configuration to generate initial UI setup.
         self.configuration = self.manager.configuration
-        self.setTheme()
+        self.set_theme()
 
         # Main window layout.
         log.info("Assembling UI.")
@@ -103,23 +103,23 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         # Toolbar connections.
         self.toolbar.configure.connect(self.manager.configure)
         self.toolbar.configure.connect(self.manager.timing.stop)
-        self.toolbar.configure.connect(self.end)
+        self.toolbar.configure.connect(self.end_acquisition)
         self.toolbar.run.connect(self.manager.run)
-        self.toolbar.run.connect(self.start)
+        self.toolbar.run.connect(self.start_acquisition)
         self.toolbar.run.connect(self.statusGroupBox.setInitialTimeDate)
-        self.toolbar.addPlotButton.triggered.connect(self.addPlot)
-        self.toolbar.extensionButton.triggered.connect(self.openExtension)
-        self.toolbar.refreshButton.triggered.connect(self.refreshDevices)
+        self.toolbar.addPlotButton.triggered.connect(self.add_plot)
+        self.toolbar.extensionButton.triggered.connect(self.open_extension)
+        self.toolbar.refreshButton.triggered.connect(self.refresh_devices)
         self.toolbar.loadConfiguration.connect(self.manager.loadConfiguration)
         self.toolbar.saveConfiguration.connect(self.manager.saveConfiguration)
         self.toolbar.clearConfigButton.triggered.connect(self.manager.clearConfiguration)
         self.toolbar.newFileButton.triggered.connect(self.manager.assembly.newFile)
         self.toolbar.autozeroButton.triggered.connect(self.manager.assembly.autozero)
         self.toolbar.clearPlotsButton.triggered.connect(self.manager.assembly.clearPlotData)
-        self.toolbar.darkModeButton.triggered.connect(self.updateDarkMode)
+        self.toolbar.darkModeButton.triggered.connect(self.update_dark_mode)
 
         # Tab interface connections.
-        self.tabs.tabToWindow.connect(self.tabToWindow)
+        self.tabs.tab_to_window.connect(self.tab_to_window)
 
         # Configuration tab connections.
         self.configurationTab.globalSettingsGroupBox.skipSamplesChanged.connect(self.manager.updateSkipSamples)
@@ -127,69 +127,66 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.configurationTab.globalSettingsGroupBox.averageSamplesChanged.connect(self.manager.updateAverageSamples)
         self.configurationTab.globalSettingsGroupBox.pathChanged.connect(self.manager.updatePath)
         self.configurationTab.globalSettingsGroupBox.filenameChanged.connect(self.manager.updateFilename)
-        self.configurationTab.configurationWindowClosed.connect(self.windowToTab)
+        self.configurationTab.configurationWindowClosed.connect(self.window_to_tab)
 
         # Sequences tab connections.
-        self.sequenceTab.sequenceWindowClosed.connect(self.windowToTab)
+        self.sequenceTab.sequenceWindowClosed.connect(self.window_to_tab)
 
         # Status tab connections.
-        self.statusTab.statusWindowClosed.connect(self.windowToTab)
+        self.statusTab.statusWindowClosed.connect(self.window_to_tab)
 
         # Manager connections.
-        self.manager.configurationChanged.connect(self.updateUI)
-        self.manager.clearDeviceConfigurationTabs.connect(self.clearDeviceConfigurationTabs)
-        self.manager.closePlots.connect(self.closePlots)
-        self.manager.clearTabs.connect(self.clearTabs)
-        self.manager.deviceAdded.connect(self.addDeviceConfigurationTab)
-        self.manager.deviceToggled.connect(self.updateDeviceConfigurationTab)
-        self.manager.deviceToggled.connect(self.updateControlVisibility)
-        self.manager.deviceToggled.connect(self.updatePreviewVisibility)
-        self.manager.deviceTableModel.numberDevicesEnabled.connect(self.updateModeEnable)
+        self.manager.configurationChanged.connect(self.update_UI)
+        self.manager.configurationChanged.connect(self.configurationTab.globalSettingsGroupBox.update_UI)
+        self.manager.clear_device_configuration_tabs.connect(self.clear_device_configuration_tabs)
+        self.manager.close_plots.connect(self.close_plots)
+        self.manager.clear_tabs.connect(self.clear_tabs)
+        self.manager.deviceAdded.connect(self.add_device_configuration_tab)
+        self.manager.deviceToggled.connect(self.update_device_configuration_tab)
+        self.manager.deviceToggled.connect(self.update_control_visibility)
+        self.manager.deviceToggled.connect(self.upate_preview_visibility)
+        self.manager.deviceTableModel.numberDevicesEnabled.connect(self.update_mode_enable)
 
         self.manager.timing.actualRate.connect(self.statusGroupBox.update)
-        self.manager.plotWindowChannelsUpdated.connect(self.updatePlots)
-        self.manager.existingPlotsFound.connect(self.createExistingPlots)
+        self.manager.plotWindowChannelsUpdated.connect(self.update_plots)
+        self.manager.existingPlotsFound.connect(self.create_existing_plots)
         self.manager.outputText.connect(self.statusGroupBox.setOutputText)
 
-        self.tabs.removePlot.connect(self.removePlot)
+        self.tabs.remove_plot.connect(self.remove_plot)
 
-        self.emitRefreshDevices.connect(self.manager.refreshDevices)
-        self.manager.finishedRefreshingDevices.connect(self.closeBusyDialog)
+        self.emitRefreshDevices.connect(self.manager.refresh_devices)
+        self.manager.finishedRefreshingDevices.connect(self.close_busy_dialog)
 
         # Timer connections.
         self.updateTimer.timeout.connect(self.manager.assembly.updatePlotData)
-        self.updateUI(self.manager.configuration)
+        self.update_UI(self.manager.configuration)
 
         # Check for and, if found, load previous configuration.
         self.manager.checkForPreviousConfiguration()
 
     @Slot(int)
-    def updateModeEnable(self, number):
-        """Update mode button enable based on the number of enabled devices."""
+    def update_mode_enable(self, number):
+        """Method to update the mode button enable state based on the number of enabled devices."""
         if number > 0:
             self.toolbar.enableModeButton()
         elif number == 0:
             self.toolbar.disableModeButton()
 
-    def moveEvent(self, event):
-        """Get current position after move."""
-        position = self.geometry()
-        self.configuration["mainWindow"]["x"] = int(position.x())
-        self.configuration["mainWindow"]["y"] = int(position.y())
-        return
-
     @Slot()
-    def refreshDevices(self):
+    def refresh_devices(self):
+        """Method to refresh device list."""
         self.emitRefreshDevices.emit()
         self.busy = BusyDialog(self)
         self.busy.open()
 
     @Slot()
-    def closeBusyDialog(self):
+    def close_busy_dialog(self):
+        """Method to close the busy dialog."""
         self.busy.accept()
         
     @Slot()
-    def start(self):
+    def start_acquisition(self):
+        """Method to start the acquisition mode."""
         self.updateTimer.start(100)
         self.running.emit(True)
         # Hide the configuration and sequences tabs.
@@ -200,7 +197,8 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
                 self.tabs.setTabVisible(index, False)
         
     @Slot()
-    def end(self):
+    def end_acquisition(self):
+        """Method to end the acquisiton mode."""
         self.updateTimer.stop()
         self.running.emit(False)
         self.statusGroupBox.reset()
@@ -212,11 +210,13 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
                 self.tabs.setTabVisible(index, True)
 
     @Slot()
-    def openExtension(self):
-        log.info("Extension opened.")
+    def open_extension(self):
+        """Method to open an extension."""
+        log.info("Extension button clicked.")
 
     @Slot()
-    def updateDarkMode(self):
+    def update_dark_mode(self):
+        """Method to update the darkMode state."""
         # Toggle darkMode boolean in the configuration.
         self.manager.configuration["global"]["darkMode"] = not self.darkMode
 
@@ -224,10 +224,11 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.darkMode = self.manager.configuration["global"]["darkMode"]
 
         # Update the UI
-        self.updateUI(self.manager.configuration)
+        self.update_UI(self.manager.configuration)
         log.info("Dark mode changed.")
 
-    def setTheme(self):
+    def set_theme(self):
+        """Method to set the theme and apply the qt-material stylesheet."""
         self.darkMode = self.configuration["global"]["darkMode"]
         # Set the darkmode. 
         if self.darkMode == True:
@@ -243,11 +244,11 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
             self.setStyleSheet(stylesheet + file.read().format(**os.environ))
 
     @Slot(dict)
-    def updateUI(self, newConfiguration):
-        # Update the UI after any configuration change.
+    def update_UI(self, newConfiguration):
+        """Method to forcibly update the UI."""
         self.configuration = newConfiguration
         self.darkMode = self.configuration["global"]["darkMode"]
-        self.setTheme()
+        self.set_theme()
 
         # Update icon colours as a function of the darkMode boolean.
         self.toolbar.updateIcons(self.darkMode)
@@ -255,11 +256,19 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
 
         # Update the UI of plot windows if they exist.
         if self.plots and "plots" in self.manager.configuration: 
-            self.updatePlots()
+            self.update_plots()
+
+    def moveEvent(self, event):
+        """Method to store the current main window position i the configuration after a move event using a Qt moveEvent overide."""
+        position = self.geometry()
+        self.configuration["mainWindow"]["x"] = int(position.x())
+        self.configuration["mainWindow"]["y"] = int(position.y())
+        return
 
     def closeEvent(self, event):
+        """Close CamLab using a Qt closeEvent override."""
         # Close all plots.
-        self.closePlots()
+        self.close_plots()
 
         # In the event the device list is refreshing, wait until complete before quitting all threads otherwise an error is shown, but hide the window in the meantime.
         self.setVisible(False)

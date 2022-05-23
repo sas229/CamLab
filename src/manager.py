@@ -21,9 +21,9 @@ log = logging.getLogger(__name__)
 class Manager(QObject):
     configurationChanged = Signal(dict)
     deviceAdded = Signal(str, str)
-    clearDeviceConfigurationTabs = Signal()
-    closePlots = Signal()
-    clearTabs = Signal()
+    clear_device_configuration_tabs = Signal()
+    close_plots = Signal()
+    clear_tabs = Signal()
     addControlTable = Signal(str, list)
     deviceToggled = Signal(str, bool)
     removeControlTable = Signal(str)
@@ -660,7 +660,7 @@ class Manager(QObject):
         log.info("Started acquisition and control.")
 
     @Slot()
-    def refreshDevices(self):
+    def refresh_devices(self):
         log.info("Refreshing devices.")
         self.findDevices()
 
@@ -695,7 +695,7 @@ class Manager(QObject):
         if loadConfigurationPath != "":
             # Clear the device list and configuration tabs.
             self.deviceTableModel.clearData()
-            self.clearDeviceConfigurationTabs.emit()
+            self.clear_device_configuration_tabs.emit()
             
             # # Clear all underlying models and tables.
             self.configuration = {}
@@ -720,6 +720,7 @@ class Manager(QObject):
                 except FileNotFoundError:
                     log.warning("Previous configuration file not found.")
                     self.initialiseDefaultConfiguration()
+            self.configurationChanged.emit(self.configuration)
         else:
             log.info("Load configuration cancelled.")
 
@@ -757,12 +758,12 @@ class Manager(QObject):
     @Slot()
     def clearConfiguration(self):
         # Delete all plots first.
-        self.closePlots.emit()
-        self.clearTabs.emit()
+        self.close_plots.emit()
+        self.clear_tabs.emit()
 
         # Next clear the device list and configuration tabs.
         self.deviceTableModel.clearData()
-        self.clearDeviceConfigurationTabs.emit()
+        self.clear_device_configuration_tabs.emit()
         
         # Clear all underlying models and tables. 
         self.acquisitionTableModels = {}
@@ -798,7 +799,7 @@ class Manager(QObject):
     def updatePath(self, newPath):
         self.configuration["global"]["path"] = str(newPath)
         self.configurationChanged.emit(self.configuration) 
-        # log.info("New path = " + newPath)
+        log.info("New path = " + newPath)
 
     @Slot(str)
     def updateFilename(self, newFilename):
@@ -969,7 +970,7 @@ class Manager(QObject):
         log.info("Feedback channel list created.")
         return feedbackChannelList
 
-    def updateFeedbackComboBox(self, deviceName, row):
+    def update_feedback_ComboBox(self, deviceName, row):
         # Make a deep copy of the current feedback channel list.
         feedbackChannelList = copy.deepcopy(self.feedbackChannelLists[deviceName])
 

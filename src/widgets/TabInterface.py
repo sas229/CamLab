@@ -6,8 +6,8 @@ import logging
 log = logging.getLogger(__name__)
 
 class TabInterface(QTabWidget):
-    tabToWindow = Signal(QWidget, int)
-    removePlot = Signal(str)
+    tab_to_window = Signal(QWidget, int)
+    remove_plot = Signal(str)
 
     def __init__(self):
         super().__init__()
@@ -22,7 +22,7 @@ class TabInterface(QTabWidget):
     def floatTab(self, index):
         # Add logic to only float tab if a plot, preview or control.
         widget = self.widget(index)
-        self.tabToWindow.emit(widget, index)
+        self.tab_to_window.emit(widget, index)
         log.info("Tab converted to window.")
 
     def addPersistentTab(self, widget, name):
@@ -49,7 +49,7 @@ class TabInterface(QTabWidget):
         # Delete if a plot widget.
         if isinstance(widget, PlotWindow):
             plotNumber = widget.plotNumber
-            self.removePlot.emit(plotNumber)
+            self.remove_plot.emit(plotNumber)
         self.removeTab(index)
         log.info("Tab removed.")
     

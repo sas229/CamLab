@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 class ControlUtilities:
 
-    def addControlTab(self, name, channel):
+    def add_control_tab(self, name, channel):
         controlID = name + " C" + str(channel+1)
         control = self.manager.configuration["devices"][name]["control"][channel]["control"]
         controlType = self.manager.configuration["devices"][name]["control"][channel]["type"]
@@ -28,7 +28,7 @@ class ControlUtilities:
             controlWidget = LinearAxis(controlID, feedback)
 
             # Connections. 
-            controlWidget.axisWindowClosed.connect(self.windowToTab)
+            controlWidget.axisWindowClosed.connect(self.window_to_tab)
             self.checkTimer.timeout.connect(self.manager.devices[name].check_connections)
             self.running.connect(self.manager.devices[name].set_running)
             self.manager.devices[name].updateRunningIndicator.connect(controlWidget.setRunningIndicator)
@@ -117,7 +117,7 @@ class ControlUtilities:
 
         # Convert tab to window if required by configuration.
         if self.manager.configuration["devices"][name]["control"][channel]["settings"]["mode"] == "window":
-            self.tabToWindow(self.controls[controlID], index)
+            self.tab_to_window(self.controls[controlID], index)
             self.controls[controlID].setVisible(False)   
             for control in enabledControls:
                 if control["channel"] == controlChannel: 
@@ -126,7 +126,7 @@ class ControlUtilities:
         log.info("Device control tab added for {id}.".format(id=controlID))
 
     @Slot(str, int, str)
-    def changeControlFeedbackChannel(self, device, channel, selectedFeedbackChannel):
+    def change_control_feedback_channel(self, device, channel, selectedFeedbackChannel):
         """Change control feedback channel."""
         # Set feedback channel.
         feedbackChannelList = self.manager.feedbackChannelLists[device]
@@ -151,7 +151,7 @@ class ControlUtilities:
 
 
     @Slot(str, int, str)
-    def changeControlWidget(self, device, channel, newWidget):
+    def change_control_widget(self, device, channel, newWidget):
         # Delete current control widget and signals and instantiate the new selection.
         controlID = device + " C" + str(channel+1)
         widget = self.controls[controlID]
@@ -161,10 +161,10 @@ class ControlUtilities:
 
         # Instantiate new control widget.
         if newWidget != "N/A":
-            self.addControlTab(device, channel)
+            self.add_control_tab(device, channel)
 
     @Slot(int, bool)
-    def toggleControlChannel(self, device, channel, state):
+    def toggle_control_channel(self, device, channel, state):
         # Toggle enable in Device class for toggled control channel.
         if channel == 0:
             self.manager.devices[device].enabled_C1 = state
@@ -180,7 +180,7 @@ class ControlUtilities:
         self.tabs.setCurrentIndex(0)
 
     @Slot()
-    def clearTabs(self):
+    def clear_tabs(self):
         # Close windows into tabs.
         for controlID in self.controls:
             self.controls[controlID].close()
@@ -194,7 +194,7 @@ class ControlUtilities:
                     self.tabs.removeTab(index)
 
     @Slot(str, bool)
-    def updateControlVisibility(self, device, show):
+    def update_control_visibility(self, device, show):
         # Set control visibility.
         controlID = device + " C1"
         if controlID in self.controls:

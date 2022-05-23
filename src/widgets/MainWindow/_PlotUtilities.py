@@ -5,7 +5,7 @@ import copy
 class PlotUtilities:
 
     @Slot(list)
-    def addPlot(self):
+    def add_plot(self):
         # Define a default configuration in the same format as we want it to be stored in self.manager.configuration["plots"][plotNumber].
         plotWindow = PlotWindow()
         plotNumber = str(id(plotWindow))
@@ -67,14 +67,14 @@ class PlotUtilities:
         # Connections.
         self.manager.configurationChanged.connect(self.plots[plotNumber].setConfiguration)
         self.manager.assembly.plotDataChanged.connect(self.plots[plotNumber].updatePlotData)
-        self.plots[plotNumber].plotWindowClosed.connect(self.windowToTab)
-        self.plots[plotNumber].colourUpdated.connect(self.updateChannelColours)
+        self.plots[plotNumber].plotWindowClosed.connect(self.window_to_tab)
+        self.plots[plotNumber].colourUpdated.connect(self.update_channel_colours)
 
         # Update all plot windows to reset configuration.
-        self.updatePlots()
+        self.update_plots()
 
     @Slot()
-    def createExistingPlots(self):
+    def create_existing_plots(self):
         # For all plots in self.manager.configuration["plots"][plotNumber], create a plot window.
         for plotNumber in self.manager.configuration["plots"].keys():
             # Create plot window object and set the plot number.
@@ -91,19 +91,19 @@ class PlotUtilities:
             # Connections.
             self.manager.configurationChanged.connect(self.plots[plotNumber].setConfiguration)
             self.manager.assembly.plotDataChanged.connect(self.plots[plotNumber].updatePlotData)
-            self.plots[plotNumber].plotWindowClosed.connect(self.windowToTab)
-            self.plots[plotNumber].colourUpdated.connect(self.updateChannelColours)
+            self.plots[plotNumber].plotWindowClosed.connect(self.window_to_tab)
+            self.plots[plotNumber].colourUpdated.connect(self.update_channel_colours)
 
             # Convert tab to window if required by configuration.
             if self.manager.configuration["plots"][plotNumber]["mode"] == "window":
                 index = self.tabs.indexOf(self.plots[plotNumber])
-                self.tabToWindow(self.plots[plotNumber], index)    
+                self.tab_to_window(self.plots[plotNumber], index)    
         
         # Update all plot windows to reset configuration.
-        self.updatePlots()
+        self.update_plots()
         
     @Slot()
-    def updatePlots(self):
+    def update_plots(self):
         # If plots exist update the configuration.
         if "plots" in self.manager.configuration:
             for plotNumber in self.manager.configuration["plots"].keys():
@@ -112,7 +112,7 @@ class PlotUtilities:
                 plotWindow.setConfiguration(self.manager.configuration)
                 
     @Slot(str)
-    def removePlot(self, plotNumber):
+    def remove_plot(self, plotNumber):
         # Pop plot from if "plots" key in dict.
         if plotNumber in self.plots:
             self.plots[plotNumber].setParent(None)
@@ -123,7 +123,7 @@ class PlotUtilities:
             if self.manager.configuration["plots"] == {}:
                 del self.manager.configuration["plots"]
     
-    def closePlots(self):
+    def close_plots(self):
         # Close windows into tabs.
         for plotNumber in self.plots:
             self.plots[plotNumber].close()
@@ -137,8 +137,8 @@ class PlotUtilities:
         self.plots = {}
 
     @Slot(QModelIndex, str)
-    def updateChannelColours(self, index, colour):
+    def update_channel_colours(self, index, colour):
         # Update colours of channels in all plots.
         for plotNumber in self.manager.configuration["plots"].keys():
             self.plots[plotNumber].setColour(index, colour)
-        self.updatePlots()
+        self.update_plots()

@@ -26,7 +26,7 @@ if __name__ == '__main__':
     # Execute main window.
     main = MainWindow()
     main.show()
-    main.setTheme()
+    main.set_theme()
     log.info("Timer instantiated.")
     sys.exit(app.exec())
 

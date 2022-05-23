@@ -11,13 +11,13 @@ log = logging.getLogger(__name__)
 class ConfigurationUtilities:
 
     @Slot(str)
-    def addDeviceConfigurationTab(self, name, deviceType):
+    def add_device_configuration_tab(self, name, deviceType):
         if deviceType == "Hub":
-            self.addLabJackT7ConfigurationTab(name)
+            self.add_LabJackT7_configuration_tab(name)
         elif deviceType == "Camera":
-            self.addCameraConfigurationTab(name)
+            self.add_camera_configuration_tab(name)
 
-    def addCameraConfigurationTab(self, name):
+    def add_camera_configuration_tab(self, name):
         # Instantiate widget.
         self.deviceConfigurationWidget[name] = CameraSettings(name)
 
@@ -32,7 +32,7 @@ class ConfigurationUtilities:
                 self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.setTabVisible(index, False)
         
         # Instantiate the camera widget and add tab if enabled boolean is true.
-        self.addCameraTab(name)
+        self.add_camera_tab(name)
 
         # Connections.
         self.previews[name].getImage.connect(self.manager.devices[name].capture_image)
@@ -67,7 +67,7 @@ class ConfigurationUtilities:
 
         log.info("Device configuration tab added for {device}.".format(device=name))
         
-    def addLabJackT7ConfigurationTab(self, name):
+    def add_LabJackT7_configuration_tab(self, name):
         # Create layout.
         self.deviceConfigurationLayout[name] = QVBoxLayout()
 
@@ -86,11 +86,11 @@ class ConfigurationUtilities:
         self.deviceConfigurationLayout[name].addWidget(self.controlTableViews[name])
 
         # Connections for control table.
-        self.manager.controlTableModels[name].controlChannelToggled.connect(self.toggleControlChannel)
+        self.manager.controlTableModels[name].controlChannelToggled.connect(self.toggle_control_channel)
         self.manager.controlTableModels[name].controlChannelToggled.connect(self.manager.updatePlotWindowChannelsData)
-        self.manager.controlTableModels[name].controlChannelNameChanged.connect(self.updateControlName)
-        self.manager.controlTableModels[name].controlWidgetChanged.connect(self.changeControlWidget)
-        self.manager.controlTableModels[name].controlFeedbackChannelChanged.connect(self.changeControlFeedbackChannel)
+        self.manager.controlTableModels[name].controlChannelNameChanged.connect(self.update_control_name)
+        self.manager.controlTableModels[name].controlWidgetChanged.connect(self.change_control_widget)
+        self.manager.controlTableModels[name].controlFeedbackChannelChanged.connect(self.change_control_feedback_channel)
 
         # Add acquisition table label.
         self.acquisitionLabel = QLabel('Acquisition')
@@ -103,7 +103,7 @@ class ConfigurationUtilities:
 
         # Connections for acquisition table.
         self.manager.acquisitionTableModels[name].acquisitionChannelTableUpdated.connect(self.manager.updatePlotWindowChannelsData)
-        self.manager.acquisitionTableModels[name].acquisitionChannelToggled.connect(self.updateFeedbackComboBox)
+        self.manager.acquisitionTableModels[name].acquisitionChannelToggled.connect(self.update_feedback_ComboBox)
 
         # Set layout within widget.
         self.deviceConfigurationWidget[name] = QWidget()
@@ -121,26 +121,26 @@ class ConfigurationUtilities:
         
         # Instantiate the control widgets and add tabs.
         for channel in range(self.manager.controlTableModels[name].rowCount()):
-            self.addControlTab(name, channel)
+            self.add_control_tab(name, channel)
 
         log.info("Device configuration tab added for {device}.".format(device=name))
         
     @Slot(str, str)
-    def updateControlName(self, currentName, newName):
+    def update_control_name(self, currentName, newName):
         # Update tab names.
         for index in range(self.tabs.count()):
             if self.tabs.tabText(index) == currentName:
                 self.tabs.setTabText(index, newName)
 
     @Slot(str, bool)
-    def updateDeviceConfigurationTab(self, name, connect):
+    def update_device_configuration_tab(self, name, connect):
         if name in self.deviceConfigurationWidget:
             widget = self.deviceConfigurationWidget[name]
             index = self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.indexOf(widget)
             self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.setTabVisible(index, connect)
 
     @Slot()
-    def updateFeedbackComboBox(self):
+    def update_feedback_ComboBox(self):
         # Get the name of the device.
         tabIndex = self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.currentIndex()
         name = self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.tabText(tabIndex)
@@ -152,7 +152,7 @@ class ConfigurationUtilities:
         self.controlTableViews[name].updateFeedbackChannelList(feedbackChannelList)
 
     @Slot()
-    def clearDeviceConfigurationTabs(self):
+    def clear_device_configuration_tabs(self):
         self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.clear()
 
     
