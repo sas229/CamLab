@@ -15,7 +15,7 @@ from widgets.ConfigurationTab import ConfigurationTab
 from widgets.SequenceTab import SequenceTab
 from widgets.StatusTab import StatusTab
 from widgets.StatusGroupBox import StatusGroupBox
-from dialogs import BusyDialog
+from old_dialogs import BusyDialog
 import logging
 from time import sleep
 from pathlib import Path

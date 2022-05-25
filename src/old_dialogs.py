@@ -1,6 +1,6 @@
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QWidget, QDialogButtonBox
+from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel
 from PySide6.QtGui import QCursor
-from PySide6.QtCore import Signal, QSize, QModelIndex, Qt
+from PySide6.QtCore import Signal, QModelIndex, Qt
 from models import ColourPickerTableModel
 from views import ColourPickerTableView
 from widgets.WaitingIndicator import WaitingIndicator 

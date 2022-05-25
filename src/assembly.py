@@ -53,7 +53,13 @@ class Assembly(QObject):
     @Slot(str, np.ndarray)
     def update_new_data(self, name, data):
         """Method to add data to numpy array for the sending device."""
-        if np.shape(self.data[name])[0] > 0:e
+        if np.shape(self.data[name])[0] > 0:
+            self.data[name] = np.vstack((self.data[name], data))
+        else:
+            self.data[name] = data
+
+    @Slot()
+    def update_output_data(self):
         """Method to update the output data to save to file and to generate the plots."""
         # Compute the minumum number of rows in the data item within each device dict.
         numTimesteps = []
@@ -124,7 +130,9 @@ class Assembly(QObject):
         filepath = self.path + "/" + self.filename + "_" + self.date + "_" + self.timestart + "_" + image_name
         # self.detect_aruco(image_array)
         img = Image.fromarray(image_array)
-        img.save(filepath, "JPEG")e
+        img.save(filepath, "JPEG")
+        
+    def detect_aruco(self, image_array):
         """Method to detect ArUco markers in image."""
         corners, ids, rejected = cv2.aruco.detectMarkers(image_array, self.arucoDict,
             parameters=self.arucoParams)

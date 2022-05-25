@@ -5,6 +5,7 @@ import sys
 import platform
 
 def init_log():
+    """Function to initialise the log file."""
     # Get platform and define destination for the logging file.
     operating_system = platform.system()
     home_dir = os.path.expanduser( '~' )

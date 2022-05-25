@@ -10,10 +10,12 @@ class Timing(QObject):
     actualRate = Signal(float)
 
     def __init__(self):
+        """Timing init."""
         super().__init__()
         self.running = False
 
     def start(self, rate):
+        """Method to start device timing."""
         log.info("Starting device timer.")
         self.running = True
         self.cycles = 0
@@ -33,6 +35,7 @@ class Timing(QObject):
             skippedIntervals = ljm.waitForNextInterval(1)
 
     def stop(self):
+        """Method to stop device timing."""
         if self.running == True:
             self.running = False
             log.info("Stopped device timer.")
