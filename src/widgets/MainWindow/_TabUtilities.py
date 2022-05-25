@@ -11,11 +11,11 @@ class TabUtilities:
             widget.set_tab()
             # Set order.
             if tabType == "configuration":
-                self.tabs.insertPersistentTab(0, widget, "Configuration")
+                self.tabs.insert_persistent_tab(0, widget, "Configuration")
             elif tabType == "sequence":
-                self.tabs.insertPersistentTab(1, widget, "Sequence")
+                self.tabs.insert_persistent_tab(1, widget, "Sequence")
             elif tabType == "status":
-                self.tabs.insertPersistentTab(2, widget, "Status")
+                self.tabs.insert_persistent_tab(2, widget, "Status")
             elif tabType == "control":
                 controlDevice, channel = widget.ID.split(' ')
                 devices = self.manager.deviceTableModel.enabledDevices()
@@ -29,14 +29,14 @@ class TabUtilities:
                         controlChannelName = control["name"]
                         controlName = deviceName + " " + controlChannel
                         if deviceName == controlDevice and controlChannel == channel:
-                            self.tabs.insertPersistentTab(index, widget, widget.windowTitle())
+                            self.tabs.insert_persistent_tab(index, widget, widget.windowTitle())
                             return
                         index += 1
             # Otherwise append on end of tab bar.
             elif tabType == "plot":
                 self.tabs.addTab(widget, widget.windowTitle())    
             elif tabType == "camera":
-                self.tabs.addPersistentTab(widget, widget.windowTitle())
+                self.tabs.add_persistent_tab(widget, widget.windowTitle())
     @Slot()
     def tab_to_window(self, widget, index):
         """Method to convert tab to window."""

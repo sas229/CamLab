@@ -7,7 +7,7 @@ from PySide6.QtCore import Signal, Slot, Qt, QModelIndex, QEvent, QLocale
 from local_qt_material import apply_stylesheet, QtStyleTools
 from models import ChannelsTableModel, ColourPickerTableModel
 from views import ChannelsTableView, ColourPickerTableView
-from dialogs import ColourPickerDialog
+from old_dialogs import ColourPickerDialog
 import logging
 import local_pyqtgraph.pyqtgraph as pg
 import numpy as np

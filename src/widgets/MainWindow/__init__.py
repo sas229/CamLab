@@ -90,9 +90,9 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         # Status tab.
         self.statusTab = StatusTab()
 
-        self.tabs.addPersistentTab(self.configurationTab, "Configuration")
-        self.tabs.addPersistentTab(self.sequenceTab, "Sequence")
-        self.tabs.addPersistentTab(self.statusTab, "Status")
+        self.tabs.add_persistent_tab(self.configurationTab, "Configuration")
+        self.tabs.add_persistent_tab(self.sequenceTab, "Sequence")
+        self.tabs.add_persistent_tab(self.statusTab, "Status")
 
         # Set the central widget of the main window.
         self.centralWidget = QWidget()
@@ -118,7 +118,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.toolbar.darkModeButton.triggered.connect(self.update_dark_mode)
 
         # Tab interface connections.
-        self.tabs.tab_to_window.connect(self.tab_to_window)
+        self.tabs.tabToWindow.connect(self.tab_to_window)
 
         # Configuration tab connections.
         self.configurationTab.configurationWindowClosed.connect(self.window_to_tab)

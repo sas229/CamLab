@@ -6,45 +6,52 @@ import logging
 log = logging.getLogger(__name__)
 
 class TabInterface(QTabWidget):
-    tab_to_window = Signal(QWidget, int)
+    tabToWindow = Signal(QWidget, int)
     remove_plot = Signal(str)
 
     def __init__(self):
         super().__init__()
+        """TabInterface init."""
         
         # Settings.
         self.setTabsClosable(True)
 
         # Connections.
-        self.tabCloseRequested.connect(self.closeTab)
-        self.tabBarDoubleClicked.connect(self.floatTab)
+        self.tabCloseRequested.connect(self.close_tab)
+        self.tabBarDoubleClicked.connect(self.float_tab)
 
-    def floatTab(self, index):
-        # Add logic to only float tab if a plot, preview or control.
+    def float_tab(self, index):
+        """Method to float plot, preview or control tab as window."""
         widget = self.widget(index)
-        self.tab_to_window.emit(widget, index)
-        log.info("Tab converted to window.")
+        if widget.whatsThis() == "plot" or widget.whatsThis() == "control" or widget.whatsThis() == "preview":
+            self.tabToWindow.emit(widget, index)
+            log.info("Tab converted to window.")
 
-    def addPersistentTab(self, widget, name):
+    def add_persistent_tab(self, widget, name):
+        """Method to add persistent tab."""
         self.addTab(widget, name)
         index = self.tabBar().count()-1
         self.tabBar().setTabButton(index, QTabBar.RightSide, None)
     
-    def insertPersistentTab(self, index, widget, name):
+    def insert_persistent_tab(self, index, widget, name):
+        """Method to insert a persistent tab at the given index."""
         self.insertTab(index, widget, name)
         self.tabBar().setTabButton(index, QTabBar.RightSide, None)
     
-    def addPersistentTabIcon(self, widget, name, icon):
+    def add_persistent_tab_icon(self, widget, name, icon):
+        """Method to add persistent tab with icon."""
         self.addTab(widget, icon, name)
         index = self.tabBar().count()-1
         self.tabBar().setTabButton(index, QTabBar.RightSide, None)
     
-    def insertPersistentTabIcon(self, index, widget, name, icon):
+    def insert_persistent_tab_icon(self, index, widget, name, icon):
+        """Method to insert a persistent tab at the given index with icon."""
         self.insertTab(index, widget, icon, name)
         self.tabBar().setTabButton(index, QTabBar.RightSide, None)
 
     @Slot(int)
-    def closeTab(self, index):
+    def close_tab(self, index):
+        """Method to close tab."""
         widget = self.widget(index)
         # Delete if a plot widget.
         if isinstance(widget, PlotWindow):

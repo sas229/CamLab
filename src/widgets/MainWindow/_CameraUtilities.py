@@ -18,7 +18,7 @@ class CameraUtilities:
         self.previews.update({name: cameraTab})
 
         # Add widget to tab and show if control enabled.
-        self.tabs.addPersistentTab(self.previews[name], name) 
+        self.tabs.add_persistent_tab(self.previews[name], name) 
         index = self.tabs.indexOf(self.previews[name])
         self.tabs.setTabVisible(index, True)
 

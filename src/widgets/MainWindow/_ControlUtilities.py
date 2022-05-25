@@ -107,7 +107,7 @@ class ControlUtilities:
         self.controls.update({controlID: controlWidget})
 
         # Add widget to tab and show if control enabled.
-        self.tabs.addPersistentTab(self.controls[controlID], controlName)
+        self.tabs.add_persistent_tab(self.controls[controlID], controlName)
         index = self.tabs.indexOf(self.controls[controlID])
         self.tabs.setTabVisible(index, False)
         enabledControls = self.manager.controlTableModels[name].enabledControls()

@@ -9,6 +9,7 @@ class CommandBuilder(QGroupBox):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        """CommandBuilder init."""
         self.dT = 0.01
         self.darkMode = True
         self.timeUnit = "s"
@@ -19,6 +20,7 @@ class CommandBuilder(QGroupBox):
         self.speedUnit = "mm/s"
         self.speedRateUnit = "mm/s<sup>2</sup>" 
 
+        # Name widgets.
         self.nameLabel = QLabel("Name")
         self.nameLabel.setVisible(True)
         self.nameLineEdit = QLineEdit()
@@ -26,6 +28,7 @@ class CommandBuilder(QGroupBox):
         self.nameLineEdit.setFixedWidth(100)
         self.nameLineEdit.setWhatsThis("name")
         
+        # Device widgets.
         self.deviceLabel = QLabel("Device")
         self.deviceLabel.setVisible(False)
         self.deviceComboBox = QComboBox()
@@ -33,6 +36,7 @@ class CommandBuilder(QGroupBox):
         self.deviceComboBox.setFixedWidth(120)
         self.deviceComboBox.setWhatsThis("device")
 
+        # Channel widgets.
         self.channelLabel = QLabel("Channel")
         self.channelLabel.setVisible(False)
         self.channelComboBox = QComboBox()
@@ -40,6 +44,7 @@ class CommandBuilder(QGroupBox):
         self.channelComboBox.setFixedWidth(120)
         self.channelComboBox.setWhatsThis("channel")
 
+        # Variable widgets.
         self.variableLabel = QLabel("Variable")
         self.variableLabel.setVisible(False)
         self.variableComboBox = QComboBox()
@@ -47,6 +52,7 @@ class CommandBuilder(QGroupBox):
         self.variableComboBox.setFixedWidth(120)
         self.variableComboBox.setWhatsThis("variable")
 
+        # Command widgets.
         self.commandLabel = QLabel("Command")
         self.commandLabel.setVisible(False)
         self.commandComboBox = QComboBox()
@@ -54,6 +60,7 @@ class CommandBuilder(QGroupBox):
         self.commandComboBox.setFixedWidth(120)
         self.commandComboBox.setWhatsThis("command")
 
+        # Offset widgets.
         self.offsetLabel = QLabel("Offset")
         self.offsetLabel.setVisible(False)
         self.offsetLineEdit = QLineEdit()
@@ -62,6 +69,7 @@ class CommandBuilder(QGroupBox):
         self.offsetLineEdit.setFixedWidth(100)
         self.offsetLineEdit.setWhatsThis("offset")
 
+        # Amplitude widgets.
         self.amplitudeLabel = QLabel("Value")
         self.amplitudeLabel.setVisible(False)
         self.amplitudeLineEdit = QLineEdit()
@@ -70,6 +78,7 @@ class CommandBuilder(QGroupBox):
         self.amplitudeLineEdit.setFixedWidth(100)
         self.amplitudeLineEdit.setWhatsThis("amplitude")
 
+        # Rate widgets.
         self.rateLabel = QLabel("Rate")
         self.rateLabel.setVisible(False)
         self.rateLineEdit = QLineEdit()
@@ -78,12 +87,14 @@ class CommandBuilder(QGroupBox):
         self.rateLineEdit.setFixedWidth(100)
         self.rateLineEdit.setWhatsThis("rate")
 
+        # File load widgets.
         self.fileLoadLabel = QLabel("Input")
         self.fileLoadLabel.setVisible(False)
         self.fileLoadButton = QPushButton()
         self.fileLoadButton.setIconSize(QSize(25, 25))
         self.fileLoadButton.setVisible(False)
 
+        # Filepath widgets.
         self.filePathLabel = QLabel("Path")
         self.filePathLabel.setVisible(False)
         self.filePathLineEdit = QLineEdit()
@@ -92,6 +103,7 @@ class CommandBuilder(QGroupBox):
         self.filePathLineEdit.setWhatsThis("filePath")
         self.filePathLineEdit.setReadOnly(True)
 
+        # Trigger widgets.
         self.triggerLabel = QLabel("Trigger")
         self.triggerLabel.setVisible(False)
         self.triggerComboBox = QComboBox()
@@ -99,6 +111,7 @@ class CommandBuilder(QGroupBox):
         self.triggerComboBox.setFixedWidth(120)
         self.triggerComboBox.setWhatsThis("trigger")
 
+        # Trigger value widgets.
         self.triggerValueLabel = QLabel("Trigger Value")
         self.triggerValueLabel.setVisible(False)
         self.triggerValueLineEdit = QLineEdit("0.0")
@@ -106,6 +119,7 @@ class CommandBuilder(QGroupBox):
         self.triggerValueLineEdit.setFixedWidth(100)
         self.triggerValueLineEdit.setWhatsThis("triggerValue")
 
+        # Repeat widgets.
         self.repeatLabel = QLabel("Repeat")
         self.repeatLabel.setVisible(False)
         self.repeatSpinBox = QSpinBox()
@@ -115,34 +129,43 @@ class CommandBuilder(QGroupBox):
         self.repeatSpinBox.setFixedWidth(60)
         self.repeatSpinBox.setWhatsThis("repeat")
 
+        # Finalise widgets.
         self.finaliseLabel = QLabel("Finalise")
         self.finaliseLabel.setVisible(False)
 
+        # Clear widgets.
         self.clearButton = QPushButton()
         self.clearButton.setIconSize(QSize(25, 25))
         self.clearButton.setVisible(False)
         self.clearButton.setToolTip("Clear command.")
 
+        # Add widgets.
         self.addButton = QPushButton()
         self.addButton.setIconSize(QSize(25, 25))
         self.addButton.setVisible(False)
         self.addButton.setToolTip("Add command to sequence.")
 
+        # Device list.
         deviceList = ["Select", "AMY", "BEN"]
         self.deviceComboBox.addItems(deviceList)
-
+        
+        # Channel list.
         channelList = ["Select", "C1", "C2"]
         self.channelComboBox.addItems(channelList)
 
+        # Variable list.
         variableList = ["Select", "Position", "Speed", "Feedback"]
         self.variableComboBox.addItems(variableList)
 
+        # Command list.
         commandList = ["Select", "Demand", "Ramp", "Triangle", "Sine", "File"]
         self.commandComboBox.addItems(commandList)
 
+        # Event list.
         eventList = ["Select", "Completion", "Immediate", "Time", "Feedback", "Position"]
         self.triggerComboBox.addItems(eventList)
 
+        # Layout.
         self.commandLayout = QGridLayout()
         n = 0
         self.commandLayout.addWidget(self.nameLabel, 0, n)
@@ -211,12 +234,13 @@ class CommandBuilder(QGroupBox):
         self.addButton.clicked.connect(self.add_command)
 
     def update_icons(self):
-        # Change appearance between light and dark modes.
+        """Method to update icons when switching between light and dark modes."""
         self.fileLoadButton.setIcon(QIcon("icon:/secondaryText/input.svg"))
         self.clearButton.setIcon(QIcon("icon:/secondaryText/clear.svg"))
         self.addButton.setIcon(QIcon("icon:/secondaryText/add.svg"))
 
     def preview_command(self):
+        """Method to show preview of command."""
         if self.finaliseLabel.isVisible() == True:
             self.create_command()
             self.commandPreview.emit(self.command)
@@ -224,11 +248,13 @@ class CommandBuilder(QGroupBox):
             self.clearPreview.emit()
 
     def add_command(self):
+        """Method to add command to sequence."""
         self.create_command()
         self.addCommandToSequence.emit(self.command)
 
     @Slot()
     def show_options(self):
+        """"Method to show options."""
         self.create_command()
         self.finaliseLabel.setVisible(True)
         self.clearButton.setVisible(True)
@@ -236,6 +262,7 @@ class CommandBuilder(QGroupBox):
     
     @Slot()
     def repeat_selected(self):
+        """Method to show next option when repeat option has been selected."""
         if self.finaliseLabel.isVisible() == True:
             self.create_command()
             self.commandPreview.emit(self.command)
@@ -244,6 +271,7 @@ class CommandBuilder(QGroupBox):
 
     @Slot()
     def amplitude_selected(self):
+        """Method to show next option when amplitude option has been selected."""
         if self.commandComboBox.currentText() == "Triangle":
             self.offsetLabel.setVisible(True)
             self.offsetLineEdit.setVisible(True)
@@ -256,7 +284,7 @@ class CommandBuilder(QGroupBox):
         self.preview_command()
 
     def resetBuilder(self, currentIndex):
-        # Hide all other widgets, reset ComboBoxes and re-initialise defaults in LineEdits. 
+        """Method to hide all other widgets, reset ComboBoxes and re-initialise defaults in LineEdits."""
         for index in range(self.commandLayout.count()):
             if index > currentIndex:
                 widget = self.commandLayout.itemAt(index).widget()
@@ -271,7 +299,7 @@ class CommandBuilder(QGroupBox):
 
     @Slot()
     def name_selected(self):
-        # Show device ComboBox.
+        """Method to show next option when name option has been selected."""
         text = self.nameLineEdit.text()
         if text != "":
             self.deviceLabel.setVisible(True)
@@ -283,7 +311,7 @@ class CommandBuilder(QGroupBox):
 
     @Slot(str)
     def device_selected(self, text):
-        # Show channel ComboBox.
+        """Method to show next option when device option has been selected."""
         if text != "Select":
             self.channelLabel.setVisible(True)
             self.channelComboBox.setVisible(True)
@@ -294,7 +322,7 @@ class CommandBuilder(QGroupBox):
 
     @Slot(str)
     def channel_selected(self, text):
-        # Show variable ComboBox.
+        """Method to show next option when channel option has been selected."""
         if text != "Select":
             self.variableLabel.setVisible(True)
             self.variableComboBox.setVisible(True)
@@ -304,7 +332,7 @@ class CommandBuilder(QGroupBox):
         self.preview_command()
 
     def set_units(self):
-        # Set units.
+        """Method to set units."""
         if self.variableComboBox.currentText() == "Position":
             text = "Rate " + "(" +self.positionRateUnit + ")"
         elif self.variableComboBox.currentText() == "Feedback":
@@ -344,7 +372,7 @@ class CommandBuilder(QGroupBox):
 
     @Slot(str)
     def variable_selected(self, text):
-        # Show command ComboBox.
+        """Method to show next option when variable option has been selected."""
         if text != "Select":
             self.commandLabel.setVisible(True)
             self.commandComboBox.setVisible(True)
@@ -359,6 +387,7 @@ class CommandBuilder(QGroupBox):
 
     @Slot(str)
     def command_selected(self, text):
+        """Method to show next option when command option has been selected."""
         currentIndex = self.commandLayout.indexOf(self.commandComboBox)
         self.resetBuilder(currentIndex)
         if text == "Ramp":
@@ -377,6 +406,7 @@ class CommandBuilder(QGroupBox):
     
     @Slot(str)
     def offset_selected(self):
+        """Method to show next option when offset option has been selected."""
         self.offset = float(self.offsetLineEdit.text())
         self.enable_repeat_input()
         self.show_options()
@@ -386,6 +416,7 @@ class CommandBuilder(QGroupBox):
 
     @Slot(str)
     def trigger_selected(self, text):
+        """Method to show next option when trigger option has been selected."""
         if text == "Select":
             self.triggerValueLabel.setVisible(False)
             self.triggerValueLineEdit.setVisible(False)
@@ -417,30 +448,35 @@ class CommandBuilder(QGroupBox):
 
     @Slot()
     def enable_repeat_input(self):
+        """Method to enable repeat input."""
         self.repeatLabel.setVisible(True)
         self.repeatSpinBox.setVisible(True)
         self.preview_command()
 
     @Slot()
     def enable_phase_input(self):
+        """Method to enable phase input."""
         self.offsetLabel.setVisible(True)
         self.offsetLineEdit.setVisible(True)
         self.preview_command()
 
     @Slot()
     def enable_rate_input(self):
+        """Method to enable rate input."""
         self.rateLabel.setVisible(True)
         self.rateLineEdit.setVisible(True)
         self.preview_command()
 
     @Slot()
     def enable_amplitude_input(self):
+        """Method to enable amplitude input."""
         self.amplitudeLabel.setVisible(True)
         self.amplitudeLineEdit.setVisible(True)
         self.preview_command()
 
     @Slot()
     def create_command(self):
+        """Method to create command."""
         self.command = {}
         for index in range(self.commandLayout.count()):
             widget = self.commandLayout.itemAt(index).widget()
@@ -458,6 +494,7 @@ class CommandBuilder(QGroupBox):
 
     @Slot()
     def clear_command(self):
+        """Method to clear command."""
         self.resetBuilder(1)
         self.nameLineEdit.setText("")
         self.clearPreview.emit()
