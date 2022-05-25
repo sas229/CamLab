@@ -59,7 +59,7 @@ class ConfigurationUtilities:
         self.manager.devices[name].updateAcquisitionRate.connect(self.deviceConfigurationWidget[name].update_acquisition_rate)
 
         # Initialise settings.
-        self.deviceConfigurationWidget[name].setConfiguration(self.manager.configuration)
+        self.deviceConfigurationWidget[name].set_configuration(self.manager.configuration)
         sleep(1.0)
 
         # Start stream.

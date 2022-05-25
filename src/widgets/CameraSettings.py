@@ -18,6 +18,7 @@ class CameraSettings(QWidget):
     setAcquisitionRate = Signal(float)
     
     def __init__(self, name, *args, **kwargs):
+        """CameraSettings init."""
         super().__init__(*args, **kwargs)
         self.name = name
 
@@ -196,8 +197,8 @@ class CameraSettings(QWidget):
         self.acquisitionRateLineEdit.returnPressed.connect(self.set_acquisition_rate)
         self.gainLineEdit.returnPressed.connect(self.set_gain)
     
-    def setConfiguration(self, configuration):
-        """Set the configuration."""
+    def set_configuration(self, configuration):
+        """Method to set the configuration."""
         self.configuration = configuration
         self.cameraConfiguration = self.configuration["devices"][self.name]["settings"]
         self.setWindowTitle(self.name)
@@ -212,6 +213,7 @@ class CameraSettings(QWidget):
         self.initialise_image_mode(self.cameraConfiguration["imageMode"])
 
     def initialise_acquisition_mode(self, text):
+        """Method to initialise the acquisition mode."""
         self.setAcquisitionMode.emit(text)
         self.acquisitionModeComboBox.setCurrentText(text)
         self.acquisitionModeComboBox.currentTextChanged.connect(self.set_acquisition_mode)
@@ -219,11 +221,13 @@ class CameraSettings(QWidget):
 
     @Slot(str)
     def set_acquisition_mode(self, text):
+        """Method to set the acquisition mode."""
         self.setAcquisitionMode.emit(text)
         self.cameraConfiguration["acquisitionMode"] = text
         log.info("Acquisition mode on {device} set to {text} in configuration.".format(device=self.name, text=text))
 
     def initialise_acquisition_rate(self, value):
+        """Method to initialise the acquisition rate."""
         self.setAcquisitionRate.emit(value)
         text = "{value:.2f}".format(value=value)
         self.acquisitionRateLineEdit.setText(text)
@@ -232,6 +236,7 @@ class CameraSettings(QWidget):
 
     @Slot(float)
     def set_acquisition_rate(self):
+        """Method to set the acquisition rate."""
         value = float(self.acquisitionRateLineEdit.text())
         text = "{value:.2f}".format(value=value)
         self.acquisitionRateLineEdit.setText(text)
@@ -241,10 +246,12 @@ class CameraSettings(QWidget):
 
     @Slot(float)
     def update_acquisition_rate(self, value):
+        """Method to update the acquisition rate."""
         text = "{value:.2f}".format(value=value)
         self.acquisitionRateLineEdit.setText(text)
         
     def initialise_binning_mode(self, text):
+        """Method to initialise the binning mode."""
         self.setBinningMode.emit(text)
         self.binningModeComboBox.setCurrentText(text)
         self.binningModeComboBox.currentTextChanged.connect(self.set_binning_mode)
@@ -252,11 +259,13 @@ class CameraSettings(QWidget):
 
     @Slot(str)
     def set_binning_mode(self, text):
+        """Method to set the binning mode."""
         self.setBinningMode.emit(text)
         self.cameraConfiguration["binningMode"] = text
         log.info("Binning mode on {device} set to {text} in configuration.".format(device=self.name, text=text))
 
     def initialise_binning(self, value):
+        """Method to initialise the binning value."""
         self.setBinning.emit(value)        
         text = str(value)
         self.binningValueComboBox.setCurrentText(text)
@@ -265,12 +274,14 @@ class CameraSettings(QWidget):
 
     @Slot(str)
     def set_binning(self, text):
+        """Method to set the binning value."""
         value = int(text)
         self.setBinning.emit(value)
         self.cameraConfiguration["binningValue"] = value
         log.info("Binning value on {device} set to {value} in configuration.".format(device=self.name, value=value))
 
     def initialise_auto_exposure_mode(self, text):
+        """Method to initialise the auto exposure mode."""
         self.setAutoExposureMode.emit(text)
         self.autoExposureComboBox.setCurrentText(text)
         self.autoExposureComboBox.currentTextChanged.connect(self.set_auto_exposure_mode)
@@ -278,11 +289,13 @@ class CameraSettings(QWidget):
 
     @Slot(str)
     def set_auto_exposure_mode(self, text):
+        """Method to set the auto exposure mode."""
         self.setAutoExposureMode.emit(text)
         self.cameraConfiguration["autoExposureMode"] = text
         log.info("Auto exposure mode on {device} set to {text} in configuration.".format(device=self.name, text=text))
 
     def initialise_auto_gain(self, text):
+        """Method to initialise the auto gain mode."""
         self.setAutoGain.emit(text)
         self.autoGainComboBox.setCurrentText(text)
         self.autoGainComboBox.currentTextChanged.connect(self.set_auto_gain)
@@ -291,11 +304,13 @@ class CameraSettings(QWidget):
 
     @Slot(str)
     def set_auto_gain(self, text):
+        """Method to set the auto gain mode."""
         self.setAutoGain.emit(text)
         self.cameraConfiguration["autoGain"] = text
         log.info("Auto gain mode on {device} set to {text} in configuration.".format(device=self.name, text=text))
 
     def initialise_gain(self, value):
+        """Method to initialise the gain value."""
         self.setGain.emit(value)
         text = str(value)
         self.gainLineEdit.setText(text)
@@ -304,6 +319,7 @@ class CameraSettings(QWidget):
 
     @Slot()
     def set_gain(self):
+        """Method to set the gain value."""
         value = float(self.gainLineEdit.text())
         text = "{value:.2f}".format(value=value)
         self.gainLineEdit.setText(text)
@@ -313,15 +329,18 @@ class CameraSettings(QWidget):
     
     @Slot(float)
     def update_gain(self, value):
+        """Method to update the gain value."""
         text = "{value:.2f}".format(value=value)
         self.gainLineEdit.setText(text)
 
     @Slot(str)
     def update_mode(self, text):
+        """Method to update the image mode."""
         index = self.imageModeComboBox.findText(text)
         self.imageModeComboBox.setCurrentIndex(index)
         
     def initialise_exposure_time(self, value):
+        """Method to initialise the exposure time."""
         self.setExposureTime.emit(value)
         text = str(value)
         self.exposureTimeLineEdit.setText(text)
@@ -330,6 +349,7 @@ class CameraSettings(QWidget):
 
     @Slot()
     def set_exposure_time(self):
+        """Method to set the exposure time."""
         value = int(self.exposureTimeLineEdit.text())
         self.setExposureTime.emit(value)
         self.cameraConfiguration["exposureTime"] = value
@@ -337,59 +357,68 @@ class CameraSettings(QWidget):
     
     @Slot(int)
     def update_exposure_time(self, value):
+        """Method to update the exposure time."""
         text = "{value:d}".format(value=value)
         self.exposureTimeLineEdit.setText(text)
         
     @Slot(str)
     def initialise_auto_white_balance_mode(self, text):
+        """Method to initialise the auto white balance mode."""
         self.setAutoWhiteBalanceMode.emit(text)
         self.autoWhiteBalanceComboBox.setCurrentText(text)
         self.autoWhiteBalanceComboBox.currentTextChanged.connect(self.set_auto_white_balance_mode)
         log.info("Auto white balance on {device} set to {text}.".format(device=self.name, text=text))
 
     def set_auto_white_balance_mode(self, text):
+        """Method to set the auto white balance mode."""
         self.setAutoWhiteBalanceMode.emit(text)
         self.cameraConfiguration["autoWhiteBalance"] = text
         log.info("Auto white balance on {device} set to {text} in configuration.".format(device=self.name, text=text))
 
     @Slot(str)
     def initialise_image_mode(self, text):
-        """Method to initialise image mode."""
+        """Method to initialise the image mode."""
         self.setImageMode.emit(text)
         self.imageModeComboBox.setCurrentText(text)
         self.imageModeComboBox.currentTextChanged.connect(self.set_image_mode)
         log.info("Image mode on {device} set to {text}.".format(device=self.name, text=text))
 
     def set_image_mode(self, text):
+        """Method to set the image mode."""
         self.setImageMode.emit(text)
         self.cameraConfiguration["imageMode"] = text
         log.info("Image mode on {device} set to {text} in configuration.".format(device=self.name, text=text))
 
     def toggle_exposure_time(self, text):
+        """Method to toggle the exposure time input."""
         if text == "Off":
             self.exposureTimeLineEdit.setEnabled(True)
         else:
             self.exposureTimeLineEdit.setEnabled(False)
     
     def toggle_gain(self, text):
+        """Method to toggle the gain input."""
         if text == "Off":
             self.gainLineEdit.setEnabled(True)
         else:
             self.gainLineEdit.setEnabled(False)
     
     def toggle_binning(self, text):
+        """Method to toggle the binning input."""
         if text == "Off":
             self.binningValueComboBox.setEnabled(False)
         else:
             self.binningValueComboBox.setEnabled(True)
 
     def toggle_dictionary(self, index):
+        """Method to toggle the ArUco dictionary input."""
         if index == 1:
             self.dictionaryComboBox.setEnabled(True)
         else:
             self.dictionaryComboBox.setEnabled(False)
     
     def toggle_acquisition_rate(self, index):
+        """Method to toggle the acquisition rate input."""
         if index == 1:
             self.acquisitionRateLineEdit.setEnabled(True)
         else:

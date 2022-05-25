@@ -92,7 +92,7 @@ class ControlUtilities:
                 self.manager.devices[name].updateFeedbackProcessVariableC2.connect(controlWidget.setFeedbackProcessVariable)
 
             # Set the configuration and initial position.
-            controlWidget.setConfiguration(configuration=self.manager.configuration)
+            controlWidget.set_configuration(configuration=self.manager.configuration)
             self.manager.devices[name].check_connections()
             position = self.manager.configuration["devices"][name]["control"][channel]["settings"]["primaryProcessVariable"]
             speed = self.manager.configuration["devices"][name]["control"][channel]["settings"]["secondarySetPoint"]

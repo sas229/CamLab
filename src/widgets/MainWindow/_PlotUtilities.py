@@ -61,12 +61,12 @@ class PlotUtilities:
         self.manager.setColourNewPlot(plotNumber)
 
         # Show the plot.
-        plotWindow.setConfiguration(self.manager.configuration)
+        plotWindow.set_configuration(self.manager.configuration)
         self.tabs.addTab(self.plots[plotNumber], "Plot")
 
         # Connections.
-        self.manager.configurationChanged.connect(self.plots[plotNumber].setConfiguration)
-        self.manager.assembly.plotDataChanged.connect(self.plots[plotNumber].updatePlotData)
+        self.manager.configurationChanged.connect(self.plots[plotNumber].set_configuration)
+        self.manager.assembly.plotDataChanged.connect(self.plots[plotNumber].update_output_data)
         self.plots[plotNumber].plotWindowClosed.connect(self.window_to_tab)
         self.plots[plotNumber].colourUpdated.connect(self.update_channel_colours)
 
@@ -85,12 +85,12 @@ class PlotUtilities:
             self.plots.update({plotNumber: plotWindow})
 
             # Show the plot.
-            plotWindow.setConfiguration(self.manager.configuration)
+            plotWindow.set_configuration(self.manager.configuration)
             self.tabs.addTab(self.plots[plotNumber], "Plot")
 
             # Connections.
-            self.manager.configurationChanged.connect(self.plots[plotNumber].setConfiguration)
-            self.manager.assembly.plotDataChanged.connect(self.plots[plotNumber].updatePlotData)
+            self.manager.configurationChanged.connect(self.plots[plotNumber].set_configuration)
+            self.manager.assembly.plotDataChanged.connect(self.plots[plotNumber].update_output_data)
             self.plots[plotNumber].plotWindowClosed.connect(self.window_to_tab)
             self.plots[plotNumber].colourUpdated.connect(self.update_channel_colours)
 
@@ -109,7 +109,7 @@ class PlotUtilities:
             for plotNumber in self.manager.configuration["plots"].keys():
                 plotWindow = self.plots[plotNumber]
                 plotWindow.setPlotNumber(plotNumber)
-                plotWindow.setConfiguration(self.manager.configuration)
+                plotWindow.set_configuration(self.manager.configuration)
                 
     @Slot(str)
     def remove_plot(self, plotNumber):

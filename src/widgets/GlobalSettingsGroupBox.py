@@ -101,7 +101,7 @@ class GlobalSettingsGroupBox(QGroupBox):
     def update_skip_samples(self):
         # Method to update the new acquisition rate.
         newSkipSamples = self.skipSamplesLineEdit.text()
-        self.globalConfiguration["skipSamples"] = newSkipSamples
+        self.globalConfiguration["skipSamples"] = int(newSkipSamples)
         log.info("New acquisition rate = " + str(newSkipSamples) + " Hz")
 
     def update_control_rate(self):
@@ -109,13 +109,13 @@ class GlobalSettingsGroupBox(QGroupBox):
         newControlRate = float(self.controlRateLineEdit.text())
         newControlRate = "{value:.2f}".format(value=newControlRate)
         self.controlRateLineEdit.setText(newControlRate)
-        self.globalConfiguration["controlRate"] = newControlRate
+        self.globalConfiguration["controlRate"] = float(newControlRate)
         log.info("New control rate = " + str(newControlRate) + " Hz")
     
     def update_average_samples(self):
         # Method to update the new number of samples to average.
         newAverageSamples =self.averageSamplesLineEdit.text()
-        self.globalConfiguration["averageSamples"] = newAverageSamples
+        self.globalConfiguration["averageSamples"] = int(newAverageSamples)
         log.info("New average samples = " + newAverageSamples)
 
     def update_path(self):

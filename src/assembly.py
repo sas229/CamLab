@@ -14,6 +14,7 @@ class Assembly(QObject):
     autozeroDevices = Signal()
     
     def __init__(self):
+        """Assembly init."""
         super().__init__()
         self.plotData = []
         self.time = 0.00
@@ -25,13 +26,15 @@ class Assembly(QObject):
         self.arucoDict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
         self.arucoParams = cv2.aruco.DetectorParameters_create()
 
-    def settings(self, rate, skip, average):
+    def define_settings(self, rate, skip, average):
+        """Method to define basic global settings."""
         self.skip = int(skip)
         self.average = int(average)
         self.DeltaT = (1/rate)*self.skip
         log.info("Assembly thread settings initialised.")
 
-    def setFilename(self, path, filename, date, timestart, ext):
+    def set_filename(self, path, filename, date, timestart, ext):
+        """Method to set the output filename."""
         self.path = path
         self.filename = filename
         self.date = date
@@ -39,7 +42,8 @@ class Assembly(QObject):
         self.filepath = path + "/" + filename + "_" + date + "_" + timestart + "_1" + ext
         log.info("Filename set.")
 
-    def writeHeader(self, header):
+    def write_header(self, header):
+        """Method to write the header to the output file."""
         self.file = open(self.filepath, 'w+')
         self.file.write(header)
         self.file.close()
@@ -47,22 +51,16 @@ class Assembly(QObject):
         log.info("Header written.")
 
     @Slot(str, np.ndarray)
-    def updateNewData(self, name, data):
-        # Add data to numpy array for the sending device.
-        if np.shape(self.data[name])[0] > 0:
-            self.data[name] = np.vstack((self.data[name], data))
-        else:
-            self.data[name] = data
-
-    @Slot()
-    def updatePlotData(self):
+    def update_new_data(self, name, data):
+        """Method to add data to numpy array for the sending device."""
+        if np.shape(self.data[name])[0] > 0:e
+        """Method to update the output data to save to file and to generate the plots."""
         # Compute the minumum number of rows in the data item within each device dict.
         numTimesteps = []
         if len(self.enabledDevices) > 0:
             for device in self.enabledDevices:
                 name = device["name"]
                 numTimesteps.append(np.shape(self.data[name])[0])
-        
             numTimesteps = min(numTimesteps)
             numTimesteps = numTimesteps - (numTimesteps % self.skip)
 
@@ -122,40 +120,44 @@ class Assembly(QObject):
     
     @Slot(str, np.ndarray)
     def save_image(self, image_name, image_array):
-        """Save image with given filename prepended with output file details."""
+        """Method to save image with given filename prepended with output file details."""
         filepath = self.path + "/" + self.filename + "_" + self.date + "_" + self.timestart + "_" + image_name
         # self.detect_aruco(image_array)
         img = Image.fromarray(image_array)
-        img.save(filepath, "JPEG")
-        
-    def detect_aruco(self, image_array):
+        img.save(filepath, "JPEG")e
+        """Method to detect ArUco markers in image."""
         corners, ids, rejected = cv2.aruco.detectMarkers(image_array, self.arucoDict,
             parameters=self.arucoParams)
         marker_image = cv2.aruco.drawDetectedMarkers(image_array, corners)
         print(len(corners))
         return marker_image
 
-    def clearAllData(self):
+    def clear_all_data(self):
+        """Method to clear all data."""
         self.data = {}
         self.plotData = []
         self.time = 0.00
         self.count = 0
 
-    def closeFile(self):
+    def close_file(self):
+        """Method to close file."""
         self.file.close()
     
     @Slot()
-    def clearPlotData(self):
+    def clear_plot_data(self):
+        """Method to clear plot data."""
         self.plotData = self.plotData[-1,:]
         log.info("Plots cleared.")
 
     @Slot()
     def autozero(self):
+        """Method to command devices to execute autozero function."""
         self.autozeroDevices.emit()
         log.info("Autozero signal sent by assembly.")
 
     @Slot()
-    def newFile(self):
+    def new_file(self):
+        """Method to start logging in a new file."""
         # Close current file.
         self.file.close()
         
@@ -167,10 +169,12 @@ class Assembly(QObject):
         self.file = open(filepath,'ab')
 
     @Slot(list)
-    def createDataArrays(self, enabledDevices):
+    def create_data_arrays(self, enabledDevices):
+        """Method to create data arrays depending on enabled devices."""
         self.enabledDevices = enabledDevices
         self.data = {}
         for device in self.enabledDevices:
-            name = device["name"]
-            self.data[name] = np.array([])
+            if device["type"] == "Hub":
+                name = device["name"]
+                self.data[name] = np.array([])
         log.info("Output arrays created.")

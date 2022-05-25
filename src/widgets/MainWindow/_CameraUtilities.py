@@ -14,7 +14,7 @@ class CameraUtilities:
         """Add camera tab."""
         # Store the widget.
         cameraTab = CameraTab(name)
-        cameraTab.setConfiguration(self.manager.configuration)
+        cameraTab.set_configuration(self.manager.configuration)
         self.previews.update({name: cameraTab})
 
         # Add widget to tab and show if control enabled.

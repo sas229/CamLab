@@ -8,7 +8,7 @@ class TabUtilities:
         if self.tabs.indexOf(widget) == -1:
             tabType = widget.whatsThis()
             widget.setWindowFlags(Qt.Widget)
-            widget.setTab()
+            widget.set_tab()
             # Set order.
             if tabType == "configuration":
                 self.tabs.insertPersistentTab(0, widget, "Configuration")
@@ -45,6 +45,6 @@ class TabUtilities:
             self.tabs.removeTab(index)
             widget.setWindowFlags(Qt.Window)
             widget.setWindowTitle(text)
-            widget.setWindow()
+            widget.set_window()
             widget.show()
             self.tabs.setCurrentIndex(0)

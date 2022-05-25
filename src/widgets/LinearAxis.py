@@ -139,9 +139,9 @@ class LinearAxis(QWidget):
         self.feedbackStatus.setVisible(feedback)
         self.feedback = feedback
         if self.controlConfiguration["settings"]["mode"] == "window":
-            self.setWindow()
+            self.set_window()
 
-    def setWindow(self):
+    def set_window(self):
         # Set the window size.
         x = int(self.controlConfiguration["settings"]["x"])
         y = int(self.controlConfiguration["settings"]["y"])
@@ -168,7 +168,7 @@ class LinearAxis(QWidget):
             self.controlConfiguration["settings"]["width"] = int(self.width())
             self.controlConfiguration["settings"]["height"] = int(self.height())
 
-    def setTab(self):
+    def set_tab(self):
         self.controlConfiguration["settings"]["mode"] = "tab"
 
     @Slot(str, str)
@@ -260,22 +260,22 @@ class LinearAxis(QWidget):
 
     @Slot()
     def updatePrimaryUnit(self, unit):
-        self.adjust.setUnit(unit)
-        self.positionDemand.setUnit(unit)
-        self.positionStatus.setUnit(unit)
+        self.adjust.set_unit(unit)
+        self.positionDemand.set_unit(unit)
+        self.positionStatus.set_unit(unit)
         self.controlConfiguration["settings"]["primaryUnit"] = unit
         log.info("Position unit updated for control channel {channel} on {device} to {unit}.".format(channel=self.channel, device=self.device, unit=unit))
 
     @Slot()
     def updateFeedbackUnit(self, unit):
-        self.feedbackDemand.setUnit(unit)
-        self.feedbackStatus.setUnit(unit)
+        self.feedbackDemand.set_unit(unit)
+        self.feedbackStatus.set_unit(unit)
         self.controlConfiguration["settings"]["feedbackUnit"] = unit
         log.info("Feedback unit updated for control channel {channel} on {device} to {unit}.".format(channel=self.channel, device=self.device, unit=unit))
 
     @Slot()
     def updateSecondaryUnit(self, unit):
-        self.jog.setUnit(unit)
+        self.jog.set_unit(unit)
         self.controlConfiguration["settings"]["secondaryUnit"] = unit
         log.info("Speed unit updated for control channel {channel} on {device} to {unit}.".format(channel=self.channel, device=self.device, unit=unit))
 
@@ -477,16 +477,16 @@ class LinearAxis(QWidget):
             elif setting == "feedbackProcessVariable":
                 self.setFeedbackProcessVariable(settings["feedbackProcessVariable"])
             elif setting == "feedbackUnit":
-                self.feedbackDemand.setUnit(settings["feedbackUnit"])
-                self.feedbackStatus.setUnit(settings["feedbackUnit"])
+                self.feedbackDemand.set_unit(settings["feedbackUnit"])
+                self.feedbackStatus.set_unit(settings["feedbackUnit"])
                 self.settings.feedbackUnitLineEdit.setText(settings["feedbackUnit"]) 
             elif setting == "primaryUnit":
-                self.positionDemand.setUnit(settings["primaryUnit"])
-                self.positionStatus.setUnit(settings["primaryUnit"])
-                self.adjust.setUnit(settings["primaryUnit"]) 
+                self.positionDemand.set_unit(settings["primaryUnit"])
+                self.positionStatus.set_unit(settings["primaryUnit"])
+                self.adjust.set_unit(settings["primaryUnit"]) 
                 self.settings.positionUnitLineEdit.setText(settings["primaryUnit"])
             elif setting == "secondaryUnit":
-                self.jog.setUnit(settings["secondaryUnit"])
+                self.jog.set_unit(settings["secondaryUnit"])
                 self.settings.speedUnitLineEdit.setText(settings["secondaryUnit"])
             elif setting == "connected":
                 self.globalControls.connectedIndicator.setChecked(settings["connected"])
@@ -513,7 +513,7 @@ class LinearAxis(QWidget):
             elif setting == "ratio":
                 self.settings.setRatio(settings["ratio"])
     
-    def setConfiguration(self, configuration):
+    def set_configuration(self, configuration):
         self.configuration = configuration
         self.controlConfiguration = self.configuration["devices"][self.device]["control"][self.control]
         self.setWindowTitle(self.controlConfiguration["name"])

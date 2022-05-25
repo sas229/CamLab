@@ -266,21 +266,21 @@ class Manager(QObject):
         enabledDevices = self.deviceTableModel.enabledDevices()
 
         # Create output arrays in assembly thread.
-        self.assembly.createDataArrays(enabledDevices)
+        self.assembly.create_data_arrays(enabledDevices)
         
         # Initialise assembly thread.
         controlRate = self.configuration["global"]["controlRate"]
         skipSamples = self.configuration["global"]["skipSamples"]
         averageSamples = self.configuration["global"]["averageSamples"]
-        self.assembly.settings(controlRate, skipSamples, averageSamples)
+        self.assembly.define_settings(controlRate, skipSamples, averageSamples)
 
         # Set filename.
         path, filename, date, time, ext = self.generateFilename()
-        self.assembly.setFilename(path, filename, date, time, ext)
+        self.assembly.set_filename(path, filename, date, time, ext)
 
         # Generate the header for the output file.
         header = self.createHeader()
-        self.assembly.writeHeader(header)
+        self.assembly.write_header(header)
         
         # For each device set initialise the device and set the acquisition array.
         for device in enabledDevices:
@@ -363,10 +363,10 @@ class Manager(QObject):
             if self.devices[name].type == "Hub":
                 self.timing.controlDevices.connect(self.devices[name].process)
                 self.assembly.autozeroDevices.connect(self.devices[name].recalculate_offsets)
-                self.devices[name].emitData.connect(self.assembly.updateNewData)
+                self.devices[name].emitData.connect(self.assembly.update_new_data)
                 self.devices[name].updateOffsets.connect(self.updateDeviceOffsets)
             elif self.devices[name].type == "Camera":
-                self.devices[name].emitData.connect(self.assembly.updateNewData)
+                self.devices[name].emitData.connect(self.assembly.update_new_data)
                 self.timing.controlDevices.connect(self.devices[name].save_image)
                 self.devices[name].saveImage.connect(self.assembly.save_image)
                 self.devices[name].stop_stream = False
@@ -377,11 +377,11 @@ class Manager(QObject):
             if self.devices[name].type == "Hub":
                 self.timing.controlDevices.disconnect(self.devices[name].process)
                 self.assembly.autozeroDevices.disconnect(self.devices[name].recalculate_offsets)
-                self.devices[name].emitData.disconnect(self.assembly.updateNewData)
+                self.devices[name].emitData.disconnect(self.assembly.update_new_data)
                 self.devices[name].updateOffsets.disconnect(self.updateDeviceOffsets)
             elif self.devices[name].type == "Camera":
                 self.devices[name].stop_stream = True
-                self.devices[name].emitData.disconnect(self.assembly.updateNewData)
+                self.devices[name].emitData.disconnect(self.assembly.update_new_data)
                 self.timing.controlDevices.disconnect(self.devices[name].save_image)
                 self.devices[name].saveImage.disconnect(self.assembly.save_image)
             self.deviceToggled.emit(name, connect)
@@ -638,7 +638,7 @@ class Manager(QObject):
     @Slot()
     def configure(self):
         # Close current file.
-        self.assembly.closeFile()
+        self.assembly.close_file()
 
         # Stop acquisition.
         self.timing.stop()
@@ -649,7 +649,7 @@ class Manager(QObject):
     @Slot()
     def run(self):
         # Set acquisition settings.
-        self.assembly.clearAllData()
+        self.assembly.clear_all_data()
         self.initialiseDeviceSettings()
 
         # Set feedback channels.

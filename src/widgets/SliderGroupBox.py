@@ -214,7 +214,7 @@ class SliderGroupBox(QGroupBox):
     def getMaximumRange(self):
         return self.axisSlider.maximumRange
     
-    def setUnit(self, unit):
+    def set_unit(self, unit):
         # Set units for labels.
         self.unit = unit
         self.leftLimitLabel.setText("Limit ({unit})".format(unit=unit))

@@ -233,7 +233,7 @@ class PlotWindow(QWidget, QtStyleTools):
         self.minimumSelectedAxisLineEdit.returnPressed.connect(self.setNewSelectedAxisRange)
         self.maximumSelectedAxisLineEdit.returnPressed.connect(self.setNewSelectedAxisRange)
 
-    def setWindow(self):
+    def set_window(self):
         x = int(self.configuration["plots"][self.plotNumber]["x"])
         y = int(self.configuration["plots"][self.plotNumber]["y"])
         w = int(self.configuration["plots"][self.plotNumber]["width"])
@@ -241,7 +241,7 @@ class PlotWindow(QWidget, QtStyleTools):
         self.setGeometry(x, y, w, h)
         self.configuration["plots"][self.plotNumber]["mode"] = "window"
 
-    def setTab(self):
+    def set_tab(self):
         self.configuration["plots"][self.plotNumber]["mode"] = "tab"
         
     def resizeEvent(self, event):
@@ -255,7 +255,7 @@ class PlotWindow(QWidget, QtStyleTools):
         self.configuration["plots"][self.plotNumber]["x"] = int(position.x())
         self.configuration["plots"][self.plotNumber]["y"] = int(position.y())
 
-    def setConfiguration(self, configuration):
+    def set_configuration(self, configuration):
         # Set the configuration.
         self.configuration = configuration
         if "plots" in self.configuration:
@@ -672,7 +672,7 @@ class PlotWindow(QWidget, QtStyleTools):
             self.lines.append(self.plot.plot())
 
     @Slot(np.ndarray)
-    def updatePlotData(self, plotData):
+    def update_output_data(self, plotData):
         # Update plotData and save as attribute.
         self.plotData = plotData
         self.updatePlot()

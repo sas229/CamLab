@@ -42,7 +42,7 @@ class DemandGroupBox(QGroupBox):
         self.setFixedHeight(200)
         self.setFixedWidth(150)
 
-    def setUnit(self, unit):
+    def set_unit(self, unit):
         self.unit = unit
         self.setPointLabel.setText("SP ({unit})".format(unit=unit))
         self.processVariableLabel.setText("PV ({unit})".format(unit=unit))

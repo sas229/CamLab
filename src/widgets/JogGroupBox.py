@@ -43,7 +43,7 @@ class JogGroupBox(QGroupBox):
         # Connections.
         self.speedLineEdit.returnPressed.connect(self.setSpeed)
 
-    def setUnit(self, unit):
+    def set_unit(self, unit):
         self.speedLabel.setText("Speed ({unit})".format(unit=unit))
         self.speedUnitChanged.emit()
         self.unit = unit

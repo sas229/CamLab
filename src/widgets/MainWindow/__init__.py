@@ -1,8 +1,8 @@
 import os, sys
 from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QGridLayout, QDialog
 from PySide6.QtGui import QScreen
-from PySide6.QtCore import Signal, Slot, QThread, QTimer, Qt
-from local_qt_material import apply_stylesheet, QtStyleTools
+from PySide6.QtCore import Signal, Slot, QThread, QTimer
+from local_qt_material import QtStyleTools
 from widgets.MainWindow._TabUtilities import TabUtilities
 from widgets.MainWindow._PlotUtilities import PlotUtilities
 from widgets.MainWindow._ControlUtilities import ControlUtilities
@@ -16,7 +16,6 @@ from widgets.SequenceTab import SequenceTab
 from widgets.StatusTab import StatusTab
 from widgets.StatusGroupBox import StatusGroupBox
 from dialogs import BusyDialog
-from log import init_log
 import logging
 from time import sleep
 from pathlib import Path
@@ -113,9 +112,9 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.toolbar.loadConfiguration.connect(self.manager.loadConfiguration)
         self.toolbar.saveConfiguration.connect(self.manager.saveConfiguration)
         self.toolbar.clearConfigButton.triggered.connect(self.manager.clearConfiguration)
-        self.toolbar.newFileButton.triggered.connect(self.manager.assembly.newFile)
+        self.toolbar.newFileButton.triggered.connect(self.manager.assembly.new_file)
         self.toolbar.autozeroButton.triggered.connect(self.manager.assembly.autozero)
-        self.toolbar.clearPlotsButton.triggered.connect(self.manager.assembly.clearPlotData)
+        self.toolbar.clearPlotsButton.triggered.connect(self.manager.assembly.clear_plot_data)
         self.toolbar.darkModeButton.triggered.connect(self.update_dark_mode)
 
         # Tab interface connections.
@@ -152,7 +151,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.manager.finishedRefreshingDevices.connect(self.close_busy_dialog)
 
         # Timer connections.
-        self.updateTimer.timeout.connect(self.manager.assembly.updatePlotData)
+        self.updateTimer.timeout.connect(self.manager.assembly.update_output_data)
 
         # Set initial configuration.
         self.set_configuration(self.manager.configuration)      

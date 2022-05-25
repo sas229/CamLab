@@ -30,7 +30,7 @@ class ConfigurationTab(QWidget):
         self.layout.setRowStretch(self.layout.rowCount(), 1)
         self.setLayout(self.layout)
 
-    def setWindow(self):
+    def set_window(self):
         x = int(self.configuration["x"])
         y = int(self.configuration["y"])
         w = int(self.configuration["width"])
@@ -38,7 +38,7 @@ class ConfigurationTab(QWidget):
         self.setGeometry(x, y, w, h)
         self.configuration["mode"] = "window"
 
-    def setTab(self):
+    def set_tab(self):
         self.configuration["mode"] = "tab"
 
     def closeEvent(self, event):

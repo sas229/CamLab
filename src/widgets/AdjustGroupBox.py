@@ -37,25 +37,25 @@ class AdjustGroupBox(QGroupBox):
         self.setFixedWidth(150)
 
         # Connections.
-        self.adjustPlusButton.clicked.connect(self.incrementSetPoint)
-        self.adjustMinusButton.clicked.connect(self.decrementSetPoint)
-        self.incrementLineEdit.returnPressed.connect(self.incrementChanged)
+        self.adjustPlusButton.clicked.connect(self.increment_set_point)
+        self.adjustMinusButton.clicked.connect(self.decrement_set_point)
+        self.incrementLineEdit.returnPressed.connect(self.increment_changed)
 
     @Slot()
-    def incrementChanged(self):
+    def increment_changed(self):
         value = float(self.incrementLineEdit.text())
         self.incrementLineEdit.setText("{value:.2f}".format(value=value))
 
     @Slot()
-    def incrementSetPoint(self):
+    def increment_set_point(self):
         value = float(self.incrementLineEdit.text())
         self.adjustSetPoint.emit(value)
 
     @Slot()
-    def decrementSetPoint(self):
+    def decrement_set_point(self):
         value = -float(self.incrementLineEdit.text())
         self.adjustSetPoint.emit(value)
 
-    def setUnit(self, unit):
+    def set_unit(self, unit):
         self.unit = unit
         self.incrementLabel.setText("Increment ({unit})".format(unit=unit))
