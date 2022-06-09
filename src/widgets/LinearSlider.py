@@ -76,18 +76,18 @@ class LinearSlider(QWidget):
     def getRightLimit(self):
         return self.rightLimit
 
-    def setSetPoint(self, value):
+    def set_setpoint(self, value):
         self.setPoint = min(max(value, self.leftLimit), self.rightLimit)
         self.update()
 
-    def getSetPoint(self):
+    def get_setpoint(self):
         return self.setPoint
 
-    def setProcessVariable(self, value):
+    def set_process_variable(self, value):
         self.processVariable = value
         self.update()
 
-    def getProcessVariable(self):
+    def get_process_variable(self):
         return self.processVariable
 
     def setLimitRadius(self, value):

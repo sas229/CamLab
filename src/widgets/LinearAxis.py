@@ -372,7 +372,7 @@ class LinearAxis(QWidget):
     def adjustPositionSetPoint(self, adjustment):
         currentSetPoint = float(self.positionDemand.setPointLineEdit.text())
         newSetPoint = currentSetPoint + adjustment
-        self.positionStatus.setSetPoint(newSetPoint) 
+        self.positionStatus.set_setpoint(newSetPoint) 
         self.updatePositionSetPointLineEdit(newSetPoint)
         self.globalControls.PIDControlButton.setChecked(False)
 
@@ -391,7 +391,7 @@ class LinearAxis(QWidget):
         value = float(self.positionDemand.setPointLineEdit.text())
         value = max(value, self.positionStatus.getLeftLimit())
         value = min(value, self.positionStatus.getRightLimit())
-        self.positionStatus.setSetPoint(value)
+        self.positionStatus.set_setpoint(value)
         self.positionDemand.setPointLineEdit.setText("{value:.2f}".format(value=value))
         self.primarySetPointChanged.emit(value)
 
@@ -400,7 +400,7 @@ class LinearAxis(QWidget):
         value = float(self.feedbackDemand.setPointLineEdit.text())
         value = max(value, self.feedbackStatus.getLeftLimit())
         value = min(value, self.feedbackStatus.getRightLimit())
-        self.feedbackStatus.setSetPoint(value)
+        self.feedbackStatus.set_setpoint(value)
         self.feedbackDemand.setPointLineEdit.setText("{value:.2f}".format(value=value))
         self.feedbackSetPointChanged.emit(value)
 
@@ -409,14 +409,14 @@ class LinearAxis(QWidget):
         # Signal sent from slider. Ensure within limits.
         value = max(value, self.positionStatus.getLeftLimit())
         value = min(value, self.positionStatus.getRightLimit())
-        self.positionStatus.setSetPoint(value)
+        self.positionStatus.set_setpoint(value)
         self.positionDemand.setPointLineEdit.setText("{value:.2f}".format(value=value))
-        self.controlConfiguration["settings"]["primarySetPoint"] = round(self.positionStatus.getSetPoint(), 2)
+        self.controlConfiguration["settings"]["primarySetPoint"] = round(self.positionStatus.get_setpoint(), 2)
 
     @Slot()
     def setPositionProcessVariable(self, value):
         # Set the process variable line edit text.
-        self.positionStatus.setProcessVariable(value)
+        self.positionStatus.set_process_variable(value)
         self.positionDemand.processVariableLineEdit.setText("{value:.2f}".format(value=value))
 
         # Update the configuration.
@@ -427,18 +427,18 @@ class LinearAxis(QWidget):
         # Signal sent from slider. Ensure within limits.
         value = max(value, self.feedbackStatus.getLeftLimit())
         value = min(value, self.feedbackStatus.getRightLimit())
-        self.feedbackStatus.setSetPoint(value)
+        self.feedbackStatus.set_setpoint(value)
         self.feedbackDemand.setPointLineEdit.setText("{value:.2f}".format(value=value))
-        self.controlConfiguration["settings"]["feedbackSetPoint"] = round(self.feedbackStatus.getSetPoint(), 2)
+        self.controlConfiguration["settings"]["feedbackSetPoint"] = round(self.feedbackStatus.get_setpoint(), 2)
     
     @Slot()
     def setFeedbackProcessVariable(self, value):
         # Set the process variable line edit text.
-        self.feedbackStatus.setProcessVariable(value)
+        self.feedbackStatus.set_process_variable(value)
         self.feedbackDemand.processVariableLineEdit.setText("{value:.2f}".format(value=value))
         
         # Update the configuration.
-        self.controlConfiguration["settings"]["feedbackProcessVariable"] = round(self.feedbackDemand.getProcessVariable(), 2)
+        self.controlConfiguration["settings"]["feedbackProcessVariable"] = round(self.feedbackDemand.get_process_variable(), 2)
 
     @Slot()
     def setPIDControlButtonEnable(self, value):

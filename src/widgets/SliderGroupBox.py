@@ -130,7 +130,7 @@ class SliderGroupBox(QGroupBox):
         return self.axisSlider.rightLimit
 
     @Slot()
-    def setSetPoint(self, value=None):
+    def set_setpoint(self, value=None):
         # Set point values to range between left and right limits.
         if value == None:
             value = float(self.setPointLineEdit.text())
@@ -140,11 +140,11 @@ class SliderGroupBox(QGroupBox):
         self.axisSlider.update()
         # self.setPointChanged.emit(value)
 
-    def getSetPoint(self):
+    def get_setpoint(self):
         return self.axisSlider.setPoint
 
     @Slot()
-    def setProcessVariable(self, value=None):
+    def set_process_variable(self, value=None):
         # Process variable values.
         if value == None:
             value = float(self.processVariableLineEdit.text())
@@ -152,16 +152,16 @@ class SliderGroupBox(QGroupBox):
         self.axisSlider.update()
         self.processVariableChanged.emit(value)
 
-    def getProcessVariable(self):
+    def get_process_variable(self):
         return self.axisSlider.processVariable
 
     # @Slot()
-    # def setSetPoint(self, value):
+    # def set_setpoint(self, value):
     #     # Set set point.
     #     self.axisSlider.setPoint = value
     #     self.axisSlider.update()
 
-    # def getSetPoint(self):
+    # def get_setpoint(self):
     #     return self.axisSlider.setPoint
 
     @Slot()

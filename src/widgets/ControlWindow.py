@@ -1,6 +1,6 @@
 import os
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QTabWidget
-from local_qt_material import apply_stylesheet, QtStyleTools
+from local_qt_material import QtStyleTools
 import logging
 from pathlib import Path
 
@@ -10,34 +10,40 @@ class ControlWindow(QWidget, QtStyleTools):
 
     def __init__(self, configuration):
         super().__init__()
+        """ControlWindow init."""
+        
+        # Settings.
         self.configuration = configuration
         self.darkMode = self.configuration["global"]["darkMode"]
-        self.setDarkMode()
+        self.set_dark_mode()
 
+        # Widget.
         self.controlTabWidget = QTabWidget()
         self.controlTabWidget.setTabPosition(QTabWidget.TabPosition(0))
 
+        # Layout.
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.controlTabWidget)
         self.setLayout(self.layout)
 
-    def updateUI(self, newConfiguration):
-        # Update the UI after any configuration change.
+    def update_UI(self, newConfiguration):
+        """Method to update the UI."""
         self.configuration = newConfiguration
         self.darkMode = self.configuration["global"]["darkMode"]
-        self.setSize()
-        self.setDarkMode()
+        self.set_size()
+        self.set_dark_mode()
         log.info("Updated control window settings in UI.")
     
-    def setSize(self):
+    def set_size(self):
+        """Method to set size of window."""
         x = int(self.configuration["controlWindow"]["x"])
         y = int(self.configuration["controlWindow"]["y"])
         w = int(self.configuration["controlWindow"]["width"])
         h = int(self.configuration["controlWindow"]["height"])
         self.setGeometry(x, y, w, h)
 
-    def setDarkMode(self):
-        # Set dark mode.
+    def set_dark_mode(self):
+        """Method to set dark mode."""
         if self.darkMode == True:
             self.apply_stylesheet(self, theme='dark_blue.xml')
         else:
@@ -51,16 +57,17 @@ class ControlWindow(QWidget, QtStyleTools):
             self.setStyleSheet(stylesheet + file.read().format(**os.environ))
 
     def resizeEvent(self, event):
-        # Save updated size in configuration.
+        """Override of Qt resizeEvent method."""
         self.configuration["controlWindow"]["width"] = int(self.width())
         self.configuration["controlWindow"]["height"] = int(self.height())
 
     def moveEvent(self, event):
-        # Save updated position in configuration.
+        """Override of Qt moveEvent method."""
         position = self.geometry()
         self.configuration["controlWindow"]["x"] = int(position.x())
         self.configuration["controlWindow"]["y"] = int(position.y())
 
     def closeEvent(self, event):
+        """Override of Qt closeEvent method."""
         self.configuration["controlWindow"]["visible"] = False
 

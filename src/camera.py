@@ -98,7 +98,7 @@ class Camera(QObject):
 
                         self.charuco_calibrate()
                 self.previewImage.emit(self.numpy_image)
-                self.updateUI()
+                self.update_UI()
         except Exception:
             e = sys.exc_info()[1]
             log.warning(e)      
@@ -180,7 +180,7 @@ class Camera(QObject):
                 # coverage.show()
         return
 
-    def updateUI(self):
+    def update_UI(self):
         """Update UI for automatically adjusted settings."""
         # If in auto exposure mode, update the exposure time.
         _, enum = self.cam.ExposureAuto.get()

@@ -7,6 +7,7 @@ class DemandGroupBox(QGroupBox):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        """DemandGroupBox init."""
 
         # Defaults.
         self.setPoint = 0
@@ -43,21 +44,26 @@ class DemandGroupBox(QGroupBox):
         self.setFixedWidth(150)
 
     def set_unit(self, unit):
+        """Method to set unit."""
         self.unit = unit
         self.setPointLabel.setText("SP ({unit})".format(unit=unit))
         self.processVariableLabel.setText("PV ({unit})".format(unit=unit))
         self.unitChanged.emit()
 
-    def setSetPoint(self, value):
+    def set_setpoint(self, value):
+        """Method to set setpoint."""
         self.setPointLineEdit.setText("{value:.2f}".format(value=value))
         self.setPoint = value
 
-    def getSetPoint(self):
+    def get_setpoint(self):
+        """Method to get setpoint."""
         return self.setPoint
 
-    def setProcessVariable(self, value):
+    def set_process_variable(self, value):
+        """Method to set process variable."""
         self.processVariableLineEdit.setText("{value:.2f}".format(value=value))
         self.processVariable = value
 
-    def getProcessVariable(self):
+    def get_process_variable(self):
+        """Method to get process variable."""
         return self.processVariable

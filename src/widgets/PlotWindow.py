@@ -1,13 +1,11 @@
-import copy
-import math
 import os
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QCheckBox, QTabWidget, QLabel, QLineEdit, QGridLayout, QComboBox, QSlider
-from PySide6.QtGui import QIcon, QAction, QCursor, QDoubleValidator, QFont
-from PySide6.QtCore import Signal, Slot, Qt, QModelIndex, QEvent, QLocale
-from local_qt_material import apply_stylesheet, QtStyleTools
-from models import ChannelsTableModel, ColourPickerTableModel
-from views import ChannelsTableView, ColourPickerTableView
-from old_dialogs import ColourPickerDialog
+from PySide6.QtGui import QDoubleValidator
+from PySide6.QtCore import Signal, Slot, Qt, QModelIndex, QLocale
+from local_qt_material import QtStyleTools
+from models import ChannelsTableModel
+from views import ChannelsTableView
+from dialogs import ColourPickerDialog
 import logging
 import local_pyqtgraph.pyqtgraph as pg
 import numpy as np
@@ -36,9 +34,7 @@ class PlotWindow(QWidget, QtStyleTools):
     
         self.plot = pg.PlotWidget(self)
 
-        styles = self.setStyle()
-        # self.plot.setLabel('left', 'Selected channels', **styles)
-        # self.plot.setLabel('bottom', 'Common channel', **styles)
+        self.setStyle()
         self.plot.setMenuEnabled(enableMenu=False)
         self.plot.getAxis('left').setTextPen(os.environ['QTMATERIAL_SECONDARYTEXTCOLOR'])
         self.plot.getAxis('bottom').setTextPen(os.environ['QTMATERIAL_SECONDARYTEXTCOLOR'])
@@ -788,7 +784,7 @@ class PlotWindow(QWidget, QtStyleTools):
         self.plot.showGrid(x = grid, y = grid, alpha = self.opacity/100)
         self.updateConfiguration()
 
-    def updateUI(self, newConfiguration):
+    def update_UI(self, newConfiguration):
         # Update the UI after any configuration change.
         self.configuration = newConfiguration
         self.darkMode = self.configuration["global"]["darkMode"]
