@@ -27,7 +27,7 @@ class Assembly(QObject):
         self.arucoParams = cv2.aruco.DetectorParameters_create()
         self.index_start_thinout = []
         self.index_end_thinout = []
-        self.points_threshold_thin_out = 5000
+        self.thinout_threshold = 5000
 
     def define_settings(self, rate, skip, average):
         """Method to define basic global settings."""
@@ -116,13 +116,15 @@ class Assembly(QObject):
                 saveData = np.column_stack((timesteps, saveData))
                 plotData = np.column_stack((timesteps, plotData))
 
-                # New part for thinning out data
-                if len(np.shape(self.plotData)) > 1:
-                    tot_points = ((np.shape(self.plotData)[1]-1) * len(self.plotData))
-                    if tot_points >= self.points_threshold_thin_out:
+                # Thin out data for plot to reduce lag when there is lots of data.
+                if np.ndim(self.plotData) > 1:
+                    channels = (np.shape(self.plotData)[1]-1) # Minus one because wwe always plot against another variable.
+                    samples = np.shape(self.plotData)[0]
+                    total_samples = (channels * samples)
+                    if total_samples >= self.thinout_threshold:
                         plotData = self.thinout_plotData()
                         plotData_copy = np.array(self.plotData.copy())
-                        rows_to_delete = range(self.index_start_thinout[-1],len(plotData_copy))
+                        rows_to_delete = range(self.index_start_thinout[-1], samples)
                         plotData_copy = np.delete(plotData_copy, rows_to_delete, axis=0)
                         plotData_copy = plotData_copy.tolist()
                         plotData_copy.append(plotData)
@@ -142,22 +144,23 @@ class Assembly(QObject):
                 self.plotDataChanged.emit(self.plotData)
     
     def thinout_plotData(self):
+        """Method to thin plotData array."""
         if self.index_start_thinout == []:
             self.index_start_thinout.append(0)
             data_to_thin_out = np.array(self.plotData).copy()
             proportion_data_retained = 0.01
-            skip_rate = int(round(proportion_data_retained*self.points_threshold_thin_out))
+            skip_rate = int(round(proportion_data_retained*self.thinout_threshold))
             thinned_out_data = data_to_thin_out[::skip_rate, :]
-            self.index_end_thinout.append(len(thinned_out_data))
+            self.index_end_thinout.append(np.shape(thinned_out_data)[0])
             thinned_out_data = thinned_out_data.tolist()
             thinned_out_data = np.vstack(thinned_out_data)
         else:
             self.index_start_thinout.append(self.index_end_thinout[-1])
             data_to_thin_out = np.array(self.plotData[self.index_start_thinout[-1]:,:]).copy()
             proportion_data_retained = 0.01
-            skip_rate = int(round(proportion_data_retained*self.points_threshold_thin_out))
+            skip_rate = int(round(proportion_data_retained*self.thinout_threshold))
             thinned_out_data = data_to_thin_out[::skip_rate, :]
-            self.index_end_thinout.append(self.index_start_thinout[-1] + len(thinned_out_data))
+            self.index_end_thinout.append(self.index_start_thinout[-1] + np.shape(thinned_out_data)[0])
             thinned_out_data = thinned_out_data.tolist()
             thinned_out_data = np.vstack(thinned_out_data)
         return thinned_out_data
@@ -192,7 +195,7 @@ class Assembly(QObject):
     @Slot()
     def clear_plot_data(self):
         """Method to clear plot data."""
-        self.plotData = self.plotData[-1,:]
+        self.plotData = np.atleast_2d(self.plotData[-1,:])
         log.info("Plots cleared.")
 
     @Slot()
