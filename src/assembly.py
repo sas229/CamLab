@@ -1,11 +1,8 @@
-from PySide6.QtCore import QObject, Signal, Slot, QDate, Qt
+from PySide6.QtCore import QObject, Signal, Slot
 import logging
 import numpy as np
-from time import time
 from scipy.ndimage import uniform_filter1d
-from datetime import datetime
 from PIL import Image
-import cv2
 
 log = logging.getLogger(__name__)
 
@@ -16,6 +13,7 @@ class Assembly(QObject):
     def __init__(self):
         """Assembly init."""
         super().__init__()
+        self.allData = []
         self.plotData = []
         self.time = 0.00
         self.count = 0
@@ -23,11 +21,8 @@ class Assembly(QObject):
         self.data = {}
         self.offsets = []
         self.enabledDevices = []
-        self.arucoDict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
-        self.arucoParams = cv2.aruco.DetectorParameters_create()
-        self.index_start_thinout = []
-        self.index_end_thinout = []
-        self.thinout_threshold = 5000
+        self.thinout_threshold = 500000
+        self.thinout = 100
 
     def define_settings(self, rate, skip, average):
         """Method to define basic global settings."""
@@ -107,63 +102,38 @@ class Assembly(QObject):
                 # If skip value greater than 1, skip values.
                 if self.skip > 1:
                     saveData = saveData[::self.skip,:].copy()
-                    plotData = plotData[::self.skip, :].copy()
                 
                 # Add timestamp.
                 n = np.shape(saveData)[0]
                 timesteps = np.arange(0, n, 1)*self.DeltaT
                 timesteps += self.time
                 saveData = np.column_stack((timesteps, saveData))
-                plotData = np.column_stack((timesteps, plotData))
-
-                # Thin out data for plot to reduce lag when there is lots of data.
-                if np.ndim(self.plotData) > 1:
-                    channels = (np.shape(self.plotData)[1]-1) # Minus one because wwe always plot against another variable.
-                    samples = np.shape(self.plotData)[0]
-                    total_samples = (channels * samples)
-                    if total_samples >= self.thinout_threshold:
-                        plotData = self.thinout_plotData()
-                        plotData_copy = np.array(self.plotData.copy())
-                        rows_to_delete = range(self.index_start_thinout[-1], samples)
-                        plotData_copy = np.delete(plotData_copy, rows_to_delete, axis=0)
-                        plotData_copy = plotData_copy.tolist()
-                        plotData_copy.append(plotData)
-                        plotData_copy = np.vstack(plotData_copy)
-                        self.plotData = plotData_copy
-                    else:
-                        self.plotData = np.vstack((self.plotData, plotData))
 
                 # Save data.
                 np.savetxt(self.file, saveData, fmt='%8.3f', delimiter='\t', newline='\n')
-                
+
+                # Create thinned out plotData.
+                if np.shape(self.allData)[0] == 0:
+                    self.allData = saveData
+                else:
+                    self.allData = np.vstack((self.allData, saveData))
+                if np.ndim(self.allData) > 1:
+                    channels = (np.shape(self.allData)[1]-1) # Minus one because we always plot against another variable, e.g. time.
+                    samples = np.shape(self.allData)[0]
+                    total_samples = (channels * samples)
+                    # If the total number of samples is greater than the thinning threshold, thin the data.
+                    if total_samples >= self.thinout_threshold:
+                        plotData = np.array(self.allData).copy()
+                        plotData_thinned = plotData[0:-int(self.thinout_threshold/channels):self.thinout,:]
+                        plotData_full = plotData[-int(self.thinout_threshold/channels):,:]
+                        self.plotData = np.vstack((plotData_thinned, plotData_full))
+                    else:
+                        self.plotData = self.allData
+
                 # Plot data.
-                if np.shape(self.plotData)[0] == 0:
-                    self.plotData = plotData
                 self.time += n*self.DeltaT
                 self.count += numTimesteps
                 self.plotDataChanged.emit(self.plotData)
-    
-    def thinout_plotData(self):
-        """Method to thin plotData array."""
-        if self.index_start_thinout == []:
-            self.index_start_thinout.append(0)
-            data_to_thin_out = np.array(self.plotData).copy()
-            proportion_data_retained = 0.01
-            skip_rate = int(round(proportion_data_retained*self.thinout_threshold))
-            thinned_out_data = data_to_thin_out[::skip_rate, :]
-            self.index_end_thinout.append(np.shape(thinned_out_data)[0])
-            thinned_out_data = thinned_out_data.tolist()
-            thinned_out_data = np.vstack(thinned_out_data)
-        else:
-            self.index_start_thinout.append(self.index_end_thinout[-1])
-            data_to_thin_out = np.array(self.plotData[self.index_start_thinout[-1]:,:]).copy()
-            proportion_data_retained = 0.01
-            skip_rate = int(round(proportion_data_retained*self.thinout_threshold))
-            thinned_out_data = data_to_thin_out[::skip_rate, :]
-            self.index_end_thinout.append(self.index_start_thinout[-1] + np.shape(thinned_out_data)[0])
-            thinned_out_data = thinned_out_data.tolist()
-            thinned_out_data = np.vstack(thinned_out_data)
-        return thinned_out_data
 
     @Slot(str, np.ndarray)
     def save_image(self, image_name, image_array):
@@ -172,14 +142,6 @@ class Assembly(QObject):
         # self.detect_aruco(image_array)
         img = Image.fromarray(image_array)
         img.save(filepath, "JPEG")
-        
-    def detect_aruco(self, image_array):
-        """Method to detect ArUco markers in image."""
-        corners, ids, rejected = cv2.aruco.detectMarkers(image_array, self.arucoDict,
-            parameters=self.arucoParams)
-        marker_image = cv2.aruco.drawDetectedMarkers(image_array, corners)
-        print(len(corners))
-        return marker_image
 
     def clear_all_data(self):
         """Method to clear all data."""
