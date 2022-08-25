@@ -86,17 +86,17 @@ class Assembly(QObject):
                     if count == 0:
                         if device["type"] == "Camera":
                             saveData = processedData[:,0].copy()
-                            plotData = processedData[:,1].copy()
+                            # plotData = processedData[:,1].copy()
                         else:
                             saveData = processedData.copy()
-                            plotData = processedData.copy()
+                            # plotData = processedData.copy()
                     else:
                         if device["type"] == "Camera":
                             saveData = np.column_stack((saveData, processedData[:,0]))
-                            plotData = np.column_stack((plotData, processedData[:,1]))
+                            # plotData = np.column_stack((plotData, processedData[:,1]))
                         else:
                             saveData = np.column_stack((saveData, processedData))
-                            plotData = np.column_stack((plotData, processedData))
+                            # plotData = np.column_stack((plotData, processedData))
                     count += 1
 
                 # If skip value greater than 1, skip values.
@@ -139,7 +139,6 @@ class Assembly(QObject):
     def save_image(self, image_name, image_array):
         """Method to save image with given filename prepended with output file details."""
         filepath = self.path + "/" + self.filename + "_" + self.date + "_" + self.timestart + "_" + image_name
-        # self.detect_aruco(image_array)
         img = Image.fromarray(image_array)
         img.save(filepath, "JPEG")
 
