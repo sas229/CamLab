@@ -22,7 +22,7 @@ class Assembly(QObject):
         self.offsets = []
         self.enabledDevices = []
         self.thinout_threshold = 500000
-        self.thinout = 100
+        self.thinout_factor = 100
 
     def define_settings(self, rate, skip, average):
         """Method to define basic global settings."""
@@ -124,7 +124,7 @@ class Assembly(QObject):
                     # If the total number of samples is greater than the thinning threshold, thin the data.
                     if total_samples >= self.thinout_threshold:
                         plotData = np.array(self.allData).copy()
-                        plotData_thinned = plotData[0:-int(self.thinout_threshold/channels):self.thinout,:]
+                        plotData_thinned = plotData[0:-int(self.thinout_threshold/channels):self.thinout_factor,:]
                         plotData_full = plotData[-int(self.thinout_threshold/channels):,:]
                         self.plotData = np.vstack((plotData_thinned, plotData_full))
                     else:
