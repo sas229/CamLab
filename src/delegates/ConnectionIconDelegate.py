@@ -15,7 +15,9 @@ class ConnectionIconDelegate(QStyledItemDelegate):
         elif index.data(Qt.DisplayRole) == 1:
             icon = QIcon("icon:/secondaryText/usb.svg")
         elif index.data(Qt.DisplayRole) == 3:
-            icon = QIcon("icon:/secondaryText/cable.svg")
+            icon = QIcon("icon:/secondaryText/lan.svg")
         elif index.data(Qt.DisplayRole) == 4:
             icon = QIcon("icon:/secondaryText/wifi.svg")
+        elif index.data(Qt.DisplayRole) == 5:
+            icon = QIcon("icon:/secondaryText/cable.svg")
         icon.paint(painter, option.rect, Qt.AlignCenter)

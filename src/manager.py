@@ -4,17 +4,13 @@ from device import Device
 from assembly import Assembly
 from timing import Timing
 from camera import Camera
-import copy
-import logging
+from press import Press
 import ruamel.yaml
-import os
-import sys
 from labjack import ljm
-import numpy as np
-import time
-import re
+import os, sys, re, serial, time, copy, logging
 from datetime import datetime
 import local_gxipy as gx
+from serial.tools import list_ports
 
 log = logging.getLogger(__name__)
 
@@ -345,6 +341,8 @@ class Manager(QObject):
                 self.devices[name] = Device(name, id, connection)
             elif deviceType == "Camera":
                 self.devices[name] = Camera(name, id, connection)
+            elif deviceType == "Press":
+                self.devices[name] = Press(name, id, connection)
             log.info("Device instance created for device named " + name + ".")
             self.deviceThreads[name] = QThread()
             log.info("Device thread created for device named " + name + ".")
@@ -460,6 +458,9 @@ class Manager(QObject):
         # Add Galaxy camera devices.
         self.addGalaxyDevices()
 
+        # Add VJTech TriScan devices.
+        self.addTriScanDevices()
+
         # Boolean to indicate that the device list has finished refreshing.
         self.refreshing = False
         self.finishedRefreshingDevices.emit()
@@ -516,11 +517,6 @@ class Manager(QObject):
                         self.configuration["devices"] = {name: newDevice} 
                     else:
                         self.configuration["devices"][name] = newDevice 
-
-                    # # Instantiate acquisition and control table models.
-                    # log.info("Instantiating data models for device.")
-                    # # Commands to instantiate data models for device control.
-                    # log.info("Data models instantiated for device.")
                 
                     # Create device thread and add device to UI.
                     log.info("Adding device to UI.")
@@ -593,7 +589,7 @@ class Manager(QObject):
                         "connection": deviceInformation["connection"],
                         "address": deviceInformation["address"],
                         "acquisition": acquisitionTable,
-                        "control" : controlTable
+                        "control": controlTable
                     }
 
                     # If no previous devices are configured, add the "devices" key to the configuration.
@@ -624,6 +620,153 @@ class Manager(QObject):
         except ljm.LJMError:
             ljme = sys.exc_info()[1]
             log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
+
+    def addTriScanDevices(self):
+        # Add VJTech TriScan devices.
+        try:
+            # Get a list of already existing devices.
+            existingDevices = self.deviceTableModel._data
+            ID_Existing = []
+            for device in existingDevices:
+                ID_Existing.append(device["id"])
+            
+            # Searching for devices.
+            address = 21
+            for comport in list_ports.comports():
+                # Configure the serial connection.
+                ser = serial.Serial(
+                    port=comport.device,
+                    baudrate=57600,
+                    parity=serial.PARITY_NONE,
+                    stopbits=serial.STOPBITS_ONE,
+                    bytesize=serial.EIGHTBITS
+                )
+                log.info("Trying to find VJTech TriScan device on port " + comport.device + ".")
+                ser.write(bytes("I" + str(address) + "TSF\r", "utf-8"))
+                time.sleep(0.1)
+                ret = ''
+
+                # Wait for return message.
+                while ser.inWaiting() > 0:
+                    ret += ser.read(1).decode("utf-8")
+
+                # If expected return message is receieved, add device to device list.
+                # if "i21t" in ret:
+                if "I21TSF" in ret:
+                    deviceInformation = {}
+                    deviceInformation["connect"] = False
+                    deviceInformation["name"] = "VJT"
+                    deviceInformation["id"] = "N/A"
+                    deviceInformation["model"] = "TriScan"
+                    deviceInformation["type"] = "Press"
+                    deviceInformation["connection"] = 5
+                    deviceInformation["status"] = True
+                    deviceInformation["address"] = "21"
+                    self.deviceTableModel.appendRow(deviceInformation)
+                    self.configurationChanged.emit(self.configuration)
+            
+                    # Make a deep copy to avoid references in the YAML output.
+                    controlTable = copy.deepcopy(self.defaultControlTable)
+                    controlTable[0]["name"] = deviceInformation["name"] + " C1"
+                    controlTable[1]["name"] = deviceInformation["name"] + " C2"
+                    newDevice = {
+                        "id": deviceInformation["id"],
+                        "model": deviceInformation["model"],
+                        "type": deviceInformation["type"],
+                        "connection": deviceInformation["connection"],
+                        "address": deviceInformation["address"],
+                    }
+
+                    # If no previous devices are configured, add the "devices" key to the configuration.
+                    name = deviceInformation["name"]
+                    if "devices" not in self.configuration:
+                        self.configuration["devices"] = {name: newDevice} 
+                    else:
+                        self.configuration["devices"][name] = newDevice 
+
+                    # Create device thread and add device to UI.
+                    log.info("Adding device to UI.")
+                    self.createDeviceThread(name=name, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False)
+                    self.configurationChanged.emit(self.configuration)
+
+                    # Log message.
+                    log.info("VJTech TriScan device found on port " + comport.device + " at address " + str(address) + ".")
+
+                    # Break because we only want to add one TriScan device threfore no need to search further ports.
+                    break
+                
+
+            # numDevices = info[0]
+            # connectionType = info[2]
+            # ID = info[3]
+            # IP = info[4]
+
+            # # Add devices if not already in device list.
+            # for i in range(numDevices):
+            #     if ID[i] not in ID_Existing:
+            #         deviceInformation = {}
+            #         deviceInformation["connect"] = False
+            #         if mode == "USB":
+            #             handle = ljm.open(7, 1, ID[i])
+            #         elif mode == "TCP":
+            #             handle = ljm.open(7, 2, ID[i])
+            #         deviceInformation["name"] = ljm.eReadNameString(handle, "DEVICE_NAME_DEFAULT")
+            #         ljm.close(handle)
+            #         deviceInformation["id"] = ID[i]
+            #         deviceInformation["model"] = "LabJack T7"
+            #         deviceInformation["type"] = "Hub"
+            #         deviceInformation["connection"] = connectionType[i]
+            #         if mode == "USB":
+            #             deviceInformation["address"] = "N/A"
+            #         elif mode == "TCP":
+            #             deviceInformation["address"] = ljm.numberToIP(IP[i])
+            #         deviceInformation["status"] = True
+            #         self.deviceTableModel.appendRow(deviceInformation)
+            #         self.configurationChanged.emit(self.configuration)
+                    
+            #         # Make a deep copy to avoid references in the YAML output.
+            #         acquisitionTable = copy.deepcopy(self.defaultAcquisitionTable)
+            #         controlTable = copy.deepcopy(self.defaultControlTable)
+            #         controlTable[0]["name"] = deviceInformation["name"] + " C1"
+            #         controlTable[1]["name"] = deviceInformation["name"] + " C2"
+            #         newDevice = {
+            #             "id": deviceInformation["id"],
+            #             "model": deviceInformation["model"],
+            #             "type": deviceInformation["type"],
+            #             "connection": deviceInformation["connection"],
+            #             "address": deviceInformation["address"],
+            #             "acquisition": acquisitionTable,
+            #             "control" : controlTable
+            #         }
+
+            #         # If no previous devices are configured, add the "devices" key to the configuration.
+            #         name = deviceInformation["name"]
+            #         if "devices" not in self.configuration:
+            #             self.configuration["devices"] = {name: newDevice} 
+            #         else:
+            #             self.configuration["devices"][name] = newDevice 
+
+            #         # Instantiate acquisition and control table models.
+            #         log.info("Instantiating data models for device.")
+            #         self.acquisitionTableModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
+            #         self.controlTableModels[name] = ControlTableModel(name, self.configuration["devices"][name]["control"])
+            #         self.feedbackChannelLists[name] = self.setFeedbackChannelList(name)
+            #         log.info("Data models instantiated for device.")
+                
+            #         # Create device thread and add device to UI.
+            #         log.info("Adding device to UI.")
+            #         self.createDeviceThread(name=name, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False)
+            #         self.configurationChanged.emit(self.configuration)
+            
+            #         # Log message.
+            #         if mode == "USB":
+            #             message = "Found a USB LabJack T7 device with ID number {number}.".format(number=deviceInformation["id"])
+            #         elif mode == "TCP":
+            #             message = "Found a TCP LabJack T7 device with ID number {number}.".format(number=deviceInformation["id"])
+            #         log.info(message)
         except Exception:
             e = sys.exc_info()[1]
             log.warning(e)

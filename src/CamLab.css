@@ -30,6 +30,10 @@ CameraSettings QGroupBox {{
   background-color: {QTMATERIAL_SECONDARYDARKCOLOR};
 }} 
 
+PressSettings QGroupBox {{
+  background-color: {QTMATERIAL_SECONDARYDARKCOLOR};
+}} 
+
 QComboBox:disabled {{
   color: {QTMATERIAL_PRIMARYCOLOR};
 }}

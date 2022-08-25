@@ -26,3 +26,4 @@ from .CommandTree import CommandTree
 from .SequenceToolBar import SequenceToolBar
 from .CameraSettings import CameraSettings
 from .CameraTab import CameraTab
+from .PressSettings import PressSettings

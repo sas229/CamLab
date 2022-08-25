@@ -14,4 +14,6 @@ class DeviceIconDelegate(QStyledItemDelegate):
             icon = QIcon("icon:/secondaryText/device_hub.svg")
         elif index.data(Qt.DisplayRole) == "Camera":
             icon = QIcon("icon:/secondaryText/camera.svg")
+        elif index.data(Qt.DisplayRole) == "Press":
+            icon = QIcon("icon:/secondaryText/press.svg")
         icon.paint(painter, option.rect, Qt.AlignCenter)
