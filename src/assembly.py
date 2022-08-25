@@ -25,6 +25,9 @@ class Assembly(QObject):
         self.enabledDevices = []
         self.arucoDict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
         self.arucoParams = cv2.aruco.DetectorParameters_create()
+        self.index_start_thinout = []
+        self.index_end_thinout = []
+        self.points_threshold_thin_out = 5000
 
     def define_settings(self, rate, skip, average):
         """Method to define basic global settings."""
@@ -101,10 +104,11 @@ class Assembly(QObject):
                             plotData = np.column_stack((plotData, processedData))
                     count += 1
 
-                # # If skip value greater than 0, skip values.
-                # if self.skip > 1: 
-                #     saveData = saveData[::self.skip,:].copy()
-
+                # If skip value greater than 1, skip values.
+                if self.skip > 1:
+                    saveData = saveData[::self.skip,:].copy()
+                    plotData = plotData[::self.skip, :].copy()
+                
                 # Add timestamp.
                 n = np.shape(saveData)[0]
                 timesteps = np.arange(0, n, 1)*self.DeltaT
@@ -112,18 +116,52 @@ class Assembly(QObject):
                 saveData = np.column_stack((timesteps, saveData))
                 plotData = np.column_stack((timesteps, plotData))
 
+                # New part for thinning out data
+                if len(np.shape(self.plotData)) > 1:
+                    tot_points = ((np.shape(self.plotData)[1]-1) * len(self.plotData))
+                    if tot_points >= self.points_threshold_thin_out:
+                        plotData = self.thinout_plotData()
+                        plotData_copy = np.array(self.plotData.copy())
+                        rows_to_delete = range(self.index_start_thinout[-1],len(plotData_copy))
+                        plotData_copy = np.delete(plotData_copy, rows_to_delete, axis=0)
+                        plotData_copy = plotData_copy.tolist()
+                        plotData_copy.append(plotData)
+                        plotData_copy = np.vstack(plotData_copy)
+                        self.plotData = plotData_copy
+                    else:
+                        self.plotData = np.vstack((self.plotData, plotData))
+
                 # Save data.
                 np.savetxt(self.file, saveData, fmt='%8.3f', delimiter='\t', newline='\n')
                 
                 # Plot data.
-                if np.shape(self.plotData)[0] > 0:
-                    self.plotData = np.vstack((self.plotData, plotData)) 
-                else: 
+                if np.shape(self.plotData)[0] == 0:
                     self.plotData = plotData
                 self.time += n*self.DeltaT
                 self.count += numTimesteps
                 self.plotDataChanged.emit(self.plotData)
     
+    def thinout_plotData(self):
+        if self.index_start_thinout == []:
+            self.index_start_thinout.append(0)
+            data_to_thin_out = np.array(self.plotData).copy()
+            proportion_data_retained = 0.01
+            skip_rate = int(round(proportion_data_retained*self.points_threshold_thin_out))
+            thinned_out_data = data_to_thin_out[::skip_rate, :]
+            self.index_end_thinout.append(len(thinned_out_data))
+            thinned_out_data = thinned_out_data.tolist()
+            thinned_out_data = np.vstack(thinned_out_data)
+        else:
+            self.index_start_thinout.append(self.index_end_thinout[-1])
+            data_to_thin_out = np.array(self.plotData[self.index_start_thinout[-1]:,:]).copy()
+            proportion_data_retained = 0.01
+            skip_rate = int(round(proportion_data_retained*self.points_threshold_thin_out))
+            thinned_out_data = data_to_thin_out[::skip_rate, :]
+            self.index_end_thinout.append(self.index_start_thinout[-1] + len(thinned_out_data))
+            thinned_out_data = thinned_out_data.tolist()
+            thinned_out_data = np.vstack(thinned_out_data)
+        return thinned_out_data
+
     @Slot(str, np.ndarray)
     def save_image(self, image_name, image_array):
         """Method to save image with given filename prepended with output file details."""
