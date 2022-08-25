@@ -32,7 +32,8 @@ class ControlUtilities:
             self.checkTimer.timeout.connect(self.manager.devices[name].check_connections)
             self.running.connect(self.manager.devices[name].set_running)
             self.manager.devices[name].updateRunningIndicator.connect(controlWidget.setRunningIndicator)
-            self.manager.controlTableModels[name].controlChannelNameChanged.connect(controlWidget.setTitle)
+            if name != "VJT":
+                self.manager.controlTableModels[name].controlChannelNameChanged.connect(controlWidget.setTitle)
             self.statusTab.runSequence.clicked.connect(self.manager.devices[name].run_sequence)
             if channel == 0:
                 controlWidget.enable.connect(self.manager.devices[name].set_enable_C1)
@@ -110,10 +111,15 @@ class ControlUtilities:
         self.tabs.add_persistent_tab(self.controls[controlID], controlName)
         index = self.tabs.indexOf(self.controls[controlID])
         self.tabs.setTabVisible(index, False)
-        enabledControls = self.manager.controlTableModels[name].enabledControls()
-        for control in enabledControls:
-            if control["channel"] == controlChannel:
+        enabledDevices = self.manager.deviceTableModel.enabledDevices()
+        for device in enabledDevices:
+            if name == device["name"]:
                 self.tabs.setTabVisible(index, True)
+            else:
+                enabledControls = self.manager.controlTableModels[name].enabledControls()
+                for control in enabledControls:
+                    if control["channel"] == controlChannel:
+                        self.tabs.setTabVisible(index, True)
 
         # Convert tab to window if required by configuration.
         if self.manager.configuration["devices"][name]["control"][channel]["settings"]["mode"] == "window":
@@ -124,6 +130,13 @@ class ControlUtilities:
                     self.controls[controlID].setVisible(True)
 
         log.info("Device control tab added for {id}.".format(id=controlID))
+
+    @Slot(str, bool)
+    def toggle_press_control_tab(self, name, state):
+        if name == "VJT":
+            controlID = name + " C1"
+            index = self.tabs.indexOf(self.controls[controlID])
+            self.tabs.setTabVisible(index, state)
 
     @Slot(str, int, str)
     def change_control_feedback_channel(self, device, channel, selectedFeedbackChannel):

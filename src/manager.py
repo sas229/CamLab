@@ -52,7 +52,7 @@ class Manager(QObject):
             {"channel": "AIN6", "name": "Ch_7", "unit": "V", "slope": 1.0, "offset": 0.00, "connect": False, "autozero": True},
             {"channel": "AIN7", "name": "Ch_8", "unit": "V", "slope": 1.0, "offset": 0.00, "connect": False, "autozero": True},
         ]
-        defaultControlSettings = {
+        self.defaultControlSettings = {
             "mode": "tab",
             "x": 0,
             "y": 0,
@@ -85,8 +85,8 @@ class Manager(QObject):
             "ratio": 5
         }
         self.defaultControlTable = [
-            {"channel": "C1", "name": "C1", "enable": False, "type": "N/A", "control": "N/A", "feedback": "N/A", "settings": defaultControlSettings},
-            {"channel": "C2", "name": "C2", "enable": False, "type": "N/A", "control": "N/A", "feedback": "N/A", "settings": defaultControlSettings}
+            {"channel": "C1", "name": "C1", "enable": False, "type": "N/A", "control": "N/A", "feedback": "N/A", "settings": self.defaultControlSettings},
+            {"channel": "C2", "name": "C2", "enable": False, "type": "N/A", "control": "N/A", "feedback": "N/A", "settings": self.defaultControlSettings}
         ]
         self.controlModeList = ["N/A", "Digital"]
         self.controlActuatorList = ["N/A", "Linear"]
@@ -508,7 +508,7 @@ class Manager(QObject):
                         "connection": deviceInformation["connection"],
                         "address": deviceInformation["address"],
                         "settings": cameraSettings,
-                        "preview": previewSettings
+                        "preview": previewSettings,
                     }
 
                     # If no previous devices are configured, add the "devices" key to the configuration.
@@ -678,6 +678,7 @@ class Manager(QObject):
                         "type": deviceInformation["type"],
                         "connection": deviceInformation["connection"],
                         "address": deviceInformation["address"],
+                        "control": [{"channel": "TS", "name": "VJT", "enable": True, "type": "Digital", "control": "Linear", "feedback": "N/A", "settings": self.defaultControlSettings}],
                     }
 
                     # If no previous devices are configured, add the "devices" key to the configuration.
@@ -697,76 +698,6 @@ class Manager(QObject):
 
                     # Break because we only want to add one TriScan device threfore no need to search further ports.
                     break
-                
-
-            # numDevices = info[0]
-            # connectionType = info[2]
-            # ID = info[3]
-            # IP = info[4]
-
-            # # Add devices if not already in device list.
-            # for i in range(numDevices):
-            #     if ID[i] not in ID_Existing:
-            #         deviceInformation = {}
-            #         deviceInformation["connect"] = False
-            #         if mode == "USB":
-            #             handle = ljm.open(7, 1, ID[i])
-            #         elif mode == "TCP":
-            #             handle = ljm.open(7, 2, ID[i])
-            #         deviceInformation["name"] = ljm.eReadNameString(handle, "DEVICE_NAME_DEFAULT")
-            #         ljm.close(handle)
-            #         deviceInformation["id"] = ID[i]
-            #         deviceInformation["model"] = "LabJack T7"
-            #         deviceInformation["type"] = "Hub"
-            #         deviceInformation["connection"] = connectionType[i]
-            #         if mode == "USB":
-            #             deviceInformation["address"] = "N/A"
-            #         elif mode == "TCP":
-            #             deviceInformation["address"] = ljm.numberToIP(IP[i])
-            #         deviceInformation["status"] = True
-            #         self.deviceTableModel.appendRow(deviceInformation)
-            #         self.configurationChanged.emit(self.configuration)
-                    
-            #         # Make a deep copy to avoid references in the YAML output.
-            #         acquisitionTable = copy.deepcopy(self.defaultAcquisitionTable)
-            #         controlTable = copy.deepcopy(self.defaultControlTable)
-            #         controlTable[0]["name"] = deviceInformation["name"] + " C1"
-            #         controlTable[1]["name"] = deviceInformation["name"] + " C2"
-            #         newDevice = {
-            #             "id": deviceInformation["id"],
-            #             "model": deviceInformation["model"],
-            #             "type": deviceInformation["type"],
-            #             "connection": deviceInformation["connection"],
-            #             "address": deviceInformation["address"],
-            #             "acquisition": acquisitionTable,
-            #             "control" : controlTable
-            #         }
-
-            #         # If no previous devices are configured, add the "devices" key to the configuration.
-            #         name = deviceInformation["name"]
-            #         if "devices" not in self.configuration:
-            #             self.configuration["devices"] = {name: newDevice} 
-            #         else:
-            #             self.configuration["devices"][name] = newDevice 
-
-            #         # Instantiate acquisition and control table models.
-            #         log.info("Instantiating data models for device.")
-            #         self.acquisitionTableModels[name] = AcquisitionTableModel(self.configuration["devices"][name]["acquisition"])
-            #         self.controlTableModels[name] = ControlTableModel(name, self.configuration["devices"][name]["control"])
-            #         self.feedbackChannelLists[name] = self.setFeedbackChannelList(name)
-            #         log.info("Data models instantiated for device.")
-                
-            #         # Create device thread and add device to UI.
-            #         log.info("Adding device to UI.")
-            #         self.createDeviceThread(name=name, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False)
-            #         self.configurationChanged.emit(self.configuration)
-            
-            #         # Log message.
-            #         if mode == "USB":
-            #             message = "Found a USB LabJack T7 device with ID number {number}.".format(number=deviceInformation["id"])
-            #         elif mode == "TCP":
-            #             message = "Found a TCP LabJack T7 device with ID number {number}.".format(number=deviceInformation["id"])
-            #         log.info(message)
         except Exception:
             e = sys.exc_info()[1]
             log.warning(e)

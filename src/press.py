@@ -360,16 +360,17 @@ class Press(QObject):
 
     def check_connection_C1(self):
         """Check connection to control device on channel C1."""
-        try:
-            self.handle = ljm.open(7, self.connection, self.id)
-            self.connectedC1 = not bool(int(ljm.eReadName(self.handle, 'FIO0')))
-            self.updateConnectionIndicatorC1.emit(self.connectedC1)
-        except ljm.LJMError:
-            ljme = sys.exc_info()[1]
-            log.warning(ljme) 
-        except Exception:
-            e = sys.exc_info()[1]
-            log.warning(e)
+        # try:
+        #     self.handle = ljm.open(7, self.connection, self.id)
+        #     self.connectedC1 = not bool(int(ljm.eReadName(self.handle, 'FIO0')))
+        #     self.updateConnectionIndicatorC1.emit(self.connectedC1)
+        # except ljm.LJMError:
+        #     ljme = sys.exc_info()[1]
+        #     log.warning(ljme) 
+        # except Exception:
+        #     e = sys.exc_info()[1]
+        #     log.warning(e)
+        log.info("Check connection.")
 
     def check_connection_C2(self):
         """Check connection to control device on channel C2."""
@@ -387,7 +388,7 @@ class Press(QObject):
     def check_connections(self):
         """Check connections to control devices."""
         self.check_connection_C1()
-        self.check_connection_C2()
+        # self.check_connection_C2()
 
     def set_speed_limit(self):
         """Set speed limit for motors."""
@@ -766,10 +767,6 @@ class Press(QObject):
     @Slot(float)
     def set_speed_C1(self, speed=0.0):
         """Set speed on control channel C1."""
-        self.handle = ljm.open(7, self.connection, self.id)     
-        target_frequency = int(speed*self.counts_per_unit_C1)
-        self.freqC1, self.rollC1, self.width_C1 = self.set_clock(1, target_frequency)
-        self.speed_C1 = self.freqC1/self.counts_per_unit_C1
         log.info("Speed on control channel C1 set to {speed}.".format(speed=speed))
 
     @Slot(float)

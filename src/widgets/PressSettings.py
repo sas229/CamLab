@@ -53,7 +53,7 @@ class PressSettings(QWidget):
     def set_configuration(self, configuration):
         """Method to set the configuration."""
         self.configuration = configuration
-        self.cameraConfiguration = self.configuration["devices"][self.name]["settings"]
+        # self.cameraConfiguration = self.configuration["devices"][self.name]["control"][0]["settings"]
         self.setWindowTitle(self.name)
     
     def set_device_list(self, device_list):
