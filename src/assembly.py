@@ -20,8 +20,9 @@ class Assembly(QObject):
         self.fileCount = 1
         self.data = {}
         self.enabledDevices = []
-        self.thinout_threshold = 100000
+        self.thinout_threshold = 50000
         self.thinout_factor = 100
+        self.maximum_threshold = 100000
 
     def define_settings(self, rate, skip, average):
         """Method to define basic global settings."""
@@ -111,7 +112,7 @@ class Assembly(QObject):
                 # Save data.
                 np.savetxt(self.file, saveData, fmt='%8.3f', delimiter='\t', newline='\n')
 
-                # Create thinned out plotData.
+                # Thin the data.
                 if np.shape(self.allData)[0] == 0:
                     self.allData = saveData
                 else:
@@ -120,7 +121,6 @@ class Assembly(QObject):
                     channels = (np.shape(self.allData)[1]-1) # Minus one because we always plot against another variable, e.g. time.
                     samples = np.shape(self.allData)[0]
                     total_samples = (channels * samples)
-                    # If the total number of samples is greater than the thinning threshold, thin the data.
                     if total_samples >= self.thinout_threshold:
                         plotData = np.array(self.allData).copy()
                         plotData_thinned = plotData[0:-int(self.thinout_threshold/channels):self.thinout_factor,:]
@@ -128,6 +128,14 @@ class Assembly(QObject):
                         self.plotData = np.vstack((plotData_thinned, plotData_full))
                     else:
                         self.plotData = self.allData
+                    # Check that thinned samples is less than absolute maximum and delete earliest data if not.
+                    thinned_channels = (np.shape(self.plotData)[1]-1) # Minus one because we always plot against another variable, e.g. time.
+                    thinned_samples = np.shape(self.plotData)[0]
+                    thinned_total_samples = (thinned_channels*thinned_samples)
+                    if thinned_total_samples >= self.maximum_threshold:
+                        overflow = thinned_total_samples-self.maximum_threshold
+                        delete_rows = int(overflow/channels) 
+                        self.plotData = np.delete(self.plotData, slice(delete_rows), axis=0)
 
                 # Plot data.
                 self.time += n*self.DeltaT
