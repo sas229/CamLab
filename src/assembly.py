@@ -13,13 +13,12 @@ class Assembly(QObject):
     def __init__(self):
         """Assembly init."""
         super().__init__()
-        self.allData = []
-        self.plotData = []
+        self.allData = np.array([])
+        self.plotData = np.array([])
         self.time = 0.00
         self.count = 0
         self.fileCount = 1
         self.data = {}
-        self.offsets = []
         self.enabledDevices = []
         self.thinout_threshold = 500000
         self.thinout_factor = 100
@@ -145,7 +144,7 @@ class Assembly(QObject):
     def clear_all_data(self):
         """Method to clear all data."""
         self.data = {}
-        self.plotData = []
+        self.allData = np.array([])
         self.time = 0.00
         self.count = 0
 
