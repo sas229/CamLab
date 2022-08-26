@@ -20,7 +20,7 @@ class Assembly(QObject):
         self.fileCount = 1
         self.data = {}
         self.enabledDevices = []
-        self.thinout_threshold = 500000
+        self.thinout_threshold = 100000
         self.thinout_factor = 100
 
     def define_settings(self, rate, skip, average):
