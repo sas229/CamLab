@@ -20,9 +20,9 @@ class Assembly(QObject):
         self.fileCount = 1
         self.data = {}
         self.enabledDevices = []
-        self.thinout_threshold = 50000
+        self.thinout_threshold = 25000
         self.thinout_factor = 100
-        self.maximum_threshold = 100000
+        self.maximum_threshold = 50000
 
     def define_settings(self, rate, skip, average):
         """Method to define basic global settings."""

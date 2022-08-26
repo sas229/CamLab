@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 colorlog = "*"
 "ruamel.yaml" = "*"
-labjack = "*"
 labjack-ljm = "*"
 numpy = "*"
 scipy = "*"
