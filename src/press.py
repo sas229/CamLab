@@ -110,6 +110,21 @@ class Press(QObject):
         self.PID_C1 = PID()
         self.PID_C2 = PID()
 
+    # def open_serial_connection():
+    #     """Connect to the device using the serial port."""
+    #     try:
+    #         ser = serial.Serial(
+    #                 port=comport,
+    #                 baudrate=57600,
+    #                 parity=serial.PARITY_NONE,
+    #                 stopbits=serial.STOPBITS_ONE,
+    #                 bytesize=serial.EIGHTBITS
+    #             )
+    #           # Send check status command and check response...
+    #     except Exception:
+    #         e = sys.exc_info()[1]
+    #         log.warning(e)
+
     @Slot()
     def run_sequence(self):
         # Hacky code to do a simple sequence on control channel C1 - only for Jonathan's usage!

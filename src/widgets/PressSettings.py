@@ -81,3 +81,7 @@ class PressSettings(QWidget):
         """Method to update the feedback channel."""
         device = self.deviceComboBox.currentText()
         log.info("Feedback device set to {} on channel {}".format(device, channel))
+        # 1. Add logic that enables / disables the feedback row of the LinearAxis depending on whether a feedback channel or "N/A" is selected here by sending a boolean signal to LinearAxis.toggleFeedbackControl.
+        # 2. Add logic to calculate the index within latestData of the target feedback channel and emit it. 
+        # 3. Then catch it and send it to the Press class instance via a connection / disconnection in the manager.toggleDeviceConnection method.
+        

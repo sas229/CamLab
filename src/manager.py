@@ -655,23 +655,21 @@ class Manager(QObject):
 
                 # If expected return message is receieved, add device to device list.
                 if "i21t" in ret:
-                # if "I21TSF" in ret:
                     deviceInformation = {}
                     deviceInformation["connect"] = False
                     deviceInformation["name"] = "VJT"
-                    deviceInformation["id"] = "N/A"
+                    deviceInformation["id"] = "21"
                     deviceInformation["model"] = "TriScan"
                     deviceInformation["type"] = "Press"
                     deviceInformation["connection"] = 5
                     deviceInformation["status"] = True
-                    deviceInformation["address"] = "21"
+                    deviceInformation["address"] = comport.device 
                     self.deviceTableModel.appendRow(deviceInformation)
                     self.configurationChanged.emit(self.configuration)
             
                     # Make a deep copy to avoid references in the YAML output.
                     controlTable = copy.deepcopy(self.defaultControlTable)
                     controlTable[0]["name"] = deviceInformation["name"] + " C1"
-                    controlTable[1]["name"] = deviceInformation["name"] + " C2"
                     newDevice = {
                         "id": deviceInformation["id"],
                         "model": deviceInformation["model"],

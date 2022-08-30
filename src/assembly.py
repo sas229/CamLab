@@ -8,6 +8,7 @@ log = logging.getLogger(__name__)
 
 class Assembly(QObject):
     plotDataChanged = Signal(np.ndarray)
+    latestDataChanged = Signal(np.ndarray)
     autozeroDevices = Signal()
     
     def __init__(self):
@@ -98,6 +99,10 @@ class Assembly(QObject):
                             saveData = np.column_stack((saveData, processedData))
                             # plotData = np.column_stack((plotData, processedData))
                     count += 1
+
+                # Take latest data (not including the timestamp) from all devices and emit signal.
+                latestData = np.atleast_2d(saveData[-1,:])
+                self.latestDataChanged.emit(latestData)
 
                 # If skip value greater than 1, skip values.
                 if self.skip > 1:
