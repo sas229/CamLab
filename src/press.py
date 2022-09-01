@@ -385,7 +385,7 @@ class Press(QObject):
         # except Exception:
         #     e = sys.exc_info()[1]
         #     log.warning(e)
-        log.info("Check connection.")
+        # log.info("Check connection.")
 
     def check_connection_C2(self):
         """Check connection to control device on channel C2."""

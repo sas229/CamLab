@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QWidget, QGroupBox, QVBoxLayout, QGridLayout, QLabel, QComboBox, QLineEdit, QPushButton
 from PySide6.QtCore import Slot, Signal
 from PySide6.QtGui import QDoubleValidator, QIntValidator
+import numpy as np
 import logging
 
 log = logging.getLogger(__name__)
@@ -16,6 +17,7 @@ class PressSettings(QWidget):
     setBinning = Signal(int)
     setAcquisitionMode = Signal(str)
     setAcquisitionRate = Signal(float)
+    setFeedbackLinearAxis = Signal(bool)
     
     def __init__(self, name, *args, **kwargs):
         """PressSettings init."""
@@ -77,10 +79,19 @@ class PressSettings(QWidget):
             if selected_device != "N/A":
                 self.channelComboBox.addItems(self.feedback_channel_lists[selected_device])
 
+
     def feedback_channel_updated(self, channel):
         """Method to update the feedback channel."""
         device = self.deviceComboBox.currentText()
+        if channel != "N/A":
+            feedback = True
+        else:
+            feedback = False
+
+        self.setFeedbackLinearAxis.emit(feedback)
+
         log.info("Feedback device set to {} on channel {}".format(device, channel))
+
         # 1. Add logic that enables / disables the feedback row of the LinearAxis depending on whether a feedback channel or "N/A" is selected here by sending a boolean signal to LinearAxis.toggleFeedbackControl.
         # 2. Add logic to calculate the index within latestData of the target feedback channel and emit it. 
         # 3. Then catch it and send it to the Press class instance via a connection / disconnection in the manager.toggleDeviceConnection method.

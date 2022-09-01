@@ -17,7 +17,7 @@ class ConfigurationUtilities:
         elif deviceType == "Camera":
             self.add_camera_configuration_tab(name)
         elif deviceType == "Press":
-            self.add_press_configuration_tab(name)
+           self.add_press_configuration_tab(name)
 
     def add_press_configuration_tab(self, name):
         # Instantiate widget.

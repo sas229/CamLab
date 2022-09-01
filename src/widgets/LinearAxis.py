@@ -7,6 +7,7 @@ from widgets.AdjustGroupBox import AdjustGroupBox
 from widgets.PIDGroupBox import PIDGroupBox
 from widgets.DemandGroupBox import DemandGroupBox
 from widgets.SliderGroupBox import SliderGroupBox
+
 import logging
 
 log = logging.getLogger(__name__)
@@ -32,9 +33,9 @@ class LinearAxis(QWidget):
     KDChanged = Signal(float)
     proportionalOnMeasurementChanged = Signal(bool)
     positiveJogEnabled = Signal()
-    negativeJogEnabled = Signal() 
+    negativeJogEnabled = Signal()
     positiveJogDisabled = Signal()
-    negativeJogDisabled = Signal() 
+    negativeJogDisabled = Signal()
     enable = Signal(bool)
     PIDControl = Signal(bool)
     zeroPosition = Signal()
@@ -43,7 +44,7 @@ class LinearAxis(QWidget):
     axisWindowClosed = Signal(QWidget)
 
     def __init__(self, ID, feedback=False, *args, **kwargs):
-        super().__init__(*args, **kwargs)              
+        super().__init__(*args, **kwargs)
         log.info("Linear axis instantiated.")
 
         # Inputs.
@@ -70,6 +71,7 @@ class LinearAxis(QWidget):
         self.feedbackDemand = DemandGroupBox("Demand")
         self.feedbackStatus = SliderGroupBox("Feedback Status")
 
+
         # Grid layout.
         self.gridLayout = QGridLayout()
         self.gridLayout.addWidget(self.globalControls, 0, 0, 1, 4)
@@ -80,12 +82,12 @@ class LinearAxis(QWidget):
         self.gridLayout.addWidget(self.positionStatus, 1, 3)
         self.gridLayout.addWidget(self.PID, 2, 0, 1, 2)
         self.gridLayout.addWidget(self.feedbackDemand, 2, 2)
-        self.gridLayout.addWidget(self.feedbackStatus, 2, 3)        
-        
+        self.gridLayout.addWidget(self.feedbackStatus, 2, 3)
+
         # Main layout.
         self.layout = QVBoxLayout()
         self.layout.addLayout(self.gridLayout)
-        self.layout.addStretch()  
+        self.layout.addStretch()
         self.setLayout(self.layout)
 
         # Connections.
@@ -146,7 +148,7 @@ class LinearAxis(QWidget):
         x = int(self.controlConfiguration["settings"]["x"])
         y = int(self.controlConfiguration["settings"]["y"])
         w = int(self.controlConfiguration["settings"]["width"])
-        # Fix the height depending on whether feedback is enabled. 
+        # Fix the height depending on whether feedback is enabled.
         if self.feedback == False:
             h = 354
         else:
@@ -160,7 +162,7 @@ class LinearAxis(QWidget):
         if self.controlConfiguration["settings"]["mode"] == "window":
             position = self.geometry()
             self.controlConfiguration["settings"]["x"] = int(position.x())
-            self.controlConfiguration["settings"]["y"] = int(position.y())  
+            self.controlConfiguration["settings"]["y"] = int(position.y())
 
     def resizeEvent(self, event):
         # Save updated size in configuration if currently in window mode.
@@ -183,7 +185,7 @@ class LinearAxis(QWidget):
     def showSettings(self):
         self.globalControls.hide()
         self.settings.show()
-    
+
     @Slot()
     def hideSettings(self):
         self.globalControls.show()
@@ -211,7 +213,7 @@ class LinearAxis(QWidget):
     @Slot()
     def emitZeroPosition(self):
         self.zeroPosition.emit()
-        
+
     @Slot()
     def emitEnable(self):
         enabled = self.globalControls.enableButton.isChecked()
@@ -223,7 +225,7 @@ class LinearAxis(QWidget):
             self.globalControls.settingsButton.setVisible(True)
             self.globalControls.PIDControlButton.setChecked(False)
             self.globalControls.PIDControlButton.setVisible(False)
-        
+
     @Slot()
     def emitPIDControl(self):
         PIDControl = self.globalControls.PIDControlButton.isChecked()
@@ -289,30 +291,30 @@ class LinearAxis(QWidget):
     def emitPositiveJogEnabled(self):
         self.positiveJogEnabled.emit()
         self.globalControls.PIDControlButton.setChecked(False)
-    
+
     @Slot()
     def emitNegativeJogEnabled(self):
         self.negativeJogEnabled.emit()
         self.globalControls.PIDControlButton.setChecked(False)
-    
+
     @Slot()
     def emitPositiveJogDisabled(self):
         self.positiveJogDisabled.emit()
-        
+
     @Slot()
     def emitNegativeJogDisabled(self):
         self.negativeJogDisabled.emit()
-    
+
     @Slot()
     def emitProportionalOnMeasurement(self, value):
         self.proportionalOnMeasurementChanged.emit(value)
         self.controlConfiguration["settings"]["proportionalOnMeasurement"] = self.PID.getProportionalOnMeasurement()
-    
+
     @Slot()
     def emitKPChanged(self, value):
         self.KPChanged.emit(value)
         self.controlConfiguration["settings"]["KP"] = round(self.PID.getKP(), 2)
-        
+
     @Slot()
     def emitKIChanged(self, value):
         self.KIChanged.emit(value)
@@ -322,7 +324,7 @@ class LinearAxis(QWidget):
     def emitKDChanged(self, value):
         self.KDChanged.emit(value)
         self.controlConfiguration["settings"]["KD"] = round(self.PID.getKD(), 2)
-        
+
     @Slot()
     def emitPrimaryLeftLimitChanged(self, value):
         self.primaryLeftLimitChanged.emit(value)
@@ -332,32 +334,32 @@ class LinearAxis(QWidget):
     def emitPrimaryRightLimitChanged(self, value):
         self.primaryRightLimitChanged.emit(value)
         self.controlConfiguration["settings"]["primaryRightLimit"] = round(self.positionStatus.getRightLimit(), 2)
-        
+
     @Slot()
     def emitPrimaryMinimumRangeChanged(self, value):
         self.primaryMinimumRangeChanged.emit(value)
         self.controlConfiguration["settings"]["primaryMinimum"] = round(self.positionStatus.getMinimumRange(), 2)
-    
+
     @Slot()
     def emitPrimaryMaximumRangeChanged(self, value):
         self.primaryMaximumRangeChanged.emit(value)
         self.controlConfiguration["settings"]["primaryMaximum"] = round(self.positionStatus.getMaximumRange(), 2)
-    
+
     @Slot()
     def emitFeedbackLeftLimitChanged(self, value):
         self.feedbackLeftLimitChanged.emit(value)
         self.controlConfiguration["settings"]["feedbackLeftLimit"] = round(self.feedbackStatus.getLeftLimit(), 2)
-    
+
     @Slot()
     def emitFeedbackRightLimitChanged(self, value):
         self.feedbackRightLimitChanged.emit(value)
         self.controlConfiguration["settings"]["feedbackRightLimit"] = round(self.feedbackStatus.getRightLimit(), 2)
-        
+
     @Slot()
     def emitFeedbackMinimumRangeChanged(self, value):
         self.feedbackMinimumRangeChanged.emit(value)
         self.controlConfiguration["settings"]["feedbackMinimum"] = round(self.feedbackStatus.getMinimumRange(), 2)
-        
+
     @Slot()
     def emitFeedbackMaximumRangeChanged(self, value):
         self.feedbackMaximumRangeChanged.emit(value)
@@ -372,7 +374,7 @@ class LinearAxis(QWidget):
     def adjustPositionSetPoint(self, adjustment):
         currentSetPoint = float(self.positionDemand.setPointLineEdit.text())
         newSetPoint = currentSetPoint + adjustment
-        self.positionStatus.set_setpoint(newSetPoint) 
+        self.positionStatus.set_setpoint(newSetPoint)
         self.updatePositionSetPointLineEdit(newSetPoint)
         self.globalControls.PIDControlButton.setChecked(False)
 
@@ -421,7 +423,7 @@ class LinearAxis(QWidget):
 
         # Update the configuration.
         self.controlConfiguration["settings"]["primaryProcessVariable"] = round(self.previousPrimaryProcessVariable, 2)
-    
+
     @Slot()
     def setFeedbackSetPoint(self, value):
         # Signal sent from slider. Ensure within limits.
@@ -430,13 +432,13 @@ class LinearAxis(QWidget):
         self.feedbackStatus.set_setpoint(value)
         self.feedbackDemand.setPointLineEdit.setText("{value:.2f}".format(value=value))
         self.controlConfiguration["settings"]["feedbackSetPoint"] = round(self.feedbackStatus.get_setpoint(), 2)
-    
+
     @Slot()
     def setFeedbackProcessVariable(self, value):
         # Set the process variable line edit text.
         self.feedbackStatus.set_process_variable(value)
         self.feedbackDemand.processVariableLineEdit.setText("{value:.2f}".format(value=value))
-        
+
         # Update the configuration.
         self.controlConfiguration["settings"]["feedbackProcessVariable"] = round(self.feedbackDemand.get_process_variable(), 2)
 
@@ -444,7 +446,7 @@ class LinearAxis(QWidget):
     def setPIDControlButtonEnable(self, value):
         self.globalControls.PIDControlButton.setEnabled(value)
         self.controlConfiguration["settings"]["enablePIDControl"] = self.getPIDControlButtonEnable()
-    
+
     def getPIDControlButtonEnable(self):
         return self.globalControls.PIDControlButton.isEnabled()
 
@@ -479,11 +481,11 @@ class LinearAxis(QWidget):
             elif setting == "feedbackUnit":
                 self.feedbackDemand.set_unit(settings["feedbackUnit"])
                 self.feedbackStatus.set_unit(settings["feedbackUnit"])
-                self.settings.feedbackUnitLineEdit.setText(settings["feedbackUnit"]) 
+                self.settings.feedbackUnitLineEdit.setText(settings["feedbackUnit"])
             elif setting == "primaryUnit":
                 self.positionDemand.set_unit(settings["primaryUnit"])
                 self.positionStatus.set_unit(settings["primaryUnit"])
-                self.adjust.set_unit(settings["primaryUnit"]) 
+                self.adjust.set_unit(settings["primaryUnit"])
                 self.settings.positionUnitLineEdit.setText(settings["primaryUnit"])
             elif setting == "secondaryUnit":
                 self.jog.set_unit(settings["secondaryUnit"])
@@ -512,7 +514,7 @@ class LinearAxis(QWidget):
                 self.settings.setPPR(settings["PPR"])
             elif setting == "ratio":
                 self.settings.setRatio(settings["ratio"])
-    
+
     def set_configuration(self, configuration):
         self.configuration = configuration
         self.controlConfiguration = self.configuration["devices"][self.device]["control"][self.control]

@@ -32,9 +32,15 @@ class ControlUtilities:
             self.checkTimer.timeout.connect(self.manager.devices[name].check_connections)
             self.running.connect(self.manager.devices[name].set_running)
             self.manager.devices[name].updateRunningIndicator.connect(controlWidget.setRunningIndicator)
-            if name != "VJT":
-                self.manager.controlTableModels[name].controlChannelNameChanged.connect(controlWidget.setTitle)
             self.statusTab.runSequence.clicked.connect(self.manager.devices[name].run_sequence)
+
+            if name == "VJT":
+
+                self.deviceConfigurationWidget[name].setFeedbackLinearAxis.connect(
+                    controlWidget.toggleFeedbackControl)
+            else:
+                self.manager.controlTableModels[name].controlChannelNameChanged.connect(controlWidget.setTitle)
+
             if channel == 0:
                 controlWidget.enable.connect(self.manager.devices[name].set_enable_C1)
                 controlWidget.PIDControl.connect(self.manager.devices[name].set_PID_control_C1)

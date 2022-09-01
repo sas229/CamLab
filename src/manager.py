@@ -654,7 +654,8 @@ class Manager(QObject):
                     ret += ser.read(1).decode("utf-8")
 
                 # If expected return message is receieved, add device to device list.
-                if "i21t" in ret:
+                # if "i21t" in ret:
+                if "I21TSF" in ret:
                     deviceInformation = {}
                     deviceInformation["connect"] = False
                     deviceInformation["name"] = "VJT"
