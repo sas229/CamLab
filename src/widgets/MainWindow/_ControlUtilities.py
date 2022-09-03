@@ -34,6 +34,7 @@ class ControlUtilities:
             self.manager.devices[name].updateRunningIndicator.connect(controlWidget.setRunningIndicator)
             self.statusTab.runSequence.clicked.connect(self.manager.devices[name].run_sequence)
 
+
             if name == "VJT":
 
                 self.deviceConfigurationWidget[name].setFeedbackLinearAxis.connect(

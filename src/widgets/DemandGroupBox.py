@@ -53,7 +53,8 @@ class DemandGroupBox(QGroupBox):
     def set_setpoint(self, value):
         """Method to set setpoint."""
         self.setPointLineEdit.setText("{value:.2f}".format(value=value))
-        self.setPoint = value
+        self.setPoint = value#
+        print('ciao')
 
     def get_setpoint(self):
         """Method to get setpoint."""

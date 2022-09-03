@@ -1271,7 +1271,9 @@ class Device(QObject):
 
     def update_PID_C1(self):
         """Update PID on control channel C1."""
+        #print('Current Data', self.current_data)
         self.feedback_process_variable_C1 = self.current_data[self.feedback_index_C1-1]
+        
         if self.status_PID_C1 == True:
             self.speedSetPointC1 = self.PID_C1(self.feedback_process_variable_C1)
             self.direction_C1 = np.sign(self.speedSetPointC1)
@@ -1313,6 +1315,7 @@ class Device(QObject):
                 self.current_data = np.concatenate((self.current_data, self.data_C2))
         self.data = self.current_data
         # Emit data signal.
+        # print(self.data)
         self.emitData.emit(self.name, np.atleast_2d(self.data))    
 
     def process(self):

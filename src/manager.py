@@ -88,6 +88,7 @@ class Manager(QObject):
             {"channel": "C1", "name": "C1", "enable": False, "type": "N/A", "control": "N/A", "feedback": "N/A", "settings": self.defaultControlSettings},
             {"channel": "C2", "name": "C2", "enable": False, "type": "N/A", "control": "N/A", "feedback": "N/A", "settings": self.defaultControlSettings}
         ]
+
         self.controlModeList = ["N/A", "Digital"]
         self.controlActuatorList = ["N/A", "Linear"]
         self.defaultFeedbackChannelList = ["N/A"]
@@ -279,6 +280,7 @@ class Manager(QObject):
         self.assembly.write_header(header)
         
         # For each device set initialise the device and set the acquisition array.
+
         for device in enabledDevices:
             name = device["name"]
             deviceType = device["type"] 
@@ -310,6 +312,33 @@ class Manager(QObject):
                         self.devices[name].set_enabled_C2(True)
 
                 log.info("Settings initialised for device named " + name + ".")
+
+            if deviceType == "Press":
+                deviceFeedback = self.configuration["devices"]["VJT"]["control"][0]["deviceFeedback"]
+                channelFeedback = self.configuration["devices"]["VJT"]["control"][0]["feedback"]
+
+                if deviceFeedback != "N/A" and channelFeedback != "N/A":
+
+                    indexPressFeedback = self.determinePressFeedbackIndex(deviceFeedback, channelFeedback, enabledDevices)
+                    # print(deviceFeedback, channelFeedback, indexPressFeedback)
+
+    def determinePressFeedbackIndex(self, deviceFeedback, channelFeedback, enabledDevices):
+
+        indexPressFeedback = 0
+        for device in enabledDevices:
+
+            if device["type"] == "Hub":
+                name = device["name"]
+                channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[
+                    name].acquisitionSettings()
+
+                for channel in channels:
+                    # print(name, channel)
+
+                    if channel == channelFeedback and name == deviceFeedback:
+                        return indexPressFeedback
+
+                    indexPressFeedback = indexPressFeedback + 1
 
     def setDeviceFeedbackChannels(self):
         log.info("Setting feedback channels for all devices.")
@@ -677,7 +706,7 @@ class Manager(QObject):
                         "type": deviceInformation["type"],
                         "connection": deviceInformation["connection"],
                         "address": deviceInformation["address"],
-                        "control": [{"channel": "TS", "name": "VJT", "enable": True, "type": "Digital", "control": "Linear", "feedback": "N/A", "settings": self.defaultControlSettings}],
+                        "control": [{"channel": "TS", "name": "VJT", "enable": True, "type": "Digital", "control": "Linear", "deviceFeedback": "N/A", "feedback": "N/A", "settings": self.defaultControlSettings}],
                     }
 
                     # If no previous devices are configured, add the "devices" key to the configuration.

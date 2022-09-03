@@ -18,6 +18,7 @@ class PressSettings(QWidget):
     setAcquisitionMode = Signal(str)
     setAcquisitionRate = Signal(float)
     setFeedbackLinearAxis = Signal(bool)
+
     
     def __init__(self, name, *args, **kwargs):
         """PressSettings init."""
@@ -25,6 +26,8 @@ class PressSettings(QWidget):
         self.name = name
         self.device_list = []
         self.feedback_channel_lists = {}
+        self.feedbackDevice = "N/A"
+        self.feedbackChannel = "N/A"
 
         self.feedbackLabel = QLabel("Press Feedback Channel:")
 
@@ -55,9 +58,9 @@ class PressSettings(QWidget):
     def set_configuration(self, configuration):
         """Method to set the configuration."""
         self.configuration = configuration
-        # self.cameraConfiguration = self.configuration["devices"][self.name]["control"][0]["settings"]
+        self.pressConfiguration = self.configuration["devices"][self.name]["control"][0]
         self.setWindowTitle(self.name)
-    
+
     def set_device_list(self, device_list):
         """Method to set the device list."""
         self.device_list = device_list
@@ -79,10 +82,10 @@ class PressSettings(QWidget):
             if selected_device != "N/A":
                 self.channelComboBox.addItems(self.feedback_channel_lists[selected_device])
 
-
     def feedback_channel_updated(self, channel):
         """Method to update the feedback channel."""
         device = self.deviceComboBox.currentText()
+        
         if channel != "N/A":
             feedback = True
         else:
@@ -90,7 +93,16 @@ class PressSettings(QWidget):
 
         self.setFeedbackLinearAxis.emit(feedback)
 
+        try:
+            self.pressConfiguration["deviceFeedback"] = device
+            self.pressConfiguration["feedback"] = channel
+        except:
+            pass
+
+
         log.info("Feedback device set to {} on channel {}".format(device, channel))
+
+        
 
         # 1. Add logic that enables / disables the feedback row of the LinearAxis depending on whether a feedback channel or "N/A" is selected here by sending a boolean signal to LinearAxis.toggleFeedbackControl.
         # 2. Add logic to calculate the index within latestData of the target feedback channel and emit it. 
