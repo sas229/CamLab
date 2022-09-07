@@ -52,16 +52,20 @@ class Assembly(QObject):
     @Slot(str, np.ndarray)
     def update_new_data(self, name, data):
         """Method to add data to numpy array for the sending device."""
+
         if np.shape(self.data[name])[0] > 0:
             self.data[name] = np.vstack((self.data[name], data))
         else:
             self.data[name] = data
 
+        print(self.data)
+
     @Slot()
     def update_output_data(self):
         """Method to update the output data to save to file and to generate the plots."""
-        # Compute the minumum number of rows in the data item within each device dict.
+        # Compute the minimum number of rows in the data item within each device dict.
         numTimesteps = []
+        print(self.data)
         if len(self.enabledDevices) > 0:
             for device in self.enabledDevices:
                 name = device["name"]

@@ -314,6 +314,7 @@ class Manager(QObject):
                 log.info("Settings initialised for device named " + name + ".")
 
             if deviceType == "Press":
+
                 deviceFeedback = self.configuration["devices"]["VJT"]["control"][0]["deviceFeedback"]
                 channelFeedback = self.configuration["devices"]["VJT"]["control"][0]["feedback"]
 
@@ -385,20 +386,32 @@ class Manager(QObject):
 
     def toggleDeviceConnection(self, name, connect):
         """Toggle device connection status."""
+
         if connect == True:
             # Connections.
             if self.devices[name].type == "Hub":
+
                 self.timing.controlDevices.connect(self.devices[name].process)
                 self.assembly.autozeroDevices.connect(self.devices[name].recalculate_offsets)
                 self.devices[name].emitData.connect(self.assembly.update_new_data)
                 self.devices[name].updateOffsets.connect(self.updateDeviceOffsets)
+
             elif self.devices[name].type == "Camera":
                 self.devices[name].emitData.connect(self.assembly.update_new_data)
                 self.timing.controlDevices.connect(self.devices[name].save_image)
                 self.devices[name].saveImage.connect(self.assembly.save_image)
                 self.devices[name].stop_stream = False
+
+            elif self.devices[name].type == "Press":
+                self.timing.controlDevices.connect(self.devices[name].process)
+                self.assembly.autozeroDevices.connect(self.devices[name].recalculate_offsets)
+                self.devices[name].emitData.connect(self.assembly.update_new_data)
+                self.devices[name].updateOffsets.connect(self.updateDeviceOffsets)
+
+
             self.deviceToggled.emit(name, connect)
             log.info("Basic signals connected to device {name}.".format(name=name))
+
         elif connect == False:
             # Disconnections.
             if self.devices[name].type == "Hub":
@@ -406,11 +419,17 @@ class Manager(QObject):
                 self.assembly.autozeroDevices.disconnect(self.devices[name].recalculate_offsets)
                 self.devices[name].emitData.disconnect(self.assembly.update_new_data)
                 self.devices[name].updateOffsets.disconnect(self.updateDeviceOffsets)
+
             elif self.devices[name].type == "Camera":
                 self.devices[name].stop_stream = True
                 self.devices[name].emitData.disconnect(self.assembly.update_new_data)
                 self.timing.controlDevices.disconnect(self.devices[name].save_image)
                 self.devices[name].saveImage.disconnect(self.assembly.save_image)
+
+            elif self.devices[name].type == "Press":
+                self.devices[name].emitData.disconnect(self.assembly.update_new_data)
+
+
             self.deviceToggled.emit(name, connect)
             log.info("Basic signals disconnected from device {name}.".format(name=name))
 
@@ -959,6 +978,11 @@ class Manager(QObject):
                 genericChannelsData.append(
                 {"plot": False, "name": "n" , "device": device["name"], "colour": self.setColourDefault(),
                 "value": "0", "unit": "-"})
+
+            elif self.devices[name].type == "Press":
+                genericChannelsData.append(
+                    {"plot": False, "name": "Speed", "device": control["name"], "colour": self.setColourDefault(),
+                     "value": "0.00", "unit": secondaryUnit})
         return genericChannelsData
 
     @Slot()

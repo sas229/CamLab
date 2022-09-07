@@ -117,9 +117,6 @@ class Press(QObject):
                 else:
                     log.info("Sequence finished.")
                     self.sequence_running = False
-        except ljm.LJMError:
-            ljme = sys.exc_info()[1]
-            log.warning(ljme) 
         except Exception:
             e = sys.exc_info()[1]
             log.warning(e)
@@ -131,7 +128,7 @@ class Press(QObject):
     def initialise(self):
         #  Initialise device.
         self.open_connection()
-        self.initialise_settings()
+        # self.initialise_settings()
         self.check_limits()
         self.set_speed_limit()
 
@@ -748,20 +745,20 @@ class Press(QObject):
             e = sys.exc_info()[1]
             log.warning(e)
 
-    def initialise_settings(self):
-        """Method to initialise the device."""
-        if self.handle != None:
-            try:
-                self.configure_ADC()
-                self.configure_pulse_counters()
-                self.set_speed_C1(self.speed_C1)
-                self.enabled_C1 = False
-            except ljm.LJMError:
-                ljme = sys.exc_info()[1]
-                log.warning(ljme) 
-            except Exception:
-                e = sys.exc_info()[1]
-                log.warning(e)
+    # def initialise_settings(self):
+    #     """Method to initialise the device."""
+    #     if self.handle != None:
+    #         try:
+    #             self.configure_ADC()
+    #             self.configure_pulse_counters()
+    #             self.set_speed_C1(self.speed_C1)
+    #             self.enabled_C1 = False
+    #         except ljm.LJMError:
+    #             ljme = sys.exc_info()[1]
+    #             log.warning(ljme)
+    #         except Exception:
+    #             e = sys.exc_info()[1]
+    #             log.warning(e)
 
     def load_lua_script(self):
         """Method to load the Lua failsafe script into the device."""
