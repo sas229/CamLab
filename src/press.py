@@ -6,6 +6,7 @@ import time
 import sys
 from time import sleep
 from simple_pid import PID
+import serial
 
 log = logging.getLogger(__name__)
 
@@ -135,22 +136,24 @@ class Press(QObject):
     @Slot(str)
     def set_enable_C1(self, value):
         """Set enable state for control channel C1."""
-        try:
-            self.handle = ljm.open(7, self.connection, self.id)
-            if value ==  True:
-                self.position_setpoint_C1 = self.position_process_variable_C1
-                self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
-                ljm.eWriteName(self.handle, "EIO0", 1)
-                self.motor_enabled_C1 = True
-            else:
-                ljm.eWriteName(self.handle, "EIO0", 0)
-                self.motor_enabled_C1 = False
-        except ljm.LJMError:
-            ljme = sys.exc_info()[1]
-            log.warning(ljme) 
-        except Exception:
-            e = sys.exc_info()[1]
-            log.warning(e)
+        print(value)
+        self.motor_enabled_C1 = True
+        # try:
+        #     self.handle = ljm.open(7, self.connection, self.id)
+        #     if value ==  True:
+        #         self.position_setpoint_C1 = self.position_process_variable_C1
+        #         self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
+        #         ljm.eWriteName(self.handle, "EIO0", 1)
+        #         self.motor_enabled_C1 = True
+        #     else:
+        #         ljm.eWriteName(self.handle, "EIO0", 0)
+        #         self.motor_enabled_C1 = False
+        # except ljm.LJMError:
+        #     ljme = sys.exc_info()[1]
+        #     log.warning(ljme) 
+        # except Exception:
+        #     e = sys.exc_info()[1]
+        #     log.warning(e)
         
     def disable_clock_0(self):
         """Check clock 0 is disabled."""
@@ -265,6 +268,9 @@ class Press(QObject):
 
     def check_connection_C1(self):
         """Check connection to control device on channel C1."""
+        self.connectedC1 = True
+        self.updateConnectionIndicatorC1.emit(self.connectedC1)
+
         # try:
         #     self.handle = ljm.open(7, self.connection, self.id)
         #     self.connectedC1 = not bool(int(ljm.eReadName(self.handle, 'FIO0')))
