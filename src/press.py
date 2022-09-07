@@ -853,15 +853,15 @@ class Press(QObject):
     def process(self):
         """Method to process timed commands."""
         try:
-            # Read from the device and apply slope and offsets.
-            self.handle = ljm.open(7, self.connection, self.id)
-            ljm.eWriteName(self.handle, "USER_RAM0_U16", 1) 
-            self.check_limits()
-            if len(self.addresses) > 0:
-                self.raw = np.asarray(ljm.eReadAddresses(self.handle, self.numFrames, self.addresses, self.dataTypes))
-                self.current_data = self.slopes*(self.raw - self.offsets)
-            else: 
-                self.current_data = np.empty(0)
+            # # Read from the device and apply slope and offsets.
+            # self.handle = ljm.open(7, self.connection, self.id)
+            # ljm.eWriteName(self.handle, "USER_RAM0_U16", 1) 
+            # self.check_limits()
+            # if len(self.addresses) > 0:
+            #     self.raw = np.asarray(ljm.eReadAddresses(self.handle, self.numFrames, self.addresses, self.dataTypes))
+            #     self.current_data = self.slopes*(self.raw - self.offsets)
+            # else: 
+            #     self.current_data = np.empty(0)
             # Check position.
             self.get_position_C1()
 
