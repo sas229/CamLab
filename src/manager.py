@@ -314,7 +314,8 @@ class Manager(QObject):
                 log.info("Settings initialised for device named " + name + ".")
 
             if deviceType == "Press":
-
+                
+                self.devices[name].initialise()
                 deviceFeedback = self.configuration["devices"]["VJT"]["control"][0]["deviceFeedback"]
                 channelFeedback = self.configuration["devices"]["VJT"]["control"][0]["feedback"]
 
@@ -427,7 +428,10 @@ class Manager(QObject):
                 self.devices[name].saveImage.disconnect(self.assembly.save_image)
 
             elif self.devices[name].type == "Press":
+                self.timing.controlDevices.disconnect(self.devices[name].process)
+                self.assembly.autozeroDevices.disconnect(self.devices[name].recalculate_offsets)
                 self.devices[name].emitData.disconnect(self.assembly.update_new_data)
+                self.devices[name].updateOffsets.disconnect(self.updateDeviceOffsets)
 
 
             self.deviceToggled.emit(name, connect)
@@ -692,6 +696,7 @@ class Manager(QObject):
                     stopbits=serial.STOPBITS_ONE,
                     bytesize=serial.EIGHTBITS
                 )
+                # ser = self.ser
                 log.info("Trying to find VJTech TriScan device on port " + comport.device + ".")
                 ser.write(bytes("I" + str(address) + "TSF\r", "utf-8"))
                 time.sleep(0.1)
@@ -744,6 +749,7 @@ class Manager(QObject):
                     log.info("VJTech TriScan device found on port " + comport.device + " at address " + str(address) + ".")
 
                     # Break because we only want to add one TriScan device threfore no need to search further ports.
+                    ser.close()
                     break
         except Exception:
             e = sys.exc_info()[1]
@@ -763,7 +769,7 @@ class Manager(QObject):
 
         # Stop acquisition.
         self.timing.stop()
-        
+           
         # Clear all previous data.
         log.info("Configuring devices.")
     

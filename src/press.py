@@ -27,8 +27,16 @@ class Press(QObject):
         self.type = "Press"
         self.name = name
         self.id = id 
-        self.connection = connection
+        self.connection = None
         self.handle = None
+
+        # Configure the serial connections.
+        # self.ser = serial.Serial(
+        # port='COM4',
+        # baudrate=57600,
+        # parity=serial.PARITY_NONE,
+        # stopbits=serial.STOPBITS_ONE,
+        # bytesize=serial.EIGHTBITS)
 
         # Variables
         self.data = np.zeros(2)
@@ -130,8 +138,24 @@ class Press(QObject):
         #  Initialise device.
         self.open_connection()
         # self.initialise_settings()
-        self.check_limits()
-        self.set_speed_limit()
+        # self.check_limits()
+        # self.set_speed_limit()
+
+    def get_press_response(self, signal):
+
+        ser = self.connection
+        ser.write(bytes(signal + '\r', "utf-8"))
+        out = ''
+        time.sleep(0.02)
+
+        while ser.inWaiting() > 0:
+
+            out += ser.read(1).decode("utf-8")
+
+        if out == '':
+            out = "No response!"
+
+        return out
 
     @Slot(str)
     def set_enable_C1(self, value):
@@ -361,8 +385,8 @@ class Press(QObject):
             self.limit_C1 = False
 
             # Check position limits.
-            self.minimumLimitC1 = bool(ljm.eReadName(self.handle, "CIO2"))
-            self.maximumLimitC1 = bool(ljm.eReadName(self.handle, "CIO0"))
+            # self.minimumLimitC1 = bool(ljm.eReadName(self.handle, "CIO2"))
+            # self.maximumLimitC1 = bool(ljm.eReadName(self.handle, "CIO0"))
 
             #  Check if motor moving and stop if moving in the direction of the hard limit for C1.
             moving = ljm.eReadName(self.handle, "DIO4_EF_ENABLE")
@@ -549,27 +573,18 @@ class Press(QObject):
     @Slot(str)
     def jog_positive_on_C1(self):
         """Turn positive jog on for control channel C1."""
-        # self.handle = ljm.open(7, self.connection, self.id)
-        if self.running == True and self.maximumLimitC1 == False and self.motor_enabled_C1 == True:
+        # if self.running == True and self.maximumLimitC1 == False and self.motor_enabled_C1 == True:
+        if self.running == True and self.motor_enabled_C1 == True:
+        # Check status of press
             if self.position_process_variable_C1 <= self.position_right_limit_C1:
                 # Set direction.
                 self.direction_C1 = 1
                 self.jog_C1 = True
-                self.set_direction_C1(self.direction_C1)
+                # self.set_direction_C1(self.direction_C1)
 
                 up_press_signal = "I21TSUP"
 
-                # # Reset counters.
-                # self.count_C1 = 0
-                # self.previous_count_C1 = 0
-                # self.pulses_C1 = 0
-                # self.previous_pulses_C1 = 0
-                # self.reset_pulse_counter_C1()
-
-                # Send signal to press to move UP
-
                 print(up_press_signal)
-                self.turn_on_PWM_C1()
                 log.info("Jog positive turned on for control channel C1 on {device}.".format(device=self.name))
 
     @Slot(str)
@@ -598,9 +613,10 @@ class Press(QObject):
         """Turn positive jog off for control channel C1."""
         print("jog positive off")
         if self.jog_C1 == True:
-            self.handle = ljm.open(7, self.connection, self.id)
+            # self.handle = ljm.open(7, self.connection, self.id)
             self.jog_C1 = False
             stop_press_signal = "I21THT"
+            print(stop_press_signal)
             # self.turn_off_PWM_C1()
             # sleep(0.1)
             # self.get_position_C1()
@@ -759,15 +775,22 @@ class Press(QObject):
 
     def open_connection(self):
         """Method to open a device connection."""
-        try:
-            self.handle = ljm.open(7, self.connection, self.id)
-            log.info("Connected to {name}.".format(name=self.name))
-        except ljm.LJMError:
-            ljme = sys.exc_info()[1]
-            log.warning(ljme) 
-        except Exception:
-            e = sys.exc_info()[1]
-            log.warning(e)
+        # try:
+        #     self.handle = ljm.open(7, self.connection, self.id)
+        #     log.info("Connected to {name}.".format(name=self.name))
+        # except ljm.LJMError:
+        #     ljme = sys.exc_info()[1]
+        #     log.warning(ljme) 
+        # except Exception:
+        #     e = sys.exc_info()[1]
+        #     log.warning(e)
+        if self.connection == None:
+            self.connection = serial.Serial(
+            port='COM4',
+            baudrate=57600,
+            parity=serial.PARITY_NONE,
+            stopbits=serial.STOPBITS_ONE,
+            bytesize=serial.EIGHTBITS)
 
     def close_connection(self):
         """Method to close the device connection."""
@@ -904,14 +927,17 @@ class Press(QObject):
             # self.check_position_C1()
             
             #Send a signal to the press asking for its status I21TSF and then decompose the signal recieved to get direction and speed of press
-            #Dummy way to get current data
+            staus_press_signal = "I21TSF"
+            status_press = self.get_press_response(staus_press_signal)
+            if status_press == "No response!":
+                print(status_press)
             
             # Check setpoint.
-            if self.sequence_running == True:
-                self.check_setpoint_C1()
-            # If feedback is available.
-            if self.feedback_C1 == True:
-                self.update_PID_C1()
+            # if self.sequence_running == True:
+            #     self.check_setpoint_C1()
+            # # If feedback is available.
+            # if self.feedback_C1 == True:
+            #     self.update_PID_C1()
 
             # Concatenate output data.
             self.send_data()
