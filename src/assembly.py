@@ -58,14 +58,11 @@ class Assembly(QObject):
         else:
             self.data[name] = data
 
-        print(self.data)
-
     @Slot()
     def update_output_data(self):
         """Method to update the output data to save to file and to generate the plots."""
         # Compute the minimum number of rows in the data item within each device dict.
         numTimesteps = []
-        print(self.data)
         if len(self.enabledDevices) > 0:
             for device in self.enabledDevices:
                 name = device["name"]
@@ -201,6 +198,9 @@ class Assembly(QObject):
         self.data = {}
         for device in self.enabledDevices:
             if device["type"] == "Hub":
+                name = device["name"]
+                self.data[name] = np.array([])
+            if device["type"] == "Press":
                 name = device["name"]
                 self.data[name] = np.array([])
         log.info("Output arrays created.")

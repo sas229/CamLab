@@ -43,6 +43,7 @@ class ControlUtilities:
                 self.manager.controlTableModels[name].controlChannelNameChanged.connect(controlWidget.setTitle)
 
             if channel == 0:
+               
                 controlWidget.enable.connect(self.manager.devices[name].set_enable_C1)
                 controlWidget.PIDControl.connect(self.manager.devices[name].set_PID_control_C1)
                 controlWidget.KPChanged.connect(self.manager.devices[name].set_KP_C1)
