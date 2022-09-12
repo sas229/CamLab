@@ -581,11 +581,10 @@ class Press(QObject):
                 # Set direction.
                 self.direction_C1 = 1
                 self.jog_C1 = True
-                # self.set_direction_C1(self.direction_C1)
+                self.move_press_up()
+                
+                
 
-                up_press_signal = "I21TUP"
-
-                out = self.get_press_response(up_press_signal)
                 log.info("Jog positive turned on for control channel C1 on {device}.".format(device=self.name))
 
     @Slot(str)
@@ -598,10 +597,7 @@ class Press(QObject):
                 # Set direction.
                 self.direction_C1 = -1
                 self.jog_C1 = True
-                # self.set_direction_C1(self.direction_C1)
-                down_press_signal = "I21TDN"
-
-                out = self.get_press_response(down_press_signal)
+                self.move_press_down()
 
                 log.info("Jog negative turned on for control channel C1 on {device}.".format(device=self.name))
 
@@ -612,9 +608,7 @@ class Press(QObject):
         if self.jog_C1 == True:
             # self.handle = ljm.open(7, self.connection, self.id)
             self.jog_C1 = False
-            stop_press_signal = "I21THT"
-            out = self.get_press_response(stop_press_signal)
-            # self.turn_off_PWM_C1()
+            self.stop_press()
             # sleep(0.1)
             # self.get_position_C1()
             # self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
@@ -626,13 +620,29 @@ class Press(QObject):
         if self.jog_C1 == True:
             # self.handle = ljm.open(7, self.connection, self.id)
             self.jog_C1 = False
-            stop_press_signal = "I21THT"
-            out = self.get_press_response(stop_press_signal)
-            # self.turn_off_PWM_C1()
+            self.stop_press()
             # sleep(0.1)
             # self.get_position_C1()
             # self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
             log.info("Jog positive turned off for control channel C1 on {device}.".format(device=self.name))
+
+    def move_press_up(self):
+
+        self.direction_C1 = 1
+        up_press_signal = "I21TUP"
+        out = self.get_press_response(up_press_signal)
+    
+    def move_press_down(self):
+        
+        self.direction_C1 = -1
+        down_press_signal = "I21TDN"
+        out = self.get_press_response(down_press_signal)
+    
+    def stop_press(self):
+
+        stop_press_signal = "I21THT"
+        out = self.get_press_response(stop_press_signal)
+
 
     @Slot()
     def updateControlPanelC1(self):
@@ -659,20 +669,35 @@ class Press(QObject):
             # Set direction.
             if increment > 0:
                 self.direction_C1 = 1
+                self.move_press_up()
+
             elif increment < 0:   
                 self.direction_C1 = -1
-            self.set_direction_C1(self.direction_C1)
+                self.move_press_down()
+
+            # self.set_direction_C1(self.direction_C1)
             self.position_setpoint_C1 = position
+
             # Reset counters.
-            self.count_C1 = 0
-            self.previous_count_C1 = 0
-            self.pulses_C1 = 0
-            self.previous_pulses_C1 = 0
-            self.reset_pulse_counter_C1()
-            # Turn on PWM.
-            pulses = int(abs(increment*self.counts_per_unit_C1))
-            self.pulse_out_C1(pulses)
-            self.moving_C1 = True
+            # self.count_C1 = 0
+            # self.previous_count_C1 = 0
+            # self.pulses_C1 = 0
+            # self.previous_pulses_C1 = 0
+            # self.reset_pulse_counter_C1()
+            # # Turn on PWM.
+            # pulses = int(abs(increment*self.counts_per_unit_C1))
+            # self.pulse_out_C1(pulses)
+            # self.moving_C1 = True
+
+    def check_position_C1_for_demand(self):
+
+        if self.direction_C1 == 1:
+            if self.position_process_variable_C1 >= self.position_setpoint_C1:
+                self.stop_press()
+        
+        elif self.direction_C1 == -1:
+            if self.position_process_variable_C1 <= self.position_setpoint_C1:
+                self.stop_press()
 
 
     def set_direction_C1(self, direction):
@@ -944,6 +969,9 @@ class Press(QObject):
 
             self.get_position_C1(current_speed_C1)
             self.initial_speed_C1 = current_speed_C1
+            
+            if self.jog_C1 == False:
+                self.check_position_C1_for_demand()
             
             # Check setpoint.
             # if self.sequence_running == True:
