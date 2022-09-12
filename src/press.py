@@ -8,6 +8,7 @@ from time import sleep
 from simple_pid import PID
 import serial
 
+
 log = logging.getLogger(__name__)
 
 class Press(QObject):
@@ -52,25 +53,26 @@ class Press(QObject):
         self.running = False
         self.jog_C1 = False
         self.moving_C1 = False
-        self.count_C1 = 0
-        self.pulses_C1 = 0
+        # self.count_C1 = 0
+        # self.pulses_C1 = 0
         self.direction_C1 = 1
         self.position_process_variable_C1 = 0
         self.speed_C1 = 3
+        self.initial_speed_C1 = 0.0
         self.feedback_setpoint_C1 = 0
         self.feedback_process_variable_C1 = 0
         self.feedback_left_limit_C1 = -100
         self.feedback_right_limit_C1 = 100
-        self.previous_count_C1 = 0
-        self.previous_pulses_C1 = 0
-        self.counts_per_unit_C1 = 32000
-        self.pulses_per_unit_C1 = 160
+        # self.previous_count_C1 = 0
+        # self.previous_pulses_C1 = 0
+        # self.counts_per_unit_C1 = 32000
+        # self.pulses_per_unit_C1 = 160
         self.position_setpoint_C1 = 0
         self.position_left_limit_C1 = 0
         self.position_right_limit_C1 = 0
         self.position_left_limit_status_C1 = False
         self.position_right_limit_status_C1 = False
-        self.max_rpm = 4000
+        # self.max_rpm = 4000
         self.current_data = np.empty(0)
         self.sequence_running = False
 
@@ -460,7 +462,7 @@ class Press(QObject):
             self.previous_count_C1 = 0
             self.updatePositionSetPointC1.emit(self.position_process_variable_C1) 
             self.updatePositionProcessVariableC1.emit(self.position_process_variable_C1)
-            ljm.eReadName(self.handle, "DIO1_EF_READ_A_AND_RESET")
+            # ljm.eReadName(self.handle, "DIO1_EF_READ_A_AND_RESET")
             log.info("Position zeroed on device " + self.name + " control channel C1.")
         except ljm.LJMError:
             ljme = sys.exc_info()[1]
@@ -702,23 +704,24 @@ class Press(QObject):
             log.warning(e)
 
 
-    def get_position_C1(self):
+    def get_position_C1(self, current_speed_C1):
         """Get position of control channel C1."""
-        # Read pulses.
-        self.read_pulses_C1()    
+        # # Read pulses.
+        # self.read_pulses_C1()    
 
-        # Check motor status by comparing pulses count output with pulses returned.
-        if self.pulses_C1 == 0:
-            incrementPulses = 0
-        else:
-            incrementPulses = (self.pulses_C1-self.previous_pulses_C1)/self.pulses_per_unit_C1
-        self.previous_pulses_C1 = self.pulses_C1
-
+        # # Check motor status by comparing pulses count output with pulses returned.
+        # if self.pulses_C1 == 0:
+        #     incrementPulses = 0
+        # else:
+        #     incrementPulses = (self.pulses_C1-self.previous_pulses_C1)/self.pulses_per_unit_C1
+        # self.previous_pulses_C1 = self.pulses_C1
+        increment_position = np.trapz(y = [self.initial_speed_C1, current_speed_C1], dx = (1/self.controlRate)/60 ) # Conver s in min
         # Increment position process variable.
         if self.direction_C1 == 1:
-            self.position_process_variable_C1 += incrementPulses
+            self.position_process_variable_C1 += increment_position
         elif self.direction_C1 == -1:
-            self.position_process_variable_C1 -= incrementPulses
+            self.position_process_variable_C1 -= increment_position            
+
 
     def check_position_C1(self):
         """Check position for control channel C1."""
@@ -759,15 +762,15 @@ class Press(QObject):
         numFrames = len(names)
         ljm.eWriteNames(self.handle, numFrames, names, aValues) 
 
-    def set_acquisition_variables(self, channels, addresses, dataTypes, slopes, offsets, autozero, controlRate):
+    def set_acquisition_variables(self, controlRate):
         """Set the acquisition variables."""
-        self.channels = channels
-        self.addresses = addresses
-        self.dataTypes = dataTypes
-        self.slopes = np.asarray(slopes)
-        self.offsets = np.asarray(offsets)
-        self.autozero = np.asarray(autozero)
-        self.numFrames = len(self.addresses)
+        # self.channels = channels
+        # self.addresses = addresses
+        # self.dataTypes = dataTypes
+        # self.slopes = np.asarray(slopes)
+        # self.offsets = np.asarray(offsets)
+        # self.autozero = np.asarray(autozero)
+        # self.numFrames = len(self.addresses)
         self.controlRate = controlRate
 
     def open_connection(self):
@@ -931,10 +934,16 @@ class Press(QObject):
                 print(status_press)
 
             #status code 0 = Stop, 1 = Up, 2 = Down, 3 = FastUp, 4 = FastDown, 5 = UpLimit, 6 = DownLimit (4 and 5 not used)
-            status_code = int(status_press[4])
-            speed_read = status_press[5:]
-            speed_read = speed_read.replace(".","")
-            speed_read = float(speed_read)/10**5
+            if len(status_press) == 14:
+                status_code = status_press[4]
+                current_speed_C1 = status_press[5:]
+                current_speed_C1 = current_speed_C1.replace(".","")
+                current_speed_C1 = float(current_speed_C1)/10**5
+            else:
+                current_speed_C1 = self.initial_speed_C1
+
+            self.get_position_C1(current_speed_C1)
+            self.initial_speed_C1 = current_speed_C1
             
             # Check setpoint.
             # if self.sequence_running == True:

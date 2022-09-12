@@ -316,6 +316,8 @@ class Manager(QObject):
             if deviceType == "Press":
                 
                 self.devices[name].initialise()
+                controlRate = self.configuration["global"]["controlRate"]
+                self.devices[name].set_acquisition_variables(controlRate)
                 deviceFeedback = self.configuration["devices"]["VJT"]["control"][0]["deviceFeedback"]
                 channelFeedback = self.configuration["devices"]["VJT"]["control"][0]["feedback"]
 
