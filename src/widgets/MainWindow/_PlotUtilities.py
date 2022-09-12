@@ -107,7 +107,6 @@ class PlotUtilities:
         # If plots exist update the configuration.
         if "plots" in self.manager.configuration:
             for plotNumber in self.manager.configuration["plots"].keys():
-                print(plotNumber)
                 plotWindow = self.plots[plotNumber]
                 plotWindow.setPlotNumber(plotNumber)
                 plotWindow.set_configuration(self.manager.configuration)

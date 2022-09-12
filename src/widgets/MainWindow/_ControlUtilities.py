@@ -113,13 +113,14 @@ class ControlUtilities:
         self.tabs.setTabVisible(index, False)
         enabledDevices = self.manager.deviceTableModel.enabledDevices()
         for device in enabledDevices:
-            if name == device["name"]:
-                self.tabs.setTabVisible(index, True)
-            else:
-                enabledControls = self.manager.controlTableModels[name].enabledControls()
-                for control in enabledControls:
-                    if control["channel"] == controlChannel:
-                        self.tabs.setTabVisible(index, True)
+            # if name == device["name"]:
+            #     self.tabs.setTabVisible(index, True)
+            # else:
+            enabledControls = self.manager.controlTableModels[name].enabledControls()
+            for control in enabledControls:
+                if control["channel"] == controlChannel:
+                    print("Control channel in enabledControls...")
+                    self.tabs.setTabVisible(index, True)
 
         # Convert tab to window if required by configuration.
         if self.manager.configuration["devices"][name]["control"][channel]["settings"]["mode"] == "window":

@@ -2,7 +2,6 @@ from PySide6.QtCore import QObject, Signal, Slot
 import logging
 from labjack import ljm
 import numpy as np
-import time
 import sys
 from time import sleep
 from simple_pid import PID
@@ -516,29 +515,29 @@ class Device(QObject):
             self.limit_C2 = False
 
             # Check position limits.
-            self.minimumLimitC1 = bool(ljm.eReadName(self.handle, "CIO2"))
-            self.maximumLimitC1 = bool(ljm.eReadName(self.handle, "CIO0"))
-            self.minimumLimitC2 = bool(ljm.eReadName(self.handle, "CIO3"))
-            self.maximumLimitC2 = bool(ljm.eReadName(self.handle, "CIO1"))
+            self.minimum_limit_C1 = bool(ljm.eReadName(self.handle, "CIO2"))
+            self.maximum_limit_C1 = bool(ljm.eReadName(self.handle, "CIO0"))
+            self.minimum_limit_C2 = bool(ljm.eReadName(self.handle, "CIO3"))
+            self.maximum_limit_C2 = bool(ljm.eReadName(self.handle, "CIO1"))
             
             #  Check if motor moving and stop if moving in the direction of the hard limit for C1.
             moving = ljm.eReadName(self.handle, "DIO4_EF_ENABLE")
-            if moving == 1 and self.direction_C1 == -1 and self.minimumLimitC1 == True:
+            if moving == 1 and self.direction_C1 == -1 and self.minimum_limit_C1 == True:
                 self.stop_command_C1()
-            elif moving == 1 and self.direction_C1 == 1 and self.maximumLimitC1 == True:
+            elif moving == 1 and self.direction_C1 == 1 and self.maximum_limit_C1 == True:
                 self.stop_command_C1()
 
             #  Check if motor moving and stop if moving in the direction of the hard limit for C2.
             moving = ljm.eReadName(self.handle, "DIO5_EF_ENABLE")
-            if moving == 1 and self.direction_C2 == -1 and self.minimumLimitC2 == True:
+            if moving == 1 and self.direction_C2 == -1 and self.minimum_limit_C2 == True:
                 self.stop_command_C2()
-            elif moving == 1 and self.direction_C2 == 1 and self.maximumLimitC2 == True:
+            elif moving == 1 and self.direction_C2 == 1 and self.maximum_limit_C2 == True:
                 self.stop_command_C2()
 
             # Turn on indicator if on limits.
-            if self.minimumLimitC1 == True or self.maximumLimitC1 == True:
+            if self.minimum_limit_C1 == True or self.maximum_limit_C1 == True:
                 self.limit_C1 = True
-            if self.minimumLimitC2 == True or self.maximumLimitC2 == True:
+            if self.minimum_limit_C2 == True or self.maximum_limit_C2 == True:
                 self.limit_C2 = True
 
             # Check position limits.
@@ -564,10 +563,12 @@ class Device(QObject):
             # Set indicator.
             if self.limit_C1 == True:
                 self.updateLimitIndicatorC1.emit(True)
+                self.stop_command_C1() # Added to try and stop actuator if soft limit is reached in PID control.
             else:
                 self.updateLimitIndicatorC1.emit(False)
             if self.limit_C2 == True:
                 self.updateLimitIndicatorC2.emit(True)
+                self.stop_command_C2() # Added to try and stop actuator if soft limit is reached in PID control.
             else:
                 self.updateLimitIndicatorC2.emit(False)
         except ljm.LJMError:
@@ -599,6 +600,7 @@ class Device(QObject):
         try:
             self.handle = ljm.open(7, self.connection, self.id)
             self.turn_off_PWM_C1()
+            self.set_PID_control_C1(False)
             sleep(0.1)
             self.get_position_C1()
             self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
@@ -616,6 +618,7 @@ class Device(QObject):
         try:
             self.handle = ljm.open(7, self.connection, self.id)
             self.turn_off_PWM_C2()
+            self.set_PID_control_C2(False)
             sleep(0.1)
             self.get_position_C2()
             self.updatePositionSetPointC2.emit(self.position_process_variable_C2)
@@ -809,7 +812,7 @@ class Device(QObject):
     def jog_positive_on_C1(self):
         """Turn positive jog on for control channel C1."""
         self.handle = ljm.open(7, self.connection, self.id)
-        if self.running == True and self.maximumLimitC1 == False and self.motor_enabled_C1 == True:
+        if self.running == True and self.maximum_limit_C1 == False and self.motor_enabled_C1 == True:
             if self.position_process_variable_C1 <= self.position_right_limit_C1:
                 # Set direction.
                 self.direction_C1 = 1
@@ -829,7 +832,7 @@ class Device(QObject):
     def jog_positive_on_C2(self):
         """Turn positive jog on for control channel C2."""
         self.handle = ljm.open(7, self.connection, self.id)
-        if self.running == True and self.maximumLimitC2 == False and self.motor_enabled_C2 == True:
+        if self.running == True and self.maximum_limit_C2 == False and self.motor_enabled_C2 == True:
             if self.position_process_variable_C2 <= self.position_right_limit_C2:
                 # Set direction.
                 self.direction_C2 = 1
@@ -849,7 +852,7 @@ class Device(QObject):
     def jog_negative_on_C1(self):
         """Turn negative jog on for control channel C1."""
         self.handle = ljm.open(7, self.connection, self.id)
-        if self.running == True and self.maximumLimitC1 == False and self.motor_enabled_C1 == True:
+        if self.running == True and self.maximum_limit_C1 == False and self.motor_enabled_C1 == True:
             if self.position_process_variable_C1 >= self.position_left_limit_C1:
                 # Set direction.
                 self.direction_C1 = -1
@@ -869,7 +872,7 @@ class Device(QObject):
     def jog_negative_on_C2(self):
         """Turn negative jog on for control channel C2."""
         self.handle = ljm.open(7, self.connection, self.id)
-        if self.running == True and self.maximumLimitC2 == False and self.motor_enabled_C2 == True:
+        if self.running == True and self.maximum_limit_C2 == False and self.motor_enabled_C2 == True:
             if self.position_process_variable_C2 >= self.position_left_limit_C2:
                 # Set direction.
                 self.direction_C2 = -1
