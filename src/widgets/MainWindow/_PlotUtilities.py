@@ -107,6 +107,7 @@ class PlotUtilities:
         # If plots exist update the configuration.
         if "plots" in self.manager.configuration:
             for plotNumber in self.manager.configuration["plots"].keys():
+                print(plotNumber)
                 plotWindow = self.plots[plotNumber]
                 plotWindow.setPlotNumber(plotNumber)
                 plotWindow.set_configuration(self.manager.configuration)
@@ -131,9 +132,9 @@ class PlotUtilities:
         tabs = self.tabs.count()
         for index in reversed(range(tabs)):
             widget = self.tabs.widget(index)
-            text = self.tabs.tabText(index)
             if isinstance(widget, PlotWindow):
                 self.tabs.removeTab(index)
+                widget.deleteLater()
         self.plots = {}
 
     @Slot(QModelIndex, str)
