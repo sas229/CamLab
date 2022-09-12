@@ -706,6 +706,7 @@ class Manager(QObject):
                 while ser.inWaiting() > 0:
                     ret += ser.read(1).decode("utf-8")
 
+                ser.close()
                 # If expected return message is receieved, add device to device list.
                 if "i21t" in ret:
                 # if "I21TSF" in ret:
@@ -749,7 +750,7 @@ class Manager(QObject):
                     log.info("VJTech TriScan device found on port " + comport.device + " at address " + str(address) + ".")
 
                     # Break because we only want to add one TriScan device threfore no need to search further ports.
-                    ser.close()
+                    
                     break
         except Exception:
             e = sys.exc_info()[1]

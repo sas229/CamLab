@@ -74,11 +74,7 @@ class Press(QObject):
         self.current_data = np.empty(0)
         self.sequence_running = False
 
-        # # Disable clock 0 and load Lua failsafe script to turn off PWM.
-        # self.open_connection()
-        # self.disable_clock_0()
-        # self.load_lua_script()
-        # self.close_connection()
+        self.open_connection()
 
         # Instantiate PID controllers.
         self.PID_C1 = PID()
@@ -136,7 +132,6 @@ class Press(QObject):
     @Slot()
     def initialise(self):
         #  Initialise device.
-        self.open_connection()
         self.set_speed_C1(self.speed_C1)
         # self.initialise_settings()
         # self.check_limits()
@@ -556,8 +551,8 @@ class Press(QObject):
         else:
             speed_string_signal= "I21TSP"+speed_string
         
-        if self.connection != None:
-            out = self.get_press_response(speed_string_signal)
+        # if self.connection != None:
+        out = self.get_press_response(speed_string_signal)
 
         log.info("Speed on control channel C1 set to " + "{:.5f}".format(speed))
             
