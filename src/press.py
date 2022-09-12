@@ -931,8 +931,11 @@ class Press(QObject):
                 print(status_press)
 
             #status code 0 = Stop, 1 = Up, 2 = Down, 3 = FastUp, 4 = FastDown, 5 = UpLimit, 6 = DownLimit (4 and 5 not used)
-            #status_code = status_press_signal[5]
-            # print(type(status_press))
+            status_code = int(status_press[4])
+            speed_read = status_press[5:]
+            speed_read = speed_read.replace(".","")
+            speed_read = float(speed_read)/10**5
+            
             # Check setpoint.
             # if self.sequence_running == True:
             #     self.check_setpoint_C1()
