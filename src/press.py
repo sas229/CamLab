@@ -137,6 +137,7 @@ class Press(QObject):
     def initialise(self):
         #  Initialise device.
         self.open_connection()
+        self.set_speed_C1(self.speed_C1)
         # self.initialise_settings()
         # self.check_limits()
         # self.set_speed_limit()
@@ -547,14 +548,17 @@ class Press(QObject):
     def set_press_speed_signal(self):
         
         speed = self.speed_C1
-        
+        speed_string = str(int(speed*10**5))
         if speed < 10:
-            speed_string = "I21TSP0"+"{:.5f}".format(speed)
+            
+            speed_string_signal = "I21TSP0"+ speed_string
         
         else:
-            speed_string = "I21TSP"+"{:.5f}".format(speed)
+            speed_string_signal= "I21TSP"+speed_string
         
-        print(speed_string)
+        if self.connection != None:
+            out = self.get_press_response(speed_string_signal)
+
         log.info("Speed on control channel C1 set to " + "{:.5f}".format(speed))
             
 
@@ -582,41 +586,37 @@ class Press(QObject):
                 self.jog_C1 = True
                 # self.set_direction_C1(self.direction_C1)
 
-                up_press_signal = "I21TSUP"
+                up_press_signal = "I21TUP"
 
-                print(up_press_signal)
+                out = self.get_press_response(up_press_signal)
                 log.info("Jog positive turned on for control channel C1 on {device}.".format(device=self.name))
 
     @Slot(str)
     def jog_negative_on_C1(self):
         """Turn negative jog on for control channel C1."""
-        self.handle = ljm.open(7, self.connection, self.id)
-        if self.running == True and self.maximumLimitC1 == False and self.motor_enabled_C1 == True:
+        # if self.running == True and self.maximumLimitC1 == False and self.motor_enabled_C1 == True:
+        if self.running == True and self.motor_enabled_C1 == True:
+            #Check status of press
             if self.position_process_variable_C1 >= self.position_left_limit_C1:
                 # Set direction.
                 self.direction_C1 = -1
                 self.jog_C1 = True
-                self.set_direction_C1(self.direction_C1)
-                # Reset counters.
-                self.count_C1 = 0
-                self.previous_count_C1 = 0
-                self.pulses_C1 = 0
-                self.previous_pulses_C1 = 0
-                self.reset_pulse_counter_C1()
-                # Turn on PWM.
-                self.turn_on_PWM_C1()
+                # self.set_direction_C1(self.direction_C1)
+                down_press_signal = "I21TDN"
+
+                out = self.get_press_response(down_press_signal)
+
                 log.info("Jog negative turned on for control channel C1 on {device}.".format(device=self.name))
 
 
     @Slot(str)
     def jog_positive_off_C1(self):
         """Turn positive jog off for control channel C1."""
-        print("jog positive off")
         if self.jog_C1 == True:
             # self.handle = ljm.open(7, self.connection, self.id)
             self.jog_C1 = False
             stop_press_signal = "I21THT"
-            print(stop_press_signal)
+            out = self.get_press_response(stop_press_signal)
             # self.turn_off_PWM_C1()
             # sleep(0.1)
             # self.get_position_C1()
@@ -627,13 +627,15 @@ class Press(QObject):
     def jog_negative_off_C1(self):
         """Turn negative jog off for control channel C1."""
         if self.jog_C1 == True:
-            self.handle = ljm.open(7, self.connection, self.id)
+            # self.handle = ljm.open(7, self.connection, self.id)
             self.jog_C1 = False
-            self.turn_off_PWM_C1()
-            sleep(0.1)
-            self.get_position_C1()
-            self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
-            log.info("Jog negative turned off for control channel C1 on {device}.".format(device=self.name))
+            stop_press_signal = "I21THT"
+            out = self.get_press_response(stop_press_signal)
+            # self.turn_off_PWM_C1()
+            # sleep(0.1)
+            # self.get_position_C1()
+            # self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
+            log.info("Jog positive turned off for control channel C1 on {device}.".format(device=self.name))
 
     @Slot()
     def updateControlPanelC1(self):
@@ -927,11 +929,15 @@ class Press(QObject):
             # self.check_position_C1()
             
             #Send a signal to the press asking for its status I21TSF and then decompose the signal recieved to get direction and speed of press
-            staus_press_signal = "I21TSF"
-            status_press = self.get_press_response(staus_press_signal)
+            status_press_signal = "I21TSF"
+            status_press = self.get_press_response(status_press_signal)
+
             if status_press == "No response!":
                 print(status_press)
-            
+
+            #status code 0 = Stop, 1 = Up, 2 = Down, 3 = FastUp, 4 = FastDown, 5 = UpLimit, 6 = DownLimit (4 and 5 not used)
+            #status_code = status_press_signal[5]
+            # print(type(status_press))
             # Check setpoint.
             # if self.sequence_running == True:
             #     self.check_setpoint_C1()
