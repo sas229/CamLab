@@ -75,6 +75,7 @@ class Press(QObject):
         # self.max_rpm = 4000
         self.current_data = np.empty(0)
         self.sequence_running = False
+        self.move_to_demanded_position = False
 
         self.open_connection()
 
@@ -533,7 +534,6 @@ class Press(QObject):
     def set_speed_C1(self, speed=0.0):
         """Set speed on control channel C1."""
         # Convert mm/s to mm/min
-        # self.speed_C1 = "{:.5f}".format(speed)
   
         self.speed_C1 = speed
 
@@ -559,19 +559,15 @@ class Press(QObject):
         out = self.get_press_response(speed_string_signal)
 
         log.info("Speed on control channel C1 set to " + "{:.5f}".format(speed))
-            
 
-    # def reset_pulse_counter_C1(self):
-    #     """Reste C1 pulse counter."""
-    #     try:
-    #         self.handle = ljm.open(7, self.connection, self.id)
-    #         ljm.eReadName(self.handle, "DIO1_EF_READ_A_AND_RESET")
-    #     except ljm.LJMError:
-    #         ljme = sys.exc_info()[1]
-    #         log.warning(ljme) 
-    #     except Exception:
-    #         e = sys.exc_info()[1]
-    #         log.warning(e)
+        if self.status_PID_C1 == True or self.move_to_demanded_position == True:
+
+            if self.direction_C1 == 1:
+                self.move_press_up()
+
+            elif self.direction_C1 == -1:
+                self.move_press_down()
+            
 
     @Slot(str)
     def jog_positive_on_C1(self):
@@ -644,6 +640,7 @@ class Press(QObject):
 
         stop_press_signal = "I21THT"
         out = self.get_press_response(stop_press_signal)
+        self.move_to_demanded_position = False
 
 
     @Slot()
@@ -679,6 +676,7 @@ class Press(QObject):
 
             # self.set_direction_C1(self.direction_C1)
             self.position_setpoint_C1 = position
+            self.move_to_demanded_position = True
 
             # Reset counters.
             # self.count_C1 = 0
