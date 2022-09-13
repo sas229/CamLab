@@ -439,10 +439,11 @@ class Press(QObject):
     def stop_command_C1(self):
         """Stop command for control channel C1."""
         try:
-            self.handle = ljm.open(7, self.connection, self.id)
-            self.turn_off_PWM_C1()
-            sleep(0.1)
-            self.get_position_C1()
+            # self.handle = ljm.open(7, self.connection, self.id)
+            # self.turn_off_PWM_C1()
+            self.stop_press()
+            # sleep(0.1)
+            # self.get_position_C1()
             self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
             log.info("Control stopped on device {device} control channel C1.".format(device=self.name))
         except ljm.LJMError:
@@ -533,6 +534,7 @@ class Press(QObject):
         """Set speed on control channel C1."""
         # Convert mm/s to mm/min
         # self.speed_C1 = "{:.5f}".format(speed)
+  
         self.speed_C1 = speed
 
         if self.speed_C1 > 99.99999:
@@ -820,7 +822,9 @@ class Press(QObject):
     def close_connection(self):
         """Method to close the device connection."""
         try:
-            self.handle = ljm.close(self.handle)
+            self.connection.close()
+            self.connection = None
+            
             log.info("Disconnected from {name}.".format(name=self.name))
         except ljm.LJMError:
             ljme = sys.exc_info()[1]

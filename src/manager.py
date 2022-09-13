@@ -900,6 +900,16 @@ class Manager(QObject):
         self.acquisitionTables = {}
         self.controlTableModels = {}
 
+        # Close serial connection with Press
+        # print("try to close")
+        
+        # try:
+        #     self.devices["VJT"].close_connection()
+        #     print("closed")
+        # except:
+        #     pass
+
+
         # Initialise the basic default configuration.
         currentDarkMode = copy.deepcopy(self.configuration["global"]["darkMode"])
         self.initialiseDefaultConfiguration()
