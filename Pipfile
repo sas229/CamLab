@@ -17,6 +17,8 @@ jinja2 = "*"
 pyinstaller = "*"
 pyqtgraph = "*"
 sphinx = "*"
+matplotlib = "*"
+pyserial = "*"
 
 [dev-packages]
 
