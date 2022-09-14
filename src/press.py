@@ -49,7 +49,7 @@ class Press(QObject):
         self.enabled_C1 = False
         self.motor_enabled_C1 = False
         self.feedback_C1 = False
-        self.feedback_index_C1 = 0
+        self.feedback_index_C1 = None
         self.running = False
         self.jog_C1 = False
         self.moving_C1 = False
@@ -135,10 +135,11 @@ class Press(QObject):
     @Slot()
     def initialise(self):
         #  Initialise device.
+        self.set_speed_limit()
         self.set_speed_C1(self.speed_C1)
         # self.initialise_settings()
         # self.check_limits()
-        # self.set_speed_limit()
+        
 
     def get_press_response(self, signal):
 
@@ -313,8 +314,8 @@ class Press(QObject):
 
     def set_speed_limit(self):
         """Set speed limit for motors."""
-        self.speed_limit = (self.CPR*self.max_rpm)/(60*self.counts_per_unit_C2)
-        log.info("Speed limit set on {device} for {rpm} RPM.".format(device=self.name, rpm=self.max_rpm))
+        self.speed_limit = 99.99999
+        log.info("Speed limit set on {device} for {speed} mm/min.".format(device=self.name, speed=self.speed_limit))
 
     @Slot(bool)
     def set_PID_control_C1(self, value):
@@ -322,16 +323,17 @@ class Press(QObject):
         self.status_PID_C1 = value
         if value == True:
             self.PID_C1.reset()
+            self.set_speed_limit()
             self.PID_C1.output_limits = (-self.speed_limit, self.speed_limit)
             self.PID_C1.setpoint = self.feedback_setpoint_C1
             self.PID_C1.set_auto_mode(True, last_output=0.001)
-            self.turn_on_PWM_C1()
+            # self.turn_on_PWM_C1()
             log.info("PID control for control channel C1 on " + self.name + " turned on.")
         else:
             self.position_setpoint_C1 = self.position_process_variable_C1
             self.PID_C1.set_auto_mode(False)
             self.updatePositionSetPointC1.emit(self.position_setpoint_C1)
-            self.turn_off_PWM_C1()
+            self.stop_press()
             log.info("PID control for control channel C1 on " + self.name + " turned off.")
 
 
@@ -370,9 +372,10 @@ class Press(QObject):
         
         log.info("Feedback setpoint on control channel C1 on {device} set to {setpoint}.".format(device=self.name, setpoint=setpoint))
 
-    def set_feedback_channel_C1(self, feedback):
+    def set_feedback_channel_C1(self, feedback, tot_chann_enabled):
         self.feedback_index_C1 = feedback
-        if self.feedback_index_C1 != 0:
+        self.tot_chann_enabled = tot_chann_enabled
+        if self.feedback_index_C1 != None:
             self.feedback_C1 = True
         log.info("Feedback channel index set on control channel C1 on {device}.".format(device=self.name))
 
@@ -716,17 +719,17 @@ class Press(QObject):
             log.warning(e)        
 
 
-    def read_pulses_C1(self):
-        """Read pulses for control channel C1."""
-        try:
-            self.handle = ljm.open(7, self.connection, self.id)
-            self.pulses_C1 = ljm.eReadName(self.handle, "DIO1_EF_READ_A")
-        except ljm.LJMError:
-            ljme = sys.exc_info()[1]
-            log.warning(ljme) 
-        except Exception:
-            e = sys.exc_info()[1]
-            log.warning(e)
+    # def read_pulses_C1(self):
+    #     """Read pulses for control channel C1."""
+    #     try:
+    #         self.handle = ljm.open(7, self.connection, self.id)
+    #         self.pulses_C1 = ljm.eReadName(self.handle, "DIO1_EF_READ_A")
+    #     except ljm.LJMError:
+    #         ljme = sys.exc_info()[1]
+    #         log.warning(ljme) 
+    #     except Exception:
+    #         e = sys.exc_info()[1]
+    #         log.warning(e)
 
 
     def get_position_C1(self, current_speed_C1):
@@ -766,26 +769,26 @@ class Press(QObject):
                 self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
         
 
-    def configure_pulse_counters(self):
-        """Setup pulse counters. Set to mode 2 which counts both rising and falling edges. 
-        400 microsecond debounce period, which is just less than the time between rising and
-        falling edges for 16 PPR at 4000 RPM."""
-        self.handle = ljm.open(7, self.connection, self.id)
-        aNamesC1 = ["DIO1_EF_ENABLE", "DIO1_EF_INDEX", "DIO1_EF_CONFIG_A", "DIO1_EF_CONFIG_B", "DIO1_EF_ENABLE"]
-        aValues = [0, 9, 400, 2, 1]
-        numFrames = 5
-        ljm.eWriteNames(self.handle, numFrames, aNamesC1, aValues)
+    # def configure_pulse_counters(self):
+    #     """Setup pulse counters. Set to mode 2 which counts both rising and falling edges. 
+    #     400 microsecond debounce period, which is just less than the time between rising and
+    #     falling edges for 16 PPR at 4000 RPM."""
+    #     self.handle = ljm.open(7, self.connection, self.id)
+    #     aNamesC1 = ["DIO1_EF_ENABLE", "DIO1_EF_INDEX", "DIO1_EF_CONFIG_A", "DIO1_EF_CONFIG_B", "DIO1_EF_ENABLE"]
+    #     aValues = [0, 9, 400, 2, 1]
+    #     numFrames = 5
+    #     ljm.eWriteNames(self.handle, numFrames, aNamesC1, aValues)
 
 
-        log.info("Pulse counters configured on device named " + self.name + ".")
+    #     log.info("Pulse counters configured on device named " + self.name + ".")
 
-    def configure_ADC(self):
-        """Set the ADC settings."""
-        self.handle = ljm.open(7, self.connection, self.id)
-        names = ["AIN_ALL_RANGE", "AIN_ALL_RESOLUTION_INDEX", "AIN_ALL_SETTLING_US"]
-        aValues = [10, 2, 0] # No amplification; 16.5 effective bits; auto settling time.
-        numFrames = len(names)
-        ljm.eWriteNames(self.handle, numFrames, names, aValues) 
+    # def configure_ADC(self):
+    #     """Set the ADC settings."""
+    #     self.handle = ljm.open(7, self.connection, self.id)
+    #     names = ["AIN_ALL_RANGE", "AIN_ALL_RESOLUTION_INDEX", "AIN_ALL_SETTLING_US"]
+    #     aValues = [10, 2, 0] # No amplification; 16.5 effective bits; auto settling time.
+    #     numFrames = len(names)
+    #     ljm.eWriteNames(self.handle, numFrames, names, aValues) 
 
     def set_acquisition_variables(self, controlRate):
         """Set the acquisition variables."""
@@ -906,14 +909,22 @@ class Press(QObject):
             e = sys.exc_info()[1]
             log.warning(e)
 
+    @Slot(np.ndarray)
+    def get_latest_data(self, latest_data):
+        
+        self.current_data = latest_data[0][:self.tot_chann_enabled]
+        # print("current data", self.current_data)
+          
+
     def update_PID_C1(self):
         """Update PID on control channel C1."""
-        self.feedback_process_variable_C1 = self.current_data[self.feedback_index_C1-1]
+        self.feedback_process_variable_C1 = self.current_data[self.feedback_index_C1]
+        
         if self.status_PID_C1 == True:
             self.speedSetPointC1 = self.PID_C1(self.feedback_process_variable_C1)
             self.direction_C1 = np.sign(self.speedSetPointC1)
             demandSpeed = np.abs(self.speedSetPointC1)
-            self.set_direction_C1(self.direction_C1)
+            # self.set_direction_C1(self.direction_C1)
             self.set_speed_C1(demandSpeed)
 
 
@@ -926,14 +937,20 @@ class Press(QObject):
             self.data_C1 = np.hstack((self.position_setpoint_C1, self.position_process_variable_C1, int(self.direction_C1), self.speed_C1, self.feedback_setpoint_C1, self.feedback_process_variable_C1))
 
         # If control channel enabled, concatenate data.
-        if self.enabled_C1 == True:
-            if self.current_data.size == 0:
-                self.current_data = self.data_C1
-            else:
-                self.current_data = np.concatenate((self.current_data, self.data_C1))
 
-        self.data = self.current_data
+        # print("current data", self.current_data)
+        # print("data C1", self.data_C1)
+        # if self.enabled_C1 == True:
+        #     if self.current_data.size == 0:
+                
+        #         self.current_data = self.data_C1
+        #     else:
+                
+        #         self.current_data = np.concatenate((self.current_data, self.data_C1))
+
+        self.data = self.data_C1
         # Emit data signal.
+        # print("DATA", self.data)
         self.emitData.emit(self.name, np.atleast_2d(self.data))    
 
     def process(self):
@@ -972,18 +989,25 @@ class Press(QObject):
             self.get_position_C1(current_speed_C1)
             self.initial_speed_C1 = current_speed_C1
             
-            if self.jog_C1 == False:
+            
+
+            if self.jog_C1 == False and self.status_PID_C1 == False:
                 self.check_position_C1_for_demand()
             
             # Check setpoint.
             # if self.sequence_running == True:
             #     self.check_setpoint_C1()
-            # # If feedback is available.
-            # if self.feedback_C1 == True:
-            #     self.update_PID_C1()
+            # If feedback is available.
+            
+            if self.feedback_C1 == True and self.current_data.size!=0:
+                
+                self.update_PID_C1()
+            
+            self.send_data()
 
             # Concatenate output data.
-            self.send_data()
+            
+
         except ljm.LJMError:
             ljme = sys.exc_info()[1]
             log.warning(ljme) 

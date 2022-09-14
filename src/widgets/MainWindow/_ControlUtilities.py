@@ -39,6 +39,7 @@ class ControlUtilities:
 
                 self.deviceConfigurationWidget[name].setFeedbackLinearAxis.connect(
                     controlWidget.toggleFeedbackControl)
+
             else:
                 self.manager.controlTableModels[name].controlChannelNameChanged.connect(controlWidget.setTitle)
 

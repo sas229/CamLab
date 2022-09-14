@@ -56,7 +56,7 @@ class Assembly(QObject):
         if np.shape(self.data[name])[0] > 0:
             self.data[name] = np.vstack((self.data[name], data))
         else:
-            self.data[name] = data
+            self.data[name] = data        
 
     @Slot()
     def update_output_data(self):
@@ -81,6 +81,7 @@ class Assembly(QObject):
                     
                     # Perform averaging of data if appropriate.
                     processedData = deviceData
+
                     if device["type"] == "Hub":
                         if self.average > 1:
                             processedData = uniform_filter1d(processedData, size=self.average, axis=0, mode='nearest')
@@ -102,8 +103,10 @@ class Assembly(QObject):
                     count += 1
 
                 # Take latest data (not including the timestamp) from all devices and emit signal.
+                # print("SAVEDATA", saveData)
                 latestData = np.atleast_2d(saveData[-1,:])
                 self.latestDataChanged.emit(latestData)
+               
 
                 # If skip value greater than 1, skip values.
                 if self.skip > 1:

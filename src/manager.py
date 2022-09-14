@@ -322,8 +322,12 @@ class Manager(QObject):
                 channelFeedback = self.configuration["devices"]["VJT"]["control"][0]["feedback"]
 
                 if deviceFeedback != "N/A" and channelFeedback != "N/A":
-
+                    
+                    self.devices[name].set_enabled_C1(True)
                     indexPressFeedback = self.determinePressFeedbackIndex(deviceFeedback, channelFeedback, enabledDevices)
+                    tot_chann_enabled = self.total_channels_enabled(enabledDevices)
+                    self.devices[name].set_feedback_channel_C1(indexPressFeedback, tot_chann_enabled)
+                
                     # print(deviceFeedback, channelFeedback, indexPressFeedback)
 
     def determinePressFeedbackIndex(self, deviceFeedback, channelFeedback, enabledDevices):
@@ -340,9 +344,22 @@ class Manager(QObject):
                     # print(name, channel)
 
                     if channel == channelFeedback and name == deviceFeedback:
-                        return indexPressFeedback
+                        return int(indexPressFeedback)
 
                     indexPressFeedback = indexPressFeedback + 1
+    
+    def total_channels_enabled(self, enableDevices):
+        tot_chann = 0
+
+        for device in enableDevices:
+            if device["type"] == "Hub":
+                name = device["name"]
+                channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[
+                    name].acquisitionSettings()
+                
+                tot_chann += len(channels)
+
+        return int(tot_chann)
 
     def setDeviceFeedbackChannels(self):
         log.info("Setting feedback channels for all devices.")
@@ -406,6 +423,7 @@ class Manager(QObject):
                 self.devices[name].stop_stream = False
 
             elif self.devices[name].type == "Press":
+                self.assembly.latestDataChanged.connect(self.devices[name].get_latest_data)
                 self.timing.controlDevices.connect(self.devices[name].process)
                 self.assembly.autozeroDevices.connect(self.devices[name].recalculate_offsets)
                 self.devices[name].emitData.connect(self.assembly.update_new_data)
@@ -430,6 +448,7 @@ class Manager(QObject):
                 self.devices[name].saveImage.disconnect(self.assembly.save_image)
 
             elif self.devices[name].type == "Press":
+                self.assembly.latestDataChanged.connect(self.devices[name].get_latest_data)
                 self.timing.controlDevices.disconnect(self.devices[name].process)
                 self.assembly.autozeroDevices.disconnect(self.devices[name].recalculate_offsets)
                 self.devices[name].emitData.disconnect(self.assembly.update_new_data)
