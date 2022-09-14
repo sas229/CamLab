@@ -583,8 +583,6 @@ class Press(QObject):
                 self.direction_C1 = 1
                 self.jog_C1 = True
                 self.move_press_up()
-                
-                
 
                 log.info("Jog positive turned on for control channel C1 on {device}.".format(device=self.name))
 
@@ -652,7 +650,7 @@ class Press(QObject):
         if self.jog_C1 == True: 
             self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
         self.updatePositionProcessVariableC1.emit(self.position_process_variable_C1)
-        if self.feedback_index_C1 != 0:
+        if self.feedback_index_C1 != None:
             self.updateFeedbackProcessVariableC1.emit(self.feedback_process_variable_C1)
             if self.status_PID_C1 == True:
                 self.updateSpeedC1.emit(self.speed_C1)
