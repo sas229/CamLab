@@ -1018,8 +1018,9 @@ class Manager(QObject):
                 "value": "0", "unit": "-"})
 
             elif self.devices[name].type == "Press":
+                secondaryUnit = self.configuration["devices"][name]["control"][0]["settings"]["secondaryUnit"]
                 genericChannelsData.append(
-                    {"plot": False, "name": "Speed", "device": control["name"], "colour": self.setColourDefault(),
+                    {"plot": False, "name": "Speed", "device": "VJT", "colour": self.setColourDefault(),
                      "value": "0.00", "unit": secondaryUnit})
         return genericChannelsData
 
