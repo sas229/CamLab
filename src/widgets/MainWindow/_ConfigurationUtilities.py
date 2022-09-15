@@ -38,6 +38,7 @@ class ConfigurationUtilities:
         # Connections.
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.toggle_press_control_tab)
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.update_press_feedback_device_ComboBox)
+        self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.manager.updatePlotWindowChannelsData)
 
         # Initialise settings.
         self.deviceConfigurationWidget[name].set_configuration(self.manager.configuration)
@@ -68,7 +69,7 @@ class ConfigurationUtilities:
                 feedback_channel_lists[name] = enabledChannels
         if "VJT" in self.deviceConfigurationWidget:
             self.deviceConfigurationWidget["VJT"].set_channel_lists(feedback_channel_lists)
-            self.deviceConfigurationWidget["VJT"].update_selected_channel_list()
+            self.deviceConfigurationWidget["VJT"].update_selected_channel_list()          
 
     def add_camera_configuration_tab(self, name):
         # Instantiate widget.

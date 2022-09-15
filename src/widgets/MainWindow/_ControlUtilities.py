@@ -39,7 +39,8 @@ class ControlUtilities:
 
                 self.deviceConfigurationWidget[name].setFeedbackLinearAxis.connect(
                     controlWidget.toggleFeedbackControl)
-
+                self.deviceConfigurationWidget[name].setFeedbackLinearAxis.connect(self.manager.updatePlotWindowChannelsData)
+                
             else:
                 self.manager.controlTableModels[name].controlChannelNameChanged.connect(controlWidget.setTitle)
 
