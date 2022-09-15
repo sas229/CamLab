@@ -85,8 +85,8 @@ class Manager(QObject):
             "ratio": 5
         }
         self.defaultControlTable = [
-            {"channel": "C1", "name": "C1", "enable": False, "type": "N/A", "control": "N/A", "feedback": "N/A", "settings": self.defaultControlSettings},
-            {"channel": "C2", "name": "C2", "enable": False, "type": "N/A", "control": "N/A", "feedback": "N/A", "settings": self.defaultControlSettings}
+            {"channel": "C1", "name": "C1", "enable": False, "type": "N/A", "control": "N/A", "feedback": "N/A", "settings": copy.deepcopy(self.defaultControlSettings)},
+            {"channel": "C2", "name": "C2", "enable": False, "type": "N/A", "control": "N/A", "feedback": "N/A", "settings": copy.deepcopy(self.defaultControlSettings)}
         ]
 
         self.controlModeList = ["N/A", "Digital"]
@@ -752,7 +752,7 @@ class Manager(QObject):
                         "type": deviceInformation["type"],
                         "connection": deviceInformation["connection"],
                         "address": deviceInformation["address"],
-                        "control": [{"channel": "TS", "name": "VJT", "enable": True, "type": "Digital", "control": "Linear", "deviceFeedback": "N/A", "feedback": "N/A", "settings": self.defaultControlSettings}],
+                        "control": [{"channel": "TS", "name": "VJT", "enable": True, "type": "Digital", "control": "Linear", "deviceFeedback": "N/A", "feedback": "N/A", "settings": copy.deepcopy(self.defaultControlSettings)}],
                     }
 
                     # If no previous devices are configured, add the "devices" key to the configuration.

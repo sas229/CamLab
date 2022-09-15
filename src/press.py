@@ -160,23 +160,22 @@ class Press(QObject):
     @Slot(str)
     def set_enable_C1(self, value):
         """Set enable state for control channel C1."""
-        self.motor_enabled_C1 = True
-        # try:
-        #     self.handle = ljm.open(7, self.connection, self.id)
-        #     if value ==  True:
-        #         self.position_setpoint_C1 = self.position_process_variable_C1
-        #         self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
-        #         ljm.eWriteName(self.handle, "EIO0", 1)
-        #         self.motor_enabled_C1 = True
-        #     else:
-        #         ljm.eWriteName(self.handle, "EIO0", 0)
-        #         self.motor_enabled_C1 = False
-        # except ljm.LJMError:
-        #     ljme = sys.exc_info()[1]
-        #     log.warning(ljme) 
-        # except Exception:
-        #     e = sys.exc_info()[1]
-        #     log.warning(e)
+    
+        try:
+            self.check_connections()
+            if value ==  True:
+                self.position_setpoint_C1 = self.position_process_variable_C1
+                self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
+                self.motor_enabled_C1 = True
+            else:
+                self.motor_enabled_C1 = False
+
+        except ljm.LJMError:
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
         
     def disable_clock_0(self):
         """Check clock 0 is disabled."""
@@ -291,20 +290,18 @@ class Press(QObject):
 
     def check_connection_C1(self):
         """Check connection to control device on channel C1."""
-        self.connectedC1 = True
-        self.updateConnectionIndicatorC1.emit(self.connectedC1)
-
-        # try:
-        #     self.handle = ljm.open(7, self.connection, self.id)
-        #     self.connectedC1 = not bool(int(ljm.eReadName(self.handle, 'FIO0')))
-        #     self.updateConnectionIndicatorC1.emit(self.connectedC1)
-        # except ljm.LJMError:
-        #     ljme = sys.exc_info()[1]
-        #     log.warning(ljme) 
-        # except Exception:
-        #     e = sys.exc_info()[1]
-        #     log.warning(e)
-        # log.info("Check connection.")
+        try:
+            status_press = self.get_press_response('I21TSF')
+            if len(status_press) == 14 and status_press[:4] == "i21t":
+                self.connectedC1 = True
+                self.updateConnectionIndicatorC1.emit(self.connectedC1)
+        except ljm.LJMError:
+            ljme = sys.exc_info()[1]
+            log.warning(ljme) 
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
+        
 
 
     def check_connections(self):
@@ -380,23 +377,19 @@ class Press(QObject):
         log.info("Feedback channel index set on control channel C1 on {device}.".format(device=self.name))
 
 
-    def check_limits(self):
+    def check_limits(self, status_code):
         try:
             # Refresh connection.
-            self.handle = ljm.open(7, self.connection, self.id)
+            # self.handle = ljm.open(7, self.connection, self.id)
             self.limit_C1 = False
+            self.maximumLimitC1 = False
+            self.minimumLimitC1 = False
 
-            # Check position limits.
-            # self.minimumLimitC1 = bool(ljm.eReadName(self.handle, "CIO2"))
-            # self.maximumLimitC1 = bool(ljm.eReadName(self.handle, "CIO0"))
-
-            #  Check if motor moving and stop if moving in the direction of the hard limit for C1.
-            moving = ljm.eReadName(self.handle, "DIO4_EF_ENABLE")
-            if moving == 1 and self.direction_C1 == -1 and self.minimumLimitC1 == True:
-                self.stop_command_C1()
-            elif moving == 1 and self.direction_C1 == 1 and self.maximumLimitC1 == True:
-                self.stop_command_C1()
-
+            if status_code == "5":
+                self.maximumLimitC1 = True
+            
+            if status_code == "6":
+                self.minimumLimitC1 = True
 
             # Turn on indicator if on limits.
             if self.minimumLimitC1 == True or self.maximumLimitC1 == True:
@@ -404,14 +397,23 @@ class Press(QObject):
 
             # Check position limits.
             if self.position_process_variable_C1 <= self.position_left_limit_C1:
+                self.stop_command_C1()
+                if self.status_PID_C1 == True:
+                    self.set_PID_control_C1(False)
                 self.limit_C1 = True
+                
             if self.position_process_variable_C1 >= self.position_right_limit_C1:
+                self.stop_command_C1()
+                if self.status_PID_C1 == True:
+                    self.set_PID_control_C1(False)
                 self.limit_C1 = True
 
             # Check feedback limits.
             if self.feedback_process_variable_C1 <= self.feedback_left_limit_C1:
+                self.stop_command_C1()
                 self.limit_C1 = True
             if self.feedback_process_variable_C1 >= self.feedback_right_limit_C1:
+                self.stop_command_C1()
                 self.limit_C1 = True
 
             # Set indicator.
@@ -909,8 +911,9 @@ class Press(QObject):
 
     @Slot(np.ndarray)
     def get_latest_data(self, latest_data):
-        
-        self.current_data = latest_data[0][:self.tot_chann_enabled]
+
+        if self.feedback_C1 == True:
+            self.current_data = latest_data[0][:self.tot_chann_enabled]
         # print("current data", self.current_data)
           
 
@@ -974,10 +977,14 @@ class Press(QObject):
 
             if status_press == "No response!":
                 print(status_press)
+                self.stop_press()
 
             #status code 0 = Stop, 1 = Up, 2 = Down, 3 = FastUp, 4 = FastDown, 5 = UpLimit, 6 = DownLimit (4 and 5 not used)
             if len(status_press) == 14:
                 status_code = status_press[4]
+                
+                self.check_limits(status_code)
+                    
                 current_speed_C1 = status_press[5:]
                 current_speed_C1 = current_speed_C1.replace(".","")
                 current_speed_C1 = float(current_speed_C1)/10**5
