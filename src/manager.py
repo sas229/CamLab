@@ -1018,10 +1018,46 @@ class Manager(QObject):
                 "value": "0", "unit": "-"})
 
             elif self.devices[name].type == "Press":
+                
+                primaryUnit = self.configuration["devices"][name]["control"][0]["settings"]["primaryUnit"]
                 secondaryUnit = self.configuration["devices"][name]["control"][0]["settings"]["secondaryUnit"]
-                genericChannelsData.append(
-                    {"plot": False, "name": "Speed", "device": "VJT", "colour": self.setColourDefault(),
-                     "value": "0.00", "unit": secondaryUnit})
+                feedbackUnit = self.configuration["devices"][name]["control"][0]["settings"]["feedbackUnit"]
+
+                if self.configuration["devices"][name]["control"][0]["feedback"] == "N/A":
+                    genericChannelsData.append(
+                    {"plot": False, "name": "Postion SP" , "device": "VJT", "colour": self.setColourDefault(),
+                    "value": "0.00", "unit": primaryUnit})
+                    genericChannelsData.append(
+                    {"plot": False, "name": "Postion PV" , "device": "VJT", "colour": self.setColourDefault(),
+                    "value": "0.00", "unit": primaryUnit})
+                    genericChannelsData.append(
+                    {"plot": False, "name": "Direction" , "device": "VJT", "colour": self.setColourDefault(),
+                    "value": "0.00", "unit": "-"})
+                    genericChannelsData.append(
+                    {"plot": False, "name": "Speed" , "device": "VJT", "colour": self.setColourDefault(),
+                    "value": "0.00", "unit": secondaryUnit})
+                
+                else:
+                    genericChannelsData.append(
+                    {"plot": False, "name": "Postion SP" , "device": "VJT", "colour": self.setColourDefault(),
+                    "value": "0.00", "unit": primaryUnit})
+                    genericChannelsData.append(
+                    {"plot": False, "name": "Postion PV" , "device": "VJT", "colour": self.setColourDefault(),
+                    "value": "0.00", "unit": primaryUnit})
+                    genericChannelsData.append(
+                    {"plot": False, "name": "Direction" , "device": "VJT", "colour": self.setColourDefault(),
+                    "value": "0.00", "unit": "-"})
+                    genericChannelsData.append(
+                    {"plot": False, "name": "Speed" , "device": "VJT", "colour": self.setColourDefault(),
+                    "value": "0.00", "unit": secondaryUnit})
+                    genericChannelsData.append(
+                    {"plot": False, "name": "Feedback SP" , "device": "VJT", "colour": self.setColourDefault(),
+                    "value": "0.00", "unit": feedbackUnit})
+                    genericChannelsData.append(
+                    {"plot": False, "name": "Feedback PV" , "device": "VJT", "colour": self.setColourDefault(),
+                    "value": "0.00", "unit": feedbackUnit})
+                    
+                         
         return genericChannelsData
 
     @Slot()
