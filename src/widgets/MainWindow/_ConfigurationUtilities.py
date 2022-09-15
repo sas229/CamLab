@@ -22,8 +22,9 @@ class ConfigurationUtilities:
     def add_press_configuration_tab(self, name):
         # Instantiate widget.
         self.deviceConfigurationWidget[name] = PressSettings(name)
-        enabledDevices = self.manager.deviceTableModel.enabledDevices()
-        self.deviceConfigurationWidget[name].set_device_list(enabledDevices)
+        # enabledDevices = self.manager.deviceTableModel.enabledDevices()
+        # self.deviceConfigurationWidget[name].set_device_list(enabledDevices)
+        # print(enabledDevices)
 
         # Add the tab and show if device connected boolean is true.
         self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.addTab(self.deviceConfigurationWidget[name], name)
@@ -39,10 +40,14 @@ class ConfigurationUtilities:
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.toggle_press_control_tab)
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.update_press_feedback_device_ComboBox)
         self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.manager.updatePlotWindowChannelsData)
+        self.manager.initialisePressFeedbackSettings.connect(self.update_press_feedback_device_ComboBox)
+        self.manager.initialisePressFeedbackSettings.connect(self.update_press_feedback_channel_ComboBox)
+        self.manager.initialisePressFeedbackSettings.connect(self.update_press_configuration)
+        # self.deviceConfigurationWidget[name].pressFeedbackUpdated.connect(self.manager.storePressFeedbackSettings)
 
-        # Initialise settings.
-        self.deviceConfigurationWidget[name].set_configuration(self.manager.configuration)
-        sleep(1.0)
+        # # Initialise settings.
+        # self.deviceConfigurationWidget[name].set_configuration(self.manager.configuration)
+        # sleep(1.0)
 
         # Add the control tab.
         self.add_control_tab(name, 0)
@@ -59,6 +64,7 @@ class ConfigurationUtilities:
         self.deviceConfigurationWidget["VJT"].set_device_list(inputDevices)
         self.update_press_feedback_channel_ComboBox()
     
+    @Slot()
     def update_press_feedback_channel_ComboBox(self):
         enabledDevices = self.manager.deviceTableModel.enabledDevices()
         feedback_channel_lists = {}
@@ -70,6 +76,11 @@ class ConfigurationUtilities:
         if "VJT" in self.deviceConfigurationWidget:
             self.deviceConfigurationWidget["VJT"].set_channel_lists(feedback_channel_lists)
             self.deviceConfigurationWidget["VJT"].update_selected_channel_list()          
+    
+    @Slot()
+    def update_press_configuration(self):
+        if "VJT" in self.deviceConfigurationWidget:
+            self.deviceConfigurationWidget["VJT"].set_configuration(self.manager.configuration)
 
     def add_camera_configuration_tab(self, name):
         # Instantiate widget.

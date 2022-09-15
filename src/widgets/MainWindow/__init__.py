@@ -248,6 +248,9 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.toolbar.updateIcons(self.darkMode)
         self.sequenceTab.update_tab()
 
+        # Update press configuration if device present.
+        self.update_press_configuration()
+
         # Update the UI of plot windows if they exist.
         if self.plots and "plots" in self.manager.configuration: 
             self.update_plots()

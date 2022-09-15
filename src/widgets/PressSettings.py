@@ -53,13 +53,25 @@ class PressSettings(QWidget):
         # Connections.
         self.deviceComboBox.currentTextChanged.connect(self.update_selected_channel_list)
         self.channelComboBox.currentTextChanged.connect(self.feedback_channel_updated)
-        
-    
+
+    @Slot(dict) 
     def set_configuration(self, configuration):
         """Method to set the configuration."""
         self.configuration = configuration
         self.pressConfiguration = self.configuration["devices"][self.name]["control"][0]
+        self.initialise_feedback_device(self.pressConfiguration["deviceFeedback"])
+        self.initialise_feedback_channel(self.pressConfiguration["feedback"])
         self.setWindowTitle(self.name)
+
+    def initialise_feedback_device(self, text):
+        """Method to initialise the feedback device."""
+        self.deviceComboBox.setCurrentText(text)
+        log.info("Feedback on {press} set to device called {device}.".format(press=self.name, device=text))
+
+    def initialise_feedback_channel(self, text):
+        """Method to initialise the feedback device."""
+        self.channelComboBox.setCurrentText(text)
+        log.info("Feedback on {press} set to channel {channel}.".format(press=self.name, channel=text))
 
     def set_device_list(self, device_list):
         """Method to set the device list."""
@@ -93,12 +105,11 @@ class PressSettings(QWidget):
 
         self.setFeedbackLinearAxis.emit(feedback)
 
-        try:
-            self.pressConfiguration["deviceFeedback"] = device
-            self.pressConfiguration["feedback"] = channel
-        except:
-            pass
-
+        # if hasattr(self, 'pressConfiguration'):
+        #     if self.pressConfiguration["deviceFeedback"] != "N/A": 
+        #         self.pressConfiguration["deviceFeedback"] = device
+        #     if self.pressConfiguration["feedback"] != "N/A":
+        #         self.pressConfiguration["feedback"] = channel
 
         log.info("Feedback device set to {} on channel {}".format(device, channel))
 

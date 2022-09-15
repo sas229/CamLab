@@ -27,6 +27,7 @@ class Manager(QObject):
     existingPlotsFound = Signal()
     outputText = Signal(str)
     finishedRefreshingDevices = Signal()
+    initialisePressFeedbackSettings = Signal()
 
     def __init__(self):
         super().__init__()
@@ -513,8 +514,46 @@ class Manager(QObject):
                     except Exception:
                         e = sys.exc_info()[1]
                         log.warning(e)
-                log.info("Configuration loaded.")
-                self.configurationChanged.emit(self.configuration)  
+
+                elif deviceInformation["type"] == "Press":
+                   
+                    # Check if press is connected in any COM ports.
+                    address = 21
+                    for comport in list_ports.comports():
+                        # Configure the serial connection.
+                        ser = serial.Serial(
+                            port=comport.device,
+                            baudrate=57600,
+                            parity=serial.PARITY_NONE,
+                            stopbits=serial.STOPBITS_ONE,
+                            bytesize=serial.EIGHTBITS
+                        )
+                        # ser = self.ser
+                        log.info("Trying to find VJTech TriScan device on port " + comport.device + ".")
+                        ser.write(bytes("I" + str(address) + "TSF\r", "utf-8"))
+                        time.sleep(0.1)
+                        ret = ''
+
+                        # Wait for return message.
+                        while ser.inWaiting() > 0:
+                            ret += ser.read(1).decode("utf-8")
+
+                        ser.close()
+                        break
+
+                    deviceInformation["status"] = True   
+                    self.deviceTableModel.appendRow(deviceInformation)
+                    self.controlTableModels[device] = ControlTableModel(device, self.configuration["devices"][device]["control"])
+                    self.createDeviceThread(name=device, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True)
+                    self.toggleDeviceConnection(device, deviceInformation["connect"])    
+
+            # Update the feedback device and channels list in PressSettings.
+            for device in self.configuration["devices"].keys():
+                if self.configuration["devices"][device]["type"] == "Press":
+                    self.initialisePressFeedbackSettings.emit()
+
+            log.info("Configuration loaded.")
+            self.configurationChanged.emit(self.configuration)  
                 
     def findDevices(self):
         """Method to find all available devices and return an array of connection properties.
