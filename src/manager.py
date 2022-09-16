@@ -319,19 +319,25 @@ class Manager(QObject):
                 self.devices[name].initialise()
                 controlRate = self.configuration["global"]["controlRate"]
                 self.devices[name].set_acquisition_variables(controlRate)
-                deviceFeedback = self.configuration["devices"]["VJT"]["control"][0]["deviceFeedback"]
-                channelFeedback = self.configuration["devices"]["VJT"]["control"][0]["feedback"]
+                self.configuration["devices"]["VJT"]["control"][0]["deviceFeedback"] = self.pressDeviceFeeback
+                self.configuration["devices"]["VJT"]["control"][0]["feedback"] = self.pressChannelFeedback
 
-                if deviceFeedback != "N/A" and channelFeedback != "N/A":
+                if self.pressDeviceFeeback != "N/A" and self.pressChannelFeedback != "N/A":
                     
                     self.devices[name].set_enabled_C1(True)
-                    indexPressFeedback = self.determinePressFeedbackIndex(deviceFeedback, channelFeedback, enabledDevices)
+                    indexPressFeedback = self.determinePressFeedbackIndex(enabledDevices)
                     tot_chann_enabled = self.total_channels_enabled(enabledDevices)
                     self.devices[name].set_feedback_channel_C1(indexPressFeedback, tot_chann_enabled)
                 
                     # print(deviceFeedback, channelFeedback, indexPressFeedback)
 
-    def determinePressFeedbackIndex(self, deviceFeedback, channelFeedback, enabledDevices):
+    @Slot(str, str)
+    def storePressFeedbackSettings(self, deviceFeedback, channelFeedback):
+
+        self.pressDeviceFeeback = deviceFeedback
+        self.pressChannelFeedback = channelFeedback
+
+    def determinePressFeedbackIndex(self, enabledDevices):
 
         indexPressFeedback = 0
         for device in enabledDevices:
@@ -344,7 +350,7 @@ class Manager(QObject):
                 for channel in channels:
                     # print(name, channel)
 
-                    if channel == channelFeedback and name == deviceFeedback:
+                    if channel == self.pressChannelFeedback and name == self.pressDeviceFeeback:
                         return int(indexPressFeedback)
 
                     indexPressFeedback = indexPressFeedback + 1

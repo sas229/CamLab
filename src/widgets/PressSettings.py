@@ -18,6 +18,7 @@ class PressSettings(QWidget):
     setAcquisitionMode = Signal(str)
     setAcquisitionRate = Signal(float)
     setFeedbackLinearAxis = Signal(bool)
+    pressFeedbackUpdated = Signal(str, str)
 
     
     def __init__(self, name, *args, **kwargs):
@@ -104,6 +105,7 @@ class PressSettings(QWidget):
             feedback = False
 
         self.setFeedbackLinearAxis.emit(feedback)
+        self.pressFeedbackUpdated.emit(device, channel)
 
         # if hasattr(self, 'pressConfiguration'):
         #     if self.pressConfiguration["deviceFeedback"] != "N/A": 

@@ -43,7 +43,7 @@ class ConfigurationUtilities:
         self.manager.initialisePressFeedbackSettings.connect(self.update_press_feedback_device_ComboBox)
         self.manager.initialisePressFeedbackSettings.connect(self.update_press_feedback_channel_ComboBox)
         self.manager.initialisePressFeedbackSettings.connect(self.update_press_configuration)
-        # self.deviceConfigurationWidget[name].pressFeedbackUpdated.connect(self.manager.storePressFeedbackSettings)
+        self.deviceConfigurationWidget[name].pressFeedbackUpdated.connect(self.manager.storePressFeedbackSettings)
 
         # # Initialise settings.
         # self.deviceConfigurationWidget[name].set_configuration(self.manager.configuration)
