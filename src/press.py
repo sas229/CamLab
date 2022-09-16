@@ -77,6 +77,7 @@ class Press(QObject):
         self.current_data = np.empty(0)
         self.sequence_running = False
         self.move_to_demanded_position = False
+        self.is_stopped = True
 
         self.open_connection()
 
@@ -397,14 +398,14 @@ class Press(QObject):
                 self.limit_C1 = True
 
             # Check position limits.
-            if self.position_process_variable_C1 <= self.position_left_limit_C1:
+            if self.position_process_variable_C1 <= self.position_left_limit_C1 and self.is_stopped == False and self.direction_C1 == -1:
                 self.stop_command_C1()
                 if self.status_PID_C1 == True:
                     self.updateEnablePIDControlC1.emit(False)
                     # self.set_PID_control_C1(False)
                 self.limit_C1 = True
                 
-            if self.position_process_variable_C1 >= self.position_right_limit_C1:
+            if self.position_process_variable_C1 >= self.position_right_limit_C1 and self.is_stopped == False and self.direction_C1 == 1:
                 self.stop_command_C1()
                 if self.status_PID_C1 == True:
                     self.updateEnablePIDControlC1.emit(False)
@@ -412,10 +413,10 @@ class Press(QObject):
                 self.limit_C1 = True
 
             # Check feedback limits.
-            if self.feedback_process_variable_C1 <= self.feedback_left_limit_C1:
+            if self.feedback_process_variable_C1 <= self.feedback_left_limit_C1 and self.is_stopped == False and self.direction_C1 == -1:
                 self.stop_command_C1()
                 self.limit_C1 = True
-            if self.feedback_process_variable_C1 >= self.feedback_right_limit_C1:
+            if self.feedback_process_variable_C1 >= self.feedback_right_limit_C1 and self.is_stopped == False and self.direction_C1 == 1:
                 self.stop_command_C1()
                 self.limit_C1 = True
 
@@ -633,17 +634,20 @@ class Press(QObject):
     def move_press_up(self):
 
         self.direction_C1 = 1
+        self.is_stopped = False
         up_press_signal = "I21TUP"
         out = self.get_press_response(up_press_signal)
     
     def move_press_down(self):
         
         self.direction_C1 = -1
+        self.is_stopped = False
         down_press_signal = "I21TDN"
         out = self.get_press_response(down_press_signal)
     
     def stop_press(self):
 
+        self.is_stopped = True
         stop_press_signal = "I21THT"
         out = self.get_press_response(stop_press_signal)
         self.move_to_demanded_position = False
@@ -916,9 +920,7 @@ class Press(QObject):
     def get_latest_data(self, latest_data):
 
         if self.feedback_C1 == True:
-            self.current_data = latest_data[0][:self.tot_chann_enabled]
-        # print("current data", self.current_data)
-          
+            self.current_data = latest_data[0][:self.tot_chann_enabled]          
 
     def update_PID_C1(self):
         """Update PID on control channel C1."""
@@ -941,9 +943,6 @@ class Press(QObject):
             self.data_C1 = np.hstack((self.position_setpoint_C1, self.position_process_variable_C1, int(self.direction_C1), self.speed_C1, self.feedback_setpoint_C1, self.feedback_process_variable_C1))
 
         # If control channel enabled, concatenate data.
-
-        # print("current data", self.current_data)
-        # print("data C1", self.data_C1)
         # if self.enabled_C1 == True:
         #     if self.current_data.size == 0:
                 
@@ -954,24 +953,11 @@ class Press(QObject):
 
         self.data = self.data_C1
         # Emit data signal.
-        # print("DATA", self.data)
         self.emitData.emit(self.name, np.atleast_2d(self.data))    
 
     def process(self):
         """Method to process timed commands."""
         try:
-            # # Read from the device and apply slope and offsets.
-            # self.handle = ljm.open(7, self.connection, self.id)
-            # ljm.eWriteName(self.handle, "USER_RAM0_U16", 1) 
-            # self.check_limits()
-            # if len(self.addresses) > 0:
-            #     self.raw = np.asarray(ljm.eReadAddresses(self.handle, self.numFrames, self.addresses, self.dataTypes))
-            #     self.current_data = self.slopes*(self.raw - self.offsets)
-            # else: 
-            #     self.current_data = np.empty(0)
-            # Check position.
-            # self.get_position_C1()
-
             # self.check_position_C1()
             
             #Send a signal to the press asking for its status I21TSF and then decompose the signal recieved to get direction and speed of press
@@ -986,7 +972,8 @@ class Press(QObject):
             if len(status_press) == 14:
                 status_code = status_press[4]
                 
-                self.check_limits(status_code)
+                if self.is_stopped == False: # If the press is  moving then do  check the limits
+                    self.check_limits(status_code)
                     
                 current_speed_C1 = status_press[5:]
                 current_speed_C1 = current_speed_C1.replace(".","")

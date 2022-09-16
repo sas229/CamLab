@@ -134,10 +134,15 @@ class SliderGroupBox(QGroupBox):
         # Set point values to range between left and right limits.
         if value == None:
             value = float(self.setPointLineEdit.text())
+        print("Before logic set_setPoint:")
+        print(value)
         value = max(value, self.getLeftLimit())
         value = min(value, self.getRightLimit())
+        print("After logic set_setPoint:")
+        print(value)
         self.axisSlider.setPoint = value
         self.axisSlider.update()
+    
         # self.setPointChanged.emit(value)
 
     def get_setpoint(self):

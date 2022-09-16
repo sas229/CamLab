@@ -519,19 +519,23 @@ class LinearAxis(QWidget):
         self.configuration = configuration
         self.controlConfiguration = self.configuration["devices"][self.device]["control"][self.control]
         self.setWindowTitle(self.controlConfiguration["name"])
+        
+        self.setPositionSetPoint(self.controlConfiguration["settings"]["primarySetPoint"])
+        self.jog.setSpeed(self.controlConfiguration["settings"]["secondarySetPoint"])
+        self.setFeedbackSetPoint(self.controlConfiguration["settings"]["feedbackSetPoint"])
+
         self.positionStatus.setMinimumRange(self.controlConfiguration["settings"]["primaryMinimum"])
         self.positionStatus.setMaximumRange(self.controlConfiguration["settings"]["primaryMaximum"])
         self.positionStatus.setLeftLimit(self.controlConfiguration["settings"]["primaryLeftLimit"])
         self.positionStatus.setRightLimit(self.controlConfiguration["settings"]["primaryRightLimit"])
-        self.setPositionSetPoint(self.controlConfiguration["settings"]["primarySetPoint"])
+        
         self.setPositionProcessVariable(self.controlConfiguration["settings"]["primaryProcessVariable"])
         self.feedbackStatus.setMinimumRange(self.controlConfiguration["settings"]["feedbackMinimum"])
         self.feedbackStatus.setMaximumRange(self.controlConfiguration["settings"]["feedbackMaximum"])
         self.feedbackStatus.setLeftLimit(self.controlConfiguration["settings"]["feedbackLeftLimit"])
         self.feedbackStatus.setRightLimit(self.controlConfiguration["settings"]["feedbackRightLimit"])
-        self.setFeedbackSetPoint(self.controlConfiguration["settings"]["feedbackSetPoint"])
         self.setFeedbackProcessVariable(self.controlConfiguration["settings"]["feedbackProcessVariable"])
-        self.jog.setSpeed(self.controlConfiguration["settings"]["secondarySetPoint"])
+        
         self.PID.setKP(self.controlConfiguration["settings"]["KP"])
         self.PID.setKI(self.controlConfiguration["settings"]["KI"])
         self.PID.setKD(self.controlConfiguration["settings"]["KD"])
