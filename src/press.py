@@ -22,6 +22,7 @@ class Press(QObject):
     updateLimitIndicatorC1 = Signal(bool)
     updateRunningIndicator = Signal(bool)
     updateSpeedC1 = Signal(float)
+    updateEnablePIDControlC1 = Signal(bool)
 
     def __init__(self, name, id, connection):
         super().__init__()
@@ -399,13 +400,15 @@ class Press(QObject):
             if self.position_process_variable_C1 <= self.position_left_limit_C1:
                 self.stop_command_C1()
                 if self.status_PID_C1 == True:
-                    self.set_PID_control_C1(False)
+                    self.updateEnablePIDControlC1.emit(False)
+                    # self.set_PID_control_C1(False)
                 self.limit_C1 = True
                 
             if self.position_process_variable_C1 >= self.position_right_limit_C1:
                 self.stop_command_C1()
                 if self.status_PID_C1 == True:
-                    self.set_PID_control_C1(False)
+                    self.updateEnablePIDControlC1.emit(False)
+                    # self.set_PID_control_C1(False)
                 self.limit_C1 = True
 
             # Check feedback limits.

@@ -45,7 +45,6 @@ class ControlUtilities:
                 self.manager.controlTableModels[name].controlChannelNameChanged.connect(controlWidget.setTitle)
 
             if channel == 0:
-               
                 controlWidget.enable.connect(self.manager.devices[name].set_enable_C1)
                 controlWidget.PIDControl.connect(self.manager.devices[name].set_PID_control_C1)
                 controlWidget.KPChanged.connect(self.manager.devices[name].set_KP_C1)
@@ -73,6 +72,7 @@ class ControlUtilities:
                 self.manager.devices[name].updateFeedbackSetPointC1.connect(controlWidget.setFeedbackSetPoint)
                 self.manager.devices[name].updatePositionProcessVariableC1.connect(controlWidget.setPositionProcessVariable)
                 self.manager.devices[name].updateFeedbackProcessVariableC1.connect(controlWidget.setFeedbackProcessVariable)
+                self.manager.devices[name].updateEnablePIDControlC1.connect(controlWidget.emitStopCommand)
             elif channel == 1:
                 controlWidget.enable.connect(self.manager.devices[name].set_enable_C2)
                 controlWidget.PIDControl.connect(self.manager.devices[name].set_PID_control_C2)
@@ -101,7 +101,8 @@ class ControlUtilities:
                 self.manager.devices[name].updateFeedbackSetPointC2.connect(controlWidget.setFeedbackSetPoint)
                 self.manager.devices[name].updatePositionProcessVariableC2.connect(controlWidget.setPositionProcessVariable)
                 self.manager.devices[name].updateFeedbackProcessVariableC2.connect(controlWidget.setFeedbackProcessVariable)
-
+                self.manager.devices[name].updateEnablePIDControlC2.connect(controlWidget.emitStopCommand)
+            
             # Set the configuration and initial position.
             controlWidget.set_configuration(configuration=self.manager.configuration)
             self.manager.devices[name].check_connections()

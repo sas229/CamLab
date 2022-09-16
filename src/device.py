@@ -27,6 +27,8 @@ class Device(QObject):
     updateRunningIndicator = Signal(bool)
     updateSpeedC1 = Signal(float)
     updateSpeedC2 = Signal(float)
+    updateEnablePIDControlC1 = Signal(bool)
+    updateEnablePIDControlC2 = Signal(bool)
 
     def __init__(self, name, id, connection):
         super().__init__()

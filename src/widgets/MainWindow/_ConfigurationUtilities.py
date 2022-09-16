@@ -44,6 +44,7 @@ class ConfigurationUtilities:
         self.manager.initialisePressFeedbackSettings.connect(self.update_press_feedback_channel_ComboBox)
         self.manager.initialisePressFeedbackSettings.connect(self.update_press_configuration)
         self.deviceConfigurationWidget[name].pressFeedbackUpdated.connect(self.manager.storePressFeedbackSettings)
+        self.deviceConfigurationWidget[name].pressFeedbackUpdated.connect(self.manager.updatePlotWindowChannelsData)
 
         # # Initialise settings.
         # self.deviceConfigurationWidget[name].set_configuration(self.manager.configuration)
@@ -156,6 +157,7 @@ class ConfigurationUtilities:
         self.manager.controlTableModels[name].controlChannelNameChanged.connect(self.update_control_name)
         self.manager.controlTableModels[name].controlWidgetChanged.connect(self.change_control_widget)
         self.manager.controlTableModels[name].controlFeedbackChannelChanged.connect(self.change_control_feedback_channel)
+        self.manager.controlTableModels[name].controlFeedbackChannelChanged.connect(self.manager.updatePlotWindowChannelsData)
 
         # Add acquisition table label.
         self.acquisitionLabel = QLabel('Acquisition')

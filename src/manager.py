@@ -1068,7 +1068,7 @@ class Manager(QObject):
                 secondaryUnit = self.configuration["devices"][name]["control"][0]["settings"]["secondaryUnit"]
                 feedbackUnit = self.configuration["devices"][name]["control"][0]["settings"]["feedbackUnit"]
 
-                if self.configuration["devices"][name]["control"][0]["feedback"] == "N/A":
+                if self.pressChannelFeedback == "N/A":
                     genericChannelsData.append(
                     {"plot": False, "name": "Postion SP" , "device": "VJT", "colour": self.setColourDefault(),
                     "value": "0.00", "unit": primaryUnit})
