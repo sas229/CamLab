@@ -103,7 +103,6 @@ class Assembly(QObject):
                     count += 1
 
                 # Take latest data (not including the timestamp) from all devices and emit signal.
-                # print("SAVEDATA", saveData)
                 latestData = np.atleast_2d(saveData[-1,:])
                 self.latestDataChanged.emit(latestData)
                

@@ -251,6 +251,41 @@ class Manager(QObject):
                 channelline += "IMG#" + " [" + str(deviceName) + "]"
                 nameline += "\t"
                 nameline += "n (-)"
+
+            elif deviceType == "Press":
+                primaryUnit = self.configuration["devices"][deviceName]["control"][0]["settings"]["primaryUnit"]
+                secondaryUnit = self.configuration["devices"][deviceName]["control"][0]["settings"]["secondaryUnit"]
+                feedbackUnit = self.configuration["devices"][deviceName]["control"][0]["settings"]["feedbackUnit"]
+                feedbackChannel = self.configuration["devices"][deviceName]["control"][0]["feedback"]
+               
+                if self.pressChannelFeedback == "N/A":
+                    slopeline += "\t 1 \t 1 \t 1 \t 1" 
+                    offsetline += "\t 0 \t 0 \t 0 \t 0"
+                    channelline += "\t" + "VJT"
+                    channelline += "\t" + "VJT"
+                    channelline += "\t" + "VJT"
+                    channelline += "\t" + "VJT"
+                    nameline += "\t Position SP " + str(primaryUnit)
+                    nameline += "\t Position PV " + str(primaryUnit)
+                    nameline += "\t Direction (-)"
+                    nameline += "\t Speed " + str(secondaryUnit)
+                else:
+                    slopeline += "\t 1 \t 1 \t 1 \t 1 \t 1 \t 1" 
+                    offsetline += "\t 0 \t 0 \t 0 \t 0 \t 0 \t 0"
+                    channelline += "\t" + "VJT"
+                    channelline += "\t" + "VJT"
+                    channelline += "\t" + "VJT"
+                    channelline += "\t" + "VJT"
+                    channelline += "\t" + "VJT"
+                    channelline += "\t" + "VJT"
+                    nameline += "\t Position SP " + str(primaryUnit)
+                    nameline += "\t Position PV " + str(primaryUnit)
+                    nameline += "\t Direction (-)"
+                    nameline += "\t Speed " + str(secondaryUnit)
+                    nameline += "\t Feedback SP " + str(feedbackUnit)
+                    nameline += "\t Feedback PV " + str(feedbackUnit)
+
+
         slopeline += "\n"
         offsetline += "\n\n"
         channelline += "\n\n"
@@ -321,14 +356,17 @@ class Manager(QObject):
                 self.devices[name].set_acquisition_variables(controlRate)
                 self.configuration["devices"]["VJT"]["control"][0]["deviceFeedback"] = self.pressDeviceFeeback
                 self.configuration["devices"]["VJT"]["control"][0]["feedback"] = self.pressChannelFeedback
-
+                
                 if self.pressDeviceFeeback != "N/A" and self.pressChannelFeedback != "N/A":
                     
                     self.devices[name].set_enabled_C1(True)
                     indexPressFeedback = self.determinePressFeedbackIndex(enabledDevices)
                     tot_chann_enabled = self.total_channels_enabled(enabledDevices)
                     self.devices[name].set_feedback_channel_C1(indexPressFeedback, tot_chann_enabled)
-                
+
+                elif self.pressChannelFeedback == "N/A":
+                    
+                    self.devices[name].set_feedback_channel_C1_off()
                     # print(deviceFeedback, channelFeedback, indexPressFeedback)
 
     @Slot(str, str)

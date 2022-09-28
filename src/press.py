@@ -374,10 +374,14 @@ class Press(QObject):
     def set_feedback_channel_C1(self, feedback, tot_chann_enabled):
         self.feedback_index_C1 = feedback
         self.tot_chann_enabled = tot_chann_enabled
-        if self.feedback_index_C1 != None:
-            self.feedback_C1 = True
+        self.feedback_C1 = True
         log.info("Feedback channel index set on control channel C1 on {device}.".format(device=self.name))
 
+    def set_feedback_channel_C1_off(self):
+        print("feedback_C1 set to off")
+        
+        self.feedback_C1 = False
+        self.feedback_index_C1 = None
 
     def check_limits(self, status_code):
         try:
