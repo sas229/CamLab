@@ -11,6 +11,7 @@ import os, sys, re, serial, time, copy, logging
 from datetime import datetime
 import local_gxipy as gx
 from serial.tools import list_ports
+from time import sleep
 
 log = logging.getLogger(__name__)
 
@@ -43,6 +44,15 @@ class Manager(QObject):
         self.j, self.k = 0, 4
         
         # Defaults.
+        home_dir = os.path.expanduser( '~' )
+        self.defaultsGlobal = {
+            "darkMode": True,
+            "controlRate": 10.00,
+            "skipSamples": 1,
+            "averageSamples": 1,
+            "path": home_dir,
+            "filename": "junk"
+            }
         self.defaultAcquisitionTable = [
             {"channel": "AIN0", "name": "Ch_1", "unit": "V", "slope": 1.0, "offset": 0.00, "connect": False, "autozero": True},
             {"channel": "AIN1", "name": "Ch_2", "unit": "V", "slope": 1.0, "offset": 0.00, "connect": False, "autozero": True},
@@ -435,9 +445,9 @@ class Manager(QObject):
             elif deviceType == "Camera":
                 self.devices[name] = Camera(name, id, connection)
             elif deviceType == "Press":
-                self.devices[name] = Press(name, id, connection)
+                self.devices[name] = Press(name, id, connection, address)
                 # Open connection.    
-                self.devices["VJT"].open_connection(address)
+                # self.devices["VJT"].open_connection(address)
             log.info("Device instance created for device named " + name + ".")
             self.deviceThreads[name] = QThread()
             log.info("Device thread created for device named " + name + ".")
@@ -445,10 +455,10 @@ class Manager(QObject):
             self.deviceThreads[name].start()
             log.info("Device thread started for device named " + name + ".")
         
-        if name == "VJT" and "VJT" in self.devices:
-            print("opening connection")
-            self.devices["VJT"].open_connection(address)
-            print("connection is opend")
+        # if name == "VJT" and "VJT" in self.devices:
+        #     print("opening connection")
+        #     self.devices["VJT"].open_connection(address)
+        #     print("connection is opend")
         # Emit signal to add tab for device to configuration.
         self.deviceAdded.emit(name, deviceType)
         self.deviceToggled.emit(name, connect)
@@ -788,10 +798,10 @@ class Manager(QObject):
         # Add VJTech TriScan devices.
         try:
             # VJT device already exists, hence close connection, so the device can be found by findDevices.
-            if "VJT" in self.devices:
-                print("connection is closed")
-                self.devices["VJT"].close_connection()
-                found_VJT = True
+            # if "VJT" in self.devices:
+            #     print("connection is closed")
+            #     self.devices["VJT"].close_connection()
+            #     found_VJT = True
 
             # Get a list of already existing devices.
             existingDevices = self.deviceTableModel._data
@@ -863,7 +873,6 @@ class Manager(QObject):
 
                     # Log message.
                     log.info("VJTech TriScan device found on port " + comport.device + " at address " + str(address) + ".")
-
                 
                     # Break because we only want to add one TriScan device threfore no need to search further ports.
                     break
@@ -918,16 +927,8 @@ class Manager(QObject):
     
     def initialiseDefaultConfiguration(self):
         """Initialise default configuration."""
-        home_dir = os.path.expanduser( '~' )
         self.configuration = {}
-        self.configuration["global"] = {
-            "darkMode": True,
-            "controlRate": 100.00,
-            "skipSamples": 1,
-            "averageSamples": 1,
-            "path": home_dir,
-            "filename": "junk"
-            }
+        self.configuration["global"] = copy.deepcopy(self.defaultsGlobal)
         self.configuration["mainWindow"] = {
             "x": 0,
             "y": 0
@@ -935,20 +936,12 @@ class Manager(QObject):
         self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
-    def loadConfiguration(self, loadConfigurationPath):
+    def loadConfiguration(self, loadConfigurationPath):         
         if loadConfigurationPath != "":
-            # Clear the device list and configuration tabs.
-            self.deviceTableModel.clearData()
-            self.clear_device_configuration_tabs.emit()
-            
-            # # Clear all underlying models and tables.
-            self.configuration = {}
-            self.acquisitionTableModels = {}
-            self.acquisitionTables = {}
-            self.controlTableModels = {}
-            self.controlTables = {}
+            # Clear old configuration.
+            self.clearConfiguration()
 
-            # Load configuration.
+            # Load new configuration.
             if not loadConfigurationPath is None:
                 try:
                     log.info("Loading configuration from " + loadConfigurationPath + " and saving location to QSettings.")
@@ -1001,6 +994,27 @@ class Manager(QObject):
 
     @Slot()
     def clearConfiguration(self):
+        # Clear the device list and configuration tabs.
+        self.deviceTableModel.clearData()
+        self.clear_device_configuration_tabs.emit()
+        
+        # # Clear all underlying models and tables.
+        self.configuration = {}
+        self.acquisitionTableModels = {}
+        self.acquisitionTables = {}
+        self.controlTableModels = {}
+        self.controlTables = {}
+        
+        for name in self.deviceThreads:
+            self.deviceThreads[name].quit()
+            log.info("Thread for " + name + " stopped.") 
+        sleep(0.2)
+
+        # Close serial connection with Press
+        if "VJT" in self.devices:
+            self.devices["VJT"].close_connection()
+
+        self.devices = {}
         # Delete all plots first.
         self.close_plots.emit()
         self.clear_tabs.emit()
@@ -1014,13 +1028,9 @@ class Manager(QObject):
         self.acquisitionTables = {}
         self.controlTableModels = {}
 
-        # Close serial connection with Press
-        # if "VJT" in self.devices:
-        #     self.devices["VJT"].close_connection()
-
         # Initialise the basic default configuration.
-        currentDarkMode = copy.deepcopy(self.configuration["global"]["darkMode"])
         self.initialiseDefaultConfiguration()
+        currentDarkMode = copy.deepcopy(self.configuration["global"]["darkMode"])
         self.configuration["global"]["darkMode"] = currentDarkMode
         self.configurationChanged.emit(self.configuration)
         log.info("Cleared configuration by loading defaults.") 
@@ -1063,10 +1073,10 @@ class Manager(QObject):
                     elif control["channel"] == "C2":
                         channel = 1
                     # Slice in lines that follows removes the brackets.
-                    primaryUnit = self.configuration["devices"][name]["control"][channel]["settings"]["primaryUnit"]
-                    secondaryUnit = self.configuration["devices"][name]["control"][channel]["settings"]["secondaryUnit"]
-                    feedbackUnit = self.configuration["devices"][name]["control"][channel]["settings"]["feedbackUnit"]
-                    channel = control["channel"]
+                    primaryUnit = copy.deepcopy(self.configuration["devices"][name]["control"][channel]["settings"]["primaryUnit"])
+                    secondaryUnit = copy.deepcopy(self.configuration["devices"][name]["control"][channel]["settings"]["secondaryUnit"])
+                    feedbackUnit = copy.deepcopy(self.configuration["devices"][name]["control"][channel]["settings"]["feedbackUnit"])
+                    channel = copy.deepcopy(control["channel"])
                     if control["feedback"] == "N/A":
                         if control["control"] == "Linear":
                             genericChannelsData.append(
@@ -1108,10 +1118,12 @@ class Manager(QObject):
 
             elif self.devices[name].type == "Press":
                 
-                primaryUnit = self.configuration["devices"][name]["control"][0]["settings"]["primaryUnit"]
-                secondaryUnit = self.configuration["devices"][name]["control"][0]["settings"]["secondaryUnit"]
-                feedbackUnit = self.configuration["devices"][name]["control"][0]["settings"]["feedbackUnit"]
-
+                primaryUnit = copy.deepcopy(self.configuration["devices"][name]["control"][0]["settings"]["primaryUnit"])
+                secondaryUnit = copy.deepcopy(self.configuration["devices"][name]["control"][0]["settings"]["secondaryUnit"])
+                feedbackUnit = copy.deepcopy(self.configuration["devices"][name]["control"][0]["settings"]["feedbackUnit"])
+                if not hasattr(self, "pressChannelFeedback"):
+                    
+                    self.pressChannelFeedback = copy.deepcopy(self.configuration["devices"][name]["control"][0]["feedback"])
                 if self.pressChannelFeedback == "N/A":
                     genericChannelsData.append(
                     {"plot": False, "name": "Postion SP" , "device": "VJT", "colour": self.setColourDefault(),

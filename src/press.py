@@ -24,21 +24,14 @@ class Press(QObject):
     updateSpeedC1 = Signal(float)
     updateEnablePIDControlC1 = Signal(bool)
 
-    def __init__(self, name, id, connection):
+    def __init__(self, name, id, connection, address):
         super().__init__()
         self.type = "Press"
         self.name = name
         self.id = id 
         self.connection = None
         self.handle = None
-
-        # Configure the serial connections.
-        # self.ser = serial.Serial(
-        # port='COM4',
-        # baudrate=57600,
-        # parity=serial.PARITY_NONE,
-        # stopbits=serial.STOPBITS_ONE,
-        # bytesize=serial.EIGHTBITS)
+        self.address = address
 
         # Variables
         self.data = np.zeros(2)
@@ -79,25 +72,11 @@ class Press(QObject):
         self.move_to_demanded_position = False
         self.is_stopped = True
 
-        # self.open_connection()
+        self.open_connection()
 
         # Instantiate PID controllers.
         self.PID_C1 = PID()
 
-    # def open_serial_connection():
-    #     """Connect to the device using the serial port."""
-    #     try:
-    #         ser = serial.Serial(
-    #                 port=comport,
-    #                 baudrate=57600,
-    #                 parity=serial.PARITY_NONE,
-    #                 stopbits=serial.STOPBITS_ONE,
-    #                 bytesize=serial.EIGHTBITS
-    #             )
-    #           # Send check status command and check response...
-    #     except Exception:
-    #         e = sys.exc_info()[1]
-    #         log.warning(e)
 
     @Slot()
     def run_sequence(self):
@@ -808,25 +787,22 @@ class Press(QObject):
         # self.numFrames = len(self.addresses)
         self.controlRate = controlRate
 
-    def open_connection(self, address):
+    def open_connection(self):
         """Method to open a device connection."""
-        # try:
-        #     self.handle = ljm.open(7, self.connection, self.id)
-        #     log.info("Connected to {name}.".format(name=self.name))
-        # except ljm.LJMError:
-        #     ljme = sys.exc_info()[1]
-        #     log.warning(ljme) 
-        # except Exception:
-        #     e = sys.exc_info()[1]
-        #     log.warning(e)
-        print("OPEN CONNECTION", self.connection)
-        if self.connection == None:
-            self.connection = serial.Serial(
-            port=address,
-            baudrate=57600,
-            parity=serial.PARITY_NONE,
-            stopbits=serial.STOPBITS_ONE,
-            bytesize=serial.EIGHTBITS)
+        try:
+            if self.connection == None:
+                self.connection = serial.Serial(
+                port = self.address,
+                baudrate=57600,
+                parity=serial.PARITY_NONE,
+                stopbits=serial.STOPBITS_ONE,
+                bytesize=serial.EIGHTBITS)
+
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
+       
+
 
     def close_connection(self):
         """Method to close the device connection."""
@@ -958,8 +934,7 @@ class Press(QObject):
     def process(self):
         """Method to process timed commands."""
         try:
-            self.check_connection_C1()
-            
+            # self.check_connection_C1()
             #Send a signal to the press asking for its status I21TSF and then decompose the signal recieved to get direction and speed of press
             status_press_signal = "I21TSF"
             status_press = self.get_press_response(status_press_signal)
