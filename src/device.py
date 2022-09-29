@@ -502,12 +502,17 @@ class Device(QObject):
         self.feedback_index_C1 = feedback
         if self.feedback_index_C1 != 0:
             self.feedback_C1 = True
+
+        elif self.feedback_index_C1 == 0:
+            self.feedback_C1 = False
         log.info("Feedback channel index set on control channel C1 on {device}.".format(device=self.name))
 
     def set_feedback_channel_C2(self, feedback):
         self.feedback_index_C2 = feedback
         if self.feedback_index_C2 != 0:
             self.feedback_C2 = True
+        elif self.feedback_index_C2 == 0:
+            self.feedback_C2 = False
         log.info("Feedback channel index set on control channel C1 on {device}.".format(device=self.name))
 
     def check_limits(self):

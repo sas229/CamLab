@@ -79,7 +79,7 @@ class Press(QObject):
         self.move_to_demanded_position = False
         self.is_stopped = True
 
-        self.open_connection()
+        # self.open_connection()
 
         # Instantiate PID controllers.
         self.PID_C1 = PID()
@@ -297,9 +297,7 @@ class Press(QObject):
             if len(status_press) == 14 and status_press[:4] == "i21t":
                 self.connectedC1 = True
                 self.updateConnectionIndicatorC1.emit(self.connectedC1)
-        except ljm.LJMError:
-            ljme = sys.exc_info()[1]
-            log.warning(ljme) 
+
         except Exception:
             e = sys.exc_info()[1]
             log.warning(e)
@@ -377,9 +375,7 @@ class Press(QObject):
         self.feedback_C1 = True
         log.info("Feedback channel index set on control channel C1 on {device}.".format(device=self.name))
 
-    def set_feedback_channel_C1_off(self):
-        print("feedback_C1 set to off")
-        
+    def set_feedback_channel_C1_off(self):      
         self.feedback_C1 = False
         self.feedback_index_C1 = None
 
@@ -812,7 +808,7 @@ class Press(QObject):
         # self.numFrames = len(self.addresses)
         self.controlRate = controlRate
 
-    def open_connection(self):
+    def open_connection(self, address):
         """Method to open a device connection."""
         # try:
         #     self.handle = ljm.open(7, self.connection, self.id)
@@ -823,9 +819,10 @@ class Press(QObject):
         # except Exception:
         #     e = sys.exc_info()[1]
         #     log.warning(e)
+        print("OPEN CONNECTION", self.connection)
         if self.connection == None:
             self.connection = serial.Serial(
-            port='COM4',
+            port=address,
             baudrate=57600,
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE,
@@ -834,13 +831,12 @@ class Press(QObject):
     def close_connection(self):
         """Method to close the device connection."""
         try:
-            self.connection.close()
-            self.connection = None
-            
-            log.info("Disconnected from {name}.".format(name=self.name))
-        except ljm.LJMError:
-            ljme = sys.exc_info()[1]
-            log.warning(ljme) 
+            if self.connection != None:
+                self.connection.close()
+                self.connection = None
+
+                log.info("Disconnected from {name}.".format(name=self.name))
+
         except Exception:
             e = sys.exc_info()[1]
             log.warning(e)
@@ -962,7 +958,7 @@ class Press(QObject):
     def process(self):
         """Method to process timed commands."""
         try:
-            # self.check_position_C1()
+            self.check_connection_C1()
             
             #Send a signal to the press asking for its status I21TSF and then decompose the signal recieved to get direction and speed of press
             status_press_signal = "I21TSF"

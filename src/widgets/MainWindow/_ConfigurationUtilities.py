@@ -80,7 +80,7 @@ class ConfigurationUtilities:
     
     @Slot()
     def update_press_configuration(self):
-        if "VJT" in self.deviceConfigurationWidget:
+        if "devices" in self.manager.configuration and "VJT" in self.manager.configuration["devices"] and "VJT" in self.deviceConfigurationWidget:
             self.deviceConfigurationWidget["VJT"].set_configuration(self.manager.configuration)
 
     def add_camera_configuration_tab(self, name):

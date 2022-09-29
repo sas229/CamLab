@@ -16,7 +16,6 @@ class ControlUtilities:
         controlName = self.manager.configuration["devices"][name]["control"][channel]["name"]
         controlChannel = self.manager.configuration["devices"][name]["control"][channel]["channel"]
         controlFeedback = self.manager.configuration["devices"][name]["control"][channel]["feedback"]
-        
         # Instantiate the appropriate widget.
         if control == "N/A" or controlType == "N/A":
             controlWidget = QWidget()
@@ -29,7 +28,7 @@ class ControlUtilities:
 
             # Connections. 
             controlWidget.axisWindowClosed.connect(self.window_to_tab)
-            self.checkTimer.timeout.connect(self.manager.devices[name].check_connections)
+            # self.checkTimer.timeout.connect(self.manager.devices[name].check_connections)
             self.running.connect(self.manager.devices[name].set_running)
             self.manager.devices[name].updateRunningIndicator.connect(controlWidget.setRunningIndicator)
             self.statusTab.runSequence.clicked.connect(self.manager.devices[name].run_sequence)

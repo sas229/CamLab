@@ -367,7 +367,6 @@ class Manager(QObject):
                 elif self.pressChannelFeedback == "N/A":
                     
                     self.devices[name].set_feedback_channel_C1_off()
-                    # print(deviceFeedback, channelFeedback, indexPressFeedback)
 
     @Slot(str, str)
     def storePressFeedbackSettings(self, deviceFeedback, channelFeedback):
@@ -386,8 +385,7 @@ class Manager(QObject):
                     name].acquisitionSettings()
 
                 for channel in channels:
-                    # print(name, channel)
-
+             
                     if channel == self.pressChannelFeedback and name == self.pressDeviceFeeback:
                         return int(indexPressFeedback)
 
@@ -429,7 +427,7 @@ class Manager(QObject):
                     log.info("Feedback channel set to {feedback} for control channel {channel} on {device}.".format(feedback=control["feedback"], channel=control["channel"], device=name))
 
     @Slot(str, int, int, bool)
-    def createDeviceThread(self, name, deviceType, id, connection, connect):
+    def createDeviceThread(self, name, deviceType, id, connection, connect, address):
         """Create device instance and move to thread if it doesn't already exist."""
         if name not in self.devices:
             if deviceType == "Hub":
@@ -438,13 +436,19 @@ class Manager(QObject):
                 self.devices[name] = Camera(name, id, connection)
             elif deviceType == "Press":
                 self.devices[name] = Press(name, id, connection)
+                # Open connection.    
+                self.devices["VJT"].open_connection(address)
             log.info("Device instance created for device named " + name + ".")
             self.deviceThreads[name] = QThread()
             log.info("Device thread created for device named " + name + ".")
             self.devices[name].moveToThread(self.deviceThreads[name])
             self.deviceThreads[name].start()
             log.info("Device thread started for device named " + name + ".")
-
+        
+        if name == "VJT" and "VJT" in self.devices:
+            print("opening connection")
+            self.devices["VJT"].open_connection(address)
+            print("connection is opend")
         # Emit signal to add tab for device to configuration.
         self.deviceAdded.emit(name, deviceType)
         self.deviceToggled.emit(name, connect)
@@ -533,7 +537,7 @@ class Manager(QObject):
                             self.acquisitionTableModels[device] = AcquisitionTableModel(self.configuration["devices"][device]["acquisition"])
                             self.controlTableModels[device] = ControlTableModel(device, self.configuration["devices"][device]["control"])
                             self.feedbackChannelLists[device] = self.setFeedbackChannelList(device)
-                            self.createDeviceThread(name=device, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True)
+                            self.createDeviceThread(name=device, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True, address = deviceInformation["address"])
                             self.toggleDeviceConnection(device, deviceInformation["connect"])       
                         except ljm.LJMError:
                             # Otherwise log the exception and set the device status to false.
@@ -553,7 +557,7 @@ class Manager(QObject):
                         
                         # Update acquisition and control table models and add to TabWidget by emitting the appropriate Signal.
                         self.deviceTableModel.appendRow(deviceInformation)
-                        self.createDeviceThread(name=device, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True)
+                        self.createDeviceThread(name=device, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True, address = deviceInformation["address"])
                         self.toggleDeviceConnection(device, deviceInformation["connect"])          
                     except Exception:
                         e = sys.exc_info()[1]
@@ -588,7 +592,7 @@ class Manager(QObject):
                     deviceInformation["status"] = True   
                     self.deviceTableModel.appendRow(deviceInformation)
                     self.controlTableModels[device] = ControlTableModel(device, self.configuration["devices"][device]["control"])
-                    self.createDeviceThread(name=device, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True)
+                    self.createDeviceThread(name=device, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True, address = deviceInformation["address"])
                     self.toggleDeviceConnection(device, deviceInformation["connect"])    
 
             # Update the feedback device and channels list in PressSettings.
@@ -676,7 +680,7 @@ class Manager(QObject):
                 
                     # Create device thread and add device to UI.
                     log.info("Adding device to UI.")
-                    self.createDeviceThread(name=name, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False)
+                    self.createDeviceThread(name=name, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False, address = deviceInformation["address"])
                     self.configurationChanged.emit(self.configuration)
 
                     # Log message.
@@ -764,7 +768,7 @@ class Manager(QObject):
                 
                     # Create device thread and add device to UI.
                     log.info("Adding device to UI.")
-                    self.createDeviceThread(name=name, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False)
+                    self.createDeviceThread(name=name, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False, address = deviceInformation["address"])
                     self.configurationChanged.emit(self.configuration)
             
                     # Log message.
@@ -783,6 +787,12 @@ class Manager(QObject):
     def addTriScanDevices(self):
         # Add VJTech TriScan devices.
         try:
+            # VJT device already exists, hence close connection, so the device can be found by findDevices.
+            if "VJT" in self.devices:
+                print("connection is closed")
+                self.devices["VJT"].close_connection()
+                found_VJT = True
+
             # Get a list of already existing devices.
             existingDevices = self.deviceTableModel._data
             ID_Existing = []
@@ -812,6 +822,7 @@ class Manager(QObject):
 
                 ser.close()
                 # If expected return message is receieved, add device to device list.
+               
                 if "i21t" in ret:
                 # if "I21TSF" in ret:
                     deviceInformation = {}
@@ -847,15 +858,16 @@ class Manager(QObject):
 
                     # Create device thread and add device to UI.
                     log.info("Adding device to UI.")
-                    self.createDeviceThread(name=name, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False)
+                    self.createDeviceThread(name=name, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False, address = deviceInformation["address"])
                     self.configurationChanged.emit(self.configuration)
 
                     # Log message.
                     log.info("VJTech TriScan device found on port " + comport.device + " at address " + str(address) + ".")
 
+                
                     # Break because we only want to add one TriScan device threfore no need to search further ports.
-                    
                     break
+                
         except Exception:
             e = sys.exc_info()[1]
             log.warning(e)
@@ -1003,14 +1015,8 @@ class Manager(QObject):
         self.controlTableModels = {}
 
         # Close serial connection with Press
-        # print("try to close")
-        
-        # try:
+        # if "VJT" in self.devices:
         #     self.devices["VJT"].close_connection()
-        #     print("closed")
-        # except:
-        #     pass
-
 
         # Initialise the basic default configuration.
         currentDarkMode = copy.deepcopy(self.configuration["global"]["darkMode"])
