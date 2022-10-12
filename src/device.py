@@ -777,7 +777,7 @@ class Device(QObject):
         target_frequency = int(speed*self.counts_per_unit_C1)
         self.freqC1, self.rollC1, self.width_C1 = self.set_clock(1, target_frequency)
         self.speed_C1 = self.freqC1/self.counts_per_unit_C1
-        log.info("Speed on control channel C1 set to {speed}.".format(speed=speed))
+        #log.info("Speed on control channel C1 set to {speed}.".format(speed=speed))
 
     @Slot(float)
     def set_speed_C2(self, speed=0.0):
@@ -786,7 +786,7 @@ class Device(QObject):
         target_frequency = int(speed*self.counts_per_unit_C2)
         self.freqC2, self.rollC2, self.width_C2 = self.set_clock(2, target_frequency)
         self.speed_C2 = self.freqC2/self.counts_per_unit_C2
-        log.info("Speed on control channel C2 set to {speed}.".format(speed=speed))
+        #log.info("Speed on control channel C2 set to {speed}.".format(speed=speed))
 
     def reset_pulse_counter_C1(self):
         """Reste C1 pulse counter."""
@@ -944,7 +944,7 @@ class Device(QObject):
     def updateControlPanelC1(self):
         """Update control panel for channel C1."""
         if self.jog_C1 == True: 
-            self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
+            self.updatePositionSetPointC1.emit(self.position_process_variable_C1)   
         self.updatePositionProcessVariableC1.emit(self.position_process_variable_C1)
         if self.feedback_index_C1 != 0:
             self.updateFeedbackProcessVariableC1.emit(self.feedback_process_variable_C1)

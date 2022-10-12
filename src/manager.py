@@ -507,7 +507,7 @@ class Manager(QObject):
                 self.devices[name].saveImage.disconnect(self.assembly.save_image)
 
             elif self.devices[name].type == "Press":
-                self.assembly.latestDataChanged.connect(self.devices[name].get_latest_data)
+                self.assembly.latestDataChanged.disconnect(self.devices[name].get_latest_data)
                 self.timing.controlDevices.disconnect(self.devices[name].process)
                 self.assembly.autozeroDevices.disconnect(self.devices[name].recalculate_offsets)
                 self.devices[name].emitData.disconnect(self.assembly.update_new_data)

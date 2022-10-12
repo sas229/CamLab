@@ -546,7 +546,7 @@ class Press(QObject):
         # if self.connection != None:
         out = self.get_press_response(speed_string_signal)
 
-        log.info("Speed on control channel C1 set to " + "{:.5f}".format(speed))
+        #log.info("Speed on control channel C1 set to " + "{:.5f}".format(speed))
 
         if self.status_PID_C1 == True or self.move_to_demanded_position == True:
 
@@ -635,9 +635,11 @@ class Press(QObject):
     @Slot()
     def updateControlPanelC1(self):
         """Update control panel for channel C1."""
+        
         if self.jog_C1 == True: 
             self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
         self.updatePositionProcessVariableC1.emit(self.position_process_variable_C1)
+        
         if self.feedback_index_C1 != None:
             self.updateFeedbackProcessVariableC1.emit(self.feedback_process_variable_C1)
             if self.status_PID_C1 == True:
@@ -894,9 +896,9 @@ class Press(QObject):
 
     @Slot(np.ndarray)
     def get_latest_data(self, latest_data):
-
+        
         if self.feedback_C1 == True:
-            self.current_data = latest_data[0][:self.tot_chann_enabled]          
+            self.current_data = latest_data[0][:self.tot_chann_enabled]   
 
     def update_PID_C1(self):
         """Update PID on control channel C1."""
@@ -936,6 +938,7 @@ class Press(QObject):
         try:
             # self.check_connection_C1()
             #Send a signal to the press asking for its status I21TSF and then decompose the signal recieved to get direction and speed of press
+            
             status_press_signal = "I21TSF"
             status_press = self.get_press_response(status_press_signal)
 

@@ -62,13 +62,16 @@ class Assembly(QObject):
     def update_output_data(self):
         """Method to update the output data to save to file and to generate the plots."""
         # Compute the minimum number of rows in the data item within each device dict.
+        
         numTimesteps = []
+        numTimesteps_control = []
         if len(self.enabledDevices) > 0:
+            
             for device in self.enabledDevices:
                 name = device["name"]
                 numTimesteps.append(np.shape(self.data[name])[0])
             numTimesteps = min(numTimesteps)
-            numTimesteps = numTimesteps - (numTimesteps % self.skip)
+            numTimesteps = numTimesteps - (numTimesteps % self.skip)               
 
             # Pop numTimesteps of data from each data object onto saveData and plotData if more than 0.
             if numTimesteps > 0:
@@ -102,11 +105,10 @@ class Assembly(QObject):
                             # plotData = np.column_stack((plotData, processedData))
                     count += 1
 
-                # Take latest data (not including the timestamp) from all devices and emit signal.
                 latestData = np.atleast_2d(saveData[-1,:])
                 self.latestDataChanged.emit(latestData)
-               
 
+      
                 # If skip value greater than 1, skip values.
                 if self.skip > 1:
                     saveData = saveData[::self.skip,:].copy()
