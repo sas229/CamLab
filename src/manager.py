@@ -972,6 +972,13 @@ class Manager(QObject):
                 enabledDeviceList = []
                 for device in enabledDevices:
                     enabledDeviceList.append(device["name"])
+
+                    # if device["name"] == "VJT":
+                        
+                    #     configuration["devices"]["VJT"]["control"][0]["deviceFeedback"] = self.pressDeviceFeeback
+                    #     configuration["devices"]["VJT"]["control"][0]["feedback"] = self.pressChannelFeedback
+                    #     print(configuration["devices"]["VJT"]["control"][0]["feedback"])
+
                 for device in configuration["devices"]:
                     if device not in enabledDeviceList:
                         devices.pop(device)

@@ -20,10 +20,12 @@ class Assembly(QObject):
         self.count = 0
         self.fileCount = 1
         self.data = {}
+        self.data_new = {}
         self.enabledDevices = []
         self.thinout_threshold = 25000
         self.thinout_factor = 100
         self.maximum_threshold = 50000
+        self.deviceData = np.array([])
 
     def define_settings(self, rate, skip, average):
         """Method to define basic global settings."""
@@ -60,20 +62,16 @@ class Assembly(QObject):
 
     @Slot()
     def update_output_data(self):
-        """Method to update the output data to save to file and to generate the plots."""
-        # Compute the minimum number of rows in the data item within each device dict.
         
         numTimesteps = []
-        numTimesteps_control = []
         if len(self.enabledDevices) > 0:
             
             for device in self.enabledDevices:
                 name = device["name"]
                 numTimesteps.append(np.shape(self.data[name])[0])
+                
             numTimesteps = min(numTimesteps)
-            numTimesteps = numTimesteps - (numTimesteps % self.skip)               
 
-            # Pop numTimesteps of data from each data object onto saveData and plotData if more than 0.
             if numTimesteps > 0:
                 deviceData = []
                 count = 0
@@ -81,76 +79,171 @@ class Assembly(QObject):
                     name = device["name"]
                     deviceData = self.data[name][0:numTimesteps,:]
                     self.data[name] = np.delete(self.data[name], range(numTimesteps), axis=0)
-                    
-                    # Perform averaging of data if appropriate.
-                    processedData = deviceData
-
-                    if device["type"] == "Hub":
-                        if self.average > 1:
-                            processedData = uniform_filter1d(processedData, size=self.average, axis=0, mode='nearest')
 
                     if count == 0:
+
                         if device["type"] == "Camera":
-                            saveData = processedData[:,0].copy()
-                            # plotData = processedData[:,1].copy()
+                            latestData = deviceData[:,0].copy()
                         else:
-                            saveData = processedData.copy()
-                            # plotData = processedData.copy()
+                            latestData = deviceData.copy()
+
                     else:
+
                         if device["type"] == "Camera":
-                            saveData = np.column_stack((saveData, processedData[:,0]))
-                            # plotData = np.column_stack((plotData, processedData[:,1]))
+                            latestData = np.column_stack((latestData, deviceData[:,0]))
                         else:
-                            saveData = np.column_stack((saveData, processedData))
-                            # plotData = np.column_stack((plotData, processedData))
+                            latestData = np.column_stack((latestData, deviceData))
                     count += 1
 
-                latestData = np.atleast_2d(saveData[-1,:])
-                self.latestDataChanged.emit(latestData)
+              
+                for data in latestData:
+                    self.latestDataChanged.emit(np.atleast_2d(data))
 
-      
-                # If skip value greater than 1, skip values.
-                if self.skip > 1:
-                    saveData = saveData[::self.skip,:].copy()
-                
-                # Add timestamp.
-                n = np.shape(saveData)[0]
-                timesteps = np.arange(0, n, 1)*self.DeltaT
-                timesteps += self.time
-                saveData = np.column_stack((timesteps, saveData))
-
-                # Save data.
-                np.savetxt(self.file, saveData, fmt='%8.3f', delimiter='\t', newline='\n')
-
-                # Thin the data.
-                if np.shape(self.allData)[0] == 0:
-                    self.allData = saveData
-                else:
-                    self.allData = np.vstack((self.allData, saveData))
-                if np.ndim(self.allData) > 1:
-                    channels = (np.shape(self.allData)[1]-1) # Minus one because we always plot against another variable, e.g. time.
-                    samples = np.shape(self.allData)[0]
-                    total_samples = (channels * samples)
-                    if total_samples >= self.thinout_threshold:
-                        plotData = np.array(self.allData).copy()
-                        plotData_thinned = plotData[0:-int(self.thinout_threshold/channels):self.thinout_factor,:]
-                        plotData_full = plotData[-int(self.thinout_threshold/channels):,:]
-                        self.plotData = np.vstack((plotData_thinned, plotData_full))
+                    if np.shape(self.deviceData)[0] == 0:
+                        self.deviceData = np.atleast_2d(data)
                     else:
-                        self.plotData = self.allData
-                    # Check that thinned samples is less than absolute maximum and delete earliest data if not.
-                    thinned_channels = (np.shape(self.plotData)[1]-1) # Minus one because we always plot against another variable, e.g. time.
-                    thinned_samples = np.shape(self.plotData)[0]
-                    thinned_total_samples = (thinned_channels*thinned_samples)
-                    if thinned_total_samples >= self.maximum_threshold:
-                        overflow = thinned_total_samples-self.maximum_threshold
-                        delete_rows = int(overflow/channels) 
-                        self.plotData = np.delete(self.plotData, slice(delete_rows), axis=0)
+                        self.deviceData = np.vstack((self.deviceData, data))
 
-                # Plot data.
-                self.time += n*self.DeltaT
-                self.count += numTimesteps
-                self.plotDataChanged.emit(self.plotData)
+                # print(numTimesteps)
+                # print(np.shape(self.deviceData)[0])
+                if np.shape(self.deviceData)[0] >= self.skip:
+                    
+                    saveData = self.deviceData.copy()
+                    self.deviceData = np.array([])
+
+                    if self.skip > 1:
+                        saveData = saveData[::self.skip,:].copy()
+                
+                    # Add timestamp.
+                    n = np.shape(saveData)[0]
+                    timesteps = np.arange(0, n, 1)*self.DeltaT
+                    timesteps += self.time
+                    saveData = np.column_stack((timesteps, saveData))
+
+                    # Save data.
+                    np.savetxt(self.file, saveData, fmt='%8.3f', delimiter='\t', newline='\n')
+                    self.deviceData = np.array([])
+
+                    # Thin the data.
+                    if np.shape(self.allData)[0] == 0:
+                        self.allData = saveData
+                    else:
+                        self.allData = np.vstack((self.allData, saveData))
+                    if np.ndim(self.allData) > 1:
+                        channels = (np.shape(self.allData)[1]-1) # Minus one because we always plot against another variable, e.g. time.
+                        samples = np.shape(self.allData)[0]
+                        total_samples = (channels * samples)
+                        if total_samples >= self.thinout_threshold:
+                            plotData = np.array(self.allData).copy()
+                            plotData_thinned = plotData[0:-int(self.thinout_threshold/channels):self.thinout_factor,:]
+                            plotData_full = plotData[-int(self.thinout_threshold/channels):,:]
+                            self.plotData = np.vstack((plotData_thinned, plotData_full))
+                        else:
+                            self.plotData = self.allData
+                        # Check that thinned samples is less than absolute maximum and delete earliest data if not.
+                        thinned_channels = (np.shape(self.plotData)[1]-1) # Minus one because we always plot against another variable, e.g. time.
+                        thinned_samples = np.shape(self.plotData)[0]
+                        thinned_total_samples = (thinned_channels*thinned_samples)
+                        if thinned_total_samples >= self.maximum_threshold:
+                            overflow = thinned_total_samples-self.maximum_threshold
+                            delete_rows = int(overflow/channels) 
+                            self.plotData = np.delete(self.plotData, slice(delete_rows), axis=0)
+
+                    # Plot data.
+                    self.time += n*self.DeltaT
+                    self.plotDataChanged.emit(self.plotData)
+               
+    # @Slot()
+    # def update_output_data(self):
+    #     """Method to update the output data to save to file and to generate the plots."""
+    #     # Compute the minimum number of rows in the data item within each device dict.
+        
+    #     numTimesteps = []
+    #     if len(self.enabledDevices) > 0:
+            
+    #         for device in self.enabledDevices:
+    #             name = device["name"]
+    #             numTimesteps.append(np.shape(self.data[name])[0])
+    #         numTimesteps = min(numTimesteps)
+    #         numTimesteps = numTimesteps - (numTimesteps % self.skip)               
+
+    #         # Pop numTimesteps of data from each data object onto saveData and plotData if more than 0.
+    #         if numTimesteps > 0:
+    #             deviceData = []
+    #             count = 0
+    #             for device in self.enabledDevices:
+    #                 name = device["name"]
+    #                 deviceData = self.data[name][0:numTimesteps,:]
+    #                 self.data[name] = np.delete(self.data[name], range(numTimesteps), axis=0)
+                    
+    #                 # Perform averaging of data if appropriate.
+    #                 processedData = deviceData
+
+    #                 if device["type"] == "Hub":
+    #                     if self.average > 1:
+    #                         processedData = uniform_filter1d(processedData, size=self.average, axis=0, mode='nearest')
+
+    #                 if count == 0:
+    #                     if device["type"] == "Camera":
+    #                         saveData = processedData[:,0].copy()
+    #                         # plotData = processedData[:,1].copy()
+    #                     else:
+    #                         saveData = processedData.copy()
+    #                         # plotData = processedData.copy()
+    #                 else:
+    #                     if device["type"] == "Camera":
+    #                         saveData = np.column_stack((saveData, processedData[:,0]))
+    #                         # plotData = np.column_stack((plotData, processedData[:,1]))
+    #                     else:
+    #                         saveData = np.column_stack((saveData, processedData))
+    #                         # plotData = np.column_stack((plotData, processedData))
+    #                 count += 1
+
+    #             # latestData = np.atleast_2d(saveData[-1,:])
+    #             # self.latestDataChanged.emit(latestData)
+                
+    #             # If skip value greater than 1, skip values.
+    #             if self.skip > 1:
+    #                 saveData = saveData[::self.skip,:].copy()
+                
+    #             # Add timestamp.
+    #             n = np.shape(saveData)[0]
+    #             timesteps = np.arange(0, n, 1)*self.DeltaT
+    #             timesteps += self.time
+    #             saveData = np.column_stack((timesteps, saveData))
+
+    #             # Save data.
+    #             np.savetxt(self.file, saveData, fmt='%8.3f', delimiter='\t', newline='\n')
+
+    #             # Thin the data.
+    #             if np.shape(self.allData)[0] == 0:
+    #                 self.allData = saveData
+    #             else:
+    #                 self.allData = np.vstack((self.allData, saveData))
+    #             if np.ndim(self.allData) > 1:
+    #                 channels = (np.shape(self.allData)[1]-1) # Minus one because we always plot against another variable, e.g. time.
+    #                 samples = np.shape(self.allData)[0]
+    #                 total_samples = (channels * samples)
+    #                 if total_samples >= self.thinout_threshold:
+    #                     plotData = np.array(self.allData).copy()
+    #                     plotData_thinned = plotData[0:-int(self.thinout_threshold/channels):self.thinout_factor,:]
+    #                     plotData_full = plotData[-int(self.thinout_threshold/channels):,:]
+    #                     self.plotData = np.vstack((plotData_thinned, plotData_full))
+    #                 else:
+    #                     self.plotData = self.allData
+    #                 # Check that thinned samples is less than absolute maximum and delete earliest data if not.
+    #                 thinned_channels = (np.shape(self.plotData)[1]-1) # Minus one because we always plot against another variable, e.g. time.
+    #                 thinned_samples = np.shape(self.plotData)[0]
+    #                 thinned_total_samples = (thinned_channels*thinned_samples)
+    #                 if thinned_total_samples >= self.maximum_threshold:
+    #                     overflow = thinned_total_samples-self.maximum_threshold
+    #                     delete_rows = int(overflow/channels) 
+    #                     self.plotData = np.delete(self.plotData, slice(delete_rows), axis=0)
+
+    #             # Plot data.
+    #             self.time += n*self.DeltaT
+    #             self.count += numTimesteps
+    #             self.plotDataChanged.emit(self.plotData)
 
     @Slot(str, np.ndarray)
     def save_image(self, image_name, image_array):
