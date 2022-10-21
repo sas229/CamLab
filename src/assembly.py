@@ -70,7 +70,7 @@ class Assembly(QObject):
                 name = device["name"]
                 numTimesteps.append(np.shape(self.data[name])[0])
                 
-            numTimesteps = min(numTimesteps)
+            numTimesteps = min(numTimesteps) # get the minimum timesteps for all the available data in self.data
 
             if numTimesteps > 0:
                 deviceData = []
@@ -78,8 +78,9 @@ class Assembly(QObject):
                 for device in self.enabledDevices:
                     name = device["name"]
                     deviceData = self.data[name][0:numTimesteps,:]
-                    self.data[name] = np.delete(self.data[name], range(numTimesteps), axis=0)
+                    self.data[name] = np.delete(self.data[name], range(numTimesteps), axis=0) # delete the data in self.data passed to deviceData as you do not want to pass them again in the next loop
 
+                    # column stack the data for each device
                     if count == 0:
 
                         if device["type"] == "Camera":
@@ -95,7 +96,7 @@ class Assembly(QObject):
                             latestData = np.column_stack((latestData, deviceData))
                     count += 1
 
-              
+                # save the collected data in a global variable and keep adding v-stacking as more data are acquired
                 for data in latestData:
                     self.latestDataChanged.emit(np.atleast_2d(data))
 
@@ -104,8 +105,7 @@ class Assembly(QObject):
                     else:
                         self.deviceData = np.vstack((self.deviceData, data))
 
-                # print(numTimesteps)
-                # print(np.shape(self.deviceData)[0])
+                # Once the number of rows in the global variable self.deviData is equal or exceeds the self.skip downsampling then apply the downsampling and set to empty the global variable
                 if np.shape(self.deviceData)[0] >= self.skip:
                     
                     saveData = self.deviceData.copy()
