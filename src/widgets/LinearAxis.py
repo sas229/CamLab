@@ -313,17 +313,17 @@ class LinearAxis(QWidget):
     @Slot()
     def emitKPChanged(self, value):
         self.KPChanged.emit(value)
-        self.controlConfiguration["settings"]["KP"] = round(self.PID.getKP(), 2)
+        self.controlConfiguration["settings"]["KP"] = round(self.PID.getKP(), 3)
 
     @Slot()
     def emitKIChanged(self, value):
         self.KIChanged.emit(value)
-        self.controlConfiguration["settings"]["KI"] = round(self.PID.getKI(), 2)
+        self.controlConfiguration["settings"]["KI"] = round(self.PID.getKI(), 3)
 
     @Slot()
     def emitKDChanged(self, value):
         self.KDChanged.emit(value)
-        self.controlConfiguration["settings"]["KD"] = round(self.PID.getKD(), 2)
+        self.controlConfiguration["settings"]["KD"] = round(self.PID.getKD(), 3)
 
     @Slot()
     def emitPrimaryLeftLimitChanged(self, value):

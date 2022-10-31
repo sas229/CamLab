@@ -16,7 +16,7 @@ class PIDGroupBox(QGroupBox):
         self.KD = 1.00
 
         # Validator.
-        self.doubleValidator = QDoubleValidator(decimals=2)
+        self.doubleValidator = QDoubleValidator(decimals=3)
 
         # Controls.
         self.KPLabel = QLabel("KP (-)")
@@ -62,7 +62,7 @@ class PIDGroupBox(QGroupBox):
         if value == None:
             value = float(self.KPLineEdit.text())
         self.KP = value
-        self.KPLineEdit.setText("{value:.2f}".format(value=value))
+        self.KPLineEdit.setText("{value:.3f}".format(value=value))
         self.KPLineEditChanged.emit(value)
 
     def getKP(self):
@@ -72,7 +72,7 @@ class PIDGroupBox(QGroupBox):
         if value == None:
             value = float(self.KILineEdit.text())
         self.KI = value
-        self.KILineEdit.setText("{value:.2f}".format(value=value))
+        self.KILineEdit.setText("{value:.3f}".format(value=value))
         self.KILineEditChanged.emit(value)
         
     def getKI(self):
@@ -82,7 +82,7 @@ class PIDGroupBox(QGroupBox):
         if value == None:
             value = float(self.KDLineEdit.text())
         self.KD = value
-        self.KDLineEdit.setText("{value:.2f}".format(value=value))
+        self.KDLineEdit.setText("{value:.3f}".format(value=value))
         self.KDLineEditChanged.emit(value)
 
     def getKD(self):
