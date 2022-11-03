@@ -503,11 +503,16 @@ class Device(QObject):
     @Slot(bool)
     def rampPID_checkbox_C1(self, value):
         self.rampPID_bool_C1 = value
+        if value == True:
+            self.starting_point_ramp_C1 = self.feedback_process_variable_C1
         log.info("Ramp PID toggled on {value} for control channel C1.".format(value = value))
 
     @Slot(bool)
     def rampPID_checkbox_C2(self, value):
         self.rampPID_bool_C2 = value
+        if value == True:
+            self.increment_setpoint_ramp_C2 = self.rampPID_C2*1/self.controlRate
+            self.starting_point_ramp_C2 = self.feedback_process_variable_C2
         log.info("Ramp PID toggled on {value} for control channel C2.".format(value = value))
 
     @Slot(float)
@@ -521,8 +526,13 @@ class Device(QObject):
     def set_feedback_setpoint_C2(self, setpoint):
         """Set feedback setpoint for channel C2."""
         self.feedback_setpoint_C2 = setpoint
-        self.PID_C2.setpoint = setpoint
+        if self.rampPID_bool_C2 == False:
+            self.final_feedback_setpoint_C2 = self.feedback_setpoint_C2
+            self.PID_C2.setpoint = self.final_feedback_setpoint_C2
         log.info("Feedback setpoint on control channel C2 on {device} set to {setpoint}.".format(device=self.name, setpoint=setpoint))
+
+    def set_feedback_setpoint_ramp_C2(self, setpoint):
+        self.PID_C2.setpoint = setpoint
 
     def set_feedback_channel_C1(self, feedback):
         self.feedback_index_C1 = feedback
@@ -1374,7 +1384,36 @@ class Device(QObject):
             if self.feedback_C1 == True:
                 self.update_PID_C1()
             if self.feedback_C2 == True:
-                self.update_PID_C2()
+
+                if self.rampPID_bool_C2 == False:
+                    self.update_PID_C2()
+
+                elif self.rampPID_bool_C2 == True:
+                    #calculate new set point on ramp
+                    self.increment_setpoint_ramp = self.rampPID_C2*1/self.controlRate
+
+                    if self.feedback_setpoint_C2 >= self.starting_point_ramp_C2:
+                        setpoint_ramp = self.increment_setpoint_ramp + self.starting_point_ramp_C2
+
+                    elif self.feedback_setpoint_C2 < self.starting_point_ramp_C2:
+                        setpoint_ramp = -self.increment_setpoint_ramp + self.starting_point_ramp_C2
+                    
+                    #Check that how far I am from the final feedback SetPoint value
+                    delta_setpoint = abs(self.feedback_setpoint_C2 - setpoint_ramp)
+                    #if delta setpoint is less than the increment calculated with the ramp then stop the ramp and set the final set point as self.feedback_setpoint
+                    if delta_setpoint <= self.increment_setpoint_ramp and self.feedback_setpoint_C2 != self.final_feedback_setpoint_C2:
+                        self.rampPID_bool_C2 = False
+                    
+                    elif self.feedback_setpoint_C2 == self.final_feedback_setpoint_C2:
+                        self.update_PID_C2()
+
+                    elif self.feedback_setpoint_C2 != self.final_feedback_setpoint_C2:
+                        # self.rampPID_bool_C2 = True
+                        self.set_feedback_setpoint_ramp_C2(setpoint_ramp)
+                        self.update_PID_C2()
+                        self.starting_point_ramp_C2 = setpoint_ramp
+
+                    
             # Concatenate output data.
             self.send_data()
         except ljm.LJMError:
