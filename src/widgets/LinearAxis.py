@@ -31,7 +31,9 @@ class LinearAxis(QWidget):
     KPChanged = Signal(float)
     KIChanged = Signal(float)
     KDChanged = Signal(float)
-    proportionalOnMeasurementChanged = Signal(bool)
+    rampPIDChanged = Signal(float)
+    # proportionalOnMeasurementChanged = Signal(bool)
+    rampPID_checkboxChanged = Signal(bool)
     positiveJogEnabled = Signal()
     negativeJogEnabled = Signal()
     positiveJogDisabled = Signal()
@@ -110,7 +112,9 @@ class LinearAxis(QWidget):
         self.PID.KPLineEditChanged.connect(self.emitKPChanged)
         self.PID.KILineEditChanged.connect(self.emitKIChanged)
         self.PID.KDLineEditChanged.connect(self.emitKDChanged)
-        self.PID.proportionalOnMeasurement.stateChanged.connect(self.emitProportionalOnMeasurement)
+        self.PID.rampPIDLineEditChanged.connect(self.emitRampPIDChanged)
+        # self.PID.proportionalOnMeasurement.stateChanged.connect(self.emitProportionalOnMeasurement)
+        self.PID.rampPID_checkbox.stateChanged.connect(self.emitRampPID_checkbox)
 
         self.jog.speedLineEdit.returnPressed.connect(self.emitSecondarySetPointChanged)
         self.jog.jogPlusButton.pressed.connect(self.emitPositiveJogEnabled)
@@ -305,10 +309,15 @@ class LinearAxis(QWidget):
     def emitNegativeJogDisabled(self):
         self.negativeJogDisabled.emit()
 
+    # @Slot()
+    # def emitProportionalOnMeasurement(self, value):
+    #     self.proportionalOnMeasurementChanged.emit(value)
+    #     self.controlConfiguration["settings"]["proportionalOnMeasurement"] = self.PID.getProportionalOnMeasurement()
+
     @Slot()
-    def emitProportionalOnMeasurement(self, value):
-        self.proportionalOnMeasurementChanged.emit(value)
-        self.controlConfiguration["settings"]["proportionalOnMeasurement"] = self.PID.getProportionalOnMeasurement()
+    def emitRampPID_checkbox(self, value):
+        self.rampPID_checkboxChanged.emit(value)
+        self.controlConfiguration["settings"]["rampPID_checkbox"] = self.PID.getRampPID_checkbox()
 
     @Slot()
     def emitKPChanged(self, value):
@@ -324,6 +333,11 @@ class LinearAxis(QWidget):
     def emitKDChanged(self, value):
         self.KDChanged.emit(value)
         self.controlConfiguration["settings"]["KD"] = round(self.PID.getKD(), 3)
+    
+    @Slot()
+    def emitRampPIDChanged(self, value):
+        self.rampPIDChanged.emit(value)
+        self.controlConfiguration["settings"]["rampPID"] = round(self.PID.getRampPID(), 3)
 
     @Slot()
     def emitPrimaryLeftLimitChanged(self, value):
@@ -498,8 +512,12 @@ class LinearAxis(QWidget):
                 self.PID.setKI(settings["KI"])
             elif setting == "KD":
                 self.PID.setKD(settings["KD"])
-            elif setting == "proportionalOnMeasurement":
-                self.PID.setProportionalOnMeasurement(settings["proportionalOnMeasurement"])
+            elif setting == "rampPID":
+                self.PID.setRampPID(settings["rampPID"])
+            # elif setting == "proportionalOnMeasurement":
+            #     self.PID.setProportionalOnMeasurement(settings["proportionalOnMeasurement"])
+            elif setting == "rampPID_checkbox":
+                self.PID.setRampPID_checkbox(settings["rampPID_checkbox"])
             elif setting == "enablePIDControl":
                 self.setPIDControlButtonEnable(settings["enablePIDControl"])
             elif setting == "PIDControl":
@@ -539,7 +557,9 @@ class LinearAxis(QWidget):
         self.PID.setKP(self.controlConfiguration["settings"]["KP"])
         self.PID.setKI(self.controlConfiguration["settings"]["KI"])
         self.PID.setKD(self.controlConfiguration["settings"]["KD"])
-        self.PID.setProportionalOnMeasurement(self.controlConfiguration["settings"]["proportionalOnMeasurement"])
+        self.PID.setRampPID(self.controlConfiguration["settings"]["rampPID"])
+        # self.PID.setProportionalOnMeasurement(self.controlConfiguration["settings"]["proportionalOnMeasurement"])
+        self.PID.setRampPID_checkbox(self.controlConfiguration["settings"]["rampPID_checkbox"])
         self.settings.setMaxRPM(self.controlConfiguration["settings"]["maxRPM"])
         self.settings.setCPR(self.controlConfiguration["settings"]["CPR"])
         self.settings.setPPR(self.controlConfiguration["settings"]["PPR"])

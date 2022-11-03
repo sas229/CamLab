@@ -6,6 +6,7 @@ class PIDGroupBox(QGroupBox):
     KPLineEditChanged = Signal(float)
     KILineEditChanged = Signal(float)
     KDLineEditChanged = Signal(float)
+    rampPIDLineEditChanged = Signal(float)
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -22,20 +23,25 @@ class PIDGroupBox(QGroupBox):
         self.KPLabel = QLabel("KP (-)")
         self.KPLineEdit = QLineEdit()
         self.KPLineEdit.setValidator(self.doubleValidator)
-        self.KPLineEdit.setText("1.00")
+        self.KPLineEdit.setText("1.000")
         self.KPLineEdit.setFixedWidth(80)
         self.KILabel = QLabel("KI (-)")
         self.KILineEdit = QLineEdit()
         self.KILineEdit.setValidator(self.doubleValidator)
-        self.KILineEdit.setText("1.00")
+        self.KILineEdit.setText("1.000")
         self.KILineEdit.setFixedWidth(80)
         self.KDLabel = QLabel("KD (-)")
         self.KDLineEdit = QLineEdit()
         self.KDLineEdit.setValidator(self.doubleValidator)
-        self.KDLineEdit.setText("1.00")
+        self.KDLineEdit.setText("1.000")
         self.KDLineEdit.setFixedWidth(80)
-        self.optionsLabel = QLabel("Options")
-        self.proportionalOnMeasurement = QCheckBox("Proportional on measurement")
+        self.optionsLabel = QLabel("Ramp unit/s")
+        # self.proportionalOnMeasurement = QCheckBox("Proportional on measurement")
+        self.rampPID_checkbox = QCheckBox()
+        self.rampPIDLineEdit = QLineEdit()
+        self.rampPIDLineEdit.setValidator(self.doubleValidator)
+        self.rampPIDLineEdit.setText("1.000")
+        self.rampPIDLineEdit.setFixedWidth(80)
 
         # Layout.
         self.Layout = QGridLayout()
@@ -46,7 +52,8 @@ class PIDGroupBox(QGroupBox):
         self.Layout.addWidget(self.KILineEdit, 1, 1)
         self.Layout.addWidget(self.KDLineEdit, 1, 2)
         self.Layout.addWidget(self.optionsLabel, 2, 0)
-        self.Layout.addWidget(self.proportionalOnMeasurement, 3, 0, 1, 3)
+        self.Layout.addWidget(self.rampPID_checkbox, 3, 1)
+        self.Layout.addWidget(self.rampPIDLineEdit, 3, 0)
         self.setLayout(self.Layout) 
         
         # Geometry.
@@ -57,6 +64,7 @@ class PIDGroupBox(QGroupBox):
         self.KPLineEdit.returnPressed.connect(self.setKP)
         self.KILineEdit.returnPressed.connect(self.setKI)
         self.KDLineEdit.returnPressed.connect(self.setKD)
+        self.rampPIDLineEdit.returnPressed.connect(self.setRampPID)
 
     def setKP(self, value=None):
         if value == None:
@@ -88,8 +96,24 @@ class PIDGroupBox(QGroupBox):
     def getKD(self):
         return self.KD
 
-    def setProportionalOnMeasurement(self, value):
-        self.proportionalOnMeasurement.setChecked(value)
+    def setRampPID(self, value=None):
+        if value == None:
+            value = float(self.rampPIDLineEdit.text())
+        self.rampPID = value
+        self.rampPIDLineEdit.setText("{value:.3f}".format(value=value))
+        self.rampPIDLineEditChanged.emit(value)
 
-    def getProportionalOnMeasurement(self):
-        return self.proportionalOnMeasurement.isChecked()
+    def getRampPID(self):
+        return self.rampPID
+
+    # def setProportionalOnMeasurement(self, value):
+    #     self.proportionalOnMeasurement.setChecked(value)
+
+    # def getProportionalOnMeasurement(self):
+    #     return self.proportionalOnMeasurement.isChecked()
+
+    def setRampPID_checkbox(self, value):
+        self.rampPID_checkbox.setChecked(value)
+
+    def getRampPID_checkbox(self):
+        return self.rampPID_checkbox.isChecked()
