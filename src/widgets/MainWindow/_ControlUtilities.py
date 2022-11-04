@@ -105,7 +105,8 @@ class ControlUtilities:
                 self.manager.devices[name].updatePositionProcessVariableC2.connect(controlWidget.setPositionProcessVariable)
                 self.manager.devices[name].updateFeedbackProcessVariableC2.connect(controlWidget.setFeedbackProcessVariable)
                 self.manager.devices[name].updateEnablePIDControlC2.connect(controlWidget.emitStopCommand)
-            
+
+
             # Set the configuration and initial position.
             controlWidget.set_configuration(configuration=self.manager.configuration)
             self.manager.devices[name].check_connections()
