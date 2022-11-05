@@ -519,9 +519,9 @@ class Device(QObject):
         if value == True:
             self.starting_point_ramp_C2 = self.feedback_process_variable_C2
 
-            if not hasattr(self, "final_feedback_setpoint_C1"):
+            if not hasattr(self, "final_feedback_setpoint_C2"):
                 self.final_feedback_setpoint_C2 = self.feedback_setpoint_C2
-                
+
         if value == False:
             self.PID_C2.setpoint = self.feedback_setpoint_C2
         log.info("Ramp PID toggled on {value} for control channel C2.".format(value = value))

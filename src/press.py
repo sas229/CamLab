@@ -39,6 +39,7 @@ class Press(QObject):
         self.KP_C1 = 0.0
         self.KI_C1 = 0.0
         self.KD_C1 = 0.0
+        self.rampPID_C1 = 0.0
         self.status_PID_C1 = False
         self.enabled_C1 = False
         self.motor_enabled_C1 = False
@@ -71,6 +72,7 @@ class Press(QObject):
         self.sequence_running = False
         self.move_to_demanded_position = False
         self.is_stopped = True
+        self.rampPID_bool_C1 = False
 
         self.open_connection()
 
@@ -333,20 +335,43 @@ class Press(QObject):
         self.KD_C1 = value
         self.set_PID_tunings_C1()
         log.info("PID derivative gain for control channel C1 on {device} changed to {value:.3f}.".format(value=value, device=self.name))
+    
+    @Slot(float)
+    def set_rampPID_C1(self, value):
+        """Set ramp PID for control channel C1."""
+        self.rampPID_C1 = value
+        log.info("PID ramp for control channel C1 on {device} changed to {value:.3f} unit/s.".format(value=value, device=self.name))
 
     @Slot(bool)
-    def set_pom_C1(self, value):
-        self.PID_C1.proportional_on_measurement = value 
-        log.info("Proportional on measurement toggled for control channel C1.")
+    def rampPID_checkbox_C1(self, value):
+        self.rampPID_bool_C1 = value
+        if value == True:
+            self.starting_point_ramp_C1 = self.feedback_process_variable_C1
+
+            if not hasattr(self, "final_feedback_setpoint_C1"):
+                self.final_feedback_setpoint_C1 = self.feedback_setpoint_C1
+
+        if value == False:
+            self.PID_C1.setpoint = self.feedback_setpoint_C1
+        log.info("Ramp PID toggled on {value} for VJT.".format(value = value))
+
+    # @Slot(bool)
+    # def set_pom_C1(self, value):
+    #     self.PID_C1.proportional_on_measurement = value 
+    #     log.info("Proportional on measurement toggled for control channel C1.")
 
 
     @Slot(float)
     def set_feedback_setpoint_C1(self, setpoint):
         """Set feedback setpoint for channel C1."""
         self.feedback_setpoint_C1 = setpoint
-        self.PID_C1.setpoint = setpoint
-        
+        if self.rampPID_bool_C1 == False:
+            self.final_feedback_setpoint_C1 = self.feedback_setpoint_C1
+            self.PID_C1.setpoint = self.final_feedback_setpoint_C1
         log.info("Feedback setpoint on control channel C1 on {device} set to {setpoint}.".format(device=self.name, setpoint=setpoint))
+
+    def set_feedback_setpoint_ramp_C1(self, setpoint):
+        self.PID_C1.setpoint = setpoint
 
     def set_feedback_channel_C1(self, feedback, tot_chann_enabled):
         self.feedback_index_C1 = feedback
@@ -975,7 +1000,32 @@ class Press(QObject):
             
             if self.feedback_C1 == True and self.current_data.size!=0:
                 
-                self.update_PID_C1()
+                if self.rampPID_bool_C1 == False:
+                    self.update_PID_C1()
+
+                elif self.rampPID_bool_C1 == True:
+                    #calculate new set point on ramp
+                    self.increment_setpoint_ramp_C1 = self.rampPID_C1*1/self.controlRate
+
+                    if self.feedback_setpoint_C1 >= self.starting_point_ramp_C1:
+                        setpoint_ramp_C1 = self.increment_setpoint_ramp_C1 + self.starting_point_ramp_C1
+
+                    elif self.feedback_setpoint_C1 < self.starting_point_ramp_C1:
+                        setpoint_ramp_C1 = -self.increment_setpoint_ramp_C1 + self.starting_point_ramp_C1
+                    
+                    #Check how far I am from the final feedback SetPoint value
+                    delta_setpoint_C1 = abs(self.feedback_setpoint_C1 - setpoint_ramp_C1)
+                    #if delta setpoint is less than the increment calculated with the ramp then stop the ramp and set the final set point as self.feedback_setpoint
+                    if delta_setpoint_C1 <= self.increment_setpoint_ramp_C1 and self.final_feedback_setpoint_C1 != self.feedback_setpoint_C1:
+                        self.final_feedback_setpoint_C1 = self.feedback_setpoint_C1
+                    
+                    elif self.final_feedback_setpoint_C1 == self.feedback_setpoint_C1:
+                        self.update_PID_C1()
+
+                    elif self.final_feedback_setpoint_C1 != self.feedback_setpoint_C1:
+                        self.set_feedback_setpoint_ramp_C1(setpoint_ramp_C1)
+                        self.update_PID_C1()
+                        self.starting_point_ramp_C1 = setpoint_ramp_C1
             
             self.send_data()
 
