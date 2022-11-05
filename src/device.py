@@ -504,8 +504,11 @@ class Device(QObject):
     def rampPID_checkbox_C1(self, value):
         self.rampPID_bool_C1 = value
         if value == True:
-            self.increment_setpoint_ramp_C1 = self.rampPID_C1*1/self.controlRate
             self.starting_point_ramp_C1 = self.feedback_process_variable_C1
+
+            if not hasattr(self, "final_feedback_setpoint_C1"):
+                self.final_feedback_setpoint_C1 = self.feedback_setpoint_C1
+
         if value == False:
             self.PID_C1.setpoint = self.feedback_setpoint_C1
         log.info("Ramp PID toggled on {value} for control channel C1.".format(value = value))
@@ -514,8 +517,11 @@ class Device(QObject):
     def rampPID_checkbox_C2(self, value):
         self.rampPID_bool_C2 = value
         if value == True:
-            self.increment_setpoint_ramp_C2 = self.rampPID_C2*1/self.controlRate
             self.starting_point_ramp_C2 = self.feedback_process_variable_C2
+
+            if not hasattr(self, "final_feedback_setpoint_C1"):
+                self.final_feedback_setpoint_C2 = self.feedback_setpoint_C2
+                
         if value == False:
             self.PID_C2.setpoint = self.feedback_setpoint_C2
         log.info("Ramp PID toggled on {value} for control channel C2.".format(value = value))
@@ -1395,6 +1401,7 @@ class Device(QObject):
 
                 if self.rampPID_bool_C1 == False:
                     self.update_PID_C1()
+
                 elif self.rampPID_bool_C1 == True:
                     #calculate new set point on ramp
                     self.increment_setpoint_ramp_C1 = self.rampPID_C1*1/self.controlRate
@@ -1405,7 +1412,7 @@ class Device(QObject):
                     elif self.feedback_setpoint_C1 < self.starting_point_ramp_C1:
                         setpoint_ramp_C1 = -self.increment_setpoint_ramp_C1 + self.starting_point_ramp_C1
                     
-                    #Check that how far I am from the final feedback SetPoint value
+                    #Check how far I am from the final feedback SetPoint value
                     delta_setpoint_C1 = abs(self.feedback_setpoint_C1 - setpoint_ramp_C1)
                     #if delta setpoint is less than the increment calculated with the ramp then stop the ramp and set the final set point as self.feedback_setpoint
                     if delta_setpoint_C1 <= self.increment_setpoint_ramp_C1 and self.final_feedback_setpoint_C1 != self.feedback_setpoint_C1:
@@ -1434,7 +1441,7 @@ class Device(QObject):
                     elif self.feedback_setpoint_C2 < self.starting_point_ramp_C2:
                         setpoint_ramp_C2 = -self.increment_setpoint_ramp_C2 + self.starting_point_ramp_C2
                     
-                    #Check that how far I am from the final feedback SetPoint value
+                    #Check how far I am from the final feedback SetPoint value
                     delta_setpoint_C2 = abs(self.feedback_setpoint_C2 - setpoint_ramp_C2)
                     #if delta setpoint is less than the increment calculated with the ramp then stop the ramp and set the final set point as self.feedback_setpoint
                     if delta_setpoint_C2 <= self.increment_setpoint_ramp_C2 and self.final_feedback_setpoint_C2 != self.feedback_setpoint_C2:
