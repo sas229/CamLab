@@ -419,6 +419,7 @@ class LinearAxis(QWidget):
         self.feedbackStatus.set_setpoint(value)
         self.feedbackDemand.setPointLineEdit.setText("{value:.2f}".format(value=value))
         self.feedbackSetPointChanged.emit(value)
+        self.controlConfiguration["settings"]["feedbackSetPoint"] = value
 
     @Slot()
     def setPositionSetPoint(self, value):
@@ -452,9 +453,8 @@ class LinearAxis(QWidget):
         # Set the process variable line edit text.
         self.feedbackStatus.set_process_variable(value)
         self.feedbackDemand.processVariableLineEdit.setText("{value:.2f}".format(value=value))
-
         # Update the configuration.
-        self.controlConfiguration["settings"]["feedbackProcessVariable"] = round(self.feedbackDemand.get_process_variable(), 2)
+        self.controlConfiguration["settings"]["feedbackProcessVariable"] = round(self.feedbackStatus.get_process_variable(), 2)
 
     @Slot()
     def setPIDControlButtonEnable(self, value):
@@ -537,10 +537,6 @@ class LinearAxis(QWidget):
         self.configuration = configuration
         self.controlConfiguration = self.configuration["devices"][self.device]["control"][self.control]
         self.setWindowTitle(self.controlConfiguration["name"])
-        
-        self.setPositionSetPoint(self.controlConfiguration["settings"]["primarySetPoint"])
-        self.jog.setSpeed(self.controlConfiguration["settings"]["secondarySetPoint"])
-        self.setFeedbackSetPoint(self.controlConfiguration["settings"]["feedbackSetPoint"])
 
         self.positionStatus.setMinimumRange(self.controlConfiguration["settings"]["primaryMinimum"])
         self.positionStatus.setMaximumRange(self.controlConfiguration["settings"]["primaryMaximum"])
@@ -553,6 +549,10 @@ class LinearAxis(QWidget):
         self.feedbackStatus.setLeftLimit(self.controlConfiguration["settings"]["feedbackLeftLimit"])
         self.feedbackStatus.setRightLimit(self.controlConfiguration["settings"]["feedbackRightLimit"])
         self.setFeedbackProcessVariable(self.controlConfiguration["settings"]["feedbackProcessVariable"])
+
+        self.setPositionSetPoint(self.controlConfiguration["settings"]["primarySetPoint"])
+        self.jog.setSpeed(self.controlConfiguration["settings"]["secondarySetPoint"])
+        self.setFeedbackSetPoint(self.controlConfiguration["settings"]["feedbackSetPoint"])
         
         self.PID.setKP(self.controlConfiguration["settings"]["KP"])
         self.PID.setKI(self.controlConfiguration["settings"]["KI"])

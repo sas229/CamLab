@@ -506,9 +506,6 @@ class Device(QObject):
         if value == True:
             self.starting_point_ramp_C1 = self.feedback_process_variable_C1
 
-            if not hasattr(self, "final_feedback_setpoint_C1"):
-                self.final_feedback_setpoint_C1 = self.feedback_setpoint_C1
-
         if value == False:
             self.PID_C1.setpoint = self.feedback_setpoint_C1
         log.info("Ramp PID toggled on {value} for control channel C1.".format(value = value))
@@ -1403,6 +1400,10 @@ class Device(QObject):
                     self.update_PID_C1()
 
                 elif self.rampPID_bool_C1 == True:
+
+                    if not hasattr(self, "final_feedback_setpoint_C1"):
+                        self.final_feedback_setpoint_C1 = self.feedback_process_variable_C1
+
                     #calculate new set point on ramp
                     self.increment_setpoint_ramp_C1 = self.rampPID_C1*1/self.controlRate
 
@@ -1419,9 +1420,11 @@ class Device(QObject):
                         self.final_feedback_setpoint_C1 = self.feedback_setpoint_C1
                     
                     elif self.final_feedback_setpoint_C1 == self.feedback_setpoint_C1:
+                        # print(self.final_feedback_setpoint_C1, self.feedback_setpoint_C1, 2)
                         self.update_PID_C1()
 
                     elif self.final_feedback_setpoint_C1 != self.feedback_setpoint_C1:
+                        # print(self.final_feedback_setpoint_C1, self.feedback_setpoint_C1)
                         self.set_feedback_setpoint_ramp_C1(setpoint_ramp_C1)
                         self.update_PID_C1()
                         self.starting_point_ramp_C1 = setpoint_ramp_C1
