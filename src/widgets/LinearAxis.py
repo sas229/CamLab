@@ -447,6 +447,7 @@ class LinearAxis(QWidget):
         self.feedbackStatus.set_setpoint(value)
         self.feedbackDemand.setPointLineEdit.setText("{value:.2f}".format(value=value))
         self.controlConfiguration["settings"]["feedbackSetPoint"] = round(self.feedbackStatus.get_setpoint(), 2)
+    
 
     @Slot()
     def setFeedbackProcessVariable(self, value):

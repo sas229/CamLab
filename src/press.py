@@ -348,9 +348,6 @@ class Press(QObject):
         if value == True:
             self.starting_point_ramp_C1 = self.feedback_process_variable_C1
 
-            if not hasattr(self, "final_feedback_setpoint_C1"):
-                self.final_feedback_setpoint_C1 = self.feedback_setpoint_C1
-
         if value == False:
             self.PID_C1.setpoint = self.feedback_setpoint_C1
         log.info("Ramp PID toggled on {value} for VJT.".format(value = value))
@@ -1004,6 +1001,12 @@ class Press(QObject):
                     self.update_PID_C1()
 
                 elif self.rampPID_bool_C1 == True:
+
+                    if not hasattr(self, "final_feedback_setpoint_C1"):
+                        #get value of feedbackSetpoint from configuration
+                        self.final_feedback_setpoint_C1 = self.current_data[self.feedback_index_C1]
+                        self.feedback_setpoint_C1 = self.current_data[self.feedback_index_C1]
+                        self.starting_point_ramp_C1 = self.current_data[self.feedback_index_C1]
                     #calculate new set point on ramp
                     self.increment_setpoint_ramp_C1 = self.rampPID_C1*1/self.controlRate
 
