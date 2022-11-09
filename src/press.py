@@ -301,7 +301,7 @@ class Press(QObject):
         self.status_PID_C1 = value
         if value == True:
             self.PID_C1.reset()
-            self.set_speed_limit()
+            self.set_speed_C1(0.001)
             self.PID_C1.output_limits = (-self.speed_limit, self.speed_limit)
             self.PID_C1.setpoint = self.feedback_setpoint_C1
             self.PID_C1.set_auto_mode(True, last_output=0.001)

@@ -435,9 +435,8 @@ class LinearAxis(QWidget):
         # Set the process variable line edit text.
         self.positionStatus.set_process_variable(value)
         self.positionDemand.processVariableLineEdit.setText("{value:.2f}".format(value=value))
-
         # Update the configuration.
-        self.controlConfiguration["settings"]["primaryProcessVariable"] = round(self.previousPrimaryProcessVariable, 2)
+        self.controlConfiguration["settings"]["primaryProcessVariable"] = round(self.positionStatus.get_process_variable(), 2)
 
     @Slot()
     def setFeedbackSetPoint(self, value):
