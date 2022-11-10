@@ -4,21 +4,23 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-colorlog = "*"
-"ruamel.yaml" = "*"
-labjack-ljm = "*"
-numpy = "*"
-scipy = "*"
-simple-pid = "*"
-pillow = "*"
-opencv-contrib-python = "*"
-pyside6 = "*"
-jinja2 = "*"
-pyinstaller = "*"
-pyqtgraph = "*"
-sphinx = "*"
+colorlog = "==6.7.0"
+"ruamel.yaml" = "==0.17.21"
+labjack-ljm = "==1.21.0"
+numpy = "==1.23.3"
+scipy = "==1.9.1"
+simple-pid = "==1.0.1"
+pillow = "==9.2.0"
+opencv-contrib-python = "==4.6.0.66"
+pyside6 = "==6.3.2"
+jinja2 = "==3.1.2"
+pyinstaller = "==5.4.1"
+pyqtgraph = "==0.12.4"
+sphinx = "==5.1.1"
+matplotlib = "==3.5.3"
+pyserial = "==3.5"
 
 [dev-packages]
 
 [requires]
-python_version = "3"
+python_version = ">=3.8"
