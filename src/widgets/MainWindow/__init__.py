@@ -203,9 +203,13 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
                 self.tabs.setTabVisible(index, True)
 
     @Slot()
-    def open_extension(self):
+    def open_extension(self, action):
         """Method to open an extension."""
+        extension = action.iconText()
         log.info("Extension button clicked.")
+        log.info(f"Opening new window for {extension}.")
+        # self.manager.shearbox = True
+
 
     @Slot()
     def update_dark_mode(self):

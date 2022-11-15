@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QToolBar, QWidget, QSizePolicy, QFileDialog
+from PySide6.QtWidgets import QToolBar, QWidget, QSizePolicy, QFileDialog, QToolButton, QMenu
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtCore import Signal, Slot
 import logging
@@ -29,10 +29,16 @@ class ToolBar(QToolBar):
         self.addPlotButton.setToolTip("Click to add plot.")
         self.addAction(self.addPlotButton)
 
-        # Open extension QAction.
-        self.extensionButton = QAction()
+        # Set up extensions menu
+        self.extensionsMenu = QMenu()
+        self.extensionsMenu.addAction("ShearBox")
+
+        # Open extension QToolButton.
+        self.extensionButton = QToolButton()
         self.extensionButton.setToolTip("Click to open extension.")
-        self.addAction(self.extensionButton)
+        self.extensionButton.setMenu(self.extensionsMenu)
+        self.extensionButton.setPopupMode(QToolButton.InstantPopup)
+        self.addWidget(self.extensionButton)
 
         self.addSeparator()
 
@@ -102,6 +108,7 @@ class ToolBar(QToolBar):
     def disableModeButton(self):
         self.modeButton.setEnabled(False)
         self.modeButton.setToolTip("Add devices to enable.")
+
 
     def changeMode(self):
         # Toggle running property, modeButton ToolTip and icon and visible state for all other ToolButtons as required.
