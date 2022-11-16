@@ -91,6 +91,7 @@ class Manager(QObject):
             "KD": 0.000,
             "rampPID": 0.000,
             "rampPID_checkbox": False,
+            "rampUnit": "mm/s",
             "maxRPM": 4000,
             "CPR": 6400,
             "PPR": 32,

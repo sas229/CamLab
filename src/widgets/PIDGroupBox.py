@@ -35,7 +35,8 @@ class PIDGroupBox(QGroupBox):
         self.KDLineEdit.setValidator(self.doubleValidator)
         self.KDLineEdit.setText("1.000")
         self.KDLineEdit.setFixedWidth(80)
-        self.optionsLabel = QLabel("Ramp unit/s")
+        self.optionsLabel = QLabel("Ramp")
+        self.checkboxLabel = QLabel("Ramp On/Off")
         # self.proportionalOnMeasurement = QCheckBox("Proportional on measurement")
         self.rampPID_checkbox = QCheckBox()
         self.rampPIDLineEdit = QLineEdit()
@@ -52,6 +53,7 @@ class PIDGroupBox(QGroupBox):
         self.Layout.addWidget(self.KILineEdit, 1, 1)
         self.Layout.addWidget(self.KDLineEdit, 1, 2)
         self.Layout.addWidget(self.optionsLabel, 2, 0)
+        self.Layout.addWidget(self.checkboxLabel, 2, 1)
         self.Layout.addWidget(self.rampPID_checkbox, 3, 1)
         self.Layout.addWidget(self.rampPIDLineEdit, 3, 0)
         self.setLayout(self.Layout) 
@@ -120,3 +122,10 @@ class PIDGroupBox(QGroupBox):
 
     def rampPIDLineEdit_setting(self, value):
         self.rampPIDLineEdit.setEnabled(value)
+
+    def set_unit(self, unit):
+        """Method to set unit."""
+        self.unit = unit
+        self.optionsLabel.setText("Ramp ({unit})".format(unit=unit))
+        
+

@@ -137,6 +137,7 @@ class LinearAxis(QWidget):
         self.settings.positionUnitChanged.connect(self.updatePrimaryUnit)
         self.settings.speedUnitChanged.connect(self.updateSecondaryUnit)
         self.settings.feedbackUnitChanged.connect(self.updateFeedbackUnit)
+        self.settings.rampUnitChanged.connect(self.updateRampUnit)
 
     @Slot(bool)
     def toggleFeedbackControl(self, feedback):
@@ -278,6 +279,12 @@ class LinearAxis(QWidget):
         self.feedbackStatus.set_unit(unit)
         self.controlConfiguration["settings"]["feedbackUnit"] = unit
         log.info("Feedback unit updated for control channel {channel} on {device} to {unit}.".format(channel=self.channel, device=self.device, unit=unit))
+        
+    @Slot()
+    def updateRampUnit(self, unit):
+        self.PID.set_unit(unit)
+        self.controlConfiguration["settings"]["rampUnit"] = unit
+        log.info("Ramp unit updated for control channel {channel} on {device} to {unit}.".format(channel=self.channel, device=self.device, unit=unit))
 
     @Slot()
     def updateSecondaryUnit(self, unit):
@@ -568,4 +575,5 @@ class LinearAxis(QWidget):
         self.settings.setPositionUnit(self.controlConfiguration["settings"]["primaryUnit"])
         self.settings.setSpeedUnit(self.controlConfiguration["settings"]["secondaryUnit"])
         self.settings.setFeedbackUnit(self.controlConfiguration["settings"]["feedbackUnit"])
+        self.settings.setRampUnit(self.controlConfiguration["settings"]["rampUnit"])
         self.toggleFeedbackControl(self.feedback)

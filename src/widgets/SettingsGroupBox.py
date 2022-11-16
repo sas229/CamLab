@@ -6,6 +6,7 @@ class SettingsGroupBox(QGroupBox):
     positionUnitChanged = Signal(str)
     speedUnitChanged = Signal(str)
     feedbackUnitChanged = Signal(str)
+    rampUnitChanged = Signal (str)
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -46,6 +47,10 @@ class SettingsGroupBox(QGroupBox):
         self.feedbackUnitLineEdit = QLineEdit()
         self.feedbackUnitLineEdit.setFixedWidth(100)
         
+        self.rampUnitLabel = QLabel("Ramp unit")
+        self.rampUnitLineEdit = QLineEdit()
+        self.rampUnitLineEdit.setFixedWidth(100)
+        
         self.returnButton = QPushButton("Return")
         self.returnButton.setFixedWidth(100)
         
@@ -73,6 +78,10 @@ class SettingsGroupBox(QGroupBox):
         self.gridLayout.addWidget(self.feedbackUnitLabel, 0, n)
         self.gridLayout.addWidget(self.feedbackUnitLineEdit, 1, n)
         self.gridLayout.setHorizontalSpacing(25)
+        n += 1
+        self.gridLayout.addWidget(self.rampUnitLabel, 0, n)
+        self.gridLayout.addWidget(self.rampUnitLineEdit, 1, n)
+        self.gridLayout.setHorizontalSpacing(25)
 
         self.returnLayout = QVBoxLayout()
         self.returnLayout.addStretch()
@@ -92,6 +101,7 @@ class SettingsGroupBox(QGroupBox):
         self.positionUnitLineEdit.returnPressed.connect(self.setPositionUnit)
         self.speedUnitLineEdit.returnPressed.connect(self.setSpeedUnit)
         self.feedbackUnitLineEdit.returnPressed.connect(self.setFeedbackUnit)
+        self.rampUnitLineEdit.returnPressed.connect(self.setRampUnit)
 
     def setMaxRPM(self, value):
         self.maxRPMLineEdit.setText("{value}".format(value=value))
@@ -122,3 +132,9 @@ class SettingsGroupBox(QGroupBox):
             value = self.feedbackUnitLineEdit.text()
         self.feedbackUnitLineEdit.setText(value)
         self.feedbackUnitChanged.emit(value)
+
+    def setRampUnit(self, value=None):
+        if value == None:
+            value = self.rampUnitLineEdit.text()
+        self.rampUnitLineEdit.setText(value)
+        self.rampUnitChanged.emit(value)
