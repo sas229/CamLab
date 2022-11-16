@@ -36,7 +36,7 @@ class PIDGroupBox(QGroupBox):
         self.KDLineEdit.setText("1.000")
         self.KDLineEdit.setFixedWidth(80)
         self.optionsLabel = QLabel("Ramp")
-        self.checkboxLabel = QLabel("Ramp On/Off")
+        self.checkboxLabel = QLabel("Ramp")
         # self.proportionalOnMeasurement = QCheckBox("Proportional on measurement")
         self.rampPID_checkbox = QCheckBox()
         self.rampPIDLineEdit = QLineEdit()
@@ -118,6 +118,7 @@ class PIDGroupBox(QGroupBox):
     def setRampPID_checkbox(self, value):
         self.rampPID_checkbox.setChecked(value)
         self.rampPIDLineEdit_setting(value)
+        self.set_checkbox_label(value)
 
     def getRampPID_checkbox(self):
         return self.rampPID_checkbox.isChecked()
@@ -130,4 +131,8 @@ class PIDGroupBox(QGroupBox):
         self.unit = unit
         self.optionsLabel.setText("Ramp ({unit})".format(unit=unit))
         
-
+    def set_checkbox_label(self, value):
+        if value == False:
+            self.checkboxLabel.setText("Ramp OFF")
+        elif value == True:
+            self.checkboxLabel.setText("Ramp ON")

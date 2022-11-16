@@ -325,6 +325,7 @@ class LinearAxis(QWidget):
     def emitRampPID_checkbox(self, value):
         self.rampPID_checkboxChanged.emit(value)
         self.PID.rampPIDLineEdit_setting(self.PID.getRampPID_checkbox())
+        self.PID.set_checkbox_label(self.PID.getRampPID_checkbox())
         self.controlConfiguration["settings"]["rampPID_checkbox"] = self.PID.getRampPID_checkbox()
 
     @Slot()
