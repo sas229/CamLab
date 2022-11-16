@@ -117,3 +117,6 @@ class PIDGroupBox(QGroupBox):
 
     def getRampPID_checkbox(self):
         return self.rampPID_checkbox.isChecked()
+
+    def rampPIDLineEdit_setting(self, value):
+        self.rampPIDLineEdit.setEnabled(value)
