@@ -31,6 +31,7 @@ class ControlUtilities:
             # self.checkTimer.timeout.connect(self.manager.devices[name].check_connections)
             self.running.connect(self.manager.devices[name].set_running)
             self.manager.devices[name].updateRunningIndicator.connect(controlWidget.setRunningIndicator)
+            self.manager.devices[name].updatePIDControlButtonEnable.connect(controlWidget.setPIDControlButtonEnable)
             self.statusTab.runSequence.clicked.connect(self.manager.devices[name].run_sequence)
 
 

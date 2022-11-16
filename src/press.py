@@ -21,6 +21,7 @@ class Press(QObject):
     updateConnectionIndicatorC1 = Signal(bool)
     updateLimitIndicatorC1 = Signal(bool)
     updateRunningIndicator = Signal(bool)
+    updatePIDControlButtonEnable = Signal(bool)
     updateSpeedC1 = Signal(float)
     updateEnablePIDControlC1 = Signal(bool)
 
@@ -445,6 +446,7 @@ class Press(QObject):
         """Set running boolean."""
         self.running = running
         self.updateRunningIndicator.emit(self.running)
+        self.updatePIDControlButtonEnable.emit(self.running)
 
     @Slot()
     def stop_command_C1(self):

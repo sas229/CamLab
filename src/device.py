@@ -25,6 +25,7 @@ class Device(QObject):
     updateLimitIndicatorC1 = Signal(bool)
     updateLimitIndicatorC2 = Signal(bool)
     updateRunningIndicator = Signal(bool)
+    updatePIDControlButtonEnable = Signal(bool)
     updateSpeedC1 = Signal(float)
     updateSpeedC2 = Signal(float)
     updateEnablePIDControlC1 = Signal(bool)
@@ -649,6 +650,7 @@ class Device(QObject):
         """Set running boolean."""
         self.running = running
         self.updateRunningIndicator.emit(self.running)
+        self.updatePIDControlButtonEnable.emit(self.running)
 
     @Slot()
     def stop_command_C1(self):

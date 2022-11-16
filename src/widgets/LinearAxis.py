@@ -464,10 +464,10 @@ class LinearAxis(QWidget):
         # Update the configuration.
         self.controlConfiguration["settings"]["feedbackProcessVariable"] = round(self.feedbackStatus.get_process_variable(), 2)
 
-    @Slot()
+    @Slot(bool)
     def setPIDControlButtonEnable(self, value):
         self.globalControls.PIDControlButton.setEnabled(value)
-        self.controlConfiguration["settings"]["enablePIDControl"] = self.getPIDControlButtonEnable()
+        # self.controlConfiguration["settings"]["enablePIDControl"] = self.getPIDControlButtonEnable()
 
     def getPIDControlButtonEnable(self):
         return self.globalControls.PIDControlButton.isEnabled()

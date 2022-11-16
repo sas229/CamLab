@@ -18,6 +18,7 @@ class GlobalControlsGroupBox(QGroupBox):
         self.PIDControlButton.setFixedWidth(125)
         self.PIDControlButton.setCheckable(True)
         self.PIDControlButton.setVisible(False)
+        self.PIDControlButton.setEnabled(False)
         self.settingsButton = QPushButton("Settings")
         self.settingsButton.setFixedWidth(125)
         self.zeroButton = QPushButton("Zero")
@@ -113,3 +114,6 @@ class GlobalControlsGroupBox(QGroupBox):
             self.stopButton.setVisible(True)
         else:
             self.stopButton.setVisible(False)
+    
+
+

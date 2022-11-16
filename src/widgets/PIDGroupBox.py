@@ -56,6 +56,7 @@ class PIDGroupBox(QGroupBox):
         self.Layout.addWidget(self.checkboxLabel, 2, 1)
         self.Layout.addWidget(self.rampPID_checkbox, 3, 1)
         self.Layout.addWidget(self.rampPIDLineEdit, 3, 0)
+        
         self.setLayout(self.Layout) 
         
         # Geometry.
@@ -116,6 +117,7 @@ class PIDGroupBox(QGroupBox):
 
     def setRampPID_checkbox(self, value):
         self.rampPID_checkbox.setChecked(value)
+        self.rampPIDLineEdit_setting(value)
 
     def getRampPID_checkbox(self):
         return self.rampPID_checkbox.isChecked()
