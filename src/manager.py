@@ -26,6 +26,7 @@ class Manager(QObject):
     removeControlTable = Signal(str)
     plotWindowChannelsUpdated = Signal()
     existingPlotsFound = Signal()
+    existingShearboxFound = Signal()
     outputText = Signal(str)
     finishedRefreshingDevices = Signal()
     initialisePressFeedbackSettings = Signal()
@@ -954,6 +955,9 @@ class Manager(QObject):
                         self.loadDevicesFromConfiguration()
                         if "plots" in self.configuration:
                             self.existingPlotsFound.emit()
+                        if "shearbox" in self.configuration:
+                            self.existingShearboxFound.emit()
+                            
                 except FileNotFoundError:
                     log.warning("Previous configuration file not found.")
                     self.initialiseDefaultConfiguration()

@@ -5,6 +5,7 @@ from PySide6.QtCore import Signal, Slot, QThread, QTimer
 from local_qt_material import QtStyleTools
 from widgets.MainWindow._TabUtilities import TabUtilities
 from widgets.MainWindow._PlotUtilities import PlotUtilities
+from widgets.MainWindow._ShearboxUtilities import ShearboxUtilities
 from widgets.MainWindow._ControlUtilities import ControlUtilities
 from widgets.MainWindow._ConfigurationUtilities import ConfigurationUtilities
 from widgets.MainWindow._CameraUtilities import CameraUtilities
@@ -22,7 +23,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUtilities, CameraUtilities, QtStyleTools, QMainWindow):
+class MainWindow(TabUtilities, PlotUtilities, ShearboxUtilities, ControlUtilities, ConfigurationUtilities, CameraUtilities, QtStyleTools, QMainWindow):
     running = Signal(bool)
     renameWindow = Signal(str)
     emitRefreshDevices = Signal()
@@ -143,6 +144,7 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.manager.timing.actualRate.connect(self.statusGroupBox.update)
         self.manager.plotWindowChannelsUpdated.connect(self.update_plots)
         self.manager.existingPlotsFound.connect(self.create_existing_plots)
+        self.manager.existingShearboxFound.connect(self.create_shearbox_window)
         self.manager.outputText.connect(self.statusGroupBox.setOutputText)
 
         self.tabs.remove_plot.connect(self.remove_plot)
@@ -208,7 +210,8 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         extension = action.iconText()
         log.info("Extension button clicked.")
         log.info(f"Opening new window for {extension}.")
-        # self.manager.shearbox = True
+        if extension == "ShearBox":
+            self.initialise_shearbox()
 
 
     @Slot()
@@ -270,6 +273,10 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         """Close CamLab using a Qt closeEvent override."""
         # Close all plots.
         self.close_plots()
+        
+        # close all windows if main window is closed
+        for window in QApplication.topLevelWidgets():
+            window.close()
 
         # In the event the device list is refreshing, wait until complete before quitting all threads otherwise an error is shown, but hide the window in the meantime.
         self.setVisible(False)
