@@ -120,7 +120,7 @@ class Press(QObject):
     def initialise(self):
         #  Initialise device.
         self.set_speed_limit()
-        self.set_speed_C1(self.speed_C1)
+        self.set_speed_C1(self.speed_C1/60)
         # self.initialise_settings()
         # self.check_limits()
         
@@ -321,27 +321,27 @@ class Press(QObject):
         """Set PID proportional gain for control channel C1."""
         self.KP_C1 = value
         self.set_PID_tunings_C1()
-        log.info("PID proportional gain for control channel C1 on {device} changed to {value:.3f}.".format(value=value, device=self.name))
+        log.info("PID proportional gain for control channel C1 on {device} changed to {value:.4f}.".format(value=value, device=self.name))
 
     @Slot(float)
     def set_KI_C1(self, value):
         """Set PID integral gain for control channel C1."""
         self.KI_C1 = value
         self.set_PID_tunings_C1()
-        log.info("PID integral gain for control channel C1 on {device} changed to {value:.3f}.".format(value=value, device=self.name))
+        log.info("PID integral gain for control channel C1 on {device} changed to {value:.4f}.".format(value=value, device=self.name))
 
     @Slot(float)
     def set_KD_C1(self, value):
         """Set PID derivative gain for control channel C1."""
         self.KD_C1 = value
         self.set_PID_tunings_C1()
-        log.info("PID derivative gain for control channel C1 on {device} changed to {value:.3f}.".format(value=value, device=self.name))
+        log.info("PID derivative gain for control channel C1 on {device} changed to {value:.4f}.".format(value=value, device=self.name))
     
     @Slot(float)
     def set_rampPID_C1(self, value):
         """Set ramp PID for control channel C1."""
         self.rampPID_C1 = value
-        log.info("PID ramp for control channel C1 on {device} changed to {value:.3f} unit/s.".format(value=value, device=self.name))
+        log.info("PID ramp for control channel C1 on {device} changed to {value:.4f} unit/s.".format(value=value, device=self.name))
 
     @Slot(bool)
     def rampPID_checkbox_C1(self, value):

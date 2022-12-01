@@ -296,7 +296,7 @@ class LinearAxis(QWidget):
     def emitSecondarySetPointChanged(self):
         value = float(self.jog.speedLineEdit.text())
         self.secondarySetPointChanged.emit(value)
-        self.controlConfiguration["settings"]["secondarySetPoint"] = round(self.jog.getSpeed(), 3)
+        self.controlConfiguration["settings"]["secondarySetPoint"] = round(self.jog.getSpeed(), 6)
 
     @Slot()
     def emitPositiveJogEnabled(self):
@@ -331,22 +331,22 @@ class LinearAxis(QWidget):
     @Slot()
     def emitKPChanged(self, value):
         self.KPChanged.emit(value)
-        self.controlConfiguration["settings"]["KP"] = round(self.PID.getKP(), 3)
+        self.controlConfiguration["settings"]["KP"] = round(self.PID.getKP(), 4)
 
     @Slot()
     def emitKIChanged(self, value):
         self.KIChanged.emit(value)
-        self.controlConfiguration["settings"]["KI"] = round(self.PID.getKI(), 3)
+        self.controlConfiguration["settings"]["KI"] = round(self.PID.getKI(), 4)
 
     @Slot()
     def emitKDChanged(self, value):
         self.KDChanged.emit(value)
-        self.controlConfiguration["settings"]["KD"] = round(self.PID.getKD(), 3)
+        self.controlConfiguration["settings"]["KD"] = round(self.PID.getKD(), 4)
     
     @Slot()
     def emitRampPIDChanged(self, value):
         self.rampPIDChanged.emit(value)
-        self.controlConfiguration["settings"]["rampPID"] = round(self.PID.getRampPID(), 3)
+        self.controlConfiguration["settings"]["rampPID"] = round(self.PID.getRampPID(), 4)
 
     @Slot()
     def emitPrimaryLeftLimitChanged(self, value):
