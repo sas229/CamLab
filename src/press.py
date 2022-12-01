@@ -53,7 +53,7 @@ class Press(QObject):
         # self.pulses_C1 = 0
         self.direction_C1 = 1
         self.position_process_variable_C1 = 0
-        self.speed_C1 = 3
+        self.speed_C1 = 0.05
         self.initial_speed_C1 = 0.0
         self.feedback_setpoint_C1 = 0
         self.feedback_process_variable_C1 = 0
@@ -546,13 +546,12 @@ class Press(QObject):
     def set_speed_C1(self, speed=0.0):
         """Set speed on control channel C1."""
         # Convert mm/s to mm/min
-  
-        self.speed_C1 = speed
+        self.speed_C1 = speed*60
 
         if self.speed_C1 > 99.99999:
 
             self.speed_C1 = 99.99999
-            log.warning("Speed cannot exceed 99.99999")
+            log.warning("Speed cannot exceed 1.667 mm/s, speed set at 1.667 mm/s")
         
         self.set_press_speed_signal()
 
@@ -667,7 +666,7 @@ class Press(QObject):
         if self.feedback_index_C1 != None:
             self.updateFeedbackProcessVariableC1.emit(self.feedback_process_variable_C1)
             if self.status_PID_C1 == True:
-                self.updateSpeedC1.emit(self.speed_C1)
+                self.updateSpeedC1.emit(self.speed_C1/60) #Convert mm/min to mm/s
                 self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
             elif self.status_PID_C1 == False:
                 self.updateFeedbackSetPointC1.emit(self.feedback_process_variable_C1) 
@@ -746,16 +745,8 @@ class Press(QObject):
 
     def get_position_C1(self, current_speed_C1):
         """Get position of control channel C1."""
-        # # Read pulses.
-        # self.read_pulses_C1()    
 
-        # # Check motor status by comparing pulses count output with pulses returned.
-        # if self.pulses_C1 == 0:
-        #     incrementPulses = 0
-        # else:
-        #     incrementPulses = (self.pulses_C1-self.previous_pulses_C1)/self.pulses_per_unit_C1
-        # self.previous_pulses_C1 = self.pulses_C1
-        increment_position = np.trapz(y = [self.initial_speed_C1, current_speed_C1], dx = (1/self.controlRate)/60 ) # Conver s in min
+        increment_position = np.trapz(y = [self.initial_speed_C1, current_speed_C1], dx = (1/self.controlRate) ) # Use s to estimate position
         # Increment position process variable.
         if self.direction_C1 == 1:
             self.position_process_variable_C1 += increment_position
@@ -781,26 +772,6 @@ class Press(QObject):
                 self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
         
 
-    # def configure_pulse_counters(self):
-    #     """Setup pulse counters. Set to mode 2 which counts both rising and falling edges. 
-    #     400 microsecond debounce period, which is just less than the time between rising and
-    #     falling edges for 16 PPR at 4000 RPM."""
-    #     self.handle = ljm.open(7, self.connection, self.id)
-    #     aNamesC1 = ["DIO1_EF_ENABLE", "DIO1_EF_INDEX", "DIO1_EF_CONFIG_A", "DIO1_EF_CONFIG_B", "DIO1_EF_ENABLE"]
-    #     aValues = [0, 9, 400, 2, 1]
-    #     numFrames = 5
-    #     ljm.eWriteNames(self.handle, numFrames, aNamesC1, aValues)
-
-
-    #     log.info("Pulse counters configured on device named " + self.name + ".")
-
-    # def configure_ADC(self):
-    #     """Set the ADC settings."""
-    #     self.handle = ljm.open(7, self.connection, self.id)
-    #     names = ["AIN_ALL_RANGE", "AIN_ALL_RESOLUTION_INDEX", "AIN_ALL_SETTLING_US"]
-    #     aValues = [10, 2, 0] # No amplification; 16.5 effective bits; auto settling time.
-    #     numFrames = len(names)
-    #     ljm.eWriteNames(self.handle, numFrames, names, aValues) 
 
     def set_acquisition_variables(self, controlRate):
         """Set the acquisition variables."""
@@ -843,20 +814,6 @@ class Press(QObject):
             e = sys.exc_info()[1]
             log.warning(e)
 
-    # def initialise_settings(self):
-    #     """Method to initialise the device."""
-    #     if self.handle != None:
-    #         try:
-    #             self.configure_ADC()
-    #             self.configure_pulse_counters()
-    #             self.set_speed_C1(self.speed_C1)
-    #             self.enabled_C1 = False
-    #         except ljm.LJMError:
-    #             ljme = sys.exc_info()[1]
-    #             log.warning(ljme)
-    #         except Exception:
-    #             e = sys.exc_info()[1]
-    #             log.warning(e)
 
     def load_lua_script(self):
         """Method to load the Lua failsafe script into the device."""
@@ -940,9 +897,9 @@ class Press(QObject):
         """Send output data."""
         # Assemble output data for each control channel with or without feedback.
         if self.feedback_C1 == False:
-            self.data_C1 = np.hstack((self.position_setpoint_C1, self.position_process_variable_C1, int(self.direction_C1), self.speed_C1))
+            self.data_C1 = np.hstack((self.position_setpoint_C1, self.position_process_variable_C1, int(self.direction_C1), self.speed_C1/60))
         elif self.feedback_C1 == True:
-            self.data_C1 = np.hstack((self.position_setpoint_C1, self.position_process_variable_C1, int(self.direction_C1), self.speed_C1, self.feedback_setpoint_C1, self.feedback_process_variable_C1))
+            self.data_C1 = np.hstack((self.position_setpoint_C1, self.position_process_variable_C1, int(self.direction_C1), self.speed_C1/60, self.feedback_setpoint_C1, self.feedback_process_variable_C1))
 
         # If control channel enabled, concatenate data.
         # if self.enabled_C1 == True:
@@ -979,7 +936,7 @@ class Press(QObject):
                     
                 current_speed_C1 = status_press[5:]
                 current_speed_C1 = current_speed_C1.replace(".","")
-                current_speed_C1 = float(current_speed_C1)/10**5
+                current_speed_C1 = float(current_speed_C1)/10**5/60 # convert mm/min in mm/s
             else:
                 current_speed_C1 = self.initial_speed_C1
 

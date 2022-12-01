@@ -17,7 +17,7 @@ class PIDGroupBox(QGroupBox):
         self.KD = 1.00
 
         # Validator.
-        self.doubleValidator = QDoubleValidator(decimals=3)
+        self.doubleValidator = QDoubleValidator(decimals=4)
 
         # Controls.
         self.KPLabel = QLabel("KP (-)")
@@ -73,7 +73,7 @@ class PIDGroupBox(QGroupBox):
         if value == None:
             value = float(self.KPLineEdit.text())
         self.KP = value
-        self.KPLineEdit.setText("{value:.3f}".format(value=value))
+        self.KPLineEdit.setText("{value:.4f}".format(value=value))
         self.KPLineEditChanged.emit(value)
 
     def getKP(self):
@@ -83,7 +83,7 @@ class PIDGroupBox(QGroupBox):
         if value == None:
             value = float(self.KILineEdit.text())
         self.KI = value
-        self.KILineEdit.setText("{value:.3f}".format(value=value))
+        self.KILineEdit.setText("{value:.4f}".format(value=value))
         self.KILineEditChanged.emit(value)
         
     def getKI(self):
@@ -93,7 +93,7 @@ class PIDGroupBox(QGroupBox):
         if value == None:
             value = float(self.KDLineEdit.text())
         self.KD = value
-        self.KDLineEdit.setText("{value:.3f}".format(value=value))
+        self.KDLineEdit.setText("{value:.4f}".format(value=value))
         self.KDLineEditChanged.emit(value)
 
     def getKD(self):
@@ -103,7 +103,7 @@ class PIDGroupBox(QGroupBox):
         if value == None:
             value = float(self.rampPIDLineEdit.text())
         self.rampPID = value
-        self.rampPIDLineEdit.setText("{value:.3f}".format(value=value))
+        self.rampPIDLineEdit.setText("{value:.4f}".format(value=value))
         self.rampPIDLineEditChanged.emit(value)
 
     def getRampPID(self):
