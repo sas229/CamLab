@@ -897,10 +897,34 @@ class Manager(QObject):
 
         # Stop acquisition.
         self.timing.stop()
+
+        #Send stop command to the devices if control is enabled
+        self.stop_controls_enabled()
+
            
         # Clear all previous data.
         log.info("Configuring devices.")
     
+    def stop_controls_enabled(self):
+                
+        for device in self.configuration["devices"]:
+            
+            if self.configuration["devices"][device]["type"] == "Hub":
+                if self.configuration["devices"][device]["model"] == "LabJack T7":
+
+                    if self.configuration["devices"][device]["control"][0]["enable"] == True:
+                        self.devices[device].stop_command_C1()
+
+                    if self.configuration["devices"][device]["control"][1]["enable"] == True:
+                        self.devices[device].stop_command_C2()
+                    
+            if self.configuration["devices"][device]["type"] == "Press":
+                if self.configuration["devices"][device]["control"][0]["enable"] == True:
+                    self.devices[device].stop_command_C1()
+        
+        log.info("Controls enabled have been stopped.")
+
+
     @Slot()
     def run(self):
         # Set acquisition settings.

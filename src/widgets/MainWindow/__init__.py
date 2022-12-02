@@ -264,6 +264,8 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
 
     def closeEvent(self, event):
         """Close CamLab using a Qt closeEvent override."""
+        # Stop all controls that are enabled
+        self.manager.stop_controls_enabled()
         # Close all plots.
         self.close_plots()
 

@@ -105,8 +105,9 @@ class ToolBar(QToolBar):
 
     def changeMode(self):
         # Toggle running property, modeButton ToolTip and icon and visible state for all other ToolButtons as required.
-        log.info("Acquisition and control mode enabled." if self.running else "Configuration mode enabled")
         self.running = not self.running
+        log.info("Acquisition and control mode enabled." if self.running else "Configuration mode enabled")
+        
         self.modeButton.setIcon(QIcon("icon:/secondaryText/stop.svg" if self.running else "icon:/secondaryText/play_circle.svg"))
         self.modeButton.setToolTip("Click to stop and configure." if self.running else "Click to run acquisition and control.")
         self.refreshButton.setVisible(not self.refreshButton.isVisible())
@@ -118,8 +119,10 @@ class ToolBar(QToolBar):
         self.clearPlotsButton.setVisible(not self.clearPlotsButton.isVisible())
         if self.running == True:    
             self.run.emit()
+            print("Start, in Acquisition mode")
         else:
             self.configure.emit()
+            print("Stop, in configuration mode")
 
     @Slot()
     def updateIcons(self, darkMode):
