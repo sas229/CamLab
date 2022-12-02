@@ -119,10 +119,8 @@ class ToolBar(QToolBar):
         self.clearPlotsButton.setVisible(not self.clearPlotsButton.isVisible())
         if self.running == True:    
             self.run.emit()
-            print("Start, in Acquisition mode")
         else:
             self.configure.emit()
-            print("Stop, in configuration mode")
 
     @Slot()
     def updateIcons(self, darkMode):
