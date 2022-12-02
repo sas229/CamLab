@@ -409,6 +409,11 @@ class Device(QObject):
             self.PID_C1.reset()
             self.set_speed_C1(0.001)
             self.PID_C1.output_limits = (-self.speed_limit, self.speed_limit)
+            #Next 3 lines Due for ramp when PID is turned ON if the primary linear axis was engaged and affected the feedback linear axis
+            self.starting_point_ramp_C1 = self.feedback_process_variable_C1 
+            self.final_feedback_setpoint_C1 = self.feedback_process_variable_C1 
+            self.feedback_setpoint_C1 = self.feedback_process_variable_C1 
+
             self.PID_C1.setpoint = self.feedback_setpoint_C1
             self.PID_C1.set_auto_mode(True, last_output=0.001)
             self.turn_on_PWM_C1()
@@ -418,6 +423,7 @@ class Device(QObject):
             self.PID_C1.set_auto_mode(False)
             self.updatePositionSetPointC1.emit(self.position_setpoint_C1)
             self.turn_off_PWM_C1()
+            self.stop_command_C1()
             log.info("PID control for control channel C1 on " + self.name + " turned off.")
 
     @Slot(bool)
@@ -428,6 +434,11 @@ class Device(QObject):
             self.PID_C2.reset()
             self.set_speed_C2(0.001)
             self.PID_C2.output_limits = (-self.speed_limit, self.speed_limit)
+            #Next 3 lines Due for ramp when PID is turned ON if the primary linear axis was engaged and affected the feedback linear axis
+            self.starting_point_ramp_C2 = self.feedback_process_variable_C2
+            self.final_feedback_setpoint_C2 = self.feedback_process_variable_C2
+            self.feedback_setpoint_C2 = self.feedback_process_variable_C2
+
             self.PID_C2.setpoint = self.feedback_setpoint_C2
             self.PID_C2.set_auto_mode(True, last_output=0.001)
             self.turn_on_PWM_C2()
@@ -437,6 +448,7 @@ class Device(QObject):
             self.PID_C2.set_auto_mode(False)
             self.updatePositionSetPointC1.emit(self.position_setpoint_C2)
             self.turn_off_PWM_C2()
+            self.stop_command_C2()
             log.info("PID control for control channel C2 on " + self.name + " turned off.")
     
     @Slot(float)
@@ -661,6 +673,9 @@ class Device(QObject):
             sleep(0.1)
             self.get_position_C1()
             self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
+            self.starting_point_ramp_C1 = self.feedback_process_variable_C1
+            self.final_feedback_setpoint_C1 = self.feedback_process_variable_C1
+            self.feedback_setpoint_C1 = self.feedback_process_variable_C1
             log.info("Control stopped on device {device} control channel C1.".format(device=self.name))
         except ljm.LJMError:
             ljme = sys.exc_info()[1]
@@ -678,6 +693,9 @@ class Device(QObject):
             sleep(0.1)
             self.get_position_C2()
             self.updatePositionSetPointC2.emit(self.position_process_variable_C2)
+            self.starting_point_ramp_C2 = self.feedback_process_variable_C2
+            self.final_feedback_setpoint_C2 = self.feedback_process_variable_C2
+            self.feedback_setpoint_C2 = self.feedback_process_variable_C2
             log.info("Control stopped on device {device} control channel C2.".format(device=self.name))
         except ljm.LJMError:
             ljme = sys.exc_info()[1]

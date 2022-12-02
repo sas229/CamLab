@@ -284,8 +284,6 @@ class Press(QObject):
             e = sys.exc_info()[1]
             log.warning(e)
         
-
-
     def check_connections(self):
         """Check connections to control devices."""
         self.check_connection_C1()
@@ -304,6 +302,11 @@ class Press(QObject):
             self.PID_C1.reset()
             self.set_speed_C1(0.001)
             self.PID_C1.output_limits = (-self.speed_limit, self.speed_limit)
+            #Next 3 lines Due for ramp when PID is turned ON if the primary linear axis was engaged and affected the feedback linear axis
+            self.starting_point_ramp_C1 = self.feedback_process_variable_C1 
+            self.final_feedback_setpoint_C1 = self.feedback_process_variable_C1 
+            self.feedback_setpoint_C1 = self.feedback_process_variable_C1 
+
             self.PID_C1.setpoint = self.feedback_setpoint_C1
             self.PID_C1.set_auto_mode(True, last_output=0.001)
             # self.turn_on_PWM_C1()
@@ -312,7 +315,7 @@ class Press(QObject):
             self.position_setpoint_C1 = self.position_process_variable_C1
             self.PID_C1.set_auto_mode(False)
             self.updatePositionSetPointC1.emit(self.position_setpoint_C1)
-            self.stop_press()
+            self.stop_command_C1()
             log.info("PID control for control channel C1 on " + self.name + " turned off.")
 
 
@@ -458,6 +461,9 @@ class Press(QObject):
             # sleep(0.1)
             # self.get_position_C1()
             self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
+            self.starting_point_ramp_C1 = self.feedback_process_variable_C1
+            self.final_feedback_setpoint_C1 = self.feedback_process_variable_C1
+            self.feedback_setpoint_C1 = self.feedback_process_variable_C1
             log.info("Control stopped on device {device} control channel C1.".format(device=self.name))
         except ljm.LJMError:
             ljme = sys.exc_info()[1]
@@ -948,12 +954,6 @@ class Press(QObject):
             if self.jog_C1 == False and self.status_PID_C1 == False:
                 self.check_position_C1_for_demand()
             
-            # Check setpoint.
-            # if self.sequence_running == True:
-            #     self.check_setpoint_C1()
-            # If feedback is available.
-            # Hello branch RampPID
-            
             if self.feedback_C1 == True and self.current_data.size!=0:
                 
                 if self.rampPID_bool_C1 == False:
@@ -975,19 +975,21 @@ class Press(QObject):
                     elif self.feedback_setpoint_C1 < self.starting_point_ramp_C1:
                         setpoint_ramp_C1 = -self.increment_setpoint_ramp_C1 + self.starting_point_ramp_C1
                     
+                    
                     #Check how far I am from the final feedback SetPoint value
                     delta_setpoint_C1 = abs(self.feedback_setpoint_C1 - setpoint_ramp_C1)
                     #if delta setpoint is less than the increment calculated with the ramp then stop the ramp and set the final set point as self.feedback_setpoint
                     if delta_setpoint_C1 <= self.increment_setpoint_ramp_C1 and self.final_feedback_setpoint_C1 != self.feedback_setpoint_C1:
                         self.final_feedback_setpoint_C1 = self.feedback_setpoint_C1
-                    
+                       
                     elif self.final_feedback_setpoint_C1 == self.feedback_setpoint_C1:
                         self.update_PID_C1()
-
+                        
                     elif self.final_feedback_setpoint_C1 != self.feedback_setpoint_C1:
                         self.set_feedback_setpoint_ramp_C1(setpoint_ramp_C1)
                         self.update_PID_C1()
                         self.starting_point_ramp_C1 = setpoint_ramp_C1
+      
             
             self.send_data()
 
