@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QToolBar, QWidget, QSizePolicy, QFileDialog, QToolButton, QMenu
+from PySide6.QtWidgets import QToolBar, QWidget, QSizePolicy, QFileDialog, QToolButton, QMenu, QGridLayout, QPushButton
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtCore import Signal, Slot
 import logging
@@ -31,7 +31,12 @@ class ToolBar(QToolBar):
 
         # Set up extensions menu
         self.extensionsMenu = QMenu()
-        self.extensionsMenu.addAction("ShearBox")
+        self.extensionsMenuLayout = QGridLayout()
+        self.shearboxButton = QPushButton("Shearbox")
+        # self.shearboxButton.addAction("ShearBox")
+
+        self.extensionsMenuLayout.addWidget(self.shearboxButton, 0, 0)
+        self.extensionsMenu.setLayout(self.extensionsMenuLayout)
 
         # Open extension QToolButton.
         self.extensionButton = QToolButton()

@@ -108,7 +108,7 @@ class MainWindow(TabUtilities, PlotUtilities, ShearboxUtilities, ControlUtilitie
         self.toolbar.run.connect(self.start_acquisition)
         self.toolbar.run.connect(self.statusGroupBox.setInitialTimeDate)
         self.toolbar.addPlotButton.triggered.connect(self.add_plot)
-        self.toolbar.extensionButton.triggered.connect(self.open_extension)
+        self.toolbar.shearboxButton.clicked.connect(self.open_shearbox)
         self.toolbar.refreshButton.triggered.connect(self.refresh_devices)
         self.toolbar.loadConfiguration.connect(self.manager.loadConfiguration)
         self.toolbar.saveConfiguration.connect(self.manager.saveConfiguration)
@@ -205,13 +205,10 @@ class MainWindow(TabUtilities, PlotUtilities, ShearboxUtilities, ControlUtilitie
                 self.tabs.setTabVisible(index, True)
 
     @Slot()
-    def open_extension(self, action):
-        """Method to open an extension."""
-        extension = action.iconText()
-        log.info("Extension button clicked.")
-        log.info(f"Opening new window for {extension}.")
-        if extension == "ShearBox":
-            self.initialise_shearbox()
+    def open_shearbox(self):
+        """Method to open the shearbox extension."""
+        log.info("Shearbox extension button clicked.")
+        self.initialise_shearbox()
 
 
     @Slot()
