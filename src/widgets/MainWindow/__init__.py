@@ -79,7 +79,7 @@ class MainWindow(TabUtilities, PlotUtilities, ShearboxUtilities, ControlUtilitie
         self.mainWindowLayout.addWidget(self.tabs)
 
         # Status GroupBox.
-        self.statusGroupBox = StatusGroupBox()
+        self.statusGroupBox = StatusGroupBox() 
 
         # Configuration tab.
         self.configurationTab = ConfigurationTab(self.configuration)
@@ -221,7 +221,7 @@ class MainWindow(TabUtilities, PlotUtilities, ShearboxUtilities, ControlUtilitie
         self.darkMode = self.manager.configuration["global"]["darkMode"]
 
         # Update the UI
-        self.set_configuration(self.manager.configuration)
+        self.manager.configurationChanged.emit(self.manager.configuration)
         log.info("Dark mode changed.")
 
     def set_theme(self):

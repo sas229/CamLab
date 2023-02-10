@@ -33,7 +33,6 @@ class ToolBar(QToolBar):
         self.extensionsMenu = QMenu()
         self.extensionsMenuLayout = QGridLayout()
         self.shearboxButton = QPushButton("Shearbox")
-        # self.shearboxButton.addAction("ShearBox")
 
         self.extensionsMenuLayout.addWidget(self.shearboxButton, 0, 0)
         self.extensionsMenu.setLayout(self.extensionsMenuLayout)

@@ -24,13 +24,7 @@ class ShearboxUtilities:
         # If the "shearbox" key doesn't exist in the configuration, it means no shearboxWindow has been made before, so we add the key.      
         self.manager.configuration["shearbox"] = copy.deepcopy(defaultProperties)
 
-        # Set configurations.
-        self.shearbox.set_configuration(self.manager.configuration)
-
-        # Connections.
-        self.manager.configurationChanged.connect(self.shearbox.set_configuration)
-        
-        self.shearbox.show()
+        self.create_shearbox_window()
 
     @Slot()
     def create_shearbox_window(self):
@@ -43,6 +37,7 @@ class ShearboxUtilities:
 
         # Connections.
         self.manager.configurationChanged.connect(self.shearbox.set_configuration)
+        self.shearbox.configurationChanged.connect(self.set_configuration)
 
         self.shearbox.show()
         
