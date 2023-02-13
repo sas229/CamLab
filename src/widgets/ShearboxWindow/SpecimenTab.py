@@ -1,5 +1,5 @@
-from PySide6.QtWidgets import QTabWidget, QWidget, QTabBar, QGridLayout
-from PySide6.QtCore import Slot, Signal
+from PySide6.QtWidgets import QTabWidget, QWidget, QTabBar, QGridLayout, QComboBox, QLabel
+from PySide6.QtCore import Slot, Signal, Qt
 from widgets.PlotWindow import PlotWindow
 import logging 
 
@@ -24,24 +24,140 @@ class SpecimenTabs(QTabWidget):
         self.add_persistent_tab(self.consolidation, "Consolidation setup")
         self.add_persistent_tab(self.shear, "Shear setup")
 
-        self.build_tabs()
+        self.build_hardware_tab()
+        self.build_specimen_tab()
+        self.build_consolidation_tab()
+        self.build_shear_tab()
 
         # Connections.
         self.tabCloseRequested.connect(self.close_tab)
         self.tabBarDoubleClicked.connect(self.float_tab)
 
-    def build_tabs(self):
+    def build_hardware_tab(self):
         self.hardwareLayout = QGridLayout()
+
+        self.hardwareLayout.addWidget(QLabel("Controllers & Transducer Inputs"), 0, 0, 1, 2, Qt.AlignCenter)
+        self.hardwareLayout.addWidget(QLabel("Instrument"), 0, 2, Qt.AlignCenter)
+        self.hardwareLayout.addWidget(QLabel("Channel"), 0, 3, Qt.AlignCenter)
+
+        self.horiz_load_ins = QComboBox()
+        self.horiz_load_ins.currentTextChanged.connect(self.set_horiz_cont_ins)
+        self.horiz_load_chan = QComboBox()
+        self.horiz_load_chan.currentTextChanged.connect(self.set_horiz_cont_chan)
+        self.hardwareLayout.addWidget(QLabel("Horizontal load input"), 1, 0)
+        self.hardwareLayout.addWidget(QLabel("N"), 1, 1)
+        self.hardwareLayout.addWidget(self.horiz_load_ins, 1, 2)
+        self.hardwareLayout.addWidget(self.horiz_load_chan, 1, 3)
+        
+        self.horiz_disp_ins = QComboBox()
+        self.horiz_disp_ins.currentTextChanged.connect(self.set_horiz_cont_ins)
+        self.horiz_disp_chan = QComboBox()
+        self.horiz_disp_chan.currentTextChanged.connect(self.set_horiz_cont_chan)
+        self.hardwareLayout.addWidget(QLabel("Horizontal displacement input"), 2, 0)
+        self.hardwareLayout.addWidget(QLabel("mm"), 2, 1)
+        self.hardwareLayout.addWidget(self.horiz_disp_ins, 2, 2)
+        self.hardwareLayout.addWidget(self.horiz_disp_chan, 2, 3)
+        
+        self.vert_load_ins = QComboBox()
+        self.vert_load_ins.currentTextChanged.connect(self.set_vert_cont_ins)
+        self.vert_load_chan = QComboBox()
+        self.vert_load_chan.currentTextChanged.connect(self.set_vert_cont_chan)
+        self.hardwareLayout.addWidget(QLabel("Vertical load input"), 3, 0)
+        self.hardwareLayout.addWidget(QLabel("N"), 3, 1)
+        self.hardwareLayout.addWidget(self.vert_load_ins, 3, 2)
+        self.hardwareLayout.addWidget(self.vert_load_chan, 3, 3)
+        
+        self.vert_disp_ins = QComboBox()
+        self.vert_disp_ins.currentTextChanged.connect(self.set_vert_cont_ins)
+        self.vert_disp_chan = QComboBox()
+        self.vert_disp_chan.currentTextChanged.connect(self.set_vert_cont_chan)
+        self.hardwareLayout.addWidget(QLabel("Vertical displacement input"), 4, 0)
+        self.hardwareLayout.addWidget(QLabel("mm"), 4, 1)
+        self.hardwareLayout.addWidget(self.vert_disp_ins, 4, 2)
+        self.hardwareLayout.addWidget(self.vert_disp_chan, 4, 3)
+        
+        self.horiz_cont_ins = QComboBox()
+        self.horiz_cont_ins.currentTextChanged.connect(self.set_horiz_cont_ins)
+        self.horiz_cont_chan = QComboBox()
+        self.horiz_cont_chan.currentTextChanged.connect(self.set_horiz_cont_chan)
+        self.hardwareLayout.addWidget(QLabel("Horizontal Control Machine"), 5, 0)
+        self.hardwareLayout.addWidget(self.horiz_cont_ins, 5, 2)
+        self.hardwareLayout.addWidget(self.horiz_cont_chan, 5, 3)
+        
+        self.vert_cont_ins = QComboBox()
+        self.vert_cont_ins.currentTextChanged.connect(self.set_vert_cont_ins)
+        self.vert_cont_chan = QComboBox()
+        self.vert_cont_chan.currentTextChanged.connect(self.set_vert_cont_chan)
+        self.hardwareLayout.addWidget(QLabel("Vertical Control Machine"), 6, 0)
+        self.hardwareLayout.addWidget(self.vert_cont_ins, 6, 2)
+        self.hardwareLayout.addWidget(self.vert_cont_chan, 6, 3)
+
+        self.hardwareLayout.addWidget(QWidget(),7,0,1,4)
+
+        self.hardwareLayout.setRowStretch(0,0)
+        self.hardwareLayout.setRowStretch(1,1)
+        self.hardwareLayout.setRowStretch(2,1)
+        self.hardwareLayout.setRowStretch(3,1)
+        self.hardwareLayout.setRowStretch(4,1)
+        self.hardwareLayout.setRowStretch(5,1)
+        self.hardwareLayout.setRowStretch(6,1)
+        self.hardwareLayout.setRowStretch(7,1)
+        self.hardwareLayout.setColumnStretch(0,0)
+        self.hardwareLayout.setColumnStretch(1,0)
+        self.hardwareLayout.setColumnStretch(2,1)
+        self.hardwareLayout.setColumnStretch(3,1)
+        self.hardwareLayout.setHorizontalSpacing(15)
+        self.hardwareLayout.setVerticalSpacing(15)
+
         self.hardware.setLayout(self.hardwareLayout)
         
+    def build_specimen_tab(self):
         self.specimenLayout = QGridLayout()
         self.specimen.setLayout(self.specimenLayout)
         
+    def build_consolidation_tab(self):
         self.consolidationLayout = QGridLayout()
         self.consolidation.setLayout(self.consolidationLayout)
         
+    def build_shear_tab(self):
         self.shearLayout = QGridLayout()
         self.shear.setLayout(self.shearLayout)
+
+    def set_horiz_load_ins(self):
+        pass
+
+    def set_horiz_load_chan(self):
+        pass
+
+    def set_horiz_disp_ins(self):
+        pass
+
+    def set_horiz_disp_chan(self):
+        pass
+
+    def set_vert_load_ins(self):
+        pass
+
+    def set_vert_load_chan(self):
+        pass
+
+    def set_vert_disp_ins(self):
+        pass
+
+    def set_vert_disp_chan(self):
+        pass
+
+    def set_horiz_cont_ins(self):
+        pass
+
+    def set_horiz_cont_chan(self):
+        pass
+
+    def set_vert_cont_ins(self):
+        pass
+
+    def set_vert_cont_chan(self):
+        pass
 
     def float_tab(self, index):
         """Method to float plot, preview or control tab as window."""
