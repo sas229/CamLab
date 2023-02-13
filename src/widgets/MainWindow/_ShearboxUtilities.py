@@ -6,23 +6,22 @@ class ShearboxUtilities:
 
     @Slot()
     def initialise_shearbox(self):
-        # Define a default configuration in the same format as we want it to be stored in self.manager.configuration["plots"][plotNumber].
-        self.shearbox = ShearboxWindow()
+        # If the "shearbox" key doesn't exist in the configuration, it means no shearbox Window has been made before, so we add the key.
+        if "shearbox" not in self.manager.configuration.keys():
+            # Defaults.
+            width = 1200
+            height = 800
+            x = self.screenSize.width()/2 - width/2
+            y = self.screenSize.height()/2 - height/2
+            defaultProperties = {
+                "height": height,
+                "width": width,
+                "x": x,
+                "y": y,
+                "Number of specimens": 1,
 
-        # Defaults.
-        width = 1200
-        height = 800
-        x = self.screenSize.width()/2 - width/2
-        y = self.screenSize.height()/2 - height/2
-        defaultProperties = {
-            "height": height,
-            "width": width,
-            "x": x,
-            "y": y,
-        }
-
-        # If the "shearbox" key doesn't exist in the configuration, it means no shearboxWindow has been made before, so we add the key.      
-        self.manager.configuration["shearbox"] = copy.deepcopy(defaultProperties)
+            }      
+            self.manager.configuration["shearbox"] = copy.deepcopy(defaultProperties)
 
         self.create_shearbox_window()
 
@@ -30,10 +29,7 @@ class ShearboxUtilities:
     def create_shearbox_window(self):
         # For all plots in self.manager.configuration["plots"][plotNumber], create a plot window.
         # Create plot window object and set the plot number.
-        self.shearbox = ShearboxWindow()
-
-        # Show the plot.
-        self.shearbox.set_configuration(self.manager.configuration)
+        self.shearbox = ShearboxWindow(self.manager.configuration)
 
         # Connections.
         self.manager.configurationChanged.connect(self.shearbox.set_configuration)

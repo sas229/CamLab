@@ -19,14 +19,14 @@ log = logging.getLogger(__name__)
 
 class ShearboxWindow(QMainWindow, QtStyleTools):
     configurationChanged = Signal()
-    def __init__(self):
+    def __init__(self, configuration):
         super().__init__()
         self.setWindowTitle("Shear Box")
         # self.setMinimumSize(800, 600)
         # self.resize(1000,800)
 
         # Extract the configuration to generate initial UI setup.
-        # self.configuration = self.manager.configuration
+        self.configuration = configuration
         # self.set_theme()
 
         self.button = QPushButton("Push here")
