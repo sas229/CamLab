@@ -144,7 +144,6 @@ class MainWindow(TabUtilities, PlotUtilities, ShearboxUtilities, ControlUtilitie
         self.manager.timing.actualRate.connect(self.statusGroupBox.update)
         self.manager.plotWindowChannelsUpdated.connect(self.update_plots)
         self.manager.existingPlotsFound.connect(self.create_existing_plots)
-        self.manager.existingShearboxFound.connect(self.create_shearbox_window)
         self.manager.outputText.connect(self.statusGroupBox.setOutputText)
 
         self.tabs.remove_plot.connect(self.remove_plot)
