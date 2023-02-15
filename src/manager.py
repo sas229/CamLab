@@ -19,6 +19,7 @@ class Manager(QObject):
     configurationChanged = Signal(dict)
     deviceAdded = Signal(str, str)
     clear_device_configuration_tabs = Signal()
+    clear_shearbox_configuration = Signal()
     close_plots = Signal()
     clear_tabs = Signal()
     addControlTable = Signal(str, list)
@@ -1005,6 +1006,7 @@ class Manager(QObject):
 
     @Slot()
     def clearConfiguration(self):
+        self.clear_shearbox_configuration.emit()
         # Clear the device list and configuration tabs.
         self.deviceTableModel.clearData()
         self.clear_device_configuration_tabs.emit()
