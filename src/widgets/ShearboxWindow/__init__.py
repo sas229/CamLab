@@ -52,18 +52,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         self.Layout.addWidget(self.tabs,2)
 
         self.specimens.valueChanged.connect(self.specimens_number)
-        self.tabs.horiz_load_ins.currentTextChanged.connect(self.set_horiz_load_ins)
-        self.tabs.horiz_load_chan.currentTextChanged.connect(self.set_horiz_load_chan)
-        self.tabs.horiz_disp_ins.currentTextChanged.connect(self.set_horiz_disp_ins)
-        self.tabs.horiz_disp_chan.currentTextChanged.connect(self.set_horiz_disp_chan)
-        self.tabs.vert_load_ins.currentTextChanged.connect(self.set_vert_load_ins)
-        self.tabs.vert_load_chan.currentTextChanged.connect(self.set_vert_load_chan)
-        self.tabs.vert_disp_ins.currentTextChanged.connect(self.set_vert_disp_ins)
-        self.tabs.vert_disp_chan.currentTextChanged.connect(self.set_vert_disp_chan)
-        self.tabs.horiz_cont_ins.currentTextChanged.connect(self.set_horiz_cont_ins)
-        self.tabs.horiz_cont_chan.currentTextChanged.connect(self.set_horiz_cont_chan)
-        self.tabs.vert_cont_ins.currentTextChanged.connect(self.set_vert_cont_ins)
-        self.tabs.vert_cont_chan.currentTextChanged.connect(self.set_vert_cont_chan)
+        self.make_tabs_connections()
 
 
         # Set the central widget of the main window.

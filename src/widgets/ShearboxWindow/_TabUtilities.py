@@ -32,6 +32,20 @@ class TabUtilities:
         self.tabs.vert_cont_ins.clear()
         self.tabs.vert_cont_ins.addItems([None] + list(self.devices.keys()))
         self.tabs.vert_cont_chan.clear()
+    
+    def make_tabs_connections(self):
+        self.tabs.horiz_load_ins.currentTextChanged.connect(self.set_horiz_load_ins)
+        self.tabs.horiz_load_chan.currentTextChanged.connect(self.set_horiz_load_chan)
+        self.tabs.horiz_disp_ins.currentTextChanged.connect(self.set_horiz_disp_ins)
+        self.tabs.horiz_disp_chan.currentTextChanged.connect(self.set_horiz_disp_chan)
+        self.tabs.vert_load_ins.currentTextChanged.connect(self.set_vert_load_ins)
+        self.tabs.vert_load_chan.currentTextChanged.connect(self.set_vert_load_chan)
+        self.tabs.vert_disp_ins.currentTextChanged.connect(self.set_vert_disp_ins)
+        self.tabs.vert_disp_chan.currentTextChanged.connect(self.set_vert_disp_chan)
+        self.tabs.horiz_cont_ins.currentTextChanged.connect(self.set_horiz_cont_ins)
+        self.tabs.horiz_cont_chan.currentTextChanged.connect(self.set_horiz_cont_chan)
+        self.tabs.vert_cont_ins.currentTextChanged.connect(self.set_vert_cont_ins)
+        self.tabs.vert_cont_chan.currentTextChanged.connect(self.set_vert_cont_chan)
 
     def set_horiz_load_ins(self, device):
         if device != "":
