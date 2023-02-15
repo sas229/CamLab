@@ -39,17 +39,14 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
 
 
         self.tabs = TabInterface()
+        
         # for i in range(1,5):
         #     if i <= self.configuration["shearbox"]["Number of Specimens"]:
         #         self.tabs.setTabEnabled(i-1, True)
         #     else:
         #         self.tabs.setTabEnabled(i-1, False)
-        self.addItemstoComboboxes()
 
-        # self.horiz_load_ins.addItems(self.configuration["devices"].keys())
-        # self.horiz_load_ins.setCurrentText(self.configuration["shearbox"]["horiz_load_ins"])
-        # if self.horiz_load_ins.currentText() != "":
-        #     self.horiz_load_chan.addItems(self.configuration["devices"][self.horiz_load_ins.currentText()].keys())
+        self.addItemstoComboboxes()
 
         self.Layout.addWidget(self.topbar,0)
         self.Layout.addWidget(self.tabs,2)
