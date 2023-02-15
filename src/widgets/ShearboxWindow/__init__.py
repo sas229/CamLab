@@ -1,8 +1,8 @@
 import os, sys
-from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QDialog, QPushButton, QLabel, QSpacerItem, QSpinBox
-from PySide6.QtGui import QScreen, QAction
-from PySide6.QtCore import Signal, Slot, QThread, QTimer
+from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox
+from PySide6.QtCore import Signal, Slot
 from local_qt_material import QtStyleTools
+from widgets.ShearboxWindow._TabUtilities import TabUtilities
 from widgets.ShearboxWindow.Tabs import TabInterface
 from widgets.ShearboxWindow.ToolBar import ToolBar
 import logging
@@ -11,7 +11,7 @@ from pathlib import Path
 
 log = logging.getLogger(__name__)
 
-class ShearboxWindow(QMainWindow, QtStyleTools):
+class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
     configurationChanged = Signal(dict)
     def __init__(self, configuration):
         super().__init__()
@@ -45,10 +45,28 @@ class ShearboxWindow(QMainWindow, QtStyleTools):
         #     else:
         #         self.tabs.setTabEnabled(i-1, False)
 
+
+        # self.horiz_load_ins.addItems(self.configuration["devices"].keys())
+        # self.horiz_load_ins.setCurrentText(self.configuration["shearbox"]["horiz_load_ins"])
+        # if self.horiz_load_ins.currentText() != "":
+        #     self.horiz_load_chan.addItems(self.configuration["devices"][self.horiz_load_ins.currentText()].keys())
+
         self.Layout.addWidget(self.topbar,0)
         self.Layout.addWidget(self.tabs,2)
 
         self.specimens.valueChanged.connect(self.specimens_number)
+        self.tabs.horiz_load_ins.currentTextChanged.connect(self.set_horiz_cont_ins)
+        self.tabs.horiz_load_chan.currentTextChanged.connect(self.set_horiz_cont_chan)
+        self.tabs.horiz_disp_ins.currentTextChanged.connect(self.set_horiz_cont_ins)
+        self.tabs.horiz_disp_chan.currentTextChanged.connect(self.set_horiz_cont_chan)
+        self.tabs.vert_load_ins.currentTextChanged.connect(self.set_vert_cont_ins)
+        self.tabs.vert_load_chan.currentTextChanged.connect(self.set_vert_cont_chan)
+        self.tabs.vert_disp_ins.currentTextChanged.connect(self.set_vert_cont_ins)
+        self.tabs.vert_disp_chan.currentTextChanged.connect(self.set_vert_cont_chan)
+        self.tabs.horiz_cont_ins.currentTextChanged.connect(self.set_horiz_cont_ins)
+        self.tabs.horiz_cont_chan.currentTextChanged.connect(self.set_horiz_cont_chan)
+        self.tabs.vert_cont_ins.currentTextChanged.connect(self.set_vert_cont_ins)
+        self.tabs.vert_cont_chan.currentTextChanged.connect(self.set_vert_cont_chan)
 
 
         # Set the central widget of the main window.
@@ -56,6 +74,7 @@ class ShearboxWindow(QMainWindow, QtStyleTools):
         self.centralWidget.setLayout(self.Layout)
         self.setCentralWidget(self.centralWidget)
 
+        self.set_theme()
 
     def set_theme(self):
         """Method to set the theme and apply the qt-material stylesheet."""
@@ -82,7 +101,11 @@ class ShearboxWindow(QMainWindow, QtStyleTools):
         #     else:
         #         self.tabs.setTabEnabled(i-1, False)
         self.update_configuration()
+    
+    def addItemstoComboboxes(self):
+        pass
 
+    @Slot()
     def set_configuration(self, configuration):
         # Set the configuration.
         self.configuration = configuration
@@ -96,11 +119,12 @@ class ShearboxWindow(QMainWindow, QtStyleTools):
         self.configurationChanged.emit(self.configuration)
 
     def closeEvent(self, event):
-        self.configuration["shearbox"]["x"] = self.frameGeometry().x()
-        self.configuration["shearbox"]["y"] = self.frameGeometry().y()
-        self.configuration["shearbox"]["width"] = self.frameGeometry().width()
-        self.configuration["shearbox"]["height"] = self.frameGeometry().height()
+        if "shearbox" in self.configuration.keys():
+            self.configuration["shearbox"]["x"] = self.frameGeometry().x()
+            self.configuration["shearbox"]["y"] = self.frameGeometry().y()
+            self.configuration["shearbox"]["width"] = self.frameGeometry().width()
+            self.configuration["shearbox"]["height"] = self.frameGeometry().height()
 
-        self.update_configuration()
+            self.update_configuration()
 
         return super().closeEvent(event)
