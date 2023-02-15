@@ -44,7 +44,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         #         self.tabs.setTabEnabled(i-1, True)
         #     else:
         #         self.tabs.setTabEnabled(i-1, False)
-
+        self.addItemstoComboboxes()
 
         # self.horiz_load_ins.addItems(self.configuration["devices"].keys())
         # self.horiz_load_ins.setCurrentText(self.configuration["shearbox"]["horiz_load_ins"])
@@ -55,14 +55,14 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         self.Layout.addWidget(self.tabs,2)
 
         self.specimens.valueChanged.connect(self.specimens_number)
-        self.tabs.horiz_load_ins.currentTextChanged.connect(self.set_horiz_cont_ins)
-        self.tabs.horiz_load_chan.currentTextChanged.connect(self.set_horiz_cont_chan)
-        self.tabs.horiz_disp_ins.currentTextChanged.connect(self.set_horiz_cont_ins)
-        self.tabs.horiz_disp_chan.currentTextChanged.connect(self.set_horiz_cont_chan)
-        self.tabs.vert_load_ins.currentTextChanged.connect(self.set_vert_cont_ins)
-        self.tabs.vert_load_chan.currentTextChanged.connect(self.set_vert_cont_chan)
-        self.tabs.vert_disp_ins.currentTextChanged.connect(self.set_vert_cont_ins)
-        self.tabs.vert_disp_chan.currentTextChanged.connect(self.set_vert_cont_chan)
+        self.tabs.horiz_load_ins.currentTextChanged.connect(self.set_horiz_load_ins)
+        self.tabs.horiz_load_chan.currentTextChanged.connect(self.set_horiz_load_chan)
+        self.tabs.horiz_disp_ins.currentTextChanged.connect(self.set_horiz_disp_ins)
+        self.tabs.horiz_disp_chan.currentTextChanged.connect(self.set_horiz_disp_chan)
+        self.tabs.vert_load_ins.currentTextChanged.connect(self.set_vert_load_ins)
+        self.tabs.vert_load_chan.currentTextChanged.connect(self.set_vert_load_chan)
+        self.tabs.vert_disp_ins.currentTextChanged.connect(self.set_vert_disp_ins)
+        self.tabs.vert_disp_chan.currentTextChanged.connect(self.set_vert_disp_chan)
         self.tabs.horiz_cont_ins.currentTextChanged.connect(self.set_horiz_cont_ins)
         self.tabs.horiz_cont_chan.currentTextChanged.connect(self.set_horiz_cont_chan)
         self.tabs.vert_cont_ins.currentTextChanged.connect(self.set_vert_cont_ins)
@@ -101,9 +101,6 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         #     else:
         #         self.tabs.setTabEnabled(i-1, False)
         self.update_configuration()
-    
-    def addItemstoComboboxes(self):
-        pass
 
     @Slot()
     def set_configuration(self, configuration):
