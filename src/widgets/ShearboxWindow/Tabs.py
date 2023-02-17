@@ -102,8 +102,8 @@ class TabInterface(QTabWidget):
         
     def build_specimen_tab(self):
         self.specimenLayout = QVBoxLayout()
-        self.specimen.steps = SpecimenTabs()
-        self.specimenLayout.addWidget(self.specimen.steps)
+        self.specimen.tabs = SpecimenTabs()
+        self.specimenLayout.addWidget(self.specimen.tabs)
         self.specimen.setLayout(self.specimenLayout)
         
     def build_consolidation_tab(self):
@@ -114,33 +114,10 @@ class TabInterface(QTabWidget):
         self.shearLayout = QGridLayout()
         self.shear.setLayout(self.shearLayout)
 
-    def float_tab(self, index):
-        """Method to float plot, preview or control tab as window."""
-        widget = self.widget(index)
-        if widget.whatsThis() == "plot" or widget.whatsThis() == "control" or widget.whatsThis() == "preview":
-            self.tabToWindow.emit(widget, index)
-            log.info("Tab converted to window.")
-
     def add_persistent_tab(self, widget, name):
         """Method to add persistent tab."""
         self.addTab(widget, name)
         index = self.tabBar().count()-1
-        self.tabBar().setTabButton(index, QTabBar.RightSide, None)
-    
-    def insert_persistent_tab(self, index, widget, name):
-        """Method to insert a persistent tab at the given index."""
-        self.insertTab(index, widget, name)
-        self.tabBar().setTabButton(index, QTabBar.RightSide, None)
-    
-    def add_persistent_tab_icon(self, widget, name, icon):
-        """Method to add persistent tab with icon."""
-        self.addTab(widget, icon, name)
-        index = self.tabBar().count()-1
-        self.tabBar().setTabButton(index, QTabBar.RightSide, None)
-    
-    def insert_persistent_tab_icon(self, index, widget, name, icon):
-        """Method to insert a persistent tab at the given index with icon."""
-        self.insertTab(index, widget, icon, name)
         self.tabBar().setTabButton(index, QTabBar.RightSide, None)
 
     @Slot(int)

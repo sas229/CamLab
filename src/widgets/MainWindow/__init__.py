@@ -206,8 +206,8 @@ class MainWindow(TabUtilities, PlotUtilities, ShearboxUtilities, ControlUtilitie
     @Slot()
     def open_shearbox(self):
         """Method to open the shearbox extension."""
-        log.info("Shearbox extension button clicked.")
         self.initialise_shearbox()
+        log.info("ShearBox opened.")
 
 
     @Slot()

@@ -44,12 +44,6 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
 
 
         self.tabs = TabInterface()
-        
-        # for i in range(1,5):
-        #     if i <= self.configuration["shearbox"]["Number of Specimens"]:
-        #         self.tabs.setTabEnabled(i-1, True)
-        #     else:
-        #         self.tabs.setTabEnabled(i-1, False)
 
         self.addItemstoComboboxes()
 
@@ -57,7 +51,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         self.Layout.addWidget(self.tabs,2)
 
         self.specimens.valueChanged.connect(self.specimens_number)
-        self.make_tabs_connections()
+        self.make_hardware_tab_connections()
 
 
         # Set the central widget of the main window.
