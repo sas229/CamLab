@@ -14,6 +14,11 @@ log = logging.getLogger(__name__)
 class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
     configurationChanged = Signal(dict)
     def __init__(self, configuration):
+        """Main window containing shear box setup
+
+        Arguments:
+            configuration -- configuration for initial setup
+        """
         super().__init__()
         self.setWindowTitle("Shear Box")
         self.setMinimumSize(800, 600)
@@ -78,28 +83,34 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         with open(path_to_css) as file:
             self.setStyleSheet(stylesheet + file.read().format(**os.environ))
         
-    def specimens_number(self):
-        self.specimens.lineEdit().deselect()
-        self.configuration["shearbox"]["Number of specimens"] = self.specimens.value()
-        # for i in range(1,5):
-        #     if i <= self.configuration["shearbox"]["Number of Specimens"]:
-        #         self.tabs.setTabEnabled(i-1, True)
-        #     else:
-        #         self.tabs.setTabEnabled(i-1, False)
-        self.update_configuration()
+    def specimens_number(self, num):
+        """Change number of specimens by one
+
+        Arguments:
+            num -- new number of specimens
+        """
+        if num < self.configuration["shearbox"]["Number of Specimens"]:
+            self.tabs.specimen.tabs.close_tab(num)
+        else:
+            specimen = f"Specimen {num}"
+            self.tabs.specimen.tabs.add_persistent_tab(self.tabs.specimen.tabs.specimens[specimen]["widget"], specimen)
+        self.configuration["shearbox"]["Number of Specimens"] = num
+        self.configurationChanged.emit(self.configuration)
 
     @Slot()
     def set_configuration(self, configuration):
-        # Set the configuration.
+        """Set the configuration
+
+        Arguments:
+            configuration -- the configuration to be set
+        """
+        
         self.configuration = configuration
         self.darkMode = self.configuration["global"]["darkMode"]
 
         self.set_theme()
         self.move(self.configuration["shearbox"]["x"], self.configuration["shearbox"]["y"])
         self.resize(self.configuration["shearbox"]["width"], self.configuration["shearbox"]["height"])
-    
-    def update_configuration(self):
-        self.configurationChanged.emit(self.configuration)
 
     def closeEvent(self, event):
         if "shearbox" in self.configuration.keys():
@@ -108,6 +119,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
             self.configuration["shearbox"]["width"] = self.frameGeometry().width()
             self.configuration["shearbox"]["height"] = self.frameGeometry().height()
 
-            self.update_configuration()
+            self.configurationChanged.emit(self.configuration)
 
+        log.info("Closing shearbox")
         return super().closeEvent(event)
