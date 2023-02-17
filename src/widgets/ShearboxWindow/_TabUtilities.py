@@ -54,7 +54,7 @@ class TabUtilities:
         self.tabs.vert_cont_ins.currentTextChanged.connect(self.set_vert_cont_ins)
         self.tabs.vert_cont_chan.currentTextChanged.connect(self.set_vert_cont_chan)
 
-    @Slot
+    @Slot(str)
     def set_horiz_load_ins(self, device):
         """Set device to use for horizontal load measurement
 
@@ -72,7 +72,7 @@ class TabUtilities:
             self.tabs.horiz_load_chan.clear()
         self.update_configuration()
 
-    @Slot
+    @Slot(str)
     def set_horiz_load_chan(self, channel):
         """Set channel to use for horizontal load measurement
 
@@ -87,7 +87,7 @@ class TabUtilities:
             self.configuration["shearbox"]["horiz_load_chan"] = None
         self.update_configuration()
 
-    @Slot
+    @Slot(str)
     def set_horiz_disp_ins(self, device):
         """Set device to use for horizontal displacement measurement
 
@@ -105,7 +105,7 @@ class TabUtilities:
             self.tabs.horiz_disp_chan.clear()
         self.update_configuration()
 
-    @Slot
+    @Slot(str)
     def set_horiz_disp_chan(self, channel):
         """Set channel to use for horizontal displacement measurement
 
@@ -120,7 +120,7 @@ class TabUtilities:
             self.configuration["shearbox"]["horiz_load_chan"] = None
         self.update_configuration()
 
-    @Slot
+    @Slot(str)
     def set_vert_load_ins(self, device):
         """Set device to use for vertical load measurement
 
@@ -138,7 +138,7 @@ class TabUtilities:
             self.tabs.vert_load_chan.clear()
         self.update_configuration()
 
-    @Slot
+    @Slot(str)
     def set_vert_load_chan(self, channel):
         """Set channel to use for vertical load measurement
 
@@ -153,7 +153,7 @@ class TabUtilities:
             self.configuration["shearbox"]["horiz_load_chan"] = None
         self.update_configuration()
 
-    @Slot
+    @Slot(str)
     def set_vert_disp_ins(self, device):
         """Set device to use for vertical displacement measurement
 
@@ -171,7 +171,7 @@ class TabUtilities:
             self.tabs.vert_disp_chan.clear()
         self.update_configuration()
 
-    @Slot
+    @Slot(str)
     def set_vert_disp_chan(self, channel):
         """Set channel to use for vertical displacement measurement
 
@@ -186,7 +186,7 @@ class TabUtilities:
             self.configuration["shearbox"]["horiz_load_chan"] = None
         self.update_configuration()
 
-    @Slot
+    @Slot(str)
     def set_horiz_cont_ins(self, device):
         """Set device to use for horizontal control
 
@@ -204,7 +204,7 @@ class TabUtilities:
             self.tabs.horiz_cont_chan.clear()
         self.update_configuration()
 
-    @Slot
+    @Slot(str)
     def set_horiz_cont_chan(self, channel):
         """Set channel to use for horizontal control
 
@@ -219,7 +219,7 @@ class TabUtilities:
             self.configuration["shearbox"]["horiz_load_chan"] = None
         self.update_configuration()
 
-    @Slot
+    @Slot(str)
     def set_vert_cont_ins(self, device):
         """Set device to use for vertical control
 
@@ -237,7 +237,7 @@ class TabUtilities:
             self.tabs.vert_cont_chan.clear()
         self.update_configuration()
 
-    @Slot
+    @Slot(str)
     def set_vert_cont_chan(self, channel):
         """Set channel to use for vertical control
 
