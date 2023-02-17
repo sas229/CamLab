@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QTabWidget, QWidget, QTabBar, QGridLayout, QVBoxLayout, QComboBox, QLabel
-from PySide6.QtCore import Slot, Signal, Qt
+from PySide6.QtCore import Slot, Qt
 from widgets.PlotWindow import PlotWindow
 from widgets.ShearboxWindow.SpecimenTab import SpecimenTabs
 import logging 
@@ -7,8 +7,6 @@ import logging
 log = logging.getLogger(__name__)
 
 class TabInterface(QTabWidget):
-    tabToWindow = Signal(QWidget, int)
-    remove_plot = Signal(str)
 
     def __init__(self):
         super().__init__()
@@ -29,10 +27,6 @@ class TabInterface(QTabWidget):
         self.build_specimen_tab()
         self.build_consolidation_tab()
         self.build_shear_tab()
-
-        # Connections.
-        self.tabCloseRequested.connect(self.close_tab)
-        self.tabBarDoubleClicked.connect(self.float_tab)
 
     def build_hardware_tab(self):
         self.hardwareLayout = QGridLayout()

@@ -1,20 +1,15 @@
 from PySide6.QtWidgets import QTabWidget, QWidget, QTabBar, QGridLayout, QLineEdit, QLabel
-from PySide6.QtCore import Slot, Signal
 from PySide6.QtGui import QDoubleValidator
-from widgets.PlotWindow import PlotWindow
 import logging 
 
 log = logging.getLogger(__name__)
 
 class SpecimenTabs(QTabWidget):
-    tabToWindow = Signal(QWidget, int)
-    remove_plot = Signal(str)
 
     def __init__(self):
         super().__init__()
         """TabInterface init."""
 
-        # Settings.
         self.specimens = dict()
 
         for i in range(1,5):
@@ -24,11 +19,12 @@ class SpecimenTabs(QTabWidget):
             if i == 1:
                 self.add_persistent_tab(self.specimens[specimen]["widget"], specimen)
 
-        # Connections.
-        self.tabCloseRequested.connect(self.close_tab)
-        self.tabBarDoubleClicked.connect(self.float_tab)
-
     def build_specimen(self, specimen):
+        """Build one of the specimen tabs
+
+        Arguments:
+            specimen -- Tab name
+        """
         self.specimens[specimen]["widget"] = QWidget()
         self.specimens[specimen]["layout"] = QGridLayout()
         num_validator = QDoubleValidator()
