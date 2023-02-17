@@ -70,7 +70,7 @@ class TabUtilities:
             log.info("No device selected")
             self.configuration["shearbox"]["horiz_load_ins"] = None
             self.tabs.horiz_load_chan.clear()
-        self.update_configuration()
+        self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
     def set_horiz_load_chan(self, channel):
@@ -85,7 +85,7 @@ class TabUtilities:
         else:
             log.info("No device selected")
             self.configuration["shearbox"]["horiz_load_chan"] = None
-        self.update_configuration()
+        self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
     def set_horiz_disp_ins(self, device):
@@ -103,7 +103,7 @@ class TabUtilities:
             log.info("No device selected")
             self.configuration["shearbox"]["horiz_disp_ins"] = None
             self.tabs.horiz_disp_chan.clear()
-        self.update_configuration()
+        self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
     def set_horiz_disp_chan(self, channel):
@@ -118,7 +118,7 @@ class TabUtilities:
         else:
             log.info("No device selected")
             self.configuration["shearbox"]["horiz_load_chan"] = None
-        self.update_configuration()
+        self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
     def set_vert_load_ins(self, device):
@@ -136,7 +136,7 @@ class TabUtilities:
             log.info("No device selected")
             self.configuration["shearbox"]["vert_load_ins"] = None
             self.tabs.vert_load_chan.clear()
-        self.update_configuration()
+        self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
     def set_vert_load_chan(self, channel):
@@ -151,7 +151,7 @@ class TabUtilities:
         else:
             log.info("No device selected")
             self.configuration["shearbox"]["horiz_load_chan"] = None
-        self.update_configuration()
+        self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
     def set_vert_disp_ins(self, device):
@@ -169,7 +169,7 @@ class TabUtilities:
             log.info("No device selected")
             self.configuration["shearbox"]["vert_disp_ins"] = None
             self.tabs.vert_disp_chan.clear()
-        self.update_configuration()
+        self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
     def set_vert_disp_chan(self, channel):
@@ -184,7 +184,7 @@ class TabUtilities:
         else:
             log.info("No device selected")
             self.configuration["shearbox"]["horiz_load_chan"] = None
-        self.update_configuration()
+        self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
     def set_horiz_cont_ins(self, device):
@@ -202,7 +202,7 @@ class TabUtilities:
             log.info("No device selected")
             self.configuration["shearbox"]["horiz_cont_ins"] = None
             self.tabs.horiz_cont_chan.clear()
-        self.update_configuration()
+        self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
     def set_horiz_cont_chan(self, channel):
@@ -217,7 +217,7 @@ class TabUtilities:
         else:
             log.info("No device selected")
             self.configuration["shearbox"]["horiz_load_chan"] = None
-        self.update_configuration()
+        self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
     def set_vert_cont_ins(self, device):
@@ -235,7 +235,7 @@ class TabUtilities:
             log.info("No device selected")
             self.configuration["shearbox"]["vert_cont_ins"] = None
             self.tabs.vert_cont_chan.clear()
-        self.update_configuration()
+        self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
     def set_vert_cont_chan(self, channel):
@@ -250,4 +250,4 @@ class TabUtilities:
         else:
             log.info("No device selected")
             self.configuration["shearbox"]["horiz_load_chan"] = None
-        self.update_configuration()
+        self.configurationChanged.emit(self.configuration)

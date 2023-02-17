@@ -1,6 +1,6 @@
-from PySide6.QtWidgets import QToolBar, QWidget, QSizePolicy, QFileDialog, QToolButton, QMenu, QGridLayout, QPushButton
-from PySide6.QtGui import QIcon, QAction
-from PySide6.QtCore import Signal, Slot
+from PySide6.QtWidgets import QToolBar, QFileDialog
+from PySide6.QtGui import QAction
+from PySide6.QtCore import Signal
 import logging
 
 log = logging.getLogger(__name__)
