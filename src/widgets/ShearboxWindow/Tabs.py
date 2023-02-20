@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QTabWidget, QWidget, QTabBar, QGridLayout, QVBoxLayout, QComboBox, QLabel, QGroupBox, QRadioButton, QCheckBox, QLineEdit
+from PySide6.QtWidgets import QTabWidget, QWidget, QTabBar, QGridLayout, QVBoxLayout, QComboBox, QLabel, QGroupBox, QRadioButton, QCheckBox, QLineEdit, QSpinBox
 from PySide6.QtGui import QDoubleValidator, QRegularExpressionValidator
 from PySide6.QtCore import Slot, Qt
 from widgets.PlotWindow import PlotWindow
@@ -86,10 +86,10 @@ class TabInterface(QTabWidget):
         self.hardwareLayout.setRowStretch(5,1)
         self.hardwareLayout.setRowStretch(6,1)
         self.hardwareLayout.setRowStretch(7,1)
-        self.hardwareLayout.setColumnStretch(0,0)
-        self.hardwareLayout.setColumnStretch(1,0)
-        self.hardwareLayout.setColumnStretch(2,1)
-        self.hardwareLayout.setColumnStretch(3,1)
+        self.hardwareLayout.setColumnStretch(0,3)
+        self.hardwareLayout.setColumnStretch(1,2)
+        self.hardwareLayout.setColumnStretch(2,6)
+        self.hardwareLayout.setColumnStretch(3,6)
         self.hardwareLayout.setHorizontalSpacing(15)
         self.hardwareLayout.setVerticalSpacing(15)
 
@@ -160,7 +160,7 @@ class TabInterface(QTabWidget):
 
         self.consolidation_log_layout.addWidget(self.consolidation_log_rate_radio, 0, 0)
         self.consolidation_log_layout.addWidget(self.consolidation_log_rate_val, 0, 1)
-        # self.consolidation_log_layout.addWidget(QLabel("kPa"), 0, 2)
+        self.consolidation_log_layout.addWidget(QLabel("(hh:mm:ss)"), 0, 2)
         self.consolidation_log_layout.addWidget(self.consolidation_log_timetable_radio, 1, 0)
         self.consolidation_log_layout.addWidget(self.consolidation_log_timetable_opt, 1, 1)
         # self.consolidation_log_layout.addWidget(QLabel("Edit"), 1, 2)
@@ -172,9 +172,10 @@ class TabInterface(QTabWidget):
         self.consolidation_stop_layout.addWidget(self.consolidation_stop_rate_disp, 0, 1)
         self.consolidation_stop_layout.addWidget(QLabel("mm"), 0, 2)
         self.consolidation_stop_layout.addWidget(self.consolidation_stop_rate_time, 1, 1)
+        self.consolidation_stop_layout.addWidget(QLabel("(hh:mm:ss)"), 1, 2)
         self.consolidation_stop_layout.addWidget(self.consolidation_stop_time_select, 2, 0)
         self.consolidation_stop_layout.addWidget(self.consolidation_stop_time_opt, 2, 1)
-        # self.consolidation_stop_layout.addWidget(QLabel("kPa"), 2, 2)
+        self.consolidation_stop_layout.addWidget(QLabel("(hh:mm:ss)"), 2, 2)
         self.consolidation_stop_layout.addWidget(self.consolidation_stop_buzz, 3, 0, 1, 3)
 
         self.consolidation_start.setLayout(self.consolidation_start_layout)
@@ -186,10 +187,117 @@ class TabInterface(QTabWidget):
         self.consolidationLayout.addWidget(self.consolidation_stop, 0)
 
         self.consolidation.setLayout(self.consolidationLayout)
+
+        self.consolidation_start_layout.setColumnStretch(0,10)
+        self.consolidation_start_layout.setColumnStretch(1,3)
+        self.consolidation_start_layout.setColumnStretch(2,1)
+        self.consolidation_log_layout.setColumnStretch(0,10)
+        self.consolidation_log_layout.setColumnStretch(1,3)
+        self.consolidation_log_layout.setColumnStretch(2,1)
+        self.consolidation_stop_layout.setColumnStretch(0,10)
+        self.consolidation_stop_layout.setColumnStretch(1,3)
+        self.consolidation_stop_layout.setColumnStretch(2,1)
         
     def build_shear_tab(self):
-        self.shearLayout = QGridLayout()
+        self.shearLayout = QVBoxLayout()
+        self.shear_trigger = QGroupBox("Trigger conditions")
+        self.shear_trigger_layout = QGridLayout()
+        self.shear_store = QGroupBox("Storage Conditions")
+        self.shear_store_layout = QGridLayout()
+        self.shear_stop = QGroupBox("Stopping Conditions")
+        self.shear_stop_layout = QGridLayout()
+        self.shear_reverse = QGroupBox("Reversing")
+        self.shear_reverse_layout = QGridLayout()
+
+        self.shear_trigger_speed_select = QCheckBox("Enter shearing speed")
+        self.shear_trigger_speed = QLineEdit()
+        self.shear_trigger_calc_select = QCheckBox("Use the rate calculated during consolidation")
+        self.shear_trigger_load_label = QLabel("Start when the shear load changes by")
+        self.shear_trigger_load_change = QLineEdit()
+
+        self.shear_store_rate_radio = QRadioButton("Log data at this rate")
+        self.shear_store_rate_val = QLineEdit()
+        self.shear_store_strain_radio = QRadioButton("When Horizontal Strain changes by")
+        self.shear_store_strain_val = QLineEdit()
+
+        self.shear_stop_drop_select = QCheckBox("After the Shear Stress reaches a peak\nand repeatedly falls this number of times")
+        self.shear_stop_drop = QSpinBox()
+        self.shear_stop_strain_select = QCheckBox("When the Shear Strain reaches this level")
+        self.shear_stop_strain = QLineEdit()
+
+        self.shear_reverse_rate_radio = QRadioButton("Reverse at this speed")
+        self.shear_reverse_rate_val = QLineEdit()
+        self.shear_reverse_same = QRadioButton("Use the same speed as the initial shear")
+
+        time_validator = QRegularExpressionValidator("^(2[0-3]|[01]?[0-9]):([0-5][0-9]):([0-5][0-9])$")
+        num_validator = QDoubleValidator(bottom=0)
+
+        self.shear_trigger_speed.setValidator(num_validator)
+        self.shear_trigger_load_change.setValidator(num_validator)
+        self.shear_store_rate_val.setValidator(time_validator)
+        self.shear_store_strain_val.setValidator(num_validator)
+        self.shear_stop_strain.setValidator(num_validator)
+        self.shear_reverse_rate_val.setValidator(num_validator)
+
+        self.shear_trigger_speed_select.setChecked(True)
+        self.shear_store_rate_radio.setChecked(True)
+        self.shear_stop_drop_select.setChecked(True)
+        self.shear_reverse_rate_radio.setChecked(True)
+
+        self.shear_stop_drop.setMinimum(2)
+        self.shear_stop_drop.setMaximum(15)
+        self.shear_stop_drop.setValue(2)
+
+        self.shear_trigger_layout.addWidget(self.shear_trigger_speed_select, 0, 0)
+        self.shear_trigger_layout.addWidget(self.shear_trigger_speed, 0, 1)
+        self.shear_trigger_layout.addWidget(QLabel("mm/min"), 0, 2)
+        self.shear_trigger_layout.addWidget(self.shear_trigger_calc_select, 1, 0, 1, 3)
+        self.shear_trigger_layout.addWidget(self.shear_trigger_load_label, 2, 0)
+        self.shear_trigger_layout.addWidget(self.shear_trigger_load_change, 2, 1)
+        self.shear_trigger_layout.addWidget(QLabel("N/s"), 2, 2)
+
+        self.shear_store_layout.addWidget(self.shear_store_rate_radio, 0, 0)
+        self.shear_store_layout.addWidget(self.shear_store_rate_val, 0, 1)
+        self.shear_store_layout.addWidget(QLabel("(hh:mm:ss)"), 0, 2)
+        self.shear_store_layout.addWidget(self.shear_store_strain_radio, 1, 0)
+        self.shear_store_layout.addWidget(self.shear_store_strain_val, 1, 1)
+        self.shear_store_layout.addWidget(QLabel("%"), 1, 2)
+
+        self.shear_stop_layout.addWidget(self.shear_stop_drop_select, 0, 0)
+        self.shear_stop_layout.addWidget(self.shear_stop_drop, 0, 1)
+        self.shear_stop_layout.addWidget(self.shear_stop_strain_select, 1, 0)
+        self.shear_stop_layout.addWidget(self.shear_stop_strain, 1, 1)
+        self.shear_stop_layout.addWidget(QLabel("%"), 1, 2)
+
+        self.shear_reverse_layout.addWidget(self.shear_reverse_rate_radio, 0, 0)
+        self.shear_reverse_layout.addWidget(self.shear_reverse_rate_val, 0, 1)
+        self.shear_reverse_layout.addWidget(QLabel("mm/min"), 0, 2)
+        self.shear_reverse_layout.addWidget(self.shear_reverse_same, 1, 0, 1, 3)
+
+        self.shear_trigger.setLayout(self.shear_trigger_layout)
+        self.shear_store.setLayout(self.shear_store_layout)
+        self.shear_stop.setLayout(self.shear_stop_layout)
+        self.shear_reverse.setLayout(self.shear_reverse_layout)
+
+        self.shearLayout.addWidget(self.shear_trigger, 0)
+        self.shearLayout.addWidget(self.shear_store, 0)
+        self.shearLayout.addWidget(self.shear_stop, 0)
+        self.shearLayout.addWidget(self.shear_reverse, 0)
+
         self.shear.setLayout(self.shearLayout)
+
+        self.shear_trigger_layout.setColumnStretch(0,10)
+        self.shear_trigger_layout.setColumnStretch(1,3)
+        self.shear_trigger_layout.setColumnStretch(2,1)
+        self.shear_store_layout.setColumnStretch(0,10)
+        self.shear_store_layout.setColumnStretch(1,3)
+        self.shear_store_layout.setColumnStretch(2,1)
+        self.shear_stop_layout.setColumnStretch(0,10)
+        self.shear_stop_layout.setColumnStretch(1,3)
+        self.shear_stop_layout.setColumnStretch(2,1)
+        self.shear_reverse_layout.setColumnStretch(0,10)
+        self.shear_reverse_layout.setColumnStretch(1,3)
+        self.shear_reverse_layout.setColumnStretch(2,1)
 
     def add_persistent_tab(self, widget, name):
         """Method to add persistent tab."""
