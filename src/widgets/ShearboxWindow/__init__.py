@@ -97,7 +97,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
             self.tabs.specimen.tabs.close_tab(num)
         else:
             specimen = f"Specimen {num}"
-            self.tabs.specimen.tabs.add_persistent_tab(self.tabs.specimen.tabs.specimens[specimen]["widget"], specimen)
+            self.tabs.specimen.tabs.add_persistent_tab(self.tabs.specimen.tabs.specimens[specimen]["tabs"], specimen)
         self.configuration["shearbox"]["Number of Specimens"] = num
         self.configurationChanged.emit(self.configuration)
 
