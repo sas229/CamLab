@@ -265,14 +265,8 @@ class MainWindow(TabUtilities, PlotUtilities, ShearboxUtilities, ControlUtilitie
         self.close_plots()
         
         # close all windows if main window is closed
-        try:
-            assert self.configuration["shearbox"]["active"]
-            for window in QApplication.topLevelWidgets():
-                window.close()
-            self.configuration["shearbox"]["active"] = True
-        except:
-            for window in QApplication.topLevelWidgets():
-                window.close()
+        for window in QApplication.topLevelWidgets():
+            window.close()
 
         # In the event the device list is refreshing, wait until complete before quitting all threads otherwise an error is shown, but hide the window in the meantime.
         self.setVisible(False)

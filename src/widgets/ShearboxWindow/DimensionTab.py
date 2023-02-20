@@ -9,7 +9,7 @@ class DimensionTab(QWidget):
 
     def __init__(self):
         super().__init__()
-        num_validator = QDoubleValidator()
+        num_validator = QDoubleValidator(bottom=0)
         
         self.initial_height = QLineEdit()
         self.initial_weight = QLineEdit()

@@ -1,4 +1,5 @@
-from PySide6.QtWidgets import QTabWidget, QWidget, QTabBar, QGridLayout, QVBoxLayout, QComboBox, QLabel
+from PySide6.QtWidgets import QTabWidget, QWidget, QTabBar, QGridLayout, QVBoxLayout, QComboBox, QLabel, QGroupBox, QRadioButton, QCheckBox, QLineEdit
+from PySide6.QtGui import QDoubleValidator, QRegularExpressionValidator
 from PySide6.QtCore import Slot, Qt
 from widgets.PlotWindow import PlotWindow
 from widgets.ShearboxWindow.SpecimenTab import SpecimenTabs
@@ -101,7 +102,89 @@ class TabInterface(QTabWidget):
         self.specimen.setLayout(self.specimenLayout)
         
     def build_consolidation_tab(self):
-        self.consolidationLayout = QGridLayout()
+        self.consolidationLayout = QVBoxLayout()
+        self.consolidation_start = QGroupBox("Starting conditions")
+        self.consolidation_start_layout = QGridLayout()
+        self.consolidation_log = QGroupBox("Data Logging")
+        self.consolidation_log_layout = QGridLayout()
+        self.consolidation_stop = QGroupBox("Stop Criteria")
+        self.consolidation_stop_layout = QGridLayout()
+
+        self.consolidation_start_stress = QLineEdit()
+        self.consolidation_trigger_stress_select = QCheckBox("Trigger data logging as soon as the\nnormal stress exceeds this level:")
+        self.consolidation_trigger_stress = QLineEdit()
+        self.consolidation_trigger_disp_select = QCheckBox("Or whenever the normal settlement\nchanges by this amount")
+        self.consolidation_trigger_disp = QLineEdit()
+        self.consolidation_in_water = QCheckBox("Specimen is submersed in water")
+
+        self.consolidation_log_rate_radio = QRadioButton("Log data at this rate")
+        self.consolidation_log_rate_val = QLineEdit()
+        self.consolidation_log_timetable_radio = QRadioButton("Use the following timetable for data logging")
+        self.consolidation_log_timetable_opt = QComboBox()
+        self.consolidation_log_change_radio = QRadioButton("Every time the settlement input channel\nchanges by the given amount")
+        self.consolidation_log_change_val = QLineEdit()
+
+        self.consolidation_stop_rate_select = QCheckBox("When the settlement does not change by\nmore than the value entered here within the specified time")
+        self.consolidation_stop_rate_disp = QLineEdit()
+        self.consolidation_stop_rate_time = QLineEdit()
+        self.consolidation_stop_time_select = QCheckBox("When the maximum time entered here is exceeded")
+        self.consolidation_stop_time_opt = QLineEdit()
+        self.consolidation_stop_buzz = QCheckBox("Buzz to inform when the consolidation stage is completed")
+
+        time_validator = QRegularExpressionValidator("^(2[0-3]|[01]?[0-9]):([0-5][0-9]):([0-5][0-9])$")
+        num_validator = QDoubleValidator(bottom=0)
+
+        self.consolidation_start_stress.setValidator(num_validator)
+        self.consolidation_trigger_stress.setValidator(num_validator)
+        self.consolidation_trigger_disp.setValidator(num_validator)
+        self.consolidation_log_rate_val.setValidator(time_validator)
+        self.consolidation_log_change_val.setValidator(num_validator)
+        self.consolidation_stop_rate_disp.setValidator(num_validator)
+        self.consolidation_stop_rate_time.setValidator(time_validator)
+        self.consolidation_stop_time_opt.setValidator(num_validator)
+
+        self.consolidation_trigger_stress_select.setChecked(True)
+        self.consolidation_log_rate_radio.setChecked(True)
+        self.consolidation_stop_rate_select.setChecked(True)
+
+        self.consolidation_start_layout.addWidget(QLabel("Apply the following vertical stress"), 0, 0)
+        self.consolidation_start_layout.addWidget(self.consolidation_start_stress, 0, 1)
+        self.consolidation_start_layout.addWidget(QLabel("kPa"), 0, 2)
+        self.consolidation_start_layout.addWidget(self.consolidation_trigger_stress_select, 1, 0)
+        self.consolidation_start_layout.addWidget(self.consolidation_trigger_stress, 1, 1)
+        self.consolidation_start_layout.addWidget(QLabel("kPa"), 1, 2)
+        self.consolidation_start_layout.addWidget(self.consolidation_trigger_disp_select, 2, 0)
+        self.consolidation_start_layout.addWidget(self.consolidation_trigger_disp, 2, 1)
+        self.consolidation_start_layout.addWidget(QLabel("mm"), 2, 2)
+        self.consolidation_start_layout.addWidget(self.consolidation_in_water, 3, 0, 1, 3)
+
+        self.consolidation_log_layout.addWidget(self.consolidation_log_rate_radio, 0, 0)
+        self.consolidation_log_layout.addWidget(self.consolidation_log_rate_val, 0, 1)
+        # self.consolidation_log_layout.addWidget(QLabel("kPa"), 0, 2)
+        self.consolidation_log_layout.addWidget(self.consolidation_log_timetable_radio, 1, 0)
+        self.consolidation_log_layout.addWidget(self.consolidation_log_timetable_opt, 1, 1)
+        # self.consolidation_log_layout.addWidget(QLabel("Edit"), 1, 2)
+        self.consolidation_log_layout.addWidget(self.consolidation_log_change_radio, 2, 0)
+        self.consolidation_log_layout.addWidget(self.consolidation_log_change_val, 2, 1)
+        # self.consolidation_log_layout.addWidget(QLabel("kPa"), 2, 2)
+
+        self.consolidation_stop_layout.addWidget(self.consolidation_stop_rate_select, 0, 0, 2, 1)
+        self.consolidation_stop_layout.addWidget(self.consolidation_stop_rate_disp, 0, 1)
+        self.consolidation_stop_layout.addWidget(QLabel("mm"), 0, 2)
+        self.consolidation_stop_layout.addWidget(self.consolidation_stop_rate_time, 1, 1)
+        self.consolidation_stop_layout.addWidget(self.consolidation_stop_time_select, 2, 0)
+        self.consolidation_stop_layout.addWidget(self.consolidation_stop_time_opt, 2, 1)
+        # self.consolidation_stop_layout.addWidget(QLabel("kPa"), 2, 2)
+        self.consolidation_stop_layout.addWidget(self.consolidation_stop_buzz, 3, 0, 1, 3)
+
+        self.consolidation_start.setLayout(self.consolidation_start_layout)
+        self.consolidation_log.setLayout(self.consolidation_log_layout)
+        self.consolidation_stop.setLayout(self.consolidation_stop_layout)
+
+        self.consolidationLayout.addWidget(self.consolidation_start, 0)
+        self.consolidationLayout.addWidget(self.consolidation_log, 0)
+        self.consolidationLayout.addWidget(self.consolidation_stop, 0)
+
         self.consolidation.setLayout(self.consolidationLayout)
         
     def build_shear_tab(self):
