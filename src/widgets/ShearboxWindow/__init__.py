@@ -22,7 +22,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         """
         super().__init__()
         self.setWindowTitle("Shear Box")
-        self.setMinimumSize(800, 687)
+        self.setMinimumSize(800, 738)
 
         self.configuration = configuration
         self.running = False

@@ -1,5 +1,6 @@
-from PySide6.QtWidgets import QWidget, QGridLayout, QLineEdit, QLabel, QGroupBox
+from PySide6.QtWidgets import QWidget, QGridLayout, QLineEdit, QLabel, QGroupBox, QRadioButton, QHBoxLayout
 from PySide6.QtGui import QDoubleValidator
+from PySide6.QtCore import Slot
 import logging 
 
 log = logging.getLogger(__name__)
@@ -12,9 +13,12 @@ class DimensionTab(QWidget):
         
         self.initial_height = QLineEdit()
         self.initial_weight = QLineEdit()
+        self.rectangular = QRadioButton("Rectangular Shape")
+        self.circular = QRadioButton("Circular Shape")
         self.initial_width = QLineEdit()
-        self.particle_density = QLineEdit()
         self.initial_depth = QLineEdit()
+        self.initial_radius = QLineEdit()
+        self.particle_density = QLineEdit()
         self.initial_area = QLineEdit()
         self.initial_volume = QLineEdit()
         self.initial_bulk_density = QLineEdit()
@@ -22,16 +26,33 @@ class DimensionTab(QWidget):
         self.initial_height.setValidator(num_validator)
         self.initial_weight.setValidator(num_validator)
         self.initial_width.setValidator(num_validator)
-        self.particle_density.setValidator(num_validator)
         self.initial_depth.setValidator(num_validator)
+        self.initial_radius.setValidator(num_validator)
+        self.particle_density.setValidator(num_validator)
 
         self.initial_area.setReadOnly(True)
         self.initial_volume.setReadOnly(True)
         self.initial_bulk_density.setReadOnly(True)
 
+        self.rectangular.setChecked(True)
+
         self.Layout = QGridLayout()
+        self.button_box = QHBoxLayout()
         self.calc_box = QGroupBox("Related Calculations")
         self.calc_box_layout = QGridLayout()
+
+        self.button_box.addWidget(self.rectangular, 1)
+        self.button_box.addWidget(self.circular, 1)
+
+        self.width_label1 = QLabel("Initial Width")
+        self.width_label2 = QLabel("w<sub>0</sub>")
+        self.width_label3 = QLabel("mm")
+        self.depth_label1 = QLabel("Initial Depth")
+        self.depth_label2 = QLabel("d<sub>0</sub>")
+        self.depth_label3 = QLabel("mm")
+        self.radius_label1 = QLabel("Initial Radius")
+        self.radius_label2 = QLabel("r<sub>0</sub>")
+        self.radius_label3 = QLabel("mm")
 
         self.Layout.addWidget(QLabel("Initial Weight"), 0, 0)
         self.Layout.addWidget(QLabel("W<sub>0</sub>"), 0, 1)
@@ -41,14 +62,15 @@ class DimensionTab(QWidget):
         self.Layout.addWidget(QLabel("H<sub>0</sub>"), 1, 1)
         self.Layout.addWidget(self.initial_height, 1, 2)
         self.Layout.addWidget(QLabel("mm"), 1, 3)
-        self.Layout.addWidget(QLabel("Initial Width"), 2, 0)
-        self.Layout.addWidget(QLabel("w<sub>0</sub>"), 2, 1)
-        self.Layout.addWidget(self.initial_width, 2, 2)
-        self.Layout.addWidget(QLabel("mm"), 2, 3)
-        self.Layout.addWidget(QLabel("Initial Depth"), 3, 0)
-        self.Layout.addWidget(QLabel("d<sub>0</sub>"), 3, 1)
-        self.Layout.addWidget(self.initial_depth, 3, 2)
-        self.Layout.addWidget(QLabel("mm"), 3, 3)
+        self.Layout.addLayout(self.button_box, 2, 0, 1, 4)
+        self.Layout.addWidget(self.width_label1, 3, 0)
+        self.Layout.addWidget(self.width_label2, 3, 1)
+        self.Layout.addWidget(self.initial_width, 3, 2)
+        self.Layout.addWidget(self.width_label3, 3, 3)
+        self.Layout.addWidget(self.depth_label1, 4, 0)
+        self.Layout.addWidget(self.depth_label2, 4, 1)
+        self.Layout.addWidget(self.initial_depth, 4, 2)
+        self.Layout.addWidget(self.depth_label3, 4, 3)
 
         self.calc_box_layout.addWidget(QLabel("Particle Density"), 0, 0)
         self.calc_box_layout.addWidget(QLabel("\u03C1<sub>s</sub>"), 0, 1)
@@ -69,8 +91,8 @@ class DimensionTab(QWidget):
 
         self.calc_box.setLayout(self.calc_box_layout)
 
-        self.Layout.addWidget(self.calc_box, 4, 0, 1, 4)
-        self.Layout.addWidget(QWidget(), 5, 0, 1, 4)
+        self.Layout.addWidget(self.calc_box, 5, 0, 1, 4)
+        self.Layout.addWidget(QWidget(), 6, 0, 1, 4)
 
         self.Layout.setColumnStretch(0,1)
         self.Layout.setColumnStretch(1,0)
@@ -81,7 +103,8 @@ class DimensionTab(QWidget):
         self.Layout.setRowStretch(2,0)
         self.Layout.setRowStretch(3,0)
         self.Layout.setRowStretch(4,0)
-        self.Layout.setRowStretch(5,1)
+        self.Layout.setRowStretch(5,0)
+        self.Layout.setRowStretch(6,1)
         self.Layout.setHorizontalSpacing(15)
         self.Layout.setVerticalSpacing(15)
         self.calc_box_layout.setColumnStretch(0,1)
@@ -96,4 +119,47 @@ class DimensionTab(QWidget):
         self.calc_box_layout.setVerticalSpacing(15)
 
         self.setLayout(self.Layout)
-    
+
+        self.rectangular.toggled.connect(self.shape_switch)
+        self.circular.toggled.connect(self.shape_switch)
+
+    @Slot()
+    def shape_switch(self):
+        if self.rectangular.isChecked():
+            self.Layout.addWidget(self.width_label1, 3, 0)
+            self.Layout.addWidget(self.width_label2, 3, 1)
+            self.Layout.addWidget(self.initial_width, 3, 2)
+            self.Layout.addWidget(self.width_label3, 3, 3)
+            self.Layout.addWidget(self.depth_label1, 4, 0)
+            self.Layout.addWidget(self.depth_label2, 4, 1)
+            self.Layout.addWidget(self.initial_depth, 4, 2)
+            self.Layout.addWidget(self.depth_label3, 4, 3)
+            self.Layout.removeWidget(self.radius_label1)
+            self.Layout.removeWidget(self.radius_label2)
+            self.Layout.removeWidget(self.initial_radius)
+            self.Layout.removeWidget(self.radius_label3)
+            self.radius_label1.setParent(None)
+            self.radius_label2.setParent(None)
+            self.initial_radius.setParent(None)
+            self.radius_label3.setParent(None)
+        else:
+            self.Layout.removeWidget(self.width_label1)
+            self.Layout.removeWidget(self.width_label2)
+            self.Layout.removeWidget(self.initial_width)
+            self.Layout.removeWidget(self.width_label3)
+            self.Layout.removeWidget(self.depth_label1)
+            self.Layout.removeWidget(self.depth_label2)
+            self.Layout.removeWidget(self.initial_depth)
+            self.Layout.removeWidget(self.depth_label3)
+            self.width_label1.setParent(None)
+            self.width_label2.setParent(None)
+            self.initial_width.setParent(None)
+            self.width_label3.setParent(None)
+            self.depth_label1.setParent(None)
+            self.depth_label2.setParent(None)
+            self.initial_depth.setParent(None)
+            self.depth_label3.setParent(None)
+            self.Layout.addWidget(self.radius_label1, 3, 0, 2, 1)
+            self.Layout.addWidget(self.radius_label2, 3, 1, 2, 1)
+            self.Layout.addWidget(self.initial_radius, 3, 2, 2, 1)
+            self.Layout.addWidget(self.radius_label3, 3, 3, 2, 1)
