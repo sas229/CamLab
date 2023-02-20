@@ -1,5 +1,8 @@
 from PySide6.QtCore import Slot
 from widgets.ShearboxWindow import ShearboxWindow
+import logging
+
+log = logging.getLogger(__name__)
 
 class ShearboxUtilities:
 
@@ -27,8 +30,8 @@ class ShearboxUtilities:
 
         try:
             self.shearbox.activateWindow()
-            self.connect_shearbox()
             self.shearbox.addItemstoComboboxes()
+            self.connect_shearbox()
         except:
             self.shearbox = ShearboxWindow(self.manager.configuration)
             self.connect_shearbox()
@@ -37,15 +40,18 @@ class ShearboxUtilities:
 
     @Slot()
     def connect_shearbox(self):
-        # Connections.
+        log.info("Connecting ShearBox")
         self.manager.clear_shearbox_configuration.connect(self.disconnect_shearbox)
         self.manager.configurationChanged.connect(self.shearbox.set_configuration)
         self.shearbox.configurationChanged.connect(self.set_configuration)
+        self.shearbox.make_connections()
         
         self.manager.configurationChanged.emit(self.manager.configuration)
 
     @Slot()
     def disconnect_shearbox(self):
+        log.info("Disconnecting ShearBox")
         self.manager.clear_shearbox_configuration.disconnect(self.disconnect_shearbox)
         self.manager.configurationChanged.disconnect(self.shearbox.set_configuration)
+        self.shearbox.remove_connections()
         self.shearbox.close()

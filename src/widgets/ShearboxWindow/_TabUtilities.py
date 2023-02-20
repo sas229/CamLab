@@ -5,14 +5,23 @@ log = logging.getLogger(__name__)
 
 class TabUtilities:
 
+    def make_connections(self):
+        self.specimens.valueChanged.connect(self.specimens_number)
+        self.make_hardware_tab_connections()
+
+    def remove_connections(self):
+        self.specimens.valueChanged.disconnect(self.specimens_number)
+        self.remove_hardware_tab_connections()
+
     def get_devices_and_channels(self):
         """Get devices and channels of each device and store in self.devices
         """
         self.devices = dict()
-        for device in self.configuration["devices"].keys():
-            key = f'{self.configuration["devices"][device]["model"]} ({self.configuration["devices"][device]["id"]})'
-            channels = [channel_info["name"] for channel_info in self.configuration["devices"][device]["acquisition"]]
-            self.devices[key] = [device, channels]
+        if "devices" in self.configuration.keys():
+            for device in self.configuration["devices"].keys():
+                key = f'{self.configuration["devices"][device]["model"]} ({self.configuration["devices"][device]["id"]})'
+                channels = [channel_info["name"] for channel_info in self.configuration["devices"][device]["acquisition"]]
+                self.devices[key] = [device, channels]
     
     def addItemstoComboboxes(self):
         """Fill comboboxes in hardware tab with device names
@@ -53,6 +62,22 @@ class TabUtilities:
         self.tabs.horiz_cont_chan.currentTextChanged.connect(self.set_horiz_cont_chan)
         self.tabs.vert_cont_ins.currentTextChanged.connect(self.set_vert_cont_ins)
         self.tabs.vert_cont_chan.currentTextChanged.connect(self.set_vert_cont_chan)
+    
+    def remove_hardware_tab_connections(self):
+        """Disconnect hardware tab combobox signals to slots 
+        """
+        self.tabs.horiz_load_ins.currentTextChanged.disconnect(self.set_horiz_load_ins)
+        self.tabs.horiz_load_chan.currentTextChanged.disconnect(self.set_horiz_load_chan)
+        self.tabs.horiz_disp_ins.currentTextChanged.disconnect(self.set_horiz_disp_ins)
+        self.tabs.horiz_disp_chan.currentTextChanged.disconnect(self.set_horiz_disp_chan)
+        self.tabs.vert_load_ins.currentTextChanged.disconnect(self.set_vert_load_ins)
+        self.tabs.vert_load_chan.currentTextChanged.disconnect(self.set_vert_load_chan)
+        self.tabs.vert_disp_ins.currentTextChanged.disconnect(self.set_vert_disp_ins)
+        self.tabs.vert_disp_chan.currentTextChanged.disconnect(self.set_vert_disp_chan)
+        self.tabs.horiz_cont_ins.currentTextChanged.disconnect(self.set_horiz_cont_ins)
+        self.tabs.horiz_cont_chan.currentTextChanged.disconnect(self.set_horiz_cont_chan)
+        self.tabs.vert_cont_ins.currentTextChanged.disconnect(self.set_vert_cont_ins)
+        self.tabs.vert_cont_chan.currentTextChanged.disconnect(self.set_vert_cont_chan)
 
     @Slot(str)
     def set_horiz_load_ins(self, device):

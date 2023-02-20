@@ -52,10 +52,6 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         self.Layout.addWidget(self.topbar,0)
         self.Layout.addWidget(self.tabs,2)
 
-        self.specimens.valueChanged.connect(self.specimens_number)
-        self.make_hardware_tab_connections()
-
-
         # Set the central widget of the main window.
         self.centralWidget = QWidget()
         self.centralWidget.setLayout(self.Layout)
@@ -123,6 +119,8 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         self.resize(self.configuration["shearbox"]["width"], self.configuration["shearbox"]["height"])
 
     def closeEvent(self, event):
+        self.remove_connections()
+
         if "shearbox" in self.configuration.keys():
             self.configuration["shearbox"]["x"] = self.frameGeometry().x()
             self.configuration["shearbox"]["y"] = self.frameGeometry().y()
@@ -131,5 +129,5 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
 
             self.configurationChanged.emit(self.configuration)
 
-        log.info("Closing shearbox")
+        log.info("Closing ShearBox")
         return super().closeEvent(event)
