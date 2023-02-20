@@ -20,7 +20,8 @@ class ShearboxUtilities:
             "x": x,
             "y": y,
             "Number of Specimens": 1,
-            "horiz_load_ins": None
+            "horiz_load_ins": None,
+            "residual cycles": 3
         }      
 
         if "shearbox" not in self.manager.configuration.keys() or type(self.manager.configuration["shearbox"]) is not dict:

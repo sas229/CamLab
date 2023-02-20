@@ -42,7 +42,7 @@ class DimensionTab(QWidget):
         self.calc_box_layout = QGridLayout()
 
         self.button_box.addWidget(self.rectangular, 1)
-        self.button_box.addWidget(self.circular, 1)
+        self.button_box.addWidget(self.circular, 4)
 
         self.width_label1 = QLabel("Initial Width")
         self.width_label2 = QLabel("w<sub>0</sub>")

@@ -188,14 +188,14 @@ class TabInterface(QTabWidget):
 
         self.consolidation.setLayout(self.consolidationLayout)
 
-        self.consolidation_start_layout.setColumnStretch(0,10)
-        self.consolidation_start_layout.setColumnStretch(1,3)
+        self.consolidation_start_layout.setColumnStretch(0,8)
+        self.consolidation_start_layout.setColumnStretch(1,4)
         self.consolidation_start_layout.setColumnStretch(2,1)
-        self.consolidation_log_layout.setColumnStretch(0,10)
-        self.consolidation_log_layout.setColumnStretch(1,3)
+        self.consolidation_log_layout.setColumnStretch(0,8)
+        self.consolidation_log_layout.setColumnStretch(1,4)
         self.consolidation_log_layout.setColumnStretch(2,1)
-        self.consolidation_stop_layout.setColumnStretch(0,10)
-        self.consolidation_stop_layout.setColumnStretch(1,3)
+        self.consolidation_stop_layout.setColumnStretch(0,8)
+        self.consolidation_stop_layout.setColumnStretch(1,4)
         self.consolidation_stop_layout.setColumnStretch(2,1)
         
     def build_shear_tab(self):
@@ -212,13 +212,16 @@ class TabInterface(QTabWidget):
         self.shear_trigger_speed_select = QCheckBox("Enter shearing speed")
         self.shear_trigger_speed = QLineEdit()
         self.shear_trigger_calc_select = QCheckBox("Use the rate calculated during consolidation")
-        self.shear_trigger_load_label = QLabel("Start when the shear load changes by")
+        self.shear_trigger_calc_opt = QComboBox()
+        self.shear_trigger_load_select = QCheckBox("Start when the shear load changes by")
         self.shear_trigger_load_change = QLineEdit()
 
         self.shear_store_rate_radio = QRadioButton("Log data at this rate")
         self.shear_store_rate_val = QLineEdit()
         self.shear_store_strain_radio = QRadioButton("When Horizontal Strain changes by")
         self.shear_store_strain_val = QLineEdit()
+        self.shear_store_disp_radio = QRadioButton("When Horizontal Strain changes by")
+        self.shear_store_disp_val = QLineEdit()
 
         self.shear_stop_drop_select = QCheckBox("After the Shear Stress reaches a peak\nand repeatedly falls this number of times")
         self.shear_stop_drop = QSpinBox()
@@ -240,9 +243,14 @@ class TabInterface(QTabWidget):
         self.shear_reverse_rate_val.setValidator(num_validator)
 
         self.shear_trigger_speed_select.setChecked(True)
+        self.shear_trigger_load_select.setChecked(True)
         self.shear_store_rate_radio.setChecked(True)
         self.shear_stop_drop_select.setChecked(True)
         self.shear_reverse_rate_radio.setChecked(True)
+
+        self.shear_trigger_calc_opt.addItem("Use the largest vertical stress")
+        self.shear_trigger_calc_opt.addItem("Use the last applied vertical stress")
+        self.shear_trigger_calc_opt.addItem("Use the average of all vertical stresses")
 
         self.shear_stop_drop.setMinimum(2)
         self.shear_stop_drop.setMaximum(15)
@@ -251,8 +259,9 @@ class TabInterface(QTabWidget):
         self.shear_trigger_layout.addWidget(self.shear_trigger_speed_select, 0, 0)
         self.shear_trigger_layout.addWidget(self.shear_trigger_speed, 0, 1)
         self.shear_trigger_layout.addWidget(QLabel("mm/min"), 0, 2)
-        self.shear_trigger_layout.addWidget(self.shear_trigger_calc_select, 1, 0, 1, 3)
-        self.shear_trigger_layout.addWidget(self.shear_trigger_load_label, 2, 0)
+        self.shear_trigger_layout.addWidget(self.shear_trigger_calc_select, 1, 0)
+        self.shear_trigger_layout.addWidget(self.shear_trigger_calc_opt, 1, 1)
+        self.shear_trigger_layout.addWidget(self.shear_trigger_load_select, 2, 0)
         self.shear_trigger_layout.addWidget(self.shear_trigger_load_change, 2, 1)
         self.shear_trigger_layout.addWidget(QLabel("N/s"), 2, 2)
 
@@ -262,6 +271,9 @@ class TabInterface(QTabWidget):
         self.shear_store_layout.addWidget(self.shear_store_strain_radio, 1, 0)
         self.shear_store_layout.addWidget(self.shear_store_strain_val, 1, 1)
         self.shear_store_layout.addWidget(QLabel("%"), 1, 2)
+        self.shear_store_layout.addWidget(self.shear_store_disp_radio, 2, 0)
+        self.shear_store_layout.addWidget(self.shear_store_disp_val, 2, 1)
+        self.shear_store_layout.addWidget(QLabel("%"), 2, 2)
 
         self.shear_stop_layout.addWidget(self.shear_stop_drop_select, 0, 0)
         self.shear_stop_layout.addWidget(self.shear_stop_drop, 0, 1)
@@ -286,17 +298,17 @@ class TabInterface(QTabWidget):
 
         self.shear.setLayout(self.shearLayout)
 
-        self.shear_trigger_layout.setColumnStretch(0,10)
-        self.shear_trigger_layout.setColumnStretch(1,3)
+        self.shear_trigger_layout.setColumnStretch(0,8)
+        self.shear_trigger_layout.setColumnStretch(1,4)
         self.shear_trigger_layout.setColumnStretch(2,1)
-        self.shear_store_layout.setColumnStretch(0,10)
-        self.shear_store_layout.setColumnStretch(1,3)
+        self.shear_store_layout.setColumnStretch(0,8)
+        self.shear_store_layout.setColumnStretch(1,4)
         self.shear_store_layout.setColumnStretch(2,1)
-        self.shear_stop_layout.setColumnStretch(0,10)
-        self.shear_stop_layout.setColumnStretch(1,3)
+        self.shear_stop_layout.setColumnStretch(0,8)
+        self.shear_stop_layout.setColumnStretch(1,4)
         self.shear_stop_layout.setColumnStretch(2,1)
-        self.shear_reverse_layout.setColumnStretch(0,10)
-        self.shear_reverse_layout.setColumnStretch(1,3)
+        self.shear_reverse_layout.setColumnStretch(0,8)
+        self.shear_reverse_layout.setColumnStretch(1,4)
         self.shear_reverse_layout.setColumnStretch(2,1)
 
     def add_persistent_tab(self, widget, name):

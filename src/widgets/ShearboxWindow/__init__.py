@@ -41,18 +41,27 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         self.residual_shear = QRadioButton("Residual Shear")
         self.radiobuttons = QWidget()
         self.radiobuttons_layout = QVBoxLayout()
-        self.radiobuttons_layout.addWidget(self.direct_shear,0)
-        self.radiobuttons_layout.addWidget(self.residual_shear,0)
+        self.radiobuttons_layout.addWidget(self.direct_shear, 0)
+        self.radiobuttons_layout.addWidget(self.residual_shear, 0)
         self.radiobuttons.setLayout(self.radiobuttons_layout)
+
+        self.cycles = QSpinBox()
+        self.cycles.setMinimum(1)
+        self.cycles.setMaximum(10)
+        self.cycles.lineEdit().setReadOnly(True)
+        self.cycles.setValue(self.configuration["shearbox"]["residual cycles"])
+        self.cycles_layout = QHBoxLayout()
+        self.cycles_label = QLabel("Number of Cycles")
 
         self.topbar = QWidget()
         self.topbarlayout = QHBoxLayout()
-        self.topbarlayout.addWidget(QLabel("Number of Specimens"),0)
-        self.topbarlayout.addWidget(self.specimens,0)
+        self.topbarlayout.addWidget(QLabel("Number of Specimens"), 0)
+        self.topbarlayout.addWidget(self.specimens, 0)
         self.topbarlayout.addStretch(1)
-        self.topbarlayout.addWidget(self.radiobuttons,0)
-        self.topbarlayout.addStretch(2)
-        self.topbarlayout.addWidget(self.toolbar,0)
+        self.topbarlayout.addWidget(self.radiobuttons, 0)
+        self.topbarlayout.addLayout(self.cycles_layout)
+        self.topbarlayout.addStretch(3)
+        self.topbarlayout.addWidget(self.toolbar, 0)
         self.topbar.setLayout(self.topbarlayout)
 
 
@@ -60,8 +69,8 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
 
         self.addItemstoComboboxes()
 
-        self.Layout.addWidget(self.topbar,0)
-        self.Layout.addWidget(self.tabs,2)
+        self.Layout.addWidget(self.topbar, 0)
+        self.Layout.addWidget(self.tabs, 2)
 
         # Set the central widget of the main window.
         self.centralWidget = QWidget()
@@ -148,7 +157,11 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
     def shear_type(self):
         if self.direct_shear.isChecked():
             self.configuration["shearbox"]["mode"] = "direct"
+            self.cycles_label.setParent(None)
+            self.cycles.setParent(None)
         else:
             self.configuration["shearbox"]["mode"] = "residual"
-            
+            self.cycles_layout.addWidget(self.cycles_label)
+            self.cycles_layout.addWidget(self.cycles)
+
         self.configurationChanged.emit(self.configuration)
