@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QGridLayout, QLineEdit, QLabel, QGroupBox, QVBoxLayout
+from PySide6.QtWidgets import QWidget, QGridLayout, QLineEdit, QLabel, QGroupBox
 from PySide6.QtGui import QDoubleValidator
 import logging 
 
@@ -76,12 +76,22 @@ class DimensionTab(QWidget):
         self.Layout.setColumnStretch(1,0)
         self.Layout.setColumnStretch(2,1)
         self.Layout.setColumnStretch(3,0)
+        self.Layout.setRowStretch(0,0)
+        self.Layout.setRowStretch(1,0)
+        self.Layout.setRowStretch(2,0)
+        self.Layout.setRowStretch(3,0)
+        self.Layout.setRowStretch(4,0)
+        self.Layout.setRowStretch(5,1)
         self.Layout.setHorizontalSpacing(15)
         self.Layout.setVerticalSpacing(15)
         self.calc_box_layout.setColumnStretch(0,1)
         self.calc_box_layout.setColumnStretch(1,0)
         self.calc_box_layout.setColumnStretch(2,1)
         self.calc_box_layout.setColumnStretch(3,0)
+        self.calc_box_layout.setRowStretch(0,0)
+        self.calc_box_layout.setRowStretch(1,0)
+        self.calc_box_layout.setRowStretch(2,0)
+        self.calc_box_layout.setRowStretch(3,0)
         self.calc_box_layout.setHorizontalSpacing(15)
         self.calc_box_layout.setVerticalSpacing(15)
 

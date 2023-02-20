@@ -39,7 +39,7 @@ class AdditionalTab(QWidget):
         self.Layout.setRowStretch(2,0)
         self.Layout.setRowStretch(3,1)
         self.Layout.setColumnStretch(0,1)
-        self.Layout.setColumnStretch(1,1)
+        self.Layout.setColumnStretch(1,0)
         self.Layout.setColumnStretch(2,1)
         self.Layout.setColumnStretch(3,0)
         self.Layout.setHorizontalSpacing(15)
