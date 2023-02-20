@@ -1,5 +1,5 @@
 import os, sys
-from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox
+from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QRadioButton
 from PySide6.QtGui import QIcon
 from PySide6.QtCore import Signal, Slot
 from local_qt_material import QtStyleTools
@@ -22,7 +22,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         """
         super().__init__()
         self.setWindowTitle("Shear Box")
-        self.setMinimumSize(800, 738)
+        self.setMinimumSize(1000, 858)
 
         self.configuration = configuration
         self.running = False
@@ -36,10 +36,21 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         self.specimens.lineEdit().setReadOnly(True)
         self.specimens.setValue(self.configuration["shearbox"]["Number of Specimens"])
 
+        self.direct_shear = QRadioButton("Direct Shear")
+        self.direct_shear.setChecked(True)
+        self.residual_shear = QRadioButton("Residual Shear")
+        self.radiobuttons = QWidget()
+        self.radiobuttons_layout = QVBoxLayout()
+        self.radiobuttons_layout.addWidget(self.direct_shear,0)
+        self.radiobuttons_layout.addWidget(self.residual_shear,0)
+        self.radiobuttons.setLayout(self.radiobuttons_layout)
+
         self.topbar = QWidget()
         self.topbarlayout = QHBoxLayout()
         self.topbarlayout.addWidget(QLabel("Number of Specimens"),0)
         self.topbarlayout.addWidget(self.specimens,0)
+        self.topbarlayout.addStretch(1)
+        self.topbarlayout.addWidget(self.radiobuttons,0)
         self.topbarlayout.addStretch(2)
         self.topbarlayout.addWidget(self.toolbar,0)
         self.topbar.setLayout(self.topbarlayout)
@@ -132,3 +143,12 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
 
         log.info("Closing ShearBox")
         return super().closeEvent(event)
+    
+    @Slot()
+    def shear_type(self):
+        if self.direct_shear.isChecked():
+            self.configuration["shearbox"]["mode"] = "direct"
+        else:
+            self.configuration["shearbox"]["mode"] = "residual"
+            
+        self.configurationChanged.emit(self.configuration)
