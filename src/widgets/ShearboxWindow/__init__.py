@@ -22,7 +22,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         """
         super().__init__()
         self.setWindowTitle("Shear Box")
-        self.setMinimumSize(800, 600)
+        self.setMinimumSize(800, 687)
 
         self.configuration = configuration
         self.running = False
@@ -126,6 +126,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
             self.configuration["shearbox"]["y"] = self.frameGeometry().y()
             self.configuration["shearbox"]["width"] = self.frameGeometry().width()
             self.configuration["shearbox"]["height"] = self.frameGeometry().height()
+            self.configuration["shearbox"]["active"] = False
 
             self.configurationChanged.emit(self.configuration)
 

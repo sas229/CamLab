@@ -14,6 +14,7 @@ class ShearboxUtilities:
         x = self.screenSize.width()/2 - width/2
         y = self.screenSize.height()/2 - height/2
         defaultProperties = {
+            "active": True,
             "height": height,
             "width": width,
             "x": x,
@@ -22,12 +23,14 @@ class ShearboxUtilities:
             "horiz_load_ins": None
         }      
 
-        if "shearbox" not in self.manager.configuration.keys():
+        if "shearbox" not in self.manager.configuration.keys() or type(self.manager.configuration["shearbox"]) is not dict:
             self.manager.configuration["shearbox"] = dict()
         for key, value in defaultProperties.items():
             if key not in self.manager.configuration["shearbox"].keys():
                 self.manager.configuration["shearbox"][key] = value
 
+        self.manager.configuration["shearbox"]["active"] = True
+        
         try:
             self.shearbox.activateWindow()
             self.shearbox.addItemstoComboboxes()
@@ -37,6 +40,8 @@ class ShearboxUtilities:
             self.connect_shearbox()
 
         self.shearbox.show()
+        
+        log.info("ShearBox opened.")
 
     @Slot()
     def connect_shearbox(self):

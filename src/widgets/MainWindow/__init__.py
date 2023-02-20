@@ -108,7 +108,7 @@ class MainWindow(TabUtilities, PlotUtilities, ShearboxUtilities, ControlUtilitie
         self.toolbar.run.connect(self.start_acquisition)
         self.toolbar.run.connect(self.statusGroupBox.setInitialTimeDate)
         self.toolbar.addPlotButton.triggered.connect(self.add_plot)
-        self.toolbar.shearboxButton.clicked.connect(self.open_shearbox)
+        self.toolbar.shearboxButton.clicked.connect(self.initialise_shearbox)
         self.toolbar.refreshButton.triggered.connect(self.refresh_devices)
         self.toolbar.loadConfiguration.connect(self.manager.loadConfiguration)
         self.toolbar.saveConfiguration.connect(self.manager.saveConfiguration)
@@ -144,6 +144,7 @@ class MainWindow(TabUtilities, PlotUtilities, ShearboxUtilities, ControlUtilitie
         self.manager.timing.actualRate.connect(self.statusGroupBox.update)
         self.manager.plotWindowChannelsUpdated.connect(self.update_plots)
         self.manager.existingPlotsFound.connect(self.create_existing_plots)
+        self.manager.activeShearboxFound.connect(self.initialise_shearbox)
         self.manager.outputText.connect(self.statusGroupBox.setOutputText)
 
         self.tabs.remove_plot.connect(self.remove_plot)
@@ -202,13 +203,6 @@ class MainWindow(TabUtilities, PlotUtilities, ShearboxUtilities, ControlUtilitie
                 self.tabs.setTabVisible(index, True)
             if self.tabs.tabText(index) == "Sequences":
                 self.tabs.setTabVisible(index, True)
-
-    @Slot()
-    def open_shearbox(self):
-        """Method to open the shearbox extension."""
-        self.initialise_shearbox()
-        log.info("ShearBox opened.")
-
 
     @Slot()
     def update_dark_mode(self):
@@ -271,8 +265,14 @@ class MainWindow(TabUtilities, PlotUtilities, ShearboxUtilities, ControlUtilitie
         self.close_plots()
         
         # close all windows if main window is closed
-        for window in QApplication.topLevelWidgets():
-            window.close()
+        try:
+            assert self.configuration["shearbox"]["active"]
+            for window in QApplication.topLevelWidgets():
+                window.close()
+            self.configuration["shearbox"]["active"] = True
+        except:
+            for window in QApplication.topLevelWidgets():
+                window.close()
 
         # In the event the device list is refreshing, wait until complete before quitting all threads otherwise an error is shown, but hide the window in the meantime.
         self.setVisible(False)
