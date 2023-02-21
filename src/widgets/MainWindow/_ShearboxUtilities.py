@@ -1,3 +1,5 @@
+from pathlib import Path
+import json
 from PySide6.QtCore import Slot
 from widgets.ShearboxWindow import ShearboxWindow
 import logging
@@ -9,20 +11,19 @@ class ShearboxUtilities:
     @Slot()
     def initialise_shearbox(self):
         # Defaults.
-        width = 1200
-        height = 800
+        width = max(1200, self.screenSize.width()/2)
+        height = max(943, self.screenSize.height()/2)
         x = self.screenSize.width()/2 - width/2
         y = self.screenSize.height()/2 - height/2
-        defaultProperties = {
-            "active": True,
+        defaultDimensions = {
             "height": height,
             "width": width,
             "x": x,
             "y": y,
-            "Number of Specimens": 1,
-            "horiz_load_ins": None,
-            "residual cycles": 3
         }      
+        with open(Path(__file__).parents[1].joinpath("ShearboxWindow","defaults.json"), "r") as file:
+            defaultProperties = json.load(file)
+            defaultProperties.update(defaultDimensions)
 
         if "shearbox" not in self.manager.configuration.keys() or type(self.manager.configuration["shearbox"]) is not dict:
             self.manager.configuration["shearbox"] = dict()
@@ -34,6 +35,7 @@ class ShearboxUtilities:
         
         try:
             self.shearbox.activateWindow()
+            self.shearbox.set_configuration(self.manager.configuration)
             self.shearbox.addItemstoComboboxes()
             self.connect_shearbox()
         except:
@@ -44,13 +46,13 @@ class ShearboxUtilities:
         
         log.info("ShearBox opened.")
 
-    @Slot()
-    def connect_shearbox(self):
+    def connect_shearbox(self, external=False):
         log.info("Connecting ShearBox")
         self.manager.clear_shearbox_configuration.connect(self.disconnect_shearbox)
         self.manager.configurationChanged.connect(self.shearbox.set_configuration)
         self.shearbox.configurationChanged.connect(self.set_configuration)
-        self.shearbox.make_connections()
+        if not external:
+            self.shearbox.make_connections()
         
         self.manager.configurationChanged.emit(self.manager.configuration)
 
@@ -58,6 +60,5 @@ class ShearboxUtilities:
     def disconnect_shearbox(self):
         log.info("Disconnecting ShearBox")
         self.manager.clear_shearbox_configuration.disconnect(self.disconnect_shearbox)
-        self.manager.configurationChanged.disconnect(self.shearbox.set_configuration)
-        self.shearbox.remove_connections()
+        self.manager.configurationChanged.disconnect(self.shearbox.set_configuration) 
         self.shearbox.close()

@@ -119,35 +119,3 @@ class DimensionTab(QWidget):
         self.calc_box_layout.setVerticalSpacing(15)
 
         self.setLayout(self.Layout)
-
-        self.rectangular.toggled.connect(self.shape_switch)
-        self.circular.toggled.connect(self.shape_switch)
-
-    @Slot()
-    def shape_switch(self):
-        if self.rectangular.isChecked():
-            self.Layout.addWidget(self.width_label1, 3, 0)
-            self.Layout.addWidget(self.width_label2, 3, 1)
-            self.Layout.addWidget(self.initial_width, 3, 2)
-            self.Layout.addWidget(self.width_label3, 3, 3)
-            self.Layout.addWidget(self.depth_label1, 4, 0)
-            self.Layout.addWidget(self.depth_label2, 4, 1)
-            self.Layout.addWidget(self.initial_depth, 4, 2)
-            self.Layout.addWidget(self.depth_label3, 4, 3)
-            self.radius_label1.setParent(None)
-            self.radius_label2.setParent(None)
-            self.initial_radius.setParent(None)
-            self.radius_label3.setParent(None)
-        else:
-            self.width_label1.setParent(None)
-            self.width_label2.setParent(None)
-            self.initial_width.setParent(None)
-            self.width_label3.setParent(None)
-            self.depth_label1.setParent(None)
-            self.depth_label2.setParent(None)
-            self.initial_depth.setParent(None)
-            self.depth_label3.setParent(None)
-            self.Layout.addWidget(self.radius_label1, 3, 0, 2, 1)
-            self.Layout.addWidget(self.radius_label2, 3, 1, 2, 1)
-            self.Layout.addWidget(self.initial_radius, 3, 2, 2, 1)
-            self.Layout.addWidget(self.radius_label3, 3, 3, 2, 1)

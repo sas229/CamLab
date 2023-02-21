@@ -49,7 +49,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         self.cycles.setMinimum(1)
         self.cycles.setMaximum(10)
         self.cycles.lineEdit().setReadOnly(True)
-        self.cycles.setValue(self.configuration["shearbox"]["residual cycles"])
+        self.cycles.setValue(self.configuration["shearbox"]["Residual Cycles"])
         self.cycles_layout = QHBoxLayout()
         self.cycles_label = QLabel("Number of Cycles")
 
@@ -169,12 +169,12 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         Arguments:
             num -- new number of residuals
         """
-        if num < self.configuration["shearbox"]["residual cycles"]:
+        if num < self.configuration["shearbox"]["Residual Cycles"]:
             self.tabs.shear_tabs.close_tab(num)
         else:
             cycle = f"Cycle {num}"
             self.tabs.shear_tabs.add_persistent_tab(self.tabs.shear_tabs.cycles[cycle]["widget"], cycle)
-        self.configuration["shearbox"]["residual cycles"] = num
+        self.configuration["shearbox"]["Residual Cycles"] = num
         self.configurationChanged.emit(self.configuration)
 
     def closeEvent(self, event):

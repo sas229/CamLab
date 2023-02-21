@@ -1,0 +1,29 @@
+{
+  "active": true,
+  "Number of Specimens": 1,
+  "Residual Cycles": 3,
+  "Hardware": {
+    "Horizontal Load Instrument": null,
+    "Horizontal Load Channel": null,
+    "Horizontal Displacement Instrument": null,
+    "Horizontal Displacement Channel": null,
+    "Vertical Load Instrument": null,
+    "Vertical Load Channel": null,
+    "Vertical Displacement Instrument": null,
+    "Vertical Displacement Channel": null,
+    "Horizontal Control Instrument": null,
+    "Horizontal Control Channel": null,
+    "Vertical Control Instrument": null,
+    "Vertical Control Channel": null
+  },
+  "Specimen 1": {
+    "Shape": "rect"
+  },
+  "Specimen 2": {},
+  "Specimen 3": {},
+  "Specimen 4": {},
+  "Consolidation": {
+  },
+  "Shear": {
+  }
+}
