@@ -214,11 +214,6 @@ class TabInterface(QTabWidget):
     @Slot(int)
     def close_tab(self, index):
         """Method to close tab."""
-        widget = self.widget(index)
-        # Delete if a plot widget.
-        if isinstance(widget, PlotWindow):
-            plotNumber = widget.plotNumber
-            self.remove_plot.emit(plotNumber)
         self.removeTab(index)
         log.info("Tab removed.")
     
