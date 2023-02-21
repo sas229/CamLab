@@ -98,8 +98,8 @@ class TabInterface(QTabWidget):
         
     def build_specimen_tab(self):
         self.specimenLayout = QVBoxLayout()
-        self.specimen.tabs = SpecimenTabs()
-        self.specimenLayout.addWidget(self.specimen.tabs)
+        self.specimen_tabs = SpecimenTabs()
+        self.specimenLayout.addWidget(self.specimen_tabs)
         self.specimen.setLayout(self.specimenLayout)
         
     def build_consolidation_tab(self):
