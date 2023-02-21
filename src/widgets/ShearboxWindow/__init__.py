@@ -137,21 +137,6 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
 
         self.move(self.configuration["shearbox"]["x"], self.configuration["shearbox"]["y"])
         self.resize(self.configuration["shearbox"]["width"], self.configuration["shearbox"]["height"])
-
-    def closeEvent(self, event):
-        self.remove_connections()
-
-        if "shearbox" in self.configuration.keys():
-            self.configuration["shearbox"]["x"] = self.frameGeometry().x()
-            self.configuration["shearbox"]["y"] = self.frameGeometry().y()
-            self.configuration["shearbox"]["width"] = self.frameGeometry().width()
-            self.configuration["shearbox"]["height"] = self.frameGeometry().height()
-            self.configuration["shearbox"]["active"] = False
-
-            self.configurationChanged.emit(self.configuration)
-
-        log.info("Closing ShearBox")
-        return super().closeEvent(event)
     
     @Slot()
     def shear_type(self):
@@ -176,3 +161,33 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
             self.tabs.shear_tabs.insert_persistent_tab(0, self.tabs.shear_tabs.cycles["Cycle 1"]["widget"], "Cycle 1")
 
         self.configurationChanged.emit(self.configuration)
+
+    @Slot(int)    
+    def residuals_number(self, num):
+        """Change number of residual shear stages by one
+
+        Arguments:
+            num -- new number of residuals
+        """
+        if num < self.configuration["shearbox"]["residual cycles"]:
+            self.tabs.shear_tabs.close_tab(num)
+        else:
+            cycle = f"Cycle {num}"
+            self.tabs.shear_tabs.add_persistent_tab(self.tabs.shear_tabs.cycles[cycle]["widget"], cycle)
+        self.configuration["shearbox"]["residual cycles"] = num
+        self.configurationChanged.emit(self.configuration)
+
+    def closeEvent(self, event):
+        self.remove_connections()
+
+        if "shearbox" in self.configuration.keys():
+            self.configuration["shearbox"]["x"] = self.frameGeometry().x()
+            self.configuration["shearbox"]["y"] = self.frameGeometry().y()
+            self.configuration["shearbox"]["width"] = self.frameGeometry().width()
+            self.configuration["shearbox"]["height"] = self.frameGeometry().height()
+            self.configuration["shearbox"]["active"] = False
+
+            self.configurationChanged.emit(self.configuration)
+
+        log.info("Closing ShearBox")
+        return super().closeEvent(event)

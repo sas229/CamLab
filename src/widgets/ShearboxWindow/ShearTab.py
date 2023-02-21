@@ -8,7 +8,7 @@ class ShearTabs(QTabWidget):
 
     def __init__(self):
         super().__init__()
-        """TabInterface init."""
+        """Shear stage defining tabs"""
 
         self.cycles = dict()
 
@@ -16,7 +16,7 @@ class ShearTabs(QTabWidget):
             cycle = f"Cycle {i}"
             self.cycles[cycle] = dict()
             self.build_tab(cycle)
-            if i > 1 and i <= 2:
+            if i > 1 and i <= 3:
                 self.add_persistent_tab(self.cycles[cycle]["widget"], cycle)
 
     def build_tab(self, cycle):
@@ -155,7 +155,7 @@ class ShearTabs(QTabWidget):
         self.addTab(widget, name)
         index = self.tabBar().count()-1
         self.tabBar().setTabButton(index, QTabBar.RightSide, None)
-        log.info("Specimen tab added.")
+        log.info("Shear setup tab added.")
     
     def insert_persistent_tab(self, index, widget, name):
         """Method to insert a persistent tab at the given index."""
@@ -165,5 +165,5 @@ class ShearTabs(QTabWidget):
     def close_tab(self, index):
         """Method to close tab."""
         self.removeTab(index)
-        log.info("Specimen tab removed.")
+        log.info("Shear setup tab removed.")
     

@@ -8,11 +8,13 @@ class TabUtilities:
     def make_connections(self):
         self.specimens.valueChanged.connect(self.specimens_number)
         self.residual_shear.toggled.connect(self.shear_type)
+        self.cycles.valueChanged.connect(self.residuals_number)
         self.make_hardware_tab_connections()
 
     def remove_connections(self):
         self.specimens.valueChanged.disconnect(self.specimens_number)
         self.residual_shear.toggled.disconnect(self.shear_type)
+        self.cycles.valueChanged.disconnect(self.residuals_number)
         self.remove_hardware_tab_connections()
 
     def get_devices_and_channels(self):
