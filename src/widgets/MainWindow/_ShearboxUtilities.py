@@ -12,7 +12,7 @@ class ShearboxUtilities:
     def initialise_shearbox(self):
         # Defaults.
         width = max(1200, self.screenSize.width()/2)
-        height = max(943, self.screenSize.height()/2)
+        height = max(1060, self.screenSize.height()/2)
         x = self.screenSize.width()/2 - width/2
         y = self.screenSize.height()/2 - height/2
         defaultDimensions = {
