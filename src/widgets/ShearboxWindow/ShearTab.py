@@ -48,7 +48,7 @@ class ShearTabs(QTabWidget):
         self.cycles[cycle]["store_rate_val"] = QLineEdit()
         self.cycles[cycle]["store_strain_radio"] = QRadioButton("When Horizontal Strain changes by")
         self.cycles[cycle]["store_strain_val"] = QLineEdit()
-        self.cycles[cycle]["store_disp_radio"] = QRadioButton("When Horizontal Strain changes by")
+        self.cycles[cycle]["store_disp_radio"] = QRadioButton("When Horizontal Displacement changes by")
         self.cycles[cycle]["store_disp_val"] = QLineEdit()
 
         self.cycles[cycle]["stop_drop_select"] = QCheckBox("After the Shear Stress reaches a peak\nand repeatedly falls this number of times")
