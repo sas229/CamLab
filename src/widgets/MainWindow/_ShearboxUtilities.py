@@ -11,10 +11,10 @@ class ShearboxUtilities:
     @Slot()
     def initialise_shearbox(self):
         # Defaults.
-        width = max(1200, self.screenSize.width()/2)
-        height = max(1060, self.screenSize.height()/2)
-        x = self.screenSize.width()/2 - width/2
-        y = self.screenSize.height()/2 - height/2
+        width = max(1200, self.screenSize.width()//2)
+        height = max(1060, self.screenSize.height()//2)
+        x = self.screenSize.width()//2 - width//2
+        y = self.screenSize.height()//2 - height//2
         defaultDimensions = {
             "height": height,
             "width": width,
@@ -27,9 +27,7 @@ class ShearboxUtilities:
 
         if "shearbox" not in self.manager.configuration.keys() or type(self.manager.configuration["shearbox"]) is not dict:
             self.manager.configuration["shearbox"] = dict()
-        for key, value in defaultProperties.items():
-            if key not in self.manager.configuration["shearbox"].keys():
-                self.manager.configuration["shearbox"][key] = value
+        self.manager.configuration["shearbox"] = add_defaults_if_missing(self.manager.configuration["shearbox"], defaultProperties)
 
         self.manager.configuration["shearbox"]["active"] = True
         
@@ -62,3 +60,17 @@ class ShearboxUtilities:
         self.manager.clear_shearbox_configuration.disconnect(self.disconnect_shearbox)
         self.manager.configurationChanged.disconnect(self.shearbox.set_configuration) 
         self.shearbox.close()
+
+def add_defaults_if_missing(main, defaults):
+    for key, value in defaults.items():
+        if key not in main.keys():
+            main[key] = value
+        elif type(defaults[key]) is dict:
+            for key2, value2 in defaults[key].items():
+                if key2 not in main[key].keys():
+                    main[key][key2] = value2
+                elif type(defaults[key][key2]) is dict:
+                    for key3, value3 in defaults[key][key2].items():
+                        if key3 not in main[key][key2].keys():
+                            main[key][key2][key3] = value3
+    return main
