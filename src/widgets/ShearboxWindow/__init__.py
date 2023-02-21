@@ -22,7 +22,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         """
         super().__init__()
         self.setWindowTitle("Shear Box")
-        self.setMinimumSize(1000, 858)
+        self.setMinimumSize(1000, 943)
 
         self.configuration = configuration
         self.running = False
@@ -157,11 +157,22 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
     def shear_type(self):
         if self.direct_shear.isChecked():
             self.configuration["shearbox"]["mode"] = "direct"
+
             self.cycles_label.setParent(None)
             self.cycles.setParent(None)
+
+            self.tabs.shear_tabs.setParent(None)
+            self.tabs.shear_tabs.cycles["Cycle 1"]["widget"].setParent(None)
+            self.tabs.shearLayout.addWidget(self.tabs.shear_tabs.cycles["Cycle 1"]["widget"])
+            self.tabs.shear_tabs.cycles["Cycle 1"]["widget"].show()
         else:
             self.configuration["shearbox"]["mode"] = "residual"
+
             self.cycles_layout.addWidget(self.cycles_label)
             self.cycles_layout.addWidget(self.cycles)
+
+            self.tabs.shear_tabs.cycles["Cycle 1"]["widget"].setParent(None)
+            self.tabs.shearLayout.addWidget(self.tabs.shear_tabs)
+            self.tabs.shear_tabs.insert_persistent_tab(0, self.tabs.shear_tabs.cycles["Cycle 1"]["widget"], "Cycle 1")
 
         self.configurationChanged.emit(self.configuration)

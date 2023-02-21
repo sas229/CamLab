@@ -3,6 +3,7 @@ from PySide6.QtGui import QDoubleValidator, QRegularExpressionValidator
 from PySide6.QtCore import Slot, Qt
 from widgets.PlotWindow import PlotWindow
 from widgets.ShearboxWindow.SpecimenTab import SpecimenTabs
+from widgets.ShearboxWindow.ShearTab import ShearTabs
 import logging 
 
 log = logging.getLogger(__name__)
@@ -200,127 +201,9 @@ class TabInterface(QTabWidget):
         
     def build_shear_tab(self):
         self.shearLayout = QVBoxLayout()
-        self.shear_trigger = QGroupBox("Trigger conditions")
-        self.shear_trigger_layout = QGridLayout()
-        self.shear_store = QGroupBox("Storage Conditions")
-        self.shear_store_layout = QGridLayout()
-        self.shear_stop = QGroupBox("Stopping Conditions")
-        self.shear_stop_layout = QGridLayout()
-        self.shear_reverse = QGroupBox("Reversing")
-        self.shear_reverse_layout = QGridLayout()
-
-        self.shear_trigger_speed_select = QCheckBox("Enter shearing speed")
-        self.shear_trigger_speed = QLineEdit()
-        self.shear_trigger_calc_select = QCheckBox("Use the rate calculated during consolidation")
-        self.shear_trigger_calc_opt = QComboBox()
-        self.shear_trigger_load_select = QCheckBox("Start when the shear load changes by")
-        self.shear_trigger_load_change = QLineEdit()
-
-        self.shear_store_rate_radio = QRadioButton("Log data at this rate")
-        self.shear_store_rate_val = QLineEdit()
-        self.shear_store_strain_radio = QRadioButton("When Horizontal Strain changes by")
-        self.shear_store_strain_val = QLineEdit()
-        self.shear_store_disp_radio = QRadioButton("When Horizontal Strain changes by")
-        self.shear_store_disp_val = QLineEdit()
-
-        self.shear_stop_drop_select = QCheckBox("After the Shear Stress reaches a peak\nand repeatedly falls this number of times")
-        self.shear_stop_drop = QSpinBox()
-        self.shear_stop_strain_select = QCheckBox("When the Shear Strain reaches this level")
-        self.shear_stop_strain = QLineEdit()
-
-        self.shear_reverse_rate_radio = QRadioButton("Reverse at this speed")
-        self.shear_reverse_rate_val = QLineEdit()
-        self.shear_reverse_same = QRadioButton("Use the same speed as the initial shear")
-        self.shear_reverse_wait_label = QLabel("Wait time for pore pressure to equalise")
-        self.shear_reverse_wait = QLineEdit()
-        self.shear_reverse_disp_label = QLabel("Then re-shear until the shear displacement is:")
-        self.shear_reverse_disp = QLineEdit()
-        self.shear_reverse_disp_unit = QLabel("mm")
-        self.shear_reverse_stress_label = QLabel("Repeat the procedure until the change in\nShear Stress between passes is less than:")
-        self.shear_reverse_stress = QLineEdit()
-        self.shear_reverse_stress_unit = QLabel("kPa")
-
-        time_validator = QRegularExpressionValidator("^(2[0-3]|[01]?[0-9]):([0-5][0-9]):([0-5][0-9])$")
-        num_validator = QDoubleValidator(bottom=0)
-
-        self.shear_trigger_speed.setValidator(num_validator)
-        self.shear_trigger_load_change.setValidator(num_validator)
-        self.shear_store_rate_val.setValidator(time_validator)
-        self.shear_store_strain_val.setValidator(num_validator)
-        self.shear_stop_strain.setValidator(num_validator)
-        self.shear_reverse_rate_val.setValidator(num_validator)
-        self.shear_reverse_wait.setValidator(time_validator)
-        self.shear_reverse_disp.setValidator(num_validator)
-        self.shear_reverse_stress.setValidator(num_validator)
-
-        self.shear_trigger_speed_select.setChecked(True)
-        self.shear_trigger_load_select.setChecked(True)
-        self.shear_store_rate_radio.setChecked(True)
-        self.shear_stop_drop_select.setChecked(True)
-        self.shear_reverse_rate_radio.setChecked(True)
-
-        self.shear_trigger_calc_opt.addItem("Use the largest vertical stress")
-        self.shear_trigger_calc_opt.addItem("Use the last applied vertical stress")
-        self.shear_trigger_calc_opt.addItem("Use the average of all vertical stresses")
-
-        self.shear_stop_drop.setMinimum(2)
-        self.shear_stop_drop.setMaximum(15)
-        self.shear_stop_drop.setValue(2)
-
-        self.shear_trigger_layout.addWidget(self.shear_trigger_speed_select, 0, 0)
-        self.shear_trigger_layout.addWidget(self.shear_trigger_speed, 0, 1)
-        self.shear_trigger_layout.addWidget(QLabel("mm/min"), 0, 2)
-        self.shear_trigger_layout.addWidget(self.shear_trigger_calc_select, 1, 0)
-        self.shear_trigger_layout.addWidget(self.shear_trigger_calc_opt, 1, 1)
-        self.shear_trigger_layout.addWidget(self.shear_trigger_load_select, 2, 0)
-        self.shear_trigger_layout.addWidget(self.shear_trigger_load_change, 2, 1)
-        self.shear_trigger_layout.addWidget(QLabel("N/s"), 2, 2)
-
-        self.shear_store_layout.addWidget(self.shear_store_rate_radio, 0, 0)
-        self.shear_store_layout.addWidget(self.shear_store_rate_val, 0, 1)
-        self.shear_store_layout.addWidget(QLabel("(hh:mm:ss)"), 0, 2)
-        self.shear_store_layout.addWidget(self.shear_store_strain_radio, 1, 0)
-        self.shear_store_layout.addWidget(self.shear_store_strain_val, 1, 1)
-        self.shear_store_layout.addWidget(QLabel("%"), 1, 2)
-        self.shear_store_layout.addWidget(self.shear_store_disp_radio, 2, 0)
-        self.shear_store_layout.addWidget(self.shear_store_disp_val, 2, 1)
-        self.shear_store_layout.addWidget(QLabel("%"), 2, 2)
-
-        self.shear_stop_layout.addWidget(self.shear_stop_drop_select, 0, 0)
-        self.shear_stop_layout.addWidget(self.shear_stop_drop, 0, 1)
-        self.shear_stop_layout.addWidget(self.shear_stop_strain_select, 1, 0)
-        self.shear_stop_layout.addWidget(self.shear_stop_strain, 1, 1)
-        self.shear_stop_layout.addWidget(QLabel("%"), 1, 2)
-
-        self.shear_reverse_layout.addWidget(self.shear_reverse_rate_radio, 0, 0)
-        self.shear_reverse_layout.addWidget(self.shear_reverse_rate_val, 0, 1)
-        self.shear_reverse_layout.addWidget(QLabel("mm/min"), 0, 2)
-        self.shear_reverse_layout.addWidget(self.shear_reverse_same, 1, 0, 1, 3)
-
-        self.shear_trigger.setLayout(self.shear_trigger_layout)
-        self.shear_store.setLayout(self.shear_store_layout)
-        self.shear_stop.setLayout(self.shear_stop_layout)
-        self.shear_reverse.setLayout(self.shear_reverse_layout)
-
-        self.shearLayout.addWidget(self.shear_trigger, 0)
-        self.shearLayout.addWidget(self.shear_store, 0)
-        self.shearLayout.addWidget(self.shear_stop, 0)
-        self.shearLayout.addWidget(self.shear_reverse, 0)
-
+        self.shear_tabs = ShearTabs()
+        self.shearLayout.addWidget(self.shear_tabs.cycles["Cycle 1"]["widget"])
         self.shear.setLayout(self.shearLayout)
-
-        self.shear_trigger_layout.setColumnStretch(0,8)
-        self.shear_trigger_layout.setColumnStretch(1,4)
-        self.shear_trigger_layout.setColumnStretch(2,1)
-        self.shear_store_layout.setColumnStretch(0,8)
-        self.shear_store_layout.setColumnStretch(1,4)
-        self.shear_store_layout.setColumnStretch(2,1)
-        self.shear_stop_layout.setColumnStretch(0,8)
-        self.shear_stop_layout.setColumnStretch(1,4)
-        self.shear_stop_layout.setColumnStretch(2,1)
-        self.shear_reverse_layout.setColumnStretch(0,8)
-        self.shear_reverse_layout.setColumnStretch(1,4)
-        self.shear_reverse_layout.setColumnStretch(2,1)
 
     def add_persistent_tab(self, widget, name):
         """Method to add persistent tab."""
