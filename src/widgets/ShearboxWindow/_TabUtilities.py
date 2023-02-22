@@ -293,7 +293,7 @@ class TabUtilities:
     @Slot(str)
     def shape_switch(self, specimen, _):
         if self.tabs.specimen.specimens[specimen]["dimensions"].rectangular.isChecked():
-            self.configuration["shearbox"][specimen]["Shape"] = "rect"
+            self.configuration["shearbox"]["Specimens"][specimen]["Shape"] = "rectangular"
 
             self.tabs.specimen.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen.specimens[specimen]["dimensions"].width_label1, 3, 0)
             self.tabs.specimen.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen.specimens[specimen]["dimensions"].width_label2, 3, 1)
@@ -308,7 +308,7 @@ class TabUtilities:
             self.tabs.specimen.specimens[specimen]["dimensions"].initial_radius.setParent(None)
             self.tabs.specimen.specimens[specimen]["dimensions"].radius_label3.setParent(None)
         else:
-            self.configuration["shearbox"][specimen]["Shape"] = "circ"
+            self.configuration["shearbox"]["Specimens"][specimen]["Shape"] = "circular"
 
             self.tabs.specimen.specimens[specimen]["dimensions"].width_label1.setParent(None)
             self.tabs.specimen.specimens[specimen]["dimensions"].width_label2.setParent(None)

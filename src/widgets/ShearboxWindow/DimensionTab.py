@@ -6,12 +6,12 @@ log = logging.getLogger(__name__)
 
 class DimensionTab(QWidget):
 
-    def __init__(self):
+    def __init__(self, specimen, configuration):
         super().__init__()
         num_validator = QDoubleValidator(bottom=0)
         
-        self.initial_height = QLineEdit()
         self.initial_weight = QLineEdit()
+        self.initial_height = QLineEdit()
         self.rectangular = QRadioButton("Rectangular Shape")
         self.circular = QRadioButton("Circular Shape")
         self.initial_width = QLineEdit()
@@ -22,8 +22,8 @@ class DimensionTab(QWidget):
         self.initial_volume = QLineEdit()
         self.initial_bulk_density = QLineEdit()
         
-        self.initial_height.setValidator(num_validator)
         self.initial_weight.setValidator(num_validator)
+        self.initial_height.setValidator(num_validator)
         self.initial_width.setValidator(num_validator)
         self.initial_depth.setValidator(num_validator)
         self.initial_radius.setValidator(num_validator)
@@ -62,14 +62,21 @@ class DimensionTab(QWidget):
         self.Layout.addWidget(self.initial_height, 1, 2)
         self.Layout.addWidget(QLabel("mm"), 1, 3)
         self.Layout.addLayout(self.button_box, 2, 0, 1, 4)
-        self.Layout.addWidget(self.width_label1, 3, 0)
-        self.Layout.addWidget(self.width_label2, 3, 1)
-        self.Layout.addWidget(self.initial_width, 3, 2)
-        self.Layout.addWidget(self.width_label3, 3, 3)
-        self.Layout.addWidget(self.depth_label1, 4, 0)
-        self.Layout.addWidget(self.depth_label2, 4, 1)
-        self.Layout.addWidget(self.initial_depth, 4, 2)
-        self.Layout.addWidget(self.depth_label3, 4, 3)
+
+        if configuration["shearbox"]["Specimens"][specimen]["Shape"] == "rectangular":
+            self.Layout.addWidget(self.width_label1, 3, 0)
+            self.Layout.addWidget(self.width_label2, 3, 1)
+            self.Layout.addWidget(self.initial_width, 3, 2)
+            self.Layout.addWidget(self.width_label3, 3, 3)
+            self.Layout.addWidget(self.depth_label1, 4, 0)
+            self.Layout.addWidget(self.depth_label2, 4, 1)
+            self.Layout.addWidget(self.initial_depth, 4, 2)
+            self.Layout.addWidget(self.depth_label3, 4, 3)
+        else:
+            self.Layout.addWidget(self.radius_label1, 3, 0, 2, 1)
+            self.Layout.addWidget(self.radius_label2, 3, 1, 2, 1)
+            self.Layout.addWidget(self.initial_radius, 3, 2, 2, 1)
+            self.Layout.addWidget(self.radius_label3, 3, 3, 2, 1)
 
         self.calc_box_layout.addWidget(QLabel("Particle Density"), 0, 0)
         self.calc_box_layout.addWidget(QLabel("\u03C1<sub>s</sub>"), 0, 1)

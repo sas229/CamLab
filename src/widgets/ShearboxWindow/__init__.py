@@ -37,8 +37,11 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         self.specimens.setValue(self.configuration["shearbox"]["Number of Specimens"])
 
         self.direct_shear = QRadioButton("Direct Shear")
-        self.direct_shear.setChecked(True)
         self.residual_shear = QRadioButton("Residual Shear")
+        if self.configuration["shearbox"]["Mode"] == "direct":
+            self.direct_shear.setChecked(True)
+        else:
+            self.residual_shear.setChecked(True)
         self.radiobuttons = QWidget()
         self.radiobuttons_layout = QVBoxLayout()
         self.radiobuttons_layout.addWidget(self.direct_shear, 0)
@@ -52,6 +55,9 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         self.cycles.setValue(self.configuration["shearbox"]["Residual Cycles"])
         self.cycles_layout = QHBoxLayout()
         self.cycles_label = QLabel("Number of Cycles")
+        if self.configuration["shearbox"]["Mode"] == "residual":
+            self.cycles_layout.addWidget(self.cycles_label)
+            self.cycles_layout.addWidget(self.cycles)
 
         self.topbar = QWidget()
         self.topbarlayout = QHBoxLayout()
@@ -65,7 +71,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         self.topbar.setLayout(self.topbarlayout)
 
 
-        self.tabs = TabInterface()
+        self.tabs = TabInterface(self.configuration)
 
         self.addItemstoComboboxes()
 
@@ -180,6 +186,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
 
             self.cycles_layout.addWidget(self.cycles_label)
             self.cycles_layout.addWidget(self.cycles)
+
             if self.configuration["shearbox"]["Residual Cycles"] > 1:
                 self.tabs.shear.cycles["Cycle 1"]["widget"].setParent(None)
                 self.tabs.insert_persistent_tab(3, self.tabs.shear, "Shear setup")
