@@ -99,7 +99,9 @@ class TabInterface(QTabWidget):
     def build_specimen_tab(self):
         self.specimenLayout = QVBoxLayout()
         self.specimen_tabs = SpecimenTabs()
-        self.specimenLayout.addWidget(self.specimen_tabs)
+        self.specimenLayout.addWidget(self.specimen_tabs.specimens["Specimen 1"]["tabs"])
+        self.specimen_tabs.specimens["Specimen 1"]["tabs"].show()
+        # self.specimenLayout.addWidget(self.specimen_tabs)
         self.specimen.setLayout(self.specimenLayout)
         
     def build_consolidation_tab(self):
@@ -203,6 +205,7 @@ class TabInterface(QTabWidget):
         self.shearLayout = QVBoxLayout()
         self.shear_tabs = ShearTabs()
         self.shearLayout.addWidget(self.shear_tabs.cycles["Cycle 1"]["widget"])
+        # self.shearLayout.addWidget(self.shear_tabs)
         self.shear.setLayout(self.shearLayout)
 
     def add_persistent_tab(self, widget, name):

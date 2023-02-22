@@ -113,7 +113,17 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         Arguments:
             num -- new number of specimens
         """
-        if num < self.configuration["shearbox"]["Number of Specimens"]:
+        if num == 1:
+            self.tabs.specimen_tabs.setParent(None)
+            self.tabs.specimen_tabs.specimens["Specimen 1"]["tabs"].setParent(None)
+            self.tabs.specimenLayout.addWidget(self.tabs.specimen_tabs.specimens["Specimen 1"]["tabs"])
+            self.tabs.specimen_tabs.specimens["Specimen 1"]["tabs"].show()
+        elif self.configuration["shearbox"]["Number of Specimens"] == 1:
+            self.tabs.specimen_tabs.specimens["Specimen 1"]["tabs"].setParent(None)
+            self.tabs.specimenLayout.addWidget(self.tabs.specimen_tabs)
+            self.tabs.specimen_tabs.add_persistent_tab(self.tabs.specimen_tabs.specimens["Specimen 1"]["tabs"], "Specimen 1")
+            self.tabs.specimen_tabs.add_persistent_tab(self.tabs.specimen_tabs.specimens["Specimen 2"]["tabs"], "Specimen 2")
+        elif num < self.configuration["shearbox"]["Number of Specimens"]:
             self.tabs.specimen_tabs.close_tab(num)
         else:
             specimen = f"Specimen {num}"
@@ -150,17 +160,16 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
             self.tabs.shear_tabs.cycles["Cycle 1"]["widget"].setParent(None)
             self.tabs.shearLayout.addWidget(self.tabs.shear_tabs.cycles["Cycle 1"]["widget"])
             self.tabs.shear_tabs.cycles["Cycle 1"]["widget"].show()
-            for i in range(1,11):
-                cycle = f"Cycle {i}"
-                self.tabs.shear_tabs.cycles[cycle]["reverse_wait_label"].setParent(None)
-                self.tabs.shear_tabs.cycles[cycle]["reverse_wait"].setParent(None)
-                self.tabs.shear_tabs.cycles[cycle]["reverse_wait_unit"].setParent(None)
-                self.tabs.shear_tabs.cycles[cycle]["reverse_disp_label"].setParent(None)
-                self.tabs.shear_tabs.cycles[cycle]["reverse_disp"].setParent(None)
-                self.tabs.shear_tabs.cycles[cycle]["reverse_disp_unit"].setParent(None)
-                self.tabs.shear_tabs.cycles[cycle]["reverse_stress_label"].setParent(None)
-                self.tabs.shear_tabs.cycles[cycle]["reverse_stress"].setParent(None)
-                self.tabs.shear_tabs.cycles[cycle]["reverse_stress_unit"].setParent(None)
+
+            self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_wait_label"].setParent(None)
+            self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_wait"].setParent(None)
+            self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_wait_unit"].setParent(None)
+            self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_disp_label"].setParent(None)
+            self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_disp"].setParent(None)
+            self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_disp_unit"].setParent(None)
+            self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_stress_label"].setParent(None)
+            self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_stress"].setParent(None)
+            self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_stress_unit"].setParent(None)
         else:
             self.configuration["shearbox"]["Mode"] = "residual"
 
@@ -170,17 +179,16 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
             self.tabs.shear_tabs.cycles["Cycle 1"]["widget"].setParent(None)
             self.tabs.shearLayout.addWidget(self.tabs.shear_tabs)
             self.tabs.shear_tabs.insert_persistent_tab(0, self.tabs.shear_tabs.cycles["Cycle 1"]["widget"], "Cycle 1")
-            for i in range(1,11):
-                cycle = f"Cycle {i}"
-                self.tabs.shear_tabs.cycles[cycle]["reverse_layout"].addWidget(self.tabs.shear_tabs.cycles[cycle]["reverse_wait_label"], 2, 0)
-                self.tabs.shear_tabs.cycles[cycle]["reverse_layout"].addWidget(self.tabs.shear_tabs.cycles[cycle]["reverse_wait"], 2, 1)
-                self.tabs.shear_tabs.cycles[cycle]["reverse_layout"].addWidget(self.tabs.shear_tabs.cycles[cycle]["reverse_wait_unit"], 2, 2)
-                self.tabs.shear_tabs.cycles[cycle]["reverse_layout"].addWidget(self.tabs.shear_tabs.cycles[cycle]["reverse_disp_label"], 3, 0)
-                self.tabs.shear_tabs.cycles[cycle]["reverse_layout"].addWidget(self.tabs.shear_tabs.cycles[cycle]["reverse_disp"], 3, 1)
-                self.tabs.shear_tabs.cycles[cycle]["reverse_layout"].addWidget(self.tabs.shear_tabs.cycles[cycle]["reverse_disp_unit"], 3, 2)
-                self.tabs.shear_tabs.cycles[cycle]["reverse_layout"].addWidget(self.tabs.shear_tabs.cycles[cycle]["reverse_stress_label"], 4, 0)
-                self.tabs.shear_tabs.cycles[cycle]["reverse_layout"].addWidget(self.tabs.shear_tabs.cycles[cycle]["reverse_stress"], 4, 1)
-                self.tabs.shear_tabs.cycles[cycle]["reverse_layout"].addWidget(self.tabs.shear_tabs.cycles[cycle]["reverse_stress_unit"], 4, 2)
+
+            self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_layout"].addWidget(self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_wait_label"], 2, 0)
+            self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_layout"].addWidget(self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_wait"], 2, 1)
+            self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_layout"].addWidget(self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_wait_unit"], 2, 2)
+            self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_layout"].addWidget(self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_disp_label"], 3, 0)
+            self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_layout"].addWidget(self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_disp"], 3, 1)
+            self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_layout"].addWidget(self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_disp_unit"], 3, 2)
+            self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_layout"].addWidget(self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_stress_label"], 4, 0)
+            self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_layout"].addWidget(self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_stress"], 4, 1)
+            self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_layout"].addWidget(self.tabs.shear_tabs.cycles["Cycle 1"]["reverse_stress_unit"], 4, 2)
 
         self.configurationChanged.emit(self.configuration)
 

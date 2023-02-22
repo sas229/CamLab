@@ -162,6 +162,7 @@ class ShearTabs(QTabWidget):
         """Method to insert a persistent tab at the given index."""
         self.insertTab(index, widget, name)
         self.tabBar().setTabButton(index, QTabBar.RightSide, None)
+        log.info("Shear setup tab inserted.")
 
     def close_tab(self, index):
         """Method to close tab."""
