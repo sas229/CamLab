@@ -38,6 +38,9 @@ class ToolBar(QToolBar):
         self.runButton.setVisible(True)
         self.addAction(self.runButton)
 
+        self.saveConfigButton.triggered.connect(self.emitSaveConfiguration)
+        self.loadConfigButton.triggered.connect(self.emitLoadConfiguration)
+
     def emitLoadConfiguration(self):
         # Method to select a configuration file to load and emit it as a signal.
         filename, _ = QFileDialog.getOpenFileName(self,"Open CamLab configuration file", "","Yaml files (*.yaml)")

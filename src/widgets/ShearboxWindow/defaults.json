@@ -2,6 +2,7 @@
   "active": true,
   "Number of Specimens": 1,
   "Residual Cycles": 3,
+  "Mode": "direct",
   "Hardware": {
     "Horizontal Load Instrument": null,
     "Horizontal Load Channel": null,

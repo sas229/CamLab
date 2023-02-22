@@ -49,6 +49,8 @@ class ShearboxUtilities:
         self.manager.clear_shearbox_configuration.connect(self.disconnect_shearbox)
         self.manager.configurationChanged.connect(self.shearbox.set_configuration)
         self.shearbox.configurationChanged.connect(self.set_configuration)
+        self.shearbox.toolbar.saveConfiguration.connect(self.manager.saveConfiguration)
+        self.shearbox.toolbar.loadConfiguration.connect(self.manager.loadConfiguration)
         if not external:
             self.shearbox.make_connections()
         
@@ -58,19 +60,19 @@ class ShearboxUtilities:
     def disconnect_shearbox(self):
         log.info("Disconnecting ShearBox")
         self.manager.clear_shearbox_configuration.disconnect(self.disconnect_shearbox)
-        self.manager.configurationChanged.disconnect(self.shearbox.set_configuration) 
+        self.manager.configurationChanged.disconnect(self.shearbox.set_configuration)
         self.shearbox.close()
 
-def add_defaults_if_missing(main, defaults):
+def add_defaults_if_missing(configuration, defaults):
     for key, value in defaults.items():
-        if key not in main.keys():
-            main[key] = value
+        if key not in configuration.keys():
+            configuration[key] = value
         elif type(defaults[key]) is dict:
             for key2, value2 in defaults[key].items():
-                if key2 not in main[key].keys():
-                    main[key][key2] = value2
+                if key2 not in configuration[key].keys():
+                    configuration[key][key2] = value2
                 elif type(defaults[key][key2]) is dict:
                     for key3, value3 in defaults[key][key2].items():
-                        if key3 not in main[key][key2].keys():
-                            main[key][key2][key3] = value3
-    return main
+                        if key3 not in configuration[key][key2].keys():
+                            configuration[key][key2][key3] = value3
+    return configuration

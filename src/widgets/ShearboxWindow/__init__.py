@@ -141,7 +141,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
     @Slot()
     def shear_type(self):
         if self.direct_shear.isChecked():
-            self.configuration["shearbox"]["mode"] = "direct"
+            self.configuration["shearbox"]["Mode"] = "direct"
 
             self.cycles_label.setParent(None)
             self.cycles.setParent(None)
@@ -162,7 +162,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
                 self.tabs.shear_tabs.cycles[cycle]["reverse_stress"].setParent(None)
                 self.tabs.shear_tabs.cycles[cycle]["reverse_stress_unit"].setParent(None)
         else:
-            self.configuration["shearbox"]["mode"] = "residual"
+            self.configuration["shearbox"]["Mode"] = "residual"
 
             self.cycles_layout.addWidget(self.cycles_label)
             self.cycles_layout.addWidget(self.cycles)
