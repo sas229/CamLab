@@ -126,6 +126,17 @@ class ShearTabs(QTabWidget):
         self.cycles[cycle]["reverse_layout"].addWidget(QLabel("mm/min"), 0, 2)
         self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_same"], 1, 0, 1, 3)
 
+        if cycle != "Cycle 1":
+            self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_wait_label"], 2, 0)
+            self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_wait"], 2, 1)
+            self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_wait_unit"], 2, 2)
+            self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_disp_label"], 3, 0)
+            self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_disp"], 3, 1)
+            self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_disp_unit"], 3, 2)
+            self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_stress_label"], 4, 0)
+            self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_stress"], 4, 1)
+            self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_stress_unit"], 4, 2)
+
         self.cycles[cycle]["trigger"].setLayout(self.cycles[cycle]["trigger_layout"])
         self.cycles[cycle]["store"].setLayout(self.cycles[cycle]["store_layout"])
         self.cycles[cycle]["stop"].setLayout(self.cycles[cycle]["stop_layout"])
@@ -156,16 +167,17 @@ class ShearTabs(QTabWidget):
         self.addTab(widget, name)
         index = self.tabBar().count()-1
         self.tabBar().setTabButton(index, QTabBar.RightSide, None)
-        log.info("Shear setup tab added.")
+        log.info(f'"{name}" tab added.')
     
     def insert_persistent_tab(self, index, widget, name):
         """Method to insert a persistent tab at the given index."""
         self.insertTab(index, widget, name)
         self.tabBar().setTabButton(index, QTabBar.RightSide, None)
-        log.info("Shear setup tab inserted.")
+        log.info(f'"{name}" tab inserted.')
 
     def close_tab(self, index):
         """Method to close tab."""
+        name = self.tabText(index)
         self.removeTab(index)
-        log.info("Shear setup tab removed.")
+        log.info(f'"{name}" tab removed.')
     

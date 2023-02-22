@@ -1,6 +1,5 @@
 from PySide6.QtWidgets import QWidget, QGridLayout, QLineEdit, QLabel, QGroupBox, QRadioButton, QHBoxLayout
 from PySide6.QtGui import QDoubleValidator
-from PySide6.QtCore import Slot
 import logging 
 
 log = logging.getLogger(__name__)

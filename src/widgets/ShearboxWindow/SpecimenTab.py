@@ -1,5 +1,4 @@
-from PySide6.QtWidgets import QTabWidget, QWidget, QTabBar, QGridLayout, QLineEdit, QLabel
-from PySide6.QtGui import QDoubleValidator
+from PySide6.QtWidgets import QTabWidget, QTabBar, QGridLayout
 from widgets.ShearboxWindow.DimensionTab import DimensionTab
 from widgets.ShearboxWindow.MoistureTab import MoistureTab
 from widgets.ShearboxWindow.AdditionalTab import AdditionalTab
@@ -43,10 +42,11 @@ class SpecimenTabs(QTabWidget):
         self.addTab(widget, name)
         index = self.tabBar().count()-1
         self.tabBar().setTabButton(index, QTabBar.RightSide, None)
-        log.info("Specimen tab added.")
+        log.info(f'"{name}" tab added.')
 
     def close_tab(self, index):
         """Method to close tab."""
+        name = self.tabText(index)
         self.removeTab(index)
-        log.info("Specimen tab removed.")
+        log.info(f'"{name}" tab removed.')
     

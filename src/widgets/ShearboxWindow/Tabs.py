@@ -1,7 +1,6 @@
-from PySide6.QtWidgets import QTabWidget, QWidget, QTabBar, QGridLayout, QVBoxLayout, QComboBox, QLabel, QGroupBox, QRadioButton, QCheckBox, QLineEdit, QSpinBox
+from PySide6.QtWidgets import QTabWidget, QWidget, QTabBar, QGridLayout, QVBoxLayout, QComboBox, QLabel, QGroupBox, QRadioButton, QCheckBox, QLineEdit
 from PySide6.QtGui import QDoubleValidator, QRegularExpressionValidator
-from PySide6.QtCore import Slot, Qt
-from widgets.PlotWindow import PlotWindow
+from PySide6.QtCore import Qt
 from widgets.ShearboxWindow.SpecimenTab import SpecimenTabs
 from widgets.ShearboxWindow.ShearTab import ShearTabs
 import logging 
@@ -14,23 +13,13 @@ class TabInterface(QTabWidget):
         super().__init__()
         """TabInterface init."""
 
-        # Settings.
-        self.hardware = QWidget()
-        self.specimen = QWidget()
-        self.consolidation = QWidget()
-        self.shear = QWidget()
-
-        self.add_persistent_tab(self.hardware, "Hardware")
-        self.add_persistent_tab(self.specimen, "Specimen")
-        self.add_persistent_tab(self.consolidation, "Consolidation setup")
-        self.add_persistent_tab(self.shear, "Shear setup")
-
         self.build_hardware_tab()
         self.build_specimen_tab()
         self.build_consolidation_tab()
         self.build_shear_tab()
 
     def build_hardware_tab(self):
+        self.hardware = QWidget()
         self.hardwareLayout = QGridLayout()
 
         self.hardwareLayout.addWidget(QLabel("Controllers & Transducer Inputs"), 0, 0, 1, 2, Qt.AlignCenter)
@@ -95,17 +84,19 @@ class TabInterface(QTabWidget):
         self.hardwareLayout.setVerticalSpacing(15)
 
         self.hardware.setLayout(self.hardwareLayout)
+
+        self.add_persistent_tab(self.hardware, "Hardware")
         
     def build_specimen_tab(self):
-        self.specimenLayout = QVBoxLayout()
-        self.specimen_tabs = SpecimenTabs()
-        self.specimenLayout.addWidget(self.specimen_tabs.specimens["Specimen 1"]["tabs"])
-        self.specimen_tabs.specimens["Specimen 1"]["tabs"].show()
-        # self.specimenLayout.addWidget(self.specimen_tabs)
-        self.specimen.setLayout(self.specimenLayout)
+        self.specimen = SpecimenTabs()
+
+        self.add_persistent_tab(self.specimen.specimens["Specimen 1"]["tabs"], "Specimen")
+        # self.add_persistent_tab(self.specimen, "Specimen")
         
     def build_consolidation_tab(self):
+        self.consolidation = QWidget()
         self.consolidationLayout = QVBoxLayout()
+
         self.consolidation_start = QGroupBox("Starting conditions")
         self.consolidation_start_layout = QGridLayout()
         self.consolidation_log = QGroupBox("Data Logging")
@@ -200,23 +191,31 @@ class TabInterface(QTabWidget):
         self.consolidation_stop_layout.setColumnStretch(0,8)
         self.consolidation_stop_layout.setColumnStretch(1,4)
         self.consolidation_stop_layout.setColumnStretch(2,1)
+
+        self.add_persistent_tab(self.consolidation, "Consolidation setup")
         
     def build_shear_tab(self):
-        self.shearLayout = QVBoxLayout()
-        self.shear_tabs = ShearTabs()
-        self.shearLayout.addWidget(self.shear_tabs.cycles["Cycle 1"]["widget"])
-        # self.shearLayout.addWidget(self.shear_tabs)
-        self.shear.setLayout(self.shearLayout)
+        self.shear = ShearTabs()
+
+        self.add_persistent_tab(self.shear.cycles["Cycle 1"]["widget"], "Shear setup")
+        # self.add_persistent_tab(self.shear, "Shear setup")
 
     def add_persistent_tab(self, widget, name):
         """Method to add persistent tab."""
         self.addTab(widget, name)
         index = self.tabBar().count()-1
         self.tabBar().setTabButton(index, QTabBar.RightSide, None)
+        log.info(f'"{name}" tab added.')
+    
+    def insert_persistent_tab(self, index, widget, name):
+        """Method to insert a persistent tab at the given index."""
+        self.insertTab(index, widget, name)
+        self.tabBar().setTabButton(index, QTabBar.RightSide, None)
+        log.info(f'"{name}" tab inserted.')
 
-    @Slot(int)
     def close_tab(self, index):
         """Method to close tab."""
+        name = self.tabText(index)
         self.removeTab(index)
-        log.info("Tab removed.")
+        log.info(f'"{name}" tab removed.')
     

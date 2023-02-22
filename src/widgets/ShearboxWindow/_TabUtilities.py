@@ -89,8 +89,8 @@ class TabUtilities:
         """Connect specimen tab signals to slots 
         """
         for i in range(1,5):
-            self.tabs.specimen_tabs.specimens[f"Specimen {i}"]["dimensions"].rectangular.toggled.connect(partial(self.shape_switch, f"Specimen {i}"))
-            # self.tabs.specimen_tabs.specimens[f"Specimen {i}"]["dimensions"].circular.toggled.connect(partial(self.shape_switch, f"Specimen {i}"))
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].rectangular.toggled.connect(partial(self.shape_switch, f"Specimen {i}"))
+            # self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].circular.toggled.connect(partial(self.shape_switch, f"Specimen {i}"))
 
     @Slot(str)
     def set_horiz_load_ins(self, device):
@@ -292,33 +292,33 @@ class TabUtilities:
 
     @Slot(str)
     def shape_switch(self, specimen, _):
-        if self.tabs.specimen_tabs.specimens[specimen]["dimensions"].rectangular.isChecked():
+        if self.tabs.specimen.specimens[specimen]["dimensions"].rectangular.isChecked():
             self.configuration["shearbox"][specimen]["Shape"] = "rect"
 
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen_tabs.specimens[specimen]["dimensions"].width_label1, 3, 0)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen_tabs.specimens[specimen]["dimensions"].width_label2, 3, 1)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen_tabs.specimens[specimen]["dimensions"].initial_width, 3, 2)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen_tabs.specimens[specimen]["dimensions"].width_label3, 3, 3)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen_tabs.specimens[specimen]["dimensions"].depth_label1, 4, 0)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen_tabs.specimens[specimen]["dimensions"].depth_label2, 4, 1)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen_tabs.specimens[specimen]["dimensions"].initial_depth, 4, 2)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen_tabs.specimens[specimen]["dimensions"].depth_label3, 4, 3)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].radius_label1.setParent(None)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].radius_label2.setParent(None)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].initial_radius.setParent(None)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].radius_label3.setParent(None)
+            self.tabs.specimen.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen.specimens[specimen]["dimensions"].width_label1, 3, 0)
+            self.tabs.specimen.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen.specimens[specimen]["dimensions"].width_label2, 3, 1)
+            self.tabs.specimen.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen.specimens[specimen]["dimensions"].initial_width, 3, 2)
+            self.tabs.specimen.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen.specimens[specimen]["dimensions"].width_label3, 3, 3)
+            self.tabs.specimen.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen.specimens[specimen]["dimensions"].depth_label1, 4, 0)
+            self.tabs.specimen.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen.specimens[specimen]["dimensions"].depth_label2, 4, 1)
+            self.tabs.specimen.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen.specimens[specimen]["dimensions"].initial_depth, 4, 2)
+            self.tabs.specimen.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen.specimens[specimen]["dimensions"].depth_label3, 4, 3)
+            self.tabs.specimen.specimens[specimen]["dimensions"].radius_label1.setParent(None)
+            self.tabs.specimen.specimens[specimen]["dimensions"].radius_label2.setParent(None)
+            self.tabs.specimen.specimens[specimen]["dimensions"].initial_radius.setParent(None)
+            self.tabs.specimen.specimens[specimen]["dimensions"].radius_label3.setParent(None)
         else:
             self.configuration["shearbox"][specimen]["Shape"] = "circ"
 
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].width_label1.setParent(None)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].width_label2.setParent(None)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].initial_width.setParent(None)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].width_label3.setParent(None)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].depth_label1.setParent(None)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].depth_label2.setParent(None)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].initial_depth.setParent(None)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].depth_label3.setParent(None)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen_tabs.specimens[specimen]["dimensions"].radius_label1, 3, 0, 2, 1)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen_tabs.specimens[specimen]["dimensions"].radius_label2, 3, 1, 2, 1)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen_tabs.specimens[specimen]["dimensions"].initial_radius, 3, 2, 2, 1)
-            self.tabs.specimen_tabs.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen_tabs.specimens[specimen]["dimensions"].radius_label3, 3, 3, 2, 1)
+            self.tabs.specimen.specimens[specimen]["dimensions"].width_label1.setParent(None)
+            self.tabs.specimen.specimens[specimen]["dimensions"].width_label2.setParent(None)
+            self.tabs.specimen.specimens[specimen]["dimensions"].initial_width.setParent(None)
+            self.tabs.specimen.specimens[specimen]["dimensions"].width_label3.setParent(None)
+            self.tabs.specimen.specimens[specimen]["dimensions"].depth_label1.setParent(None)
+            self.tabs.specimen.specimens[specimen]["dimensions"].depth_label2.setParent(None)
+            self.tabs.specimen.specimens[specimen]["dimensions"].initial_depth.setParent(None)
+            self.tabs.specimen.specimens[specimen]["dimensions"].depth_label3.setParent(None)
+            self.tabs.specimen.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen.specimens[specimen]["dimensions"].radius_label1, 3, 0, 2, 1)
+            self.tabs.specimen.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen.specimens[specimen]["dimensions"].radius_label2, 3, 1, 2, 1)
+            self.tabs.specimen.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen.specimens[specimen]["dimensions"].initial_radius, 3, 2, 2, 1)
+            self.tabs.specimen.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen.specimens[specimen]["dimensions"].radius_label3, 3, 3, 2, 1)
