@@ -138,7 +138,7 @@ class MainWindow(TabUtilities, PlotUtilities, ShearboxUtilities, ControlUtilitie
         self.manager.deviceAdded.connect(self.add_device_configuration_tab)
         self.manager.deviceToggled.connect(self.update_device_configuration_tab)
         self.manager.deviceToggled.connect(self.update_control_visibility)
-        self.manager.deviceToggled.connect(self.upate_preview_visibility)
+        self.manager.deviceToggled.connect(self.update_preview_visibility)
         self.manager.deviceTableModel.numberDevicesEnabled.connect(self.update_mode_enable)
 
         self.manager.timing.actualRate.connect(self.statusGroupBox.update)

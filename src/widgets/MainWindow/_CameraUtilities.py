@@ -30,7 +30,7 @@ class CameraUtilities:
         self.previews[name].previewWindowClosed.connect(self.window_to_tab)        
 
     @Slot(str, bool)
-    def upate_preview_visibility(self, name, connect):
+    def update_preview_visibility(self, name, connect):
         """Update preview visibility."""
         if name in self.previews:
             index = self.tabs.indexOf(self.previews[name])
