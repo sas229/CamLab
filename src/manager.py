@@ -1014,7 +1014,7 @@ class Manager(QObject):
         self.deviceTableModel.clearData()
         self.clear_device_configuration_tabs.emit()
         
-        # # Clear all underlying models and tables.
+        # Clear all underlying models and tables.
         self.configuration = {}
         self.acquisitionTableModels = {}
         self.acquisitionTables = {}
