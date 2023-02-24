@@ -26,6 +26,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
 
         self.configuration = configuration
         self.running = False
+        self.get_devices_and_channels()
 
         self.Layout = QVBoxLayout()
         self.toolbar = ToolBar()
@@ -233,6 +234,51 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
             self.tabs.shear.add_persistent_tab(self.tabs.shear.cycles[cycle]["widget"], cycle)
         self.configuration["shearbox"]["Residual Cycles"] = num
         self.configurationChanged.emit(self.configuration)
+
+    def apply_configuration(self, configuration):
+        """Apply configuration values to widgets
+
+        Arguments:
+            configuration -- configuration to apply
+        """
+        
+        self.tabs.horiz_load_ins.setCurrentText(configuration["shearbox"]["Hardware"]["Horizontal Load Instrument"])
+        self.tabs.horiz_load_chan.setCurrentText(configuration["shearbox"]["Hardware"]["Horizontal Load Channel"])
+        self.tabs.horiz_disp_ins.setCurrentText(configuration["shearbox"]["Hardware"]["Horizontal Displacement Instrument"])
+        self.tabs.horiz_disp_chan.setCurrentText(configuration["shearbox"]["Hardware"]["Horizontal Displacement Channel"])
+        self.tabs.vert_load_ins.setCurrentText(configuration["shearbox"]["Hardware"]["Vertical Load Instrument"])
+        self.tabs.vert_load_chan.setCurrentText(configuration["shearbox"]["Hardware"]["Vertical Load Channel"])
+        self.tabs.vert_disp_ins.setCurrentText(configuration["shearbox"]["Hardware"]["Vertical Displacement Instrument"])
+        self.tabs.vert_disp_chan.setCurrentText(configuration["shearbox"]["Hardware"]["Vertical Displacement Channel"])
+        self.tabs.horiz_cont_ins.setCurrentText(configuration["shearbox"]["Hardware"]["Horizontal Control Instrument"])
+        self.tabs.horiz_cont_chan.setCurrentText(configuration["shearbox"]["Hardware"]["Horizontal Control Channel"])
+        self.tabs.vert_cont_ins.setCurrentText(configuration["shearbox"]["Hardware"]["Vertical Control Instrument"])
+        self.tabs.vert_cont_chan.setCurrentText(configuration["shearbox"]["Hardware"]["Vertical Control Channel"])
+
+        self.tabs.specimen.apply_configuration(configuration)
+
+        self.tabs.consolidation_start_stress.setText(configuration["shearbox"]["Consolidation"]["Initial Stress"])
+        self.tabs.consolidation_trigger_stress_select.setChecked(configuration["shearbox"]["Consolidation"]["Trigger Logging at Stress"])
+        self.tabs.consolidation_trigger_stress.setText(configuration["shearbox"]["Consolidation"]["Trigger Stress"])
+        self.tabs.consolidation_trigger_disp_select.setChecked(configuration["shearbox"]["Consolidation"]["Trigger Logging at Displacement"])
+        self.tabs.consolidation_trigger_disp.setText(configuration["shearbox"]["Consolidation"]["Trigger Displacement"])
+        self.tabs.consolidation_in_water.setChecked(configuration["shearbox"]["Consolidation"]["Sample in Water"])
+
+        self.tabs.consolidation_log_rate_radio.setChecked(configuration["shearbox"]["Consolidation"]["Logging Method"]=="rate")
+        self.tabs.consolidation_log_rate_val.setText(configuration["shearbox"]["Consolidation"]["Logging Rate"])
+        self.tabs.consolidation_log_timetable_radio.setChecked(configuration["shearbox"]["Consolidation"]["Logging Method"]=="timetable")
+        self.tabs.consolidation_log_timetable_opt.setCurrentText(configuration["shearbox"]["Consolidation"]["Logging Timetable"])
+        self.tabs.consolidation_log_change_radio.setChecked(configuration["shearbox"]["Consolidation"]["Logging Method"]=="change")
+        self.tabs.consolidation_log_change_val.setText(configuration["shearbox"]["Consolidation"]["Logging Channel Change"])
+
+        self.tabs.consolidation_stop_rate_select.setChecked(configuration["shearbox"]["Consolidation"]["Stop on Rate of Change"])
+        self.tabs.consolidation_stop_rate_disp.setText(configuration["shearbox"]["Consolidation"]["Stopping Displacement Change"])
+        self.tabs.consolidation_stop_rate_time.setText(configuration["shearbox"]["Consolidation"]["Stopping Time Change"])
+        self.tabs.consolidation_stop_time_select.setChecked(configuration["shearbox"]["Consolidation"]["Stop after Time"])
+        self.tabs.consolidation_stop_time_opt.setText(configuration["shearbox"]["Consolidation"]["Stop Time"])
+        self.tabs.consolidation_stop_buzz.setChecked(configuration["shearbox"]["Consolidation"]["Buzz on Finish"])
+
+        self.tabs.shear.apply_configuration(configuration)
 
     def closeEvent(self, event):
         self.remove_connections()

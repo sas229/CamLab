@@ -13,14 +13,12 @@ class TabInterface(QTabWidget):
         super().__init__()
         """TabInterface init."""
 
-        self.build_hardware_tab(configuration)
+        self.build_hardware_tab()
         self.build_specimen_tab(configuration)
-        self.build_consolidation_tab(configuration)
+        self.build_consolidation_tab()
         self.build_shear_tab(configuration)
 
-        self.apply_configuration(configuration)
-
-    def build_hardware_tab(self, configuration):
+    def build_hardware_tab(self):
         self.hardware = QWidget()
         self.hardwareLayout = QGridLayout()
 
@@ -89,7 +87,7 @@ class TabInterface(QTabWidget):
         self.add_persistent_tab(self.specimen.specimens["Specimen 1"]["tabs"], "Specimen")
         # self.add_persistent_tab(self.specimen, "Specimen")
         
-    def build_consolidation_tab(self, configuration):
+    def build_consolidation_tab(self):
         self.consolidation = QWidget()
         self.consolidationLayout = QVBoxLayout()
 
@@ -191,47 +189,6 @@ class TabInterface(QTabWidget):
 
         self.add_persistent_tab(self.shear.cycles["Cycle 1"]["widget"], "Shear setup")
         # self.add_persistent_tab(self.shear, "Shear setup")
-
-    def apply_configuration(self, configuration):
-        """Apply configuration values to widgets
-
-        Arguments:
-            configuration -- configuration to apply
-        """
-        self.horiz_load_ins.setCurrentText(configuration["shearbox"]["Hardware"]["Horizontal Load Instrument"])
-        self.horiz_load_chan.setCurrentText(configuration["shearbox"]["Hardware"]["Horizontal Load Channel"])
-        self.horiz_disp_ins.setCurrentText(configuration["shearbox"]["Hardware"]["Horizontal Displacement Instrument"])
-        self.horiz_disp_chan.setCurrentText(configuration["shearbox"]["Hardware"]["Horizontal Displacement Channel"])
-        self.vert_load_ins.setCurrentText(configuration["shearbox"]["Hardware"]["Vertical Load Instrument"])
-        self.vert_load_chan.setCurrentText(configuration["shearbox"]["Hardware"]["Vertical Load Channel"])
-        self.vert_disp_ins.setCurrentText(configuration["shearbox"]["Hardware"]["Vertical Displacement Instrument"])
-        self.vert_disp_chan.setCurrentText(configuration["shearbox"]["Hardware"]["Vertical Displacement Channel"])
-        self.horiz_cont_ins.setCurrentText(configuration["shearbox"]["Hardware"]["Horizontal Control Instrument"])
-        self.horiz_cont_chan.setCurrentText(configuration["shearbox"]["Hardware"]["Horizontal Control Channel"])
-        self.vert_cont_ins.setCurrentText(configuration["shearbox"]["Hardware"]["Vertical Control Instrument"])
-        self.vert_cont_chan.setCurrentText(configuration["shearbox"]["Hardware"]["Vertical Control Channel"])
-
-
-        self.consolidation_start_stress.setText(configuration["shearbox"]["Consolidation"]["Initial Stress"])
-        self.consolidation_trigger_stress_select.setChecked(configuration["shearbox"]["Consolidation"]["Trigger Logging at Stress"])
-        self.consolidation_trigger_stress.setText(configuration["shearbox"]["Consolidation"]["Trigger Stress"])
-        self.consolidation_trigger_disp_select.setChecked(configuration["shearbox"]["Consolidation"]["Trigger Logging at Displacement"])
-        self.consolidation_trigger_disp.setText(configuration["shearbox"]["Consolidation"]["Trigger Displacement"])
-        self.consolidation_in_water.setChecked(configuration["shearbox"]["Consolidation"]["Sample in Water"])
-
-        self.consolidation_log_rate_radio.setChecked(configuration["shearbox"]["Consolidation"]["Logging Method"]=="rate")
-        self.consolidation_log_rate_val.setText(configuration["shearbox"]["Consolidation"]["Logging Rate"])
-        self.consolidation_log_timetable_radio.setChecked(configuration["shearbox"]["Consolidation"]["Logging Method"]=="timetable")
-        self.consolidation_log_timetable_opt.setCurrentText(configuration["shearbox"]["Consolidation"]["Logging Timetable"])
-        self.consolidation_log_change_radio.setChecked(configuration["shearbox"]["Consolidation"]["Logging Method"]=="change")
-        self.consolidation_log_change_val.setText(configuration["shearbox"]["Consolidation"]["Logging Channel Change"])
-
-        self.consolidation_stop_rate_select.setChecked(configuration["shearbox"]["Consolidation"]["Stop on Rate of Change"])
-        self.consolidation_stop_rate_disp.setText(configuration["shearbox"]["Consolidation"]["Stopping Displacement Change"])
-        self.consolidation_stop_rate_time.setText(configuration["shearbox"]["Consolidation"]["Stopping Time Change"])
-        self.consolidation_stop_time_select.setChecked(configuration["shearbox"]["Consolidation"]["Stop after Time"])
-        self.consolidation_stop_time_opt.setText(configuration["shearbox"]["Consolidation"]["Stop Time"])
-        self.consolidation_stop_buzz.setChecked(configuration["shearbox"]["Consolidation"]["Buzz on Finish"])
 
     def add_persistent_tab(self, widget, name):
         """Method to add persistent tab."""

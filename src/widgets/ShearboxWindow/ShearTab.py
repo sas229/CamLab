@@ -18,7 +18,6 @@ class ShearTabs(QTabWidget):
             self.build_tab(cycle, configuration)
             if configuration["shearbox"]["Residual Cycles"] > 1 and i <= configuration["shearbox"]["Residual Cycles"] and (configuration["shearbox"]["Mode"] == "residual" or i != 1):
                 self.add_persistent_tab(self.cycles[cycle]["widget"], cycle)
-            self.apply_configuration(cycle, configuration)
 
     def build_tab(self, cycle, configuration):
         """Build one of the shear tabs
@@ -157,38 +156,39 @@ class ShearTabs(QTabWidget):
         self.cycles[cycle]["reverse_layout"].setColumnStretch(1,4)
         self.cycles[cycle]["reverse_layout"].setColumnStretch(2,1)
 
-    def apply_configuration(self, cycle, configuration):
+    def apply_configuration(self, configuration):
         """Apply configuration values to widgets
 
         Arguments:
-            cycle -- Cycle tab name
             configuration -- configuration to apply
         """
-        self.cycles[cycle]["trigger_speed_select"].setChecked(configuration["shearbox"]["Shear"][cycle]["Shear Speed Selection"]=="manual")
-        self.cycles[cycle]["trigger_speed"].setText(configuration["shearbox"]["Shear"][cycle]["Shear Speed"])
-        self.cycles[cycle]["trigger_calc_select"].setChecked(configuration["shearbox"]["Shear"][cycle]["Shear Speed Selection"]=="calculated")
-        self.cycles[cycle]["trigger_calc_opt"].setCurrentText(configuration["shearbox"]["Shear"][cycle]["Speed Calculation"])
-        self.cycles[cycle]["trigger_load_select"].setChecked(configuration["shearbox"]["Shear"][cycle]["Trigger on Load Change"])
-        self.cycles[cycle]["trigger_load_change"].setText(configuration["shearbox"]["Shear"][cycle]["Load Change Rate"])
+        for i in range(1,11):
+            cycle = f"Cycle {i}"
+            self.cycles[cycle]["trigger_speed_select"].setChecked(configuration["shearbox"]["Shear"][cycle]["Shear Speed Selection"]=="manual")
+            self.cycles[cycle]["trigger_speed"].setText(configuration["shearbox"]["Shear"][cycle]["Shear Speed"])
+            self.cycles[cycle]["trigger_calc_select"].setChecked(configuration["shearbox"]["Shear"][cycle]["Shear Speed Selection"]=="calculated")
+            self.cycles[cycle]["trigger_calc_opt"].setCurrentText(configuration["shearbox"]["Shear"][cycle]["Speed Calculation"])
+            self.cycles[cycle]["trigger_load_select"].setChecked(configuration["shearbox"]["Shear"][cycle]["Trigger on Load Change"])
+            self.cycles[cycle]["trigger_load_change"].setText(configuration["shearbox"]["Shear"][cycle]["Load Change Rate"])
 
-        self.cycles[cycle]["store_rate_radio"].setChecked(configuration["shearbox"]["Shear"][cycle]["Logging Method"]=="rate")
-        self.cycles[cycle]["store_rate_val"].setText(configuration["shearbox"]["Shear"][cycle]["Logging Rate"])
-        self.cycles[cycle]["store_strain_radio"].setChecked(configuration["shearbox"]["Shear"][cycle]["Logging Method"]=="strain")
-        self.cycles[cycle]["store_strain_val"].setText(configuration["shearbox"]["Shear"][cycle]["Logging Strain"])
-        self.cycles[cycle]["store_disp_radio"].setChecked(configuration["shearbox"]["Shear"][cycle]["Logging Method"]=="displacement")
-        self.cycles[cycle]["store_disp_val"].setText(configuration["shearbox"]["Shear"][cycle]["Logging Displacement"])
+            self.cycles[cycle]["store_rate_radio"].setChecked(configuration["shearbox"]["Shear"][cycle]["Logging Method"]=="rate")
+            self.cycles[cycle]["store_rate_val"].setText(configuration["shearbox"]["Shear"][cycle]["Logging Rate"])
+            self.cycles[cycle]["store_strain_radio"].setChecked(configuration["shearbox"]["Shear"][cycle]["Logging Method"]=="strain")
+            self.cycles[cycle]["store_strain_val"].setText(configuration["shearbox"]["Shear"][cycle]["Logging Strain"])
+            self.cycles[cycle]["store_disp_radio"].setChecked(configuration["shearbox"]["Shear"][cycle]["Logging Method"]=="displacement")
+            self.cycles[cycle]["store_disp_val"].setText(configuration["shearbox"]["Shear"][cycle]["Logging Displacement"])
 
-        self.cycles[cycle]["stop_drop_select"].setChecked(configuration["shearbox"]["Shear"][cycle]["Stop after Repeated Falls"])
-        self.cycles[cycle]["stop_drop"].setValue(configuration["shearbox"]["Shear"][cycle]["Number of Falls"])
-        self.cycles[cycle]["stop_strain_select"].setChecked(configuration["shearbox"]["Shear"][cycle]["Stop on Maximum Strain"])
-        self.cycles[cycle]["stop_strain"].setText(configuration["shearbox"]["Shear"][cycle]["Maximum Strain"])
+            self.cycles[cycle]["stop_drop_select"].setChecked(configuration["shearbox"]["Shear"][cycle]["Stop after Repeated Falls"])
+            self.cycles[cycle]["stop_drop"].setValue(configuration["shearbox"]["Shear"][cycle]["Number of Falls"])
+            self.cycles[cycle]["stop_strain_select"].setChecked(configuration["shearbox"]["Shear"][cycle]["Stop on Maximum Strain"])
+            self.cycles[cycle]["stop_strain"].setText(configuration["shearbox"]["Shear"][cycle]["Maximum Strain"])
 
-        self.cycles[cycle]["reverse_rate_radio"].setChecked(configuration["shearbox"]["Shear"][cycle]["Reverse Method"]=="rate")
-        self.cycles[cycle]["reverse_rate_val"].setText(configuration["shearbox"]["Shear"][cycle]["Reverse Speed"])
-        self.cycles[cycle]["reverse_same"].setChecked(configuration["shearbox"]["Shear"][cycle]["Reverse Method"]=="same")
-        self.cycles[cycle]["reverse_wait"].setText(configuration["shearbox"]["Shear"][cycle]["Wait before Reversing"])
-        self.cycles[cycle]["reverse_disp"].setText(configuration["shearbox"]["Shear"][cycle]["Shear until Displacement"])
-        self.cycles[cycle]["reverse_stress"].setText(configuration["shearbox"]["Shear"][cycle]["Repeat until Stress"])
+            self.cycles[cycle]["reverse_rate_radio"].setChecked(configuration["shearbox"]["Shear"][cycle]["Reverse Method"]=="rate")
+            self.cycles[cycle]["reverse_rate_val"].setText(configuration["shearbox"]["Shear"][cycle]["Reverse Speed"])
+            self.cycles[cycle]["reverse_same"].setChecked(configuration["shearbox"]["Shear"][cycle]["Reverse Method"]=="same")
+            self.cycles[cycle]["reverse_wait"].setText(configuration["shearbox"]["Shear"][cycle]["Wait before Reversing"])
+            self.cycles[cycle]["reverse_disp"].setText(configuration["shearbox"]["Shear"][cycle]["Shear until Displacement"])
+            self.cycles[cycle]["reverse_stress"].setText(configuration["shearbox"]["Shear"][cycle]["Repeat until Stress"])
 
     def add_persistent_tab(self, widget, name):
         """Method to add persistent tab."""
