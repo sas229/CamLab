@@ -956,11 +956,11 @@ class Manager(QObject):
                         self.loadDevicesFromConfiguration()
                         if "plots" in self.configuration:
                             self.existingPlotsFound.emit()
-                        try:
-                            assert self.configuration["shearbox"]["active"]
+                        if self.configuration["shearbox"]["active"]:
                             self.activeShearboxFound.emit()
-                        except:
-                            log.info("No ShearBox extension saved")
+                        else:
+                            log.info("ShearBox extension not active.")
+                        log.info("Configuration loaded.")
                             
                 except FileNotFoundError:
                     log.warning("Previous configuration file not found.")
