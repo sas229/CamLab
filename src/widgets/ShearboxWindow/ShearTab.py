@@ -4,6 +4,12 @@ import logging
 
 log = logging.getLogger(__name__)
 
+def num_to_str(num):
+    if num != None:
+        return str(num)
+    else:
+        return ""
+
 class ShearTabs(QTabWidget):
 
     def __init__(self, configuration):
@@ -165,30 +171,30 @@ class ShearTabs(QTabWidget):
         for i in range(1,11):
             cycle = f"Cycle {i}"
             self.cycles[cycle]["trigger_speed_select"].setChecked(configuration["shearbox"]["Shear"][cycle]["Shear Speed Selection"]=="manual")
-            self.cycles[cycle]["trigger_speed"].setText(configuration["shearbox"]["Shear"][cycle]["Shear Speed"])
+            self.cycles[cycle]["trigger_speed"].setText(num_to_str(configuration["shearbox"]["Shear"][cycle]["Shear Speed"]))
             self.cycles[cycle]["trigger_calc_select"].setChecked(configuration["shearbox"]["Shear"][cycle]["Shear Speed Selection"]=="calculated")
             self.cycles[cycle]["trigger_calc_opt"].setCurrentText(configuration["shearbox"]["Shear"][cycle]["Speed Calculation"])
             self.cycles[cycle]["trigger_load_select"].setChecked(configuration["shearbox"]["Shear"][cycle]["Trigger on Load Change"])
-            self.cycles[cycle]["trigger_load_change"].setText(configuration["shearbox"]["Shear"][cycle]["Load Change Rate"])
+            self.cycles[cycle]["trigger_load_change"].setText(num_to_str(configuration["shearbox"]["Shear"][cycle]["Load Change Rate"]))
 
             self.cycles[cycle]["store_rate_radio"].setChecked(configuration["shearbox"]["Shear"][cycle]["Logging Method"]=="rate")
-            self.cycles[cycle]["store_rate_val"].setText(configuration["shearbox"]["Shear"][cycle]["Logging Rate"])
+            self.cycles[cycle]["store_rate_val"].setText(num_to_str(configuration["shearbox"]["Shear"][cycle]["Logging Rate"]))
             self.cycles[cycle]["store_strain_radio"].setChecked(configuration["shearbox"]["Shear"][cycle]["Logging Method"]=="strain")
-            self.cycles[cycle]["store_strain_val"].setText(configuration["shearbox"]["Shear"][cycle]["Logging Strain"])
+            self.cycles[cycle]["store_strain_val"].setText(num_to_str(configuration["shearbox"]["Shear"][cycle]["Logging Strain"]))
             self.cycles[cycle]["store_disp_radio"].setChecked(configuration["shearbox"]["Shear"][cycle]["Logging Method"]=="displacement")
-            self.cycles[cycle]["store_disp_val"].setText(configuration["shearbox"]["Shear"][cycle]["Logging Displacement"])
+            self.cycles[cycle]["store_disp_val"].setText(num_to_str(configuration["shearbox"]["Shear"][cycle]["Logging Displacement"]))
 
             self.cycles[cycle]["stop_drop_select"].setChecked(configuration["shearbox"]["Shear"][cycle]["Stop after Repeated Falls"])
             self.cycles[cycle]["stop_drop"].setValue(configuration["shearbox"]["Shear"][cycle]["Number of Falls"])
             self.cycles[cycle]["stop_strain_select"].setChecked(configuration["shearbox"]["Shear"][cycle]["Stop on Maximum Strain"])
-            self.cycles[cycle]["stop_strain"].setText(configuration["shearbox"]["Shear"][cycle]["Maximum Strain"])
+            self.cycles[cycle]["stop_strain"].setText(num_to_str(configuration["shearbox"]["Shear"][cycle]["Maximum Strain"]))
 
             self.cycles[cycle]["reverse_rate_radio"].setChecked(configuration["shearbox"]["Shear"][cycle]["Reverse Method"]=="rate")
-            self.cycles[cycle]["reverse_rate_val"].setText(configuration["shearbox"]["Shear"][cycle]["Reverse Speed"])
+            self.cycles[cycle]["reverse_rate_val"].setText(num_to_str(configuration["shearbox"]["Shear"][cycle]["Reverse Speed"]))
             self.cycles[cycle]["reverse_same"].setChecked(configuration["shearbox"]["Shear"][cycle]["Reverse Method"]=="same")
-            self.cycles[cycle]["reverse_wait"].setText(configuration["shearbox"]["Shear"][cycle]["Wait before Reversing"])
-            self.cycles[cycle]["reverse_disp"].setText(configuration["shearbox"]["Shear"][cycle]["Shear until Displacement"])
-            self.cycles[cycle]["reverse_stress"].setText(configuration["shearbox"]["Shear"][cycle]["Repeat until Stress"])
+            self.cycles[cycle]["reverse_wait"].setText(num_to_str(configuration["shearbox"]["Shear"][cycle]["Wait before Reversing"]))
+            self.cycles[cycle]["reverse_disp"].setText(num_to_str(configuration["shearbox"]["Shear"][cycle]["Shear until Displacement"]))
+            self.cycles[cycle]["reverse_stress"].setText(num_to_str(configuration["shearbox"]["Shear"][cycle]["Repeat until Stress"]))
 
     def add_persistent_tab(self, widget, name):
         """Method to add persistent tab."""

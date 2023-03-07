@@ -18,6 +18,7 @@ class TabUtilities:
         self.residual_shear.toggled.disconnect(self.shear_type)
         self.cycles.valueChanged.disconnect(self.residuals_number)
         self.remove_hardware_tab_connections()
+        self.remove_specimen_tab_connections()
 
     def get_devices_and_channels(self):
         """Get devices and channels of each device and store in self.devices
@@ -29,10 +30,9 @@ class TabUtilities:
                 channels = [channel_info["name"] for channel_info in self.configuration["devices"][device]["acquisition"]]
                 self.devices[key] = [device, channels]
     
-    def addItemstoComboboxes(self):
-        """Fill comboboxes in hardware tab with device names
+    def addItemstoInstrumentComboboxes(self):
+        """Fill instrument comboboxes in hardware tab with device names
         """
-        self.get_devices_and_channels()
             
         self.tabs.horiz_load_ins.clear()
         self.tabs.horiz_load_ins.addItems([None] + list(self.devices.keys()))
@@ -90,27 +90,38 @@ class TabUtilities:
         """
         for i in range(1,5):
             self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].rectangular.toggled.connect(partial(self.shape_switch, f"Specimen {i}"))
-            # self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].circular.toggled.connect(partial(self.shape_switch, f"Specimen {i}"))
+    
+    def remove_specimen_tab_connections(self):
+        """Connect specimen tab signals to slots 
+        """
+        for i in range(1,5):
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].rectangular.toggled.disconnect()
 
     @Slot(str)
-    def set_horiz_load_ins(self, device):
+    def set_horiz_load_ins(self, device, apply_config=False):
         """Set device to use for horizontal load measurement
 
         Arguments:
             device -- self.devices key
         """
-        if device != "":
-            self.configuration["shearbox"]["Horizontal Load Instrument"] = self.devices[device][0]
+        if apply_config:
             log.info(f"Device selected: {device}")
             self.tabs.horiz_load_chan.clear()
             self.tabs.horiz_load_chan.addItems([None] + self.devices[device][1])
             self.tabs.horiz_load_chan.currentTextChanged.connect(self.set_horiz_load_chan)
         else:
-            log.info("Device deselected / No device selected")
-            self.configuration["shearbox"]["Horizontal Load Instrument"] = None
-            self.tabs.horiz_load_chan.currentTextChanged.disconnect(self.set_horiz_load_chan)
-            self.tabs.horiz_load_chan.clear()
-        self.configurationChanged.emit(self.configuration)
+            if device != "":
+                self.configuration["shearbox"]["Horizontal Load Instrument"] = self.devices[device][0]
+                log.info(f"Device selected: {device}")
+                self.tabs.horiz_load_chan.clear()
+                self.tabs.horiz_load_chan.addItems([None] + self.devices[device][1])
+                self.tabs.horiz_load_chan.currentTextChanged.connect(self.set_horiz_load_chan)
+            else:
+                self.configuration["shearbox"]["Horizontal Load Instrument"] = None
+                log.info("Device deselected / No device selected")
+                self.tabs.horiz_load_chan.currentTextChanged.disconnect(self.set_horiz_load_chan)
+                self.tabs.horiz_load_chan.clear()
+            self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
     def set_horiz_load_chan(self, channel):
@@ -128,24 +139,30 @@ class TabUtilities:
         self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
-    def set_horiz_disp_ins(self, device):
+    def set_horiz_disp_ins(self, device, apply_config=False):
         """Set device to use for horizontal displacement measurement
 
         Arguments:
             device -- self.devices key
         """
-        if device != "":
-            self.configuration["shearbox"]["Horizontal Displacement Instrument"] = self.devices[device][0]
+        if apply_config:
             log.info(f"Device selected: {device}")
-            self.tabs.horiz_disp_chan.clear()
-            self.tabs.horiz_disp_chan.addItems([None] + self.devices[device][1])
-            self.tabs.horiz_disp_chan.currentTextChanged.connect(self.set_horiz_disp_chan)
+            self.tabs.horiz_load_chan.clear()
+            self.tabs.horiz_load_chan.addItems([None] + self.devices[device][1])
+            self.tabs.horiz_load_chan.currentTextChanged.connect(self.set_horiz_load_chan)
         else:
-            log.info("Device deselected / No device selected")
-            self.configuration["shearbox"]["Horizontal Displacement Instrument"] = None
-            self.tabs.horiz_disp_chan.currentTextChanged.disconnect(self.set_horiz_disp_chan)
-            self.tabs.horiz_disp_chan.clear()
-        self.configurationChanged.emit(self.configuration)
+            if device != "":
+                self.configuration["shearbox"]["Horizontal Displacement Instrument"] = self.devices[device][0]
+                log.info(f"Device selected: {device}")
+                self.tabs.horiz_disp_chan.clear()
+                self.tabs.horiz_disp_chan.addItems([None] + self.devices[device][1])
+                self.tabs.horiz_disp_chan.currentTextChanged.connect(self.set_horiz_disp_chan)
+            else:
+                self.configuration["shearbox"]["Horizontal Displacement Instrument"] = None
+                log.info("Device deselected / No device selected")
+                self.tabs.horiz_disp_chan.currentTextChanged.disconnect(self.set_horiz_disp_chan)
+                self.tabs.horiz_disp_chan.clear()
+            self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
     def set_horiz_disp_chan(self, channel):
@@ -163,24 +180,30 @@ class TabUtilities:
         self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
-    def set_vert_load_ins(self, device):
+    def set_vert_load_ins(self, device, apply_config=False):
         """Set device to use for vertical load measurement
 
         Arguments:
             device -- self.devices key
         """
-        if device != "":
-            self.configuration["shearbox"]["Vertical Load Instrument"] = self.devices[device][0]
+        if apply_config:
             log.info(f"Device selected: {device}")
-            self.tabs.vert_load_chan.clear()
-            self.tabs.vert_load_chan.addItems([None] + self.devices[device][1])
-            self.tabs.vert_load_chan.currentTextChanged.connect(self.set_vert_load_chan)
+            self.tabs.horiz_load_chan.clear()
+            self.tabs.horiz_load_chan.addItems([None] + self.devices[device][1])
+            self.tabs.horiz_load_chan.currentTextChanged.connect(self.set_horiz_load_chan)
         else:
-            log.info("Device deselected / No device selected")
-            self.configuration["shearbox"]["Vertical Load Instrument"] = None
-            self.tabs.vert_load_chan.currentTextChanged.disconnect(self.set_vert_load_chan)
-            self.tabs.vert_load_chan.clear()
-        self.configurationChanged.emit(self.configuration)
+            if device != "":
+                self.configuration["shearbox"]["Vertical Load Instrument"] = self.devices[device][0]
+                log.info(f"Device selected: {device}")
+                self.tabs.vert_load_chan.clear()
+                self.tabs.vert_load_chan.addItems([None] + self.devices[device][1])
+                self.tabs.vert_load_chan.currentTextChanged.connect(self.set_vert_load_chan)
+            else:
+                self.configuration["shearbox"]["Vertical Load Instrument"] = None
+                log.info("Device deselected / No device selected")
+                self.tabs.vert_load_chan.currentTextChanged.disconnect(self.set_vert_load_chan)
+                self.tabs.vert_load_chan.clear()
+            self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
     def set_vert_load_chan(self, channel):
@@ -198,24 +221,30 @@ class TabUtilities:
         self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
-    def set_vert_disp_ins(self, device):
+    def set_vert_disp_ins(self, device, apply_config=False):
         """Set device to use for vertical displacement measurement
 
         Arguments:
             device -- self.devices key
         """
-        if device != "":
-            self.configuration["shearbox"]["Vertical Displacement Instrument"] = self.devices[device][0]
+        if apply_config:
             log.info(f"Device selected: {device}")
-            self.tabs.vert_disp_chan.clear()
-            self.tabs.vert_disp_chan.addItems([None] + self.devices[device][1])
-            self.tabs.vert_disp_chan.currentTextChanged.connect(self.set_vert_disp_chan)
+            self.tabs.horiz_load_chan.clear()
+            self.tabs.horiz_load_chan.addItems([None] + self.devices[device][1])
+            self.tabs.horiz_load_chan.currentTextChanged.connect(self.set_horiz_load_chan)
         else:
-            log.info("Device deselected / No device selected")
-            self.configuration["shearbox"]["Vertical Displacement Instrument"] = None
-            self.tabs.vert_disp_chan.currentTextChanged.disconnect(self.set_vert_disp_chan)
-            self.tabs.vert_disp_chan.clear()
-        self.configurationChanged.emit(self.configuration)
+            if device != "":
+                self.configuration["shearbox"]["Vertical Displacement Instrument"] = self.devices[device][0]
+                log.info(f"Device selected: {device}")
+                self.tabs.vert_disp_chan.clear()
+                self.tabs.vert_disp_chan.addItems([None] + self.devices[device][1])
+                self.tabs.vert_disp_chan.currentTextChanged.connect(self.set_vert_disp_chan)
+            else:
+                self.configuration["shearbox"]["Vertical Displacement Instrument"] = None
+                log.info("Device deselected / No device selected")
+                self.tabs.vert_disp_chan.currentTextChanged.disconnect(self.set_vert_disp_chan)
+                self.tabs.vert_disp_chan.clear()
+            self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
     def set_vert_disp_chan(self, channel):
@@ -233,24 +262,30 @@ class TabUtilities:
         self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
-    def set_horiz_cont_ins(self, device):
+    def set_horiz_cont_ins(self, device, apply_config=False):
         """Set device to use for horizontal control
 
         Arguments:
             device -- self.devices key
         """
-        if device != "":
-            self.configuration["shearbox"]["Horizontal Control Instrument"] = self.devices[device][0]
+        if apply_config:
             log.info(f"Device selected: {device}")
-            self.tabs.horiz_cont_chan.clear()
-            self.tabs.horiz_cont_chan.addItems([None] + self.devices[device][1])
-            self.tabs.horiz_cont_chan.currentTextChanged.connect(self.set_horiz_cont_chan)
+            self.tabs.horiz_load_chan.clear()
+            self.tabs.horiz_load_chan.addItems([None] + self.devices[device][1])
+            self.tabs.horiz_load_chan.currentTextChanged.connect(self.set_horiz_load_chan)
         else:
-            log.info("Device deselected / No device selected")
-            self.configuration["shearbox"]["Horizontal Control Instrument"] = None
-            self.tabs.horiz_cont_chan.currentTextChanged.disconnect(self.set_horiz_cont_chan)
-            self.tabs.horiz_cont_chan.clear()
-        self.configurationChanged.emit(self.configuration)
+            if device != "":
+                self.configuration["shearbox"]["Horizontal Control Instrument"] = self.devices[device][0]
+                log.info(f"Device selected: {device}")
+                self.tabs.horiz_cont_chan.clear()
+                self.tabs.horiz_cont_chan.addItems([None] + self.devices[device][1])
+                self.tabs.horiz_cont_chan.currentTextChanged.connect(self.set_horiz_cont_chan)
+            else:
+                self.configuration["shearbox"]["Horizontal Control Instrument"] = None
+                log.info("Device deselected / No device selected")
+                self.tabs.horiz_cont_chan.currentTextChanged.disconnect(self.set_horiz_cont_chan)
+                self.tabs.horiz_cont_chan.clear()
+            self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
     def set_horiz_cont_chan(self, channel):
@@ -268,24 +303,30 @@ class TabUtilities:
         self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
-    def set_vert_cont_ins(self, device):
+    def set_vert_cont_ins(self, device, apply_config=False):
         """Set device to use for vertical control
 
         Arguments:
             device -- self.devices key
         """
-        if device != "":
-            self.configuration["shearbox"]["Vertical Control Instrument"] = self.devices[device][0]
+        if apply_config:
             log.info(f"Device selected: {device}")
-            self.tabs.vert_cont_chan.clear()
-            self.tabs.vert_cont_chan.addItems([None] + self.devices[device][1])
-            self.tabs.vert_cont_chan.currentTextChanged.connect(self.set_vert_cont_chan)
+            self.tabs.horiz_load_chan.clear()
+            self.tabs.horiz_load_chan.addItems([None] + self.devices[device][1])
+            self.tabs.horiz_load_chan.currentTextChanged.connect(self.set_horiz_load_chan)
         else:
-            log.info("Device deselected / No device selected")
-            self.configuration["shearbox"]["Vertical Control Instrument"] = None
-            self.tabs.vert_cont_chan.currentTextChanged.disconnect(self.set_vert_cont_chan)
-            self.tabs.vert_cont_chan.clear()
-        self.configurationChanged.emit(self.configuration)
+            if device != "":
+                self.configuration["shearbox"]["Vertical Control Instrument"] = self.devices[device][0]
+                log.info(f"Device selected: {device}")
+                self.tabs.vert_cont_chan.clear()
+                self.tabs.vert_cont_chan.addItems([None] + self.devices[device][1])
+                self.tabs.vert_cont_chan.currentTextChanged.connect(self.set_vert_cont_chan)
+            else:
+                self.configuration["shearbox"]["Vertical Control Instrument"] = None
+                log.info("Device deselected / No device selected")
+                self.tabs.vert_cont_chan.currentTextChanged.disconnect(self.set_vert_cont_chan)
+                self.tabs.vert_cont_chan.clear()
+            self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
     def set_vert_cont_chan(self, channel):

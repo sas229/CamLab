@@ -34,7 +34,7 @@ class ShearboxUtilities:
         try:
             self.shearbox.activateWindow()
             self.shearbox.set_configuration(self.manager.configuration)
-            self.shearbox.addItemstoComboboxes()
+            self.shearbox.apply_configuration(self.manager.configuration)
             self.connect_shearbox()
         except:
             self.shearbox = ShearboxWindow(self.manager.configuration)
@@ -45,7 +45,7 @@ class ShearboxUtilities:
         log.info("ShearBox opened.")
 
     def connect_shearbox(self, external=False):
-        log.info("Connecting ShearBox")
+        log.info("Connecting ShearBox.")
         self.manager.clear_shearbox_configuration.connect(self.disconnect_shearbox)
         self.manager.configurationChanged.connect(self.shearbox.set_configuration)
         self.shearbox.configurationChanged.connect(self.set_configuration)
@@ -58,7 +58,7 @@ class ShearboxUtilities:
 
     @Slot()
     def disconnect_shearbox(self):
-        log.info("Disconnecting ShearBox")
+        log.info("Disconnecting ShearBox.")
         self.manager.clear_shearbox_configuration.disconnect(self.disconnect_shearbox)
         self.manager.configurationChanged.disconnect(self.shearbox.set_configuration)
         self.shearbox.close()
