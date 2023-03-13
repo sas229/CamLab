@@ -20,39 +20,6 @@ class TabUtilities:
         self.cycles.valueChanged.disconnect()
         self.remove_hardware_tab_connections()
         self.remove_specimen_tab_connections()
-
-    def get_devices_and_channels(self):
-        """Get devices and channels of each device and store in self.devices
-        """
-        self.devices = dict()
-        if "devices" in self.configuration.keys():
-            for device in self.configuration["devices"].keys():
-                key = f'{self.configuration["devices"][device]["model"]} ({self.configuration["devices"][device]["id"]})'
-                channels = [channel_info["name"] for channel_info in self.configuration["devices"][device]["acquisition"]]
-                self.devices[key] = [device, channels]
-    
-    def addItemstoInstrumentComboboxes(self):
-        """Fill instrument comboboxes in hardware tab with device names
-        """
-            
-        self.tabs.horiz_load_ins.clear()
-        self.tabs.horiz_load_ins.addItems([None] + list(self.devices.keys()))
-        self.tabs.horiz_load_chan.clear()
-        self.tabs.horiz_disp_ins.clear()
-        self.tabs.horiz_disp_ins.addItems([None] + list(self.devices.keys()))
-        self.tabs.horiz_disp_chan.clear()
-        self.tabs.vert_load_ins.clear()
-        self.tabs.vert_load_ins.addItems([None] + list(self.devices.keys()))
-        self.tabs.vert_load_chan.clear()
-        self.tabs.vert_disp_ins.clear()
-        self.tabs.vert_disp_ins.addItems([None] + list(self.devices.keys()))
-        self.tabs.vert_disp_chan.clear()
-        self.tabs.horiz_cont_ins.clear()
-        self.tabs.horiz_cont_ins.addItems([None] + list(self.devices.keys()))
-        self.tabs.horiz_cont_chan.clear()
-        self.tabs.vert_cont_ins.clear()
-        self.tabs.vert_cont_ins.addItems([None] + list(self.devices.keys()))
-        self.tabs.vert_cont_chan.clear()
     
     def make_hardware_tab_connections(self):
         """Connect hardware tab combobox signals to slots 
@@ -97,6 +64,14 @@ class TabUtilities:
             self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].initial_depth.returnPressed.connect(partial(self.set_depth, f"Specimen {i}"))
             self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].initial_radius.returnPressed.connect(partial(self.set_radius, f"Specimen {i}"))
             self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].particle_density.returnPressed.connect(partial(self.set_density, f"Specimen {i}"))
+            
+            self.tabs.specimen.specimens[f"Specimen {i}"]["moisture"].initial_wet_weight.returnPressed.connect(partial(self.set_wet_weight, f"Specimen {i}"))
+            self.tabs.specimen.specimens[f"Specimen {i}"]["moisture"].initial_dry_weight.returnPressed.connect(partial(self.set_dry_weight, f"Specimen {i}"))
+            self.tabs.specimen.specimens[f"Specimen {i}"]["moisture"].tin_initial_weight.returnPressed.connect(partial(self.set_tin_weight, f"Specimen {i}"))
+            
+            self.tabs.specimen.specimens[f"Specimen {i}"]["additional"].platen_weight.returnPressed.connect(partial(self.set_platen_weight, f"Specimen {i}"))
+            self.tabs.specimen.specimens[f"Specimen {i}"]["additional"].platen_corr.returnPressed.connect(partial(self.set_platen_corr, f"Specimen {i}"))
+            self.tabs.specimen.specimens[f"Specimen {i}"]["additional"].est_strain_at_fail.returnPressed.connect(partial(self.set_est_strain_at_fail, f"Specimen {i}"))
     
     def remove_specimen_tab_connections(self):
         """Connect specimen tab signals to slots 
@@ -109,6 +84,47 @@ class TabUtilities:
             self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].initial_depth.returnPressed.disconnect()
             self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].initial_radius.returnPressed.disconnect()
             self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].particle_density.returnPressed.disconnect()
+            
+            self.tabs.specimen.specimens[f"Specimen {i}"]["moisture"].initial_wet_weight.returnPressed.disconnect()
+            self.tabs.specimen.specimens[f"Specimen {i}"]["moisture"].initial_dry_weight.returnPressed.disconnect()
+            self.tabs.specimen.specimens[f"Specimen {i}"]["moisture"].tin_initial_weight.returnPressed.disconnect()
+            
+            self.tabs.specimen.specimens[f"Specimen {i}"]["additional"].platen_weight.returnPressed.disconnect()
+            self.tabs.specimen.specimens[f"Specimen {i}"]["additional"].platen_corr.returnPressed.disconnect()
+            self.tabs.specimen.specimens[f"Specimen {i}"]["additional"].est_strain_at_fail.returnPressed.disconnect()
+
+    def get_devices_and_channels(self):
+        """Get devices and channels of each device and store in self.devices
+        """
+        self.devices = dict()
+        if "devices" in self.configuration.keys():
+            for device in self.configuration["devices"].keys():
+                key = f'{self.configuration["devices"][device]["model"]} ({self.configuration["devices"][device]["id"]})'
+                channels = [channel_info["name"] for channel_info in self.configuration["devices"][device]["acquisition"]]
+                self.devices[key] = [device, channels]
+    
+    def addItemstoInstrumentComboboxes(self):
+        """Fill instrument comboboxes in hardware tab with device names
+        """
+            
+        self.tabs.horiz_load_ins.clear()
+        self.tabs.horiz_load_ins.addItems([None] + list(self.devices.keys()))
+        self.tabs.horiz_load_chan.clear()
+        self.tabs.horiz_disp_ins.clear()
+        self.tabs.horiz_disp_ins.addItems([None] + list(self.devices.keys()))
+        self.tabs.horiz_disp_chan.clear()
+        self.tabs.vert_load_ins.clear()
+        self.tabs.vert_load_ins.addItems([None] + list(self.devices.keys()))
+        self.tabs.vert_load_chan.clear()
+        self.tabs.vert_disp_ins.clear()
+        self.tabs.vert_disp_ins.addItems([None] + list(self.devices.keys()))
+        self.tabs.vert_disp_chan.clear()
+        self.tabs.horiz_cont_ins.clear()
+        self.tabs.horiz_cont_ins.addItems([None] + list(self.devices.keys()))
+        self.tabs.horiz_cont_chan.clear()
+        self.tabs.vert_cont_ins.clear()
+        self.tabs.vert_cont_ins.addItems([None] + list(self.devices.keys()))
+        self.tabs.vert_cont_chan.clear()
 
     @Slot(str)
     def set_horiz_load_ins(self, device, apply_config=False):
@@ -445,6 +461,7 @@ class TabUtilities:
         log.info(f'Set {specimen} initial weight to {weight}.')        
 
         volume = self.configuration["shearbox"]["Specimens"][specimen]["Initial Volume"]
+        moisture = self.configuration["shearbox"]["Specimens"][specimen]["Initial Moisture"]
 
         if not (None in [weight, volume]):
             bulk_density = weight / volume
@@ -452,6 +469,16 @@ class TabUtilities:
             self.tabs.specimen.specimens[specimen]["dimensions"].initial_bulk_density.setText(str(round(bulk_density, 3)))
         
             log.info(f'Set {specimen} initial bulk density to {bulk_density}.')
+        
+            if not (None in [moisture, bulk_density]):
+                dry_density = bulk_density / (1 + moisture/100)
+                self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = dry_density
+                self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText(str(round(dry_density, 3)))
+            
+                log.info(f'Set {specimen} initial dry density to {dry_density}.')
+            else:
+                self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = None
+                self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText("")
 
             
     @Slot(str)
@@ -466,6 +493,7 @@ class TabUtilities:
         depth = self.configuration["shearbox"]["Specimens"][specimen]["Initial Depth"]
         radius = self.configuration["shearbox"]["Specimens"][specimen]["Initial Radius"]
         rect = (self.configuration["shearbox"]["Specimens"][specimen]["Shape"] == "rectangular")
+        moisture = self.configuration["shearbox"]["Specimens"][specimen]["Initial Moisture"]
 
         if (not (None in [height, width, depth]) and rect) or (not (None in [height, radius]) and not rect):
             if not (None in [height, width, depth]) and rect:
@@ -485,6 +513,16 @@ class TabUtilities:
                 self.tabs.specimen.specimens[specimen]["dimensions"].initial_bulk_density.setText(str(round(bulk_density, 3)))
             
                 log.info(f'Set {specimen} initial bulk density to {bulk_density}.')
+        
+                if not (None in [moisture, bulk_density]):
+                    dry_density = bulk_density / (1 + moisture/100)
+                    self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = dry_density
+                    self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText(str(round(dry_density, 3)))
+                
+                    log.info(f'Set {specimen} initial dry density to {dry_density}.')
+                else:
+                    self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = None
+                    self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText("")
             
     @Slot(str)
     def set_width(self, specimen):
@@ -496,6 +534,7 @@ class TabUtilities:
         weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Weight"]
         height = self.configuration["shearbox"]["Specimens"][specimen]["Initial Height"]
         depth = self.configuration["shearbox"]["Specimens"][specimen]["Initial Depth"]
+        moisture = self.configuration["shearbox"]["Specimens"][specimen]["Initial Moisture"]
 
         if not (None in [width, depth]):
             area = width * depth / 100
@@ -516,6 +555,16 @@ class TabUtilities:
                 self.tabs.specimen.specimens[specimen]["dimensions"].initial_bulk_density.setText(str(round(bulk_density, 3)))
             
                 log.info(f'Set {specimen} initial bulk density to {bulk_density}.')
+        
+                if not (None in [moisture, bulk_density]):
+                    dry_density = bulk_density / (1 + moisture/100)
+                    self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = dry_density
+                    self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText(str(round(dry_density, 3)))
+                
+                    log.info(f'Set {specimen} initial dry density to {dry_density}.')
+                else:
+                    self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = None
+                    self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText("")
             
     @Slot(str)
     def set_depth(self, specimen):
@@ -527,6 +576,7 @@ class TabUtilities:
         weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Weight"]
         height = self.configuration["shearbox"]["Specimens"][specimen]["Initial Height"]
         width = self.configuration["shearbox"]["Specimens"][specimen]["Initial Width"]
+        moisture = self.configuration["shearbox"]["Specimens"][specimen]["Initial Moisture"]
 
         if not (None in [width, depth]):
             area = width * depth / 100
@@ -547,6 +597,16 @@ class TabUtilities:
                 self.tabs.specimen.specimens[specimen]["dimensions"].initial_bulk_density.setText(str(round(bulk_density, 3)))
             
                 log.info(f'Set {specimen} initial bulk density to {bulk_density}.')
+        
+                if not (None in [moisture, bulk_density]):
+                    dry_density = bulk_density / (1 + moisture/100)
+                    self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = dry_density
+                    self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText(str(round(dry_density, 3)))
+                
+                    log.info(f'Set {specimen} initial dry density to {dry_density}.')
+                else:
+                    self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = None
+                    self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText("")
             
     @Slot(str)
     def set_radius(self, specimen):
@@ -557,6 +617,7 @@ class TabUtilities:
 
         weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Weight"]
         height = self.configuration["shearbox"]["Specimens"][specimen]["Initial Height"]
+        moisture = self.configuration["shearbox"]["Specimens"][specimen]["Initial Moisture"]
 
         if radius != None:
             area = np.pi * radius**2 / 100
@@ -564,6 +625,7 @@ class TabUtilities:
             self.tabs.specimen.specimens[specimen]["dimensions"].initial_area.setText(str(round(area, 3)))
 
             log.info(f'Set {specimen} initial area to {area}.')
+
         if not (None in [height, radius]):
             volume = height * np.pi * radius**2 / 1000
             self.configuration["shearbox"]["Specimens"][specimen]["Initial Volume"] = volume
@@ -577,10 +639,186 @@ class TabUtilities:
                 self.tabs.specimen.specimens[specimen]["dimensions"].initial_bulk_density.setText(str(round(bulk_density, 3)))
             
                 log.info(f'Set {specimen} initial bulk density to {bulk_density}.')
-            
+        
+                if not (None in [moisture, bulk_density]):
+                    dry_density = bulk_density / (1 + moisture/100)
+                    self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = dry_density
+                    self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText(str(round(dry_density, 3)))
+                
+                    log.info(f'Set {specimen} initial dry density to {dry_density}.')
+                else:
+                    self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = None
+                    self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText("")
+
     @Slot(str)
     def set_density(self, specimen):
         particle_density = float(self.tabs.specimen.specimens[specimen]["dimensions"].particle_density.text())
         self.configuration["shearbox"]["Specimens"][specimen]["Particle Density"] = particle_density
 
         log.info(f'Set {specimen} particle density to {particle_density}.')
+            
+    @Slot(str)
+    def set_wet_weight(self, specimen):
+        wet_weight = float(self.tabs.specimen.specimens[specimen]["moisture"].initial_wet_weight.text())
+        self.configuration["shearbox"]["Specimens"][specimen]["Initial Wet Weight"] = wet_weight
+
+        log.info(f'Set {specimen} initial wet weight to {wet_weight}.')
+
+        bulk_density = self.configuration["shearbox"]["Specimens"][specimen]["Initial Bulk Density"]
+        dry_weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Weight"]
+        tin_weight = self.configuration["shearbox"]["Specimens"][specimen]["Tin (initial) Weight"]
+
+        try:
+            moisture = ((wet_weight - tin_weight) / (dry_weight - tin_weight) - 1) * 100
+            assert (moisture >= 0 and moisture <= 100)
+            self.configuration["shearbox"]["Specimens"][specimen]["Initial Moisture"] = moisture
+            self.tabs.specimen.specimens[specimen]["moisture"].initial_moisture.setText(str(round(moisture, 1)))
+        
+            log.info(f'Set {specimen} initial moisture to {moisture}.')
+        
+            if not (None in [moisture, bulk_density]):
+                dry_density = bulk_density / (1 + moisture/100)
+                self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = dry_density
+                self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText(str(round(dry_density, 3)))
+            
+                log.info(f'Set {specimen} initial dry density to {dry_density}.')
+            else:
+                self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = None
+                self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText("") 
+        except:
+            moisture = None
+            self.configuration["shearbox"]["Specimens"][specimen]["Initial Moisture"] = None
+            self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = None
+            self.tabs.specimen.specimens[specimen]["moisture"].initial_moisture.setText("")
+            self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText("")
+            
+        if not (None in [moisture, bulk_density]):
+            voids_ratio = 2
+            self.configuration["shearbox"]["Specimens"][specimen]["Initial Voids Ratio"] = voids_ratio
+            self.tabs.specimen.specimens[specimen]["moisture"].initial_voids_ratio.setText(str(round(voids_ratio, 3)))
+        
+            log.info(f'Set {specimen} initial voids ratio to {voids_ratio}.')
+            
+        if not (None in [moisture, bulk_density]):
+            deg_of_sat = 2
+            self.configuration["shearbox"]["Specimens"][specimen]["Initial Degree of Saturation"] = deg_of_sat
+            self.tabs.specimen.specimens[specimen]["moisture"].initial_deg_of_sat.setText(str(round(deg_of_sat, 1)))
+        
+            log.info(f'Set {specimen} initial degree of saturation to {deg_of_sat}.')
+            
+    @Slot(str)
+    def set_dry_weight(self, specimen):
+        dry_weight = float(self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_weight.text())
+        self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Weight"] = dry_weight
+
+        log.info(f'Set {specimen} initial dry weight to {dry_weight}.')
+
+        bulk_density = self.configuration["shearbox"]["Specimens"][specimen]["Initial Bulk Density"]
+        wet_weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Wet Weight"]
+        tin_weight = self.configuration["shearbox"]["Specimens"][specimen]["Tin (initial) Weight"]
+
+        if not (None in [dry_weight, tin_weight]):
+            moisture = ((wet_weight - tin_weight) / (dry_weight - tin_weight) - 1) * 100
+            if moisture >= 0 and moisture <= 100:
+                self.configuration["shearbox"]["Specimens"][specimen]["Initial Moisture"] = moisture
+                self.tabs.specimen.specimens[specimen]["moisture"].initial_moisture.setText(str(round(moisture, 1)))
+            
+                log.info(f'Set {specimen} initial moisture to {moisture}.')
+            
+                if not (None in [moisture, bulk_density]):
+                    dry_density = bulk_density / (1 + moisture/100)
+                    self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = dry_density
+                    self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText(str(round(dry_density, 3)))
+                
+                    log.info(f'Set {specimen} initial dry density to {dry_density}.')
+            else:
+                moisture = None
+                self.tabs.specimen.specimens[specimen]["moisture"].initial_moisture.setText("")
+                self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText("")
+        else:
+            moisture = None
+            self.tabs.specimen.specimens[specimen]["moisture"].initial_moisture.setText("")
+            self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText("")
+            
+        if not (None in [moisture, bulk_density]):
+            voids_ratio = 2
+            self.configuration["shearbox"]["Specimens"][specimen]["Initial Voids Ratio"] = voids_ratio
+            self.tabs.specimen.specimens[specimen]["moisture"].initial_voids_ratio.setText(str(round(voids_ratio, 3)))
+        
+            log.info(f'Set {specimen} initial voids ratio to {voids_ratio}.')
+            
+        if not (None in [moisture, bulk_density]):
+            deg_of_sat = 2
+            self.configuration["shearbox"]["Specimens"][specimen]["Initial Degree of Saturation"] = deg_of_sat
+            self.tabs.specimen.specimens[specimen]["moisture"].initial_deg_of_sat.setText(str(round(deg_of_sat, 1)))
+        
+            log.info(f'Set {specimen} initial degree of saturation to {deg_of_sat}.')
+            
+    @Slot(str)
+    def set_tin_weight(self, specimen):
+        tin_weight = float(self.tabs.specimen.specimens[specimen]["moisture"].tin_initial_weight.text())
+        self.configuration["shearbox"]["Specimens"][specimen]["Tin (initial) Weight"] = tin_weight
+
+        log.info(f'Set {specimen} tin (initial) weight to {tin_weight}.')
+
+        bulk_density = self.configuration["shearbox"]["Specimens"][specimen]["Initial Bulk Density"]
+        wet_weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Wet Weight"]
+        dry_weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Weight"]
+
+        if not (None in [dry_weight, tin_weight]):
+            moisture = ((wet_weight - tin_weight) / (dry_weight - tin_weight) - 1) * 100
+            if moisture >= 0 and moisture <= 100:
+                self.configuration["shearbox"]["Specimens"][specimen]["Initial Moisture"] = moisture
+                self.tabs.specimen.specimens[specimen]["moisture"].initial_moisture.setText(str(round(moisture, 1)))
+            
+                log.info(f'Set {specimen} initial moisture to {moisture}.')
+            
+                if not (None in [moisture, bulk_density]):
+                    dry_density = bulk_density / (1 + moisture/100)
+                    self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = dry_density
+                    self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText(str(round(dry_density, 3)))
+                
+                    log.info(f'Set {specimen} initial dry density to {dry_density}.')
+            else:
+                moisture = None
+                self.tabs.specimen.specimens[specimen]["moisture"].initial_moisture.setText("")
+                self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText("")
+        else:
+            moisture = None
+            self.tabs.specimen.specimens[specimen]["moisture"].initial_moisture.setText("")
+            self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText("")
+            
+        if not (None in [moisture, bulk_density]):
+            voids_ratio = 2
+            self.configuration["shearbox"]["Specimens"][specimen]["Initial Voids Ratio"] = voids_ratio
+            self.tabs.specimen.specimens[specimen]["moisture"].initial_voids_ratio.setText(str(round(voids_ratio, 3)))
+        
+            log.info(f'Set {specimen} initial voids ratio to {voids_ratio}.')
+            
+        if not (None in [moisture, bulk_density]):
+            deg_of_sat = 2
+            self.configuration["shearbox"]["Specimens"][specimen]["Initial Degree of Saturation"] = deg_of_sat
+            self.tabs.specimen.specimens[specimen]["moisture"].initial_deg_of_sat.setText(str(round(deg_of_sat, 1)))
+        
+            log.info(f'Set {specimen} initial degree of saturation to {deg_of_sat}.')
+
+    @Slot(str)
+    def set_platen_weight(self, specimen):
+        platen_weight = float(self.tabs.specimen.specimens[specimen]["additional"].platen_weight.text())
+        self.configuration["shearbox"]["Specimens"][specimen]["platen_weight"] = platen_weight
+
+        log.info(f'Set {specimen} platen weight to {platen_weight}.')
+
+    @Slot(str)
+    def set_platen_corr(self, specimen):
+        platen_corr = float(self.tabs.specimen.specimens[specimen]["additional"].platen_corr.text())
+        self.configuration["shearbox"]["Specimens"][specimen]["Platen Correction"] = platen_corr
+
+        log.info(f'Set {specimen} platen correction to {platen_corr}.')
+
+    @Slot(str)
+    def set_est_strain_at_fail(self, specimen):
+        est_strain_at_fail = float(self.tabs.specimen.specimens[specimen]["additional"].est_strain_at_fail.text())
+        self.configuration["shearbox"]["Specimens"][specimen]["Estimated Strain at Shear Failure"] = est_strain_at_fail
+
+        log.info(f'Set {specimen} estimated strain at shear failure to {est_strain_at_fail}.')

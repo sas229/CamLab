@@ -73,7 +73,8 @@ class ShearTabs(QTabWidget):
         self.cycles[cycle]["reverse_stress"] = QLineEdit()
         self.cycles[cycle]["reverse_stress_unit"] = QLabel("kPa")
 
-        time_validator = QRegularExpressionValidator("^(2[0-3]|[01]?[0-9]):([0-5][0-9]):([0-5][0-9])$")
+        # time_validator = QRegularExpressionValidator("^(2[0-3]|[01]?[0-9]):([0-5][0-9]):([0-5][0-9])$")
+        time_validator = QRegularExpressionValidator("^((2[0-3]|[01]?[0-9]):([0-5][0-9]):([0-5][0-9]))|(([0-5]?[0-9]):([0-5][0-9]))|([0-5][0-9]|[1-9])$")
         # num_validator = QDoubleValidator(bottom=0)
         num_validator = QRegularExpressionValidator("^([1-9][0-9]*(\.[0-9]+)?|0+\.[0-9]*[1-9][0-9]*)$")
 

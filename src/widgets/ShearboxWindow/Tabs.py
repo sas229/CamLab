@@ -118,7 +118,8 @@ class TabInterface(QTabWidget):
         self.consolidation_stop_time_opt = QLineEdit()
         self.consolidation_stop_buzz = QCheckBox("Buzz to inform when the consolidation stage is completed")
 
-        time_validator = QRegularExpressionValidator("^(2[0-3]|[01]?[0-9]):([0-5][0-9]):([0-5][0-9])$")
+        # time_validator = QRegularExpressionValidator("^(2[0-3]|[01]?[0-9]):([0-5][0-9]):([0-5][0-9])$")
+        time_validator = QRegularExpressionValidator("^((2[0-3]|[01]?[0-9]):([0-5][0-9]):([0-5][0-9]))|(([0-5]?[0-9]):([0-5][0-9]))|([0-5][0-9]|[1-9])$")
         # num_validator = QDoubleValidator(bottom=0)
         num_validator = QRegularExpressionValidator("^([1-9][0-9]*(\.[0-9]+)?|0+\.[0-9]*[1-9][0-9]*)$")
 
@@ -129,7 +130,7 @@ class TabInterface(QTabWidget):
         self.consolidation_log_change_val.setValidator(num_validator)
         self.consolidation_stop_rate_disp.setValidator(num_validator)
         self.consolidation_stop_rate_time.setValidator(time_validator)
-        self.consolidation_stop_time_opt.setValidator(num_validator)
+        self.consolidation_stop_time_opt.setValidator(time_validator)
 
         self.consolidation_start_layout.addWidget(QLabel("Apply the following vertical stress"), 0, 0)
         self.consolidation_start_layout.addWidget(self.consolidation_start_stress, 0, 1)
