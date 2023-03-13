@@ -9,14 +9,14 @@ log = logging.getLogger(__name__)
 
 class TabInterface(QTabWidget):
 
-    def __init__(self, configuration):
+    def __init__(self):
         super().__init__()
         """TabInterface init."""
 
         self.build_hardware_tab()
-        self.build_specimen_tab(configuration)
+        self.build_specimen_tab()
         self.build_consolidation_tab()
-        self.build_shear_tab(configuration)
+        self.build_shear_tab()
 
     def build_hardware_tab(self):
         self.hardware = QWidget()
@@ -81,11 +81,10 @@ class TabInterface(QTabWidget):
 
         self.add_persistent_tab(self.hardware, "Hardware")
         
-    def build_specimen_tab(self, configuration):
-        self.specimen = SpecimenTabs(configuration)
+    def build_specimen_tab(self):
+        self.specimen = SpecimenTabs()
 
         self.add_persistent_tab(self.specimen.specimens["Specimen 1"]["tabs"], "Specimen")
-        # self.add_persistent_tab(self.specimen, "Specimen")
         
     def build_consolidation_tab(self):
         self.consolidation = QWidget()
@@ -184,11 +183,10 @@ class TabInterface(QTabWidget):
 
         self.add_persistent_tab(self.consolidation, "Consolidation setup")
         
-    def build_shear_tab(self, configuration):
-        self.shear = ShearTabs(configuration)
+    def build_shear_tab(self):
+        self.shear = ShearTabs()
 
         self.add_persistent_tab(self.shear.cycles["Cycle 1"]["widget"], "Shear setup")
-        # self.add_persistent_tab(self.shear, "Shear setup")
 
     def add_persistent_tab(self, widget, name):
         """Method to add persistent tab."""

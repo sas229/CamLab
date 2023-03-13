@@ -14,7 +14,7 @@ def num_to_str(num):
 
 class SpecimenTabs(QTabWidget):
 
-    def __init__(self, configuration):
+    def __init__(self):
         super().__init__()
         """TabInterface init."""
 
@@ -23,18 +23,16 @@ class SpecimenTabs(QTabWidget):
         for i in range(1,5):
             specimen = f"Specimen {i}"
             self.specimens[specimen] = dict()
-            self.build_specimen(specimen, configuration)
-            if i > 1 and i <= configuration["shearbox"]["Number of Specimens"]:
-                self.add_persistent_tab(self.specimens[specimen]["tabs"], specimen)
+            self.build_specimen(specimen)
 
-    def build_specimen(self, specimen, configuration):
+    def build_specimen(self, specimen):
         """Build one of the specimen tabs
 
         Arguments:
             specimen -- Tab name
         """
         self.specimens[specimen]["tabs"] = QTabWidget()
-        self.specimens[specimen]["dimensions"] = DimensionTab(specimen, configuration)
+        self.specimens[specimen]["dimensions"] = DimensionTab()
         self.specimens[specimen]["moisture"] = MoistureTab()
         self.specimens[specimen]["additional"] = AdditionalTab()
 

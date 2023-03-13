@@ -612,7 +612,7 @@ class Manager(QObject):
                 if self.configuration["devices"][device]["type"] == "Press":
                     self.initialisePressFeedbackSettings.emit()
 
-            log.info("Configuration loaded.")
+            log.info("Devices configuration loaded.")
             self.configurationChanged.emit(self.configuration)  
                 
     def findDevices(self):

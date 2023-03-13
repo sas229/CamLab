@@ -14,9 +14,9 @@ class TabUtilities:
         self.make_specimen_tab_connections()
 
     def remove_connections(self):
-        self.specimens.valueChanged.disconnect(self.specimens_number)
-        self.residual_shear.toggled.disconnect(self.shear_type)
-        self.cycles.valueChanged.disconnect(self.residuals_number)
+        self.specimens.valueChanged.disconnect()
+        self.residual_shear.toggled.disconnect()
+        self.cycles.valueChanged.disconnect()
         self.remove_hardware_tab_connections()
         self.remove_specimen_tab_connections()
 
@@ -66,24 +66,24 @@ class TabUtilities:
     def remove_hardware_tab_connections(self):
         """Disconnect hardware tab combobox signals to slots 
         """
-        self.tabs.horiz_load_ins.currentTextChanged.disconnect(self.set_horiz_load_ins)
-        self.tabs.horiz_disp_ins.currentTextChanged.disconnect(self.set_horiz_disp_ins)
-        self.tabs.vert_load_ins.currentTextChanged.disconnect(self.set_vert_load_ins)
-        self.tabs.vert_disp_ins.currentTextChanged.disconnect(self.set_vert_disp_ins)
-        self.tabs.horiz_cont_ins.currentTextChanged.disconnect(self.set_horiz_cont_ins)
-        self.tabs.vert_cont_ins.currentTextChanged.disconnect(self.set_vert_cont_ins)
+        self.tabs.horiz_load_ins.currentTextChanged.disconnect()
+        self.tabs.horiz_disp_ins.currentTextChanged.disconnect()
+        self.tabs.vert_load_ins.currentTextChanged.disconnect()
+        self.tabs.vert_disp_ins.currentTextChanged.disconnect()
+        self.tabs.horiz_cont_ins.currentTextChanged.disconnect()
+        self.tabs.vert_cont_ins.currentTextChanged.disconnect()
         if self.configuration["shearbox"]["Hardware"]["Horizontal Load Instrument"] != None:
-            self.tabs.horiz_load_chan.currentTextChanged.disconnect(self.set_horiz_load_chan)
+            self.tabs.horiz_load_chan.currentTextChanged.disconnect()
         if self.configuration["shearbox"]["Hardware"]["Horizontal Displacement Instrument"] != None:
-            self.tabs.horiz_disp_chan.currentTextChanged.disconnect(self.set_horiz_disp_chan)
+            self.tabs.horiz_disp_chan.currentTextChanged.disconnect()
         if self.configuration["shearbox"]["Hardware"]["Vertical Load Instrument"] != None:
-            self.tabs.vert_load_chan.currentTextChanged.disconnect(self.set_vert_load_chan)
+            self.tabs.vert_load_chan.currentTextChanged.disconnect()
         if self.configuration["shearbox"]["Hardware"]["Vertical Displacement Instrument"] != None:
-            self.tabs.vert_disp_chan.currentTextChanged.disconnect(self.set_vert_disp_chan)
+            self.tabs.vert_disp_chan.currentTextChanged.disconnect()
         if self.configuration["shearbox"]["Hardware"]["Horizontal Control Instrument"] != None:
-            self.tabs.horiz_cont_chan.currentTextChanged.disconnect(self.set_horiz_cont_chan)
+            self.tabs.horiz_cont_chan.currentTextChanged.disconnect()
         if self.configuration["shearbox"]["Hardware"]["Vertical Control Instrument"] != None:
-            self.tabs.vert_cont_chan.currentTextChanged.disconnect(self.set_vert_cont_chan)
+            self.tabs.vert_cont_chan.currentTextChanged.disconnect()
     
     def make_specimen_tab_connections(self):
         """Connect specimen tab signals to slots 

@@ -12,7 +12,7 @@ def num_to_str(num):
 
 class ShearTabs(QTabWidget):
 
-    def __init__(self, configuration):
+    def __init__(self):
         super().__init__()
         """Shear stage defining tabs"""
 
@@ -21,11 +21,9 @@ class ShearTabs(QTabWidget):
         for i in range(1,11):
             cycle = f"Cycle {i}"
             self.cycles[cycle] = dict()
-            self.build_tab(cycle, configuration)
-            if configuration["shearbox"]["Residual Cycles"] > 1 and i <= configuration["shearbox"]["Residual Cycles"] and (configuration["shearbox"]["Mode"] == "residual" or i != 1):
-                self.add_persistent_tab(self.cycles[cycle]["widget"], cycle)
+            self.build_tab(cycle)
 
-    def build_tab(self, cycle, configuration):
+    def build_tab(self, cycle):
         """Build one of the shear tabs
 
         Arguments:
@@ -126,16 +124,15 @@ class ShearTabs(QTabWidget):
         self.cycles[cycle]["reverse_layout"].addWidget(QLabel("mm/min"), 0, 2)
         self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_same"], 1, 0, 1, 3)
 
-        if configuration["shearbox"]["Mode"] == "residual" or cycle != "Cycle 1":
-            self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_wait_label"], 2, 0)
-            self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_wait"], 2, 1)
-            self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_wait_unit"], 2, 2)
-            self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_disp_label"], 3, 0)
-            self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_disp"], 3, 1)
-            self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_disp_unit"], 3, 2)
-            self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_stress_label"], 4, 0)
-            self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_stress"], 4, 1)
-            self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_stress_unit"], 4, 2)
+        self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_wait_label"], 2, 0)
+        self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_wait"], 2, 1)
+        self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_wait_unit"], 2, 2)
+        self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_disp_label"], 3, 0)
+        self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_disp"], 3, 1)
+        self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_disp_unit"], 3, 2)
+        self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_stress_label"], 4, 0)
+        self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_stress"], 4, 1)
+        self.cycles[cycle]["reverse_layout"].addWidget(self.cycles[cycle]["reverse_stress_unit"], 4, 2)
 
         self.cycles[cycle]["trigger"].setLayout(self.cycles[cycle]["trigger_layout"])
         self.cycles[cycle]["store"].setLayout(self.cycles[cycle]["store_layout"])

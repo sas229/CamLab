@@ -66,7 +66,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         self.topbarlayout.addWidget(self.toolbar, 0)
         self.topbar.setLayout(self.topbarlayout)
 
-        self.tabs = TabInterface(self.configuration)
+        self.tabs = TabInterface()
 
         self.Layout.addWidget(self.topbar, 0)
         self.Layout.addWidget(self.tabs, 2)
@@ -109,7 +109,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
 
     @Slot(int)    
     def specimens_number(self, num):
-        """Change number of specimens by one
+        """Change number of specimens
 
         Arguments:
             num -- new number of specimens
@@ -117,21 +117,22 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         index = self.tabs.currentIndex()
         if num == 1:
             self.tabs.specimen.setParent(None)
-            self.tabs.specimen.specimens["Specimen 1"]["tabs"].setParent(None)
+            for i in range(self.tabs.specimen.count()):
+                self.tabs.specimen.specimens[f"Specimen {i+1}"]["tabs"].setParent(None)
             self.tabs.insert_persistent_tab(1, self.tabs.specimen.specimens["Specimen 1"]["tabs"], "Specimen")
             self.tabs.setCurrentIndex(index)
-            self.tabs.specimen.specimens["Specimen 1"]["tabs"].show()
-        elif self.configuration["shearbox"]["Number of Specimens"] == 1:
+        elif self.tabs.specimen.count() == 0 and num > 1:
             self.tabs.specimen.specimens["Specimen 1"]["tabs"].setParent(None)
             self.tabs.insert_persistent_tab(1, self.tabs.specimen, "Specimen")
             self.tabs.setCurrentIndex(index)
-            self.tabs.specimen.add_persistent_tab(self.tabs.specimen.specimens["Specimen 1"]["tabs"], "Specimen 1")
-            self.tabs.specimen.add_persistent_tab(self.tabs.specimen.specimens["Specimen 2"]["tabs"], "Specimen 2")
-        elif num < self.configuration["shearbox"]["Number of Specimens"]:
-            self.tabs.specimen.close_tab(num)
-        else:
-            specimen = f"Specimen {num}"
-            self.tabs.specimen.add_persistent_tab(self.tabs.specimen.specimens[specimen]["tabs"], specimen)
+            for i in range(num):
+                self.tabs.specimen.add_persistent_tab(self.tabs.specimen.specimens[f"Specimen {i+1}"]["tabs"], f"Specimen {i+1}")
+        elif num < self.tabs.specimen.count():
+            for i in range(self.tabs.specimen.count(), num, -1):
+                self.tabs.specimen.close_tab(i-1)
+        elif num > self.tabs.specimen.count():
+            for i in range(self.tabs.specimen.count(), num):
+                self.tabs.specimen.add_persistent_tab(self.tabs.specimen.specimens[f"Specimen {i+1}"]["tabs"], f"Specimen {i+1}")
         self.configuration["shearbox"]["Number of Specimens"] = num
         self.configurationChanged.emit(self.configuration)
 
@@ -154,6 +155,8 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
     
     @Slot()
     def shear_type(self):
+        """switch between direct and residual shear.
+        """
         index = self.tabs.currentIndex()
         if self.direct_shear.isChecked():
             self.configuration["shearbox"]["Mode"] = "direct"
@@ -200,6 +203,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
             self.tabs.shear.cycles["Cycle 1"]["reverse_layout"].addWidget(self.tabs.shear.cycles["Cycle 1"]["reverse_stress_unit"], 4, 2)
 
         self.configurationChanged.emit(self.configuration)
+        log.info(f'Shear mode set to "{self.configuration["shearbox"]["Mode"]}".')
 
     @Slot(int)    
     def residuals_number(self, num):
@@ -211,21 +215,22 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         index = self.tabs.currentIndex()
         if num == 1:
             self.tabs.shear.setParent(None)
-            self.tabs.shear.cycles["Cycle 1"]["widget"].setParent(None)
+            for i in range(self.tabs.shear.count()):
+                self.tabs.shear.cycles[f"Cycle {i+1}"]["widget"].setParent(None)
             self.tabs.insert_persistent_tab(3, self.tabs.shear.cycles["Cycle 1"]["widget"], "Shear setup")
             self.tabs.setCurrentIndex(index)
-            self.tabs.shear.cycles["Cycle 1"]["widget"].show()
-        elif self.configuration["shearbox"]["Residual Cycles"] == 1:
+        elif self.tabs.shear.count() == 0 and num > 1:
             self.tabs.shear.cycles["Cycle 1"]["widget"].setParent(None)
             self.tabs.insert_persistent_tab(3, self.tabs.shear, "Shear setup")
             self.tabs.setCurrentIndex(index)
-            self.tabs.shear.add_persistent_tab(self.tabs.shear.cycles["Cycle 1"]["widget"], "Cycle 1")
-            self.tabs.shear.add_persistent_tab(self.tabs.shear.cycles["Cycle 2"]["widget"], "Cycle 2")
-        elif num < self.configuration["shearbox"]["Residual Cycles"]:
-            self.tabs.shear.close_tab(num)
-        else:
-            cycle = f"Cycle {num}"
-            self.tabs.shear.add_persistent_tab(self.tabs.shear.cycles[cycle]["widget"], cycle)
+            for i in range(num):
+                self.tabs.shear.add_persistent_tab(self.tabs.shear.cycles[f"Cycle {i+1}"]["widget"], f"Cycle {i+1}")
+        elif num < self.tabs.shear.count():
+            for i in range(self.tabs.shear.count(), num, -1):
+                self.tabs.shear.close_tab(i-1)
+        elif num > self.tabs.shear.count():
+            for i in range(self.tabs.shear.count(), num): 
+                self.tabs.shear.add_persistent_tab(self.tabs.shear.cycles[f"Cycle {i+1}"]["widget"], f"Cycle {i+1}")
         self.configuration["shearbox"]["Residual Cycles"] = num
         self.configurationChanged.emit(self.configuration)
 
@@ -239,6 +244,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         self.addItemstoInstrumentComboboxes()
 
         self.specimens.setValue(configuration["shearbox"]["Number of Specimens"])
+        self.specimens_number(configuration["shearbox"]["Number of Specimens"])
 
         if configuration["shearbox"]["Mode"] == "direct":
             self.direct_shear.setChecked(True)
@@ -247,6 +253,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         self.shear_type()
 
         self.cycles.setValue(configuration["shearbox"]["Residual Cycles"])
+        self.residuals_number(configuration["shearbox"]["Residual Cycles"])
 
         self.tabs.horiz_load_ins.setCurrentText(configuration["shearbox"]["Hardware"]["Horizontal Load Instrument"])
         if self.tabs.horiz_load_ins.currentText() != "":
