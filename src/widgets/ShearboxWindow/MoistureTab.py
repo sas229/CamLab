@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QGridLayout, QLineEdit, QLabel, QGroupBox
-from PySide6.QtGui import QDoubleValidator
+from PySide6.QtGui import QDoubleValidator, QRegularExpressionValidator
 import logging 
 
 log = logging.getLogger(__name__)
@@ -9,7 +9,8 @@ class MoistureTab(QWidget):
     def __init__(self):
         super().__init__()
         self.Layout = QGridLayout()
-        num_validator = QDoubleValidator()
+        # num_validator = QDoubleValidator(bottom=0)
+        num_validator = QRegularExpressionValidator("^([1-9][0-9]*(\.[0-9]+)?|0+\.[0-9]*[1-9][0-9]*)$")
         
         self.initial_wet_weight = QLineEdit()
         self.initial_dry_weight = QLineEdit()

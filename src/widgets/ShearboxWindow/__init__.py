@@ -317,7 +317,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
 
         self.tabs.specimen.apply_configuration(configuration)
         for i in range(1,5):
-            self.shape_switch(f"Specimen {i}", _=None)
+            self.shape_switch(f"Specimen {i}")
 
         self.tabs.consolidation_start_stress.setText(num_to_str(configuration["shearbox"]["Consolidation"]["Initial Stress"]))
         self.tabs.consolidation_trigger_stress_select.setChecked(configuration["shearbox"]["Consolidation"]["Trigger Logging at Stress"])

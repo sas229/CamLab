@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QGridLayout, QLineEdit, QLabel, QGroupBox, QRadioButton, QHBoxLayout
-from PySide6.QtGui import QDoubleValidator
+from PySide6.QtGui import QDoubleValidator, QRegularExpressionValidator
 import logging 
 
 log = logging.getLogger(__name__)
@@ -8,7 +8,8 @@ class DimensionTab(QWidget):
 
     def __init__(self):
         super().__init__()
-        num_validator = QDoubleValidator(bottom=0)
+        # num_validator = QDoubleValidator(bottom=0)
+        num_validator = QRegularExpressionValidator("^([1-9][0-9]*(\.[0-9]+)?|0+\.[0-9]*[1-9][0-9]*)$")
         
         self.initial_weight = QLineEdit()
         self.initial_height = QLineEdit()

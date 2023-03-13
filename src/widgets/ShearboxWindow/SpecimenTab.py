@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QTabWidget, QTabBar, QGridLayout
+from PySide6.QtWidgets import QTabWidget, QTabBar
 from widgets.ShearboxWindow.DimensionTab import DimensionTab
 from widgets.ShearboxWindow.MoistureTab import MoistureTab
 from widgets.ShearboxWindow.AdditionalTab import AdditionalTab
@@ -57,9 +57,6 @@ class SpecimenTabs(QTabWidget):
             self.specimens[specimen]["dimensions"].initial_depth.setText(num_to_str(configuration["shearbox"]["Specimens"][specimen]["Initial Depth"]))
             self.specimens[specimen]["dimensions"].initial_radius.setText(num_to_str(configuration["shearbox"]["Specimens"][specimen]["Initial Radius"]))
             self.specimens[specimen]["dimensions"].particle_density.setText(num_to_str(configuration["shearbox"]["Specimens"][specimen]["Particle Density"]))
-            self.specimens[specimen]["dimensions"].initial_area.setText(num_to_str(configuration["shearbox"]["Specimens"][specimen]["Initial Area"]))
-            self.specimens[specimen]["dimensions"].initial_volume.setText(num_to_str(configuration["shearbox"]["Specimens"][specimen]["Initial Volume"]))
-            self.specimens[specimen]["dimensions"].initial_bulk_density.setText(num_to_str(configuration["shearbox"]["Specimens"][specimen]["Initial Bulk Density"]))
             
             self.specimens[specimen]["moisture"].initial_wet_weight.setText(num_to_str(configuration["shearbox"]["Specimens"][specimen]["Initial Wet Weight"]))
             self.specimens[specimen]["moisture"].initial_dry_weight.setText(num_to_str(configuration["shearbox"]["Specimens"][specimen]["Initial Dry Weight"]))

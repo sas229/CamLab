@@ -119,7 +119,8 @@ class TabInterface(QTabWidget):
         self.consolidation_stop_buzz = QCheckBox("Buzz to inform when the consolidation stage is completed")
 
         time_validator = QRegularExpressionValidator("^(2[0-3]|[01]?[0-9]):([0-5][0-9]):([0-5][0-9])$")
-        num_validator = QDoubleValidator(bottom=0)
+        # num_validator = QDoubleValidator(bottom=0)
+        num_validator = QRegularExpressionValidator("^([1-9][0-9]*(\.[0-9]+)?|0+\.[0-9]*[1-9][0-9]*)$")
 
         self.consolidation_start_stress.setValidator(num_validator)
         self.consolidation_trigger_stress.setValidator(num_validator)

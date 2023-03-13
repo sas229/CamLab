@@ -1,3 +1,4 @@
+import numpy as np
 from PySide6.QtCore import Slot
 from functools import partial
 import logging
@@ -90,12 +91,24 @@ class TabUtilities:
         """
         for i in range(1,5):
             self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].rectangular.toggled.connect(partial(self.shape_switch, f"Specimen {i}"))
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].initial_weight.returnPressed.connect(partial(self.set_weight, f"Specimen {i}"))
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].initial_height.returnPressed.connect(partial(self.set_height, f"Specimen {i}"))
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].initial_width.returnPressed.connect(partial(self.set_width, f"Specimen {i}"))
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].initial_depth.returnPressed.connect(partial(self.set_depth, f"Specimen {i}"))
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].initial_radius.returnPressed.connect(partial(self.set_radius, f"Specimen {i}"))
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].particle_density.returnPressed.connect(partial(self.set_density, f"Specimen {i}"))
     
     def remove_specimen_tab_connections(self):
         """Connect specimen tab signals to slots 
         """
         for i in range(1,5):
             self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].rectangular.toggled.disconnect()
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].initial_weight.returnPressed.disconnect()
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].initial_height.returnPressed.disconnect()
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].initial_width.returnPressed.disconnect()
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].initial_depth.returnPressed.disconnect()
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].initial_radius.returnPressed.disconnect()
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].particle_density.returnPressed.disconnect()
 
     @Slot(str)
     def set_horiz_load_ins(self, device, apply_config=False):
@@ -344,7 +357,7 @@ class TabUtilities:
         self.configurationChanged.emit(self.configuration)
 
     @Slot(str)
-    def shape_switch(self, specimen, _):
+    def shape_switch(self, specimen, _=None):
         if self.tabs.specimen.specimens[specimen]["dimensions"].rectangular.isChecked():
             self.configuration["shearbox"]["Specimens"][specimen]["Shape"] = "rectangular"
 
@@ -360,6 +373,30 @@ class TabUtilities:
             self.tabs.specimen.specimens[specimen]["dimensions"].radius_label2.setParent(None)
             self.tabs.specimen.specimens[specimen]["dimensions"].initial_radius.setParent(None)
             self.tabs.specimen.specimens[specimen]["dimensions"].radius_label3.setParent(None)
+
+            weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Weight"]
+            height = self.configuration["shearbox"]["Specimens"][specimen]["Initial Height"]
+            width = self.configuration["shearbox"]["Specimens"][specimen]["Initial Width"]
+            depth = self.configuration["shearbox"]["Specimens"][specimen]["Initial Depth"]
+
+            if not (None in [width, depth]):
+                area = width * depth / 100
+                self.configuration["shearbox"]["Specimens"][specimen]["Initial Area"] = area
+                self.tabs.specimen.specimens[specimen]["dimensions"].initial_area.setText(str(round(area, 3)))
+            else:
+                self.tabs.specimen.specimens[specimen]["dimensions"].initial_area.setText("")
+            if not (None in [height, width, depth]):
+                volume = height * width * depth / 1000
+                self.configuration["shearbox"]["Specimens"][specimen]["Initial Volume"] = volume
+                self.tabs.specimen.specimens[specimen]["dimensions"].initial_volume.setText(str(round(volume, 3)))
+            else:
+                volume = None
+                self.tabs.specimen.specimens[specimen]["dimensions"].initial_volume.setText("")
+
+            if not (None in [weight, volume]):
+                bulk_density = weight / volume
+                self.configuration["shearbox"]["Specimens"][specimen]["Initial Bulk Density"] = bulk_density
+                self.tabs.specimen.specimens[specimen]["dimensions"].initial_bulk_density.setText(str(round(bulk_density, 3)))
         else:
             self.configuration["shearbox"]["Specimens"][specimen]["Shape"] = "circular"
 
@@ -375,3 +412,175 @@ class TabUtilities:
             self.tabs.specimen.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen.specimens[specimen]["dimensions"].radius_label2, 3, 1, 2, 1)
             self.tabs.specimen.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen.specimens[specimen]["dimensions"].initial_radius, 3, 2, 2, 1)
             self.tabs.specimen.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen.specimens[specimen]["dimensions"].radius_label3, 3, 3, 2, 1)
+
+            weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Weight"]
+            height = self.configuration["shearbox"]["Specimens"][specimen]["Initial Height"]
+            radius = self.configuration["shearbox"]["Specimens"][specimen]["Initial Radius"]
+
+            if radius != None:
+                area = np.pi * radius**2 / 100
+                self.configuration["shearbox"]["Specimens"][specimen]["Initial Area"] = area
+                self.tabs.specimen.specimens[specimen]["dimensions"].initial_area.setText(str(round(area, 3)))
+            else:
+                self.tabs.specimen.specimens[specimen]["dimensions"].initial_area.setText("")
+            if not (None in [height, radius]):
+                volume = height * np.pi * radius**2 / 1000
+                self.configuration["shearbox"]["Specimens"][specimen]["Initial Volume"] = volume
+                self.tabs.specimen.specimens[specimen]["dimensions"].initial_volume.setText(str(round(volume, 3)))
+            else:
+                volume = None
+                self.tabs.specimen.specimens[specimen]["dimensions"].initial_volume.setText("")
+
+            if not (None in [weight, volume]):
+                bulk_density = weight / volume
+                self.configuration["shearbox"]["Specimens"][specimen]["Initial Bulk Density"] = bulk_density
+                self.tabs.specimen.specimens[specimen]["dimensions"].initial_bulk_density.setText(str(round(bulk_density, 3)))
+
+            
+    @Slot(str)
+    def set_weight(self, specimen):
+        weight = float(self.tabs.specimen.specimens[specimen]["dimensions"].initial_weight.text())
+        self.configuration["shearbox"]["Specimens"][specimen]["Initial Weight"] = weight
+
+        log.info(f'Set {specimen} initial weight to {weight}.')        
+
+        volume = self.configuration["shearbox"]["Specimens"][specimen]["Initial Volume"]
+
+        if not (None in [weight, volume]):
+            bulk_density = weight / volume
+            self.configuration["shearbox"]["Specimens"][specimen]["Initial Bulk Density"] = bulk_density
+            self.tabs.specimen.specimens[specimen]["dimensions"].initial_bulk_density.setText(str(round(bulk_density, 3)))
+        
+            log.info(f'Set {specimen} initial bulk density to {bulk_density}.')
+
+            
+    @Slot(str)
+    def set_height(self, specimen):
+        height = float(self.tabs.specimen.specimens[specimen]["dimensions"].initial_height.text())
+        self.configuration["shearbox"]["Specimens"][specimen]["Initial Height"] = height
+
+        log.info(f'Set {specimen} initial height to {height}.')
+
+        weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Weight"]
+        width = self.configuration["shearbox"]["Specimens"][specimen]["Initial Width"]
+        depth = self.configuration["shearbox"]["Specimens"][specimen]["Initial Depth"]
+        radius = self.configuration["shearbox"]["Specimens"][specimen]["Initial Radius"]
+        rect = (self.configuration["shearbox"]["Specimens"][specimen]["Shape"] == "rectangular")
+
+        if (not (None in [height, width, depth]) and rect) or (not (None in [height, radius]) and not rect):
+            if not (None in [height, width, depth]) and rect:
+                volume = height * width * depth / 1000
+                self.configuration["shearbox"]["Specimens"][specimen]["Initial Volume"] = volume
+                self.tabs.specimen.specimens[specimen]["dimensions"].initial_volume.setText(str(round(volume, 3)))
+            else:
+                volume = height * np.pi * radius**2 / 1000
+                self.configuration["shearbox"]["Specimens"][specimen]["Initial Volume"] = volume
+                self.tabs.specimen.specimens[specimen]["dimensions"].initial_volume.setText(str(round(volume, 3)))
+            
+            log.info(f'Set {specimen} initial volume to {volume}.')
+
+            if not (None in [weight, volume]):
+                bulk_density = weight / volume
+                self.configuration["shearbox"]["Specimens"][specimen]["Initial Bulk Density"] = bulk_density
+                self.tabs.specimen.specimens[specimen]["dimensions"].initial_bulk_density.setText(str(round(bulk_density, 3)))
+            
+                log.info(f'Set {specimen} initial bulk density to {bulk_density}.')
+            
+    @Slot(str)
+    def set_width(self, specimen):
+        width = float(self.tabs.specimen.specimens[specimen]["dimensions"].initial_width.text())
+        self.configuration["shearbox"]["Specimens"][specimen]["Initial Width"] = width
+
+        log.info(f'Set {specimen} initial width to {width}.')
+
+        weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Weight"]
+        height = self.configuration["shearbox"]["Specimens"][specimen]["Initial Height"]
+        depth = self.configuration["shearbox"]["Specimens"][specimen]["Initial Depth"]
+
+        if not (None in [width, depth]):
+            area = width * depth / 100
+            self.configuration["shearbox"]["Specimens"][specimen]["Initial Area"] = area
+            self.tabs.specimen.specimens[specimen]["dimensions"].initial_area.setText(str(round(area, 3)))
+
+            log.info(f'Set {specimen} initial area to {area}.')
+        if not (None in [height, width, depth]):
+            volume = height * width * depth / 1000
+            self.configuration["shearbox"]["Specimens"][specimen]["Initial Volume"] = volume
+            self.tabs.specimen.specimens[specimen]["dimensions"].initial_volume.setText(str(round(volume, 3)))
+
+            log.info(f'Set {specimen} initial volume to {volume}.')
+
+            if not (None in [weight, volume]):
+                bulk_density = weight / volume
+                self.configuration["shearbox"]["Specimens"][specimen]["Initial Bulk Density"] = bulk_density
+                self.tabs.specimen.specimens[specimen]["dimensions"].initial_bulk_density.setText(str(round(bulk_density, 3)))
+            
+                log.info(f'Set {specimen} initial bulk density to {bulk_density}.')
+            
+    @Slot(str)
+    def set_depth(self, specimen):
+        depth = float(self.tabs.specimen.specimens[specimen]["dimensions"].initial_depth.text())
+        self.configuration["shearbox"]["Specimens"][specimen]["Initial Depth"] = depth
+
+        log.info(f'Set {specimen} initial depth to {depth}.')
+
+        weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Weight"]
+        height = self.configuration["shearbox"]["Specimens"][specimen]["Initial Height"]
+        width = self.configuration["shearbox"]["Specimens"][specimen]["Initial Width"]
+
+        if not (None in [width, depth]):
+            area = width * depth / 100
+            self.configuration["shearbox"]["Specimens"][specimen]["Initial Area"] = area
+            self.tabs.specimen.specimens[specimen]["dimensions"].initial_area.setText(str(round(area, 3)))
+
+            log.info(f'Set {specimen} initial area to {area}.')
+        if not (None in [height, width, depth]):
+            volume = height * width * depth / 1000
+            self.configuration["shearbox"]["Specimens"][specimen]["Initial Volume"] = volume
+            self.tabs.specimen.specimens[specimen]["dimensions"].initial_volume.setText(str(round(volume, 3)))
+
+            log.info(f'Set {specimen} initial volume to {volume}.')
+
+            if not (None in [weight, volume]):
+                bulk_density = weight / volume
+                self.configuration["shearbox"]["Specimens"][specimen]["Initial Bulk Density"] = bulk_density
+                self.tabs.specimen.specimens[specimen]["dimensions"].initial_bulk_density.setText(str(round(bulk_density, 3)))
+            
+                log.info(f'Set {specimen} initial bulk density to {bulk_density}.')
+            
+    @Slot(str)
+    def set_radius(self, specimen):
+        radius = float(self.tabs.specimen.specimens[specimen]["dimensions"].initial_radius.text())
+        self.configuration["shearbox"]["Specimens"][specimen]["Initial Radius"] = radius
+
+        log.info(f'Set {specimen} initial radius to {radius}.')
+
+        weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Weight"]
+        height = self.configuration["shearbox"]["Specimens"][specimen]["Initial Height"]
+
+        if radius != None:
+            area = np.pi * radius**2 / 100
+            self.configuration["shearbox"]["Specimens"][specimen]["Initial Area"] = area
+            self.tabs.specimen.specimens[specimen]["dimensions"].initial_area.setText(str(round(area, 3)))
+
+            log.info(f'Set {specimen} initial area to {area}.')
+        if not (None in [height, radius]):
+            volume = height * np.pi * radius**2 / 1000
+            self.configuration["shearbox"]["Specimens"][specimen]["Initial Volume"] = volume
+            self.tabs.specimen.specimens[specimen]["dimensions"].initial_volume.setText(str(round(volume, 3)))
+
+            log.info(f'Set {specimen} initial volume to {volume}.')
+
+            if not (None in [weight, volume]):
+                bulk_density = weight / volume
+                self.configuration["shearbox"]["Specimens"][specimen]["Initial Bulk Density"] = bulk_density
+                self.tabs.specimen.specimens[specimen]["dimensions"].initial_bulk_density.setText(str(round(bulk_density, 3)))
+            
+                log.info(f'Set {specimen} initial bulk density to {bulk_density}.')
+            
+    @Slot(str)
+    def set_density(self, specimen):
+        particle_density = float(self.tabs.specimen.specimens[specimen]["dimensions"].particle_density.text())
+        self.configuration["shearbox"]["Specimens"][specimen]["Particle Density"] = particle_density
+
+        log.info(f'Set {specimen} particle density to {particle_density}.')
