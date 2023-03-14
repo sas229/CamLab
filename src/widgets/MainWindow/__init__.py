@@ -171,7 +171,7 @@ class MainWindow(TabUtilities, PlotUtilities, ShearboxUtilities, ControlUtilitie
     def refresh_devices(self):
         """Method to refresh device list."""
         self.emitRefreshDevices.emit()
-        self.busy = BusyDialog(self)
+        self.busy = BusyDialog(parent=self, message="Scanning for devices...")
         self.busy.open()
 
     @Slot()

@@ -7,13 +7,13 @@ log = logging.getLogger(__name__)
 
 class BusyDialog(QDialog):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent, message):
         super().__init__(parent)
         self.setFixedSize(400, 100)
         self.setWindowModality(Qt.ApplicationModal)
         self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
 
-        self.message = QLabel("Scanning for devices...")
+        self.message = QLabel(message)
         self.waitingIndicator = WaitingIndicator(centerOnParent=False)
         self.waitingIndicator.start()
 
