@@ -80,6 +80,18 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
 
         self.apply_configuration(self.configuration)
 
+    def moveEvent(self, event):
+        self.configuration["shearbox"]["x"] = self.pos().x()
+        self.configuration["shearbox"]["y"] = self.pos().y()
+        # self.configurationChanged.emit(self.configuration)
+        return super(ShearboxWindow, self).moveEvent(event)
+
+    def resizeEvent(self, event):
+        self.configuration["shearbox"]["width"] = self.size().width()
+        self.configuration["shearbox"]["width"] = self.size().height()
+        # self.configurationChanged.emit(self.configuration)
+        return super(ShearboxWindow, self).resizeEvent(event)
+
     def set_theme(self):
         """Method to set the theme and apply the qt-material stylesheet."""
         self.darkMode = self.configuration["global"]["darkMode"]
@@ -150,8 +162,11 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         self.set_theme()
         self.updateIcons(self.darkMode)
 
-        self.move(self.configuration["shearbox"]["x"], self.configuration["shearbox"]["y"])
-        self.resize(self.configuration["shearbox"]["width"], self.configuration["shearbox"]["height"])
+        try:
+            self.move(self.configuration["shearbox"]["x"], self.configuration["shearbox"]["y"])
+            self.resize(self.configuration["shearbox"]["width"], self.configuration["shearbox"]["height"])
+        except:
+            pass
     
     @Slot()
     def shear_type(self):

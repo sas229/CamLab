@@ -37,9 +37,9 @@ class ShearboxUtilities:
         
         try:
             self.shearbox.activateWindow()
-            if self.shearbox.configuration != self.manager.configuration:
-                self.shearbox.set_configuration(self.manager.configuration)
-                self.shearbox.apply_configuration(self.manager.configuration)
+            self.shearbox.remove_connections()
+            self.shearbox.set_configuration(self.manager.configuration)
+            self.shearbox.apply_configuration(self.manager.configuration)
             self.connect_shearbox()
         except:
             self.shearbox = ShearboxWindow(self.manager.configuration)
@@ -66,22 +66,27 @@ class ShearboxUtilities:
                 self.shearbox.remove_connections()
         except:
             pass
-        finally:
-            self.manager.clear_shearbox_configuration.connect(self.disconnect_shearbox)
-            self.manager.configurationChanged.connect(self.shearbox.set_configuration)
-            self.shearbox.configurationChanged.connect(self.set_configuration)
-            self.shearbox.toolbar.saveConfiguration.connect(self.manager.saveConfiguration)
-            self.shearbox.toolbar.loadConfiguration.connect(self.manager.loadConfiguration)
-            if not external:
-                self.shearbox.make_connections()
 
-            log.info("ShearBox connected.")
-            self.manager.configurationChanged.emit(self.manager.configuration)
+        self.manager.clear_shearbox_configuration.connect(self.disconnect_shearbox)
+        self.manager.configurationChanged.connect(self.shearbox.set_configuration)
+        self.shearbox.configurationChanged.connect(self.set_configuration)
+        self.shearbox.toolbar.saveConfiguration.connect(self.manager.saveConfiguration)
+        self.shearbox.toolbar.loadConfiguration.connect(self.manager.loadConfiguration)
+        if not external:
+            self.shearbox.make_connections()
+
+        log.info("ShearBox connected.")
+        self.manager.configurationChanged.emit(self.manager.configuration)
 
     @Slot()
     def disconnect_shearbox(self):
         self.manager.clear_shearbox_configuration.disconnect(self.disconnect_shearbox)
-        self.manager.configurationChanged.disconnect(self.shearbox.set_configuration)
+        try:
+            self.manager.configurationChanged.disconnect(self.shearbox.set_configuration)
+        except:
+            pass
+        
+        self.shearbox.close()
         log.info("ShearBox disconnected.")
 
 def add_defaults_if_missing(configuration, defaults):
