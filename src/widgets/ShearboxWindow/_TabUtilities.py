@@ -14,6 +14,7 @@ class TabUtilities:
         self.make_hardware_tab_connections()
         self.make_specimen_tab_connections()
         self.make_consolidation_tab_connections()
+        self.make_shear_tab_connections()
 
     def remove_connections(self):
         self.specimens.valueChanged.disconnect()
@@ -22,6 +23,7 @@ class TabUtilities:
         self.remove_hardware_tab_connections()
         self.remove_specimen_tab_connections()
         self.remove_consolidation_tab_connections()
+        self.remove_shear_tab_connections()
     
     def make_hardware_tab_connections(self):
         """Connect hardware tab combobox signals to slots 
@@ -106,11 +108,11 @@ class TabUtilities:
         self.tabs.consolidation_trigger_disp.returnPressed.connect(self.set_consolidation_trigger_disp)
         self.tabs.consolidation_in_water.toggled.connect(self.set_consolidation_in_water)
 
-        self.tabs.consolidation_log_rate_radio.toggled.connect(self.set_consolidation_logging_method_rate)
+        self.tabs.consolidation_log_rate_radio.toggled.connect(self.set_consolidation_log_rate_radio)
         self.tabs.consolidation_log_rate_val.returnPressed.connect(self.set_consolidation_log_rate_val)
-        self.tabs.consolidation_log_timetable_radio.toggled.connect(self.set_consolidation_logging_method_timetable)
+        self.tabs.consolidation_log_timetable_radio.toggled.connect(self.set_consolidation_log_timetable_radio)
         self.tabs.consolidation_log_timetable_opt.currentTextChanged.connect(self.set_consolidation_log_timetable_opt)
-        self.tabs.consolidation_log_change_radio.toggled.connect(self.set_consolidation_logging_method_change)
+        self.tabs.consolidation_log_change_radio.toggled.connect(self.set_consolidation_log_change_radio)
         self.tabs.consolidation_log_change_val.returnPressed.connect(self.set_consolidation_log_change_val)
 
         self.tabs.consolidation_stop_rate_select.toggled.connect(self.set_consolidation_stop_rate_select)
@@ -141,7 +143,67 @@ class TabUtilities:
         self.tabs.consolidation_stop_time_select.toggled.disconnect()
         self.tabs.consolidation_stop_time_opt.returnPressed.disconnect()
         self.tabs.consolidation_stop_buzz.toggled.disconnect()
+    
+    def make_shear_tab_connections(self):
+        """Connect shear tab signals to slots 
+        """
+        for i in range(1,11): 
+            self.tabs.shear.cycles[f"Cycle {i}"]["trigger_speed_select"].toggled.connect(partial(self.set_shear_trigger_speed_select, f"Cycle {i}"))
+            self.tabs.shear.cycles[f"Cycle {i}"]["trigger_speed"].returnPressed.connect(partial(self.set_shear_trigger_speed, f"Cycle {i}"))
+            self.tabs.shear.cycles[f"Cycle {i}"]["trigger_calc_select"].toggled.connect(partial(self.set_shear_trigger_calc_select, f"Cycle {i}"))
+            self.tabs.shear.cycles[f"Cycle {i}"]["trigger_calc_opt"].currentTextChanged.connect(partial(self.set_shear_trigger_calc_opt, f"Cycle {i}"))
+            self.tabs.shear.cycles[f"Cycle {i}"]["trigger_load_select"].toggled.connect(partial(self.set_shear_trigger_load_select, f"Cycle {i}"))
+            self.tabs.shear.cycles[f"Cycle {i}"]["trigger_load_change"].returnPressed.connect(partial(self.set_shear_trigger_load_change, f"Cycle {i}"))
 
+            self.tabs.shear.cycles[f"Cycle {i}"]["store_rate_radio"].toggled.connect(partial(self.set_shear_store_rate_radio, f"Cycle {i}"))
+            self.tabs.shear.cycles[f"Cycle {i}"]["store_rate_val"].returnPressed.connect(partial(self.set_shear_store_rate_val, f"Cycle {i}"))
+            self.tabs.shear.cycles[f"Cycle {i}"]["store_strain_radio"].toggled.connect(partial(self.set_shear_store_strain_radio, f"Cycle {i}"))
+            self.tabs.shear.cycles[f"Cycle {i}"]["store_strain_val"].returnPressed.connect(partial(self.set_shear_store_strain_val, f"Cycle {i}"))
+            self.tabs.shear.cycles[f"Cycle {i}"]["store_disp_radio"].toggled.connect(partial(self.set_shear_store_disp_radio, f"Cycle {i}"))
+            self.tabs.shear.cycles[f"Cycle {i}"]["store_disp_val"].returnPressed.connect(partial(self.set_shear_store_disp_val, f"Cycle {i}"))
+
+            self.tabs.shear.cycles[f"Cycle {i}"]["stop_drop_select"].toggled.connect(partial(self.set_shear_stop_drop_select, f"Cycle {i}"))
+            self.tabs.shear.cycles[f"Cycle {i}"]["stop_drop"].valueChanged.connect(partial(self.set_shear_stop_drop, f"Cycle {i}"))
+            self.tabs.shear.cycles[f"Cycle {i}"]["stop_strain_select"].toggled.connect(partial(self.set_shear_stop_strain_select, f"Cycle {i}"))
+            self.tabs.shear.cycles[f"Cycle {i}"]["stop_strain"].returnPressed.connect(partial(self.set_shear_stop_strain, f"Cycle {i}"))
+
+            self.tabs.shear.cycles[f"Cycle {i}"]["reverse_rate_radio"].toggled.connect(partial(self.set_shear_reverse_rate_radio, f"Cycle {i}"))
+            self.tabs.shear.cycles[f"Cycle {i}"]["reverse_rate_val"].returnPressed.connect(partial(self.set_shear_reverse_rate_val, f"Cycle {i}"))
+            self.tabs.shear.cycles[f"Cycle {i}"]["reverse_same"].toggled.connect(partial(self.set_shear_reverse_same, f"Cycle {i}"))
+            self.tabs.shear.cycles[f"Cycle {i}"]["reverse_wait"].returnPressed.connect(partial(self.set_shear_reverse_wait, f"Cycle {i}"))
+            self.tabs.shear.cycles[f"Cycle {i}"]["reverse_disp"].returnPressed.connect(partial(self.set_shear_reverse_disp, f"Cycle {i}"))
+            self.tabs.shear.cycles[f"Cycle {i}"]["reverse_stress"].returnPressed.connect(partial(self.set_shear_reverse_stress, f"Cycle {i}"))
+    
+    def remove_shear_tab_connections(self):
+        """Disconnect shear tab signals to slots 
+        """
+        for i in range(1,11): 
+            self.tabs.shear.cycles[f"Cycle {i}"]["trigger_speed_select"].toggled.disconnect()
+            self.tabs.shear.cycles[f"Cycle {i}"]["trigger_speed"].returnPressed.disconnect()
+            self.tabs.shear.cycles[f"Cycle {i}"]["trigger_calc_select"].toggled.disconnect()
+            self.tabs.shear.cycles[f"Cycle {i}"]["trigger_calc_opt"].currentTextChanged.disconnect()
+            self.tabs.shear.cycles[f"Cycle {i}"]["trigger_load_select"].toggled.disconnect()
+            self.tabs.shear.cycles[f"Cycle {i}"]["trigger_load_change"].returnPressed.disconnect()
+
+            self.tabs.shear.cycles[f"Cycle {i}"]["store_rate_radio"].toggled.disconnect()
+            self.tabs.shear.cycles[f"Cycle {i}"]["store_rate_val"].returnPressed.disconnect()
+            self.tabs.shear.cycles[f"Cycle {i}"]["store_strain_radio"].toggled.disconnect()
+            self.tabs.shear.cycles[f"Cycle {i}"]["store_strain_val"].returnPressed.disconnect()
+            self.tabs.shear.cycles[f"Cycle {i}"]["store_disp_radio"].toggled.disconnect()
+            self.tabs.shear.cycles[f"Cycle {i}"]["store_disp_val"].returnPressed.disconnect()
+
+            self.tabs.shear.cycles[f"Cycle {i}"]["stop_drop_select"].toggled.disconnect()
+            self.tabs.shear.cycles[f"Cycle {i}"]["stop_drop"].valueChanged.disconnect()
+            self.tabs.shear.cycles[f"Cycle {i}"]["stop_strain_select"].toggled.disconnect()
+            self.tabs.shear.cycles[f"Cycle {i}"]["stop_strain"].returnPressed.disconnect()
+
+            self.tabs.shear.cycles[f"Cycle {i}"]["reverse_rate_radio"].toggled.disconnect()
+            self.tabs.shear.cycles[f"Cycle {i}"]["reverse_rate_val"].returnPressed.disconnect()
+            self.tabs.shear.cycles[f"Cycle {i}"]["reverse_same"].toggled.disconnect()
+            self.tabs.shear.cycles[f"Cycle {i}"]["reverse_wait"].returnPressed.disconnect()
+            self.tabs.shear.cycles[f"Cycle {i}"]["reverse_disp"].returnPressed.disconnect()
+            self.tabs.shear.cycles[f"Cycle {i}"]["reverse_stress"].returnPressed.disconnect()
+            
     def get_devices_and_channels(self):
         """Get devices and channels of each device and store in self.devices
         """
@@ -446,12 +508,12 @@ class TabUtilities:
         self.configurationChanged.emit(self.configuration)
 
     def shape_switch(self, specimen):
-        self.set_rectangular_shape(specimen)
-        self.set_circular_shape(specimen)
+        self.set_rectangular_shape(specimen, self.tabs.specimen.specimens[specimen]["dimensions"].rectangular.isChecked())
+        self.set_circular_shape(specimen, self.tabs.specimen.specimens[specimen]["dimensions"].circular.isChecked())
 
     @Slot(str)
-    def set_rectangular_shape(self, specimen, _=None):
-        if self.tabs.specimen.specimens[specimen]["dimensions"].rectangular.isChecked():
+    def set_rectangular_shape(self, specimen, checked):
+        if checked:
             self.configuration["shearbox"]["Specimens"][specimen]["Shape"] = "rectangular"
 
             self.tabs.specimen.specimens[specimen]["dimensions"].Layout.addWidget(self.tabs.specimen.specimens[specimen]["dimensions"].width_label1, 3, 0)
@@ -492,8 +554,8 @@ class TabUtilities:
                 self.tabs.specimen.specimens[specimen]["dimensions"].initial_bulk_density.setText(str(round(bulk_density, 3)))
 
     @Slot(str)
-    def set_circular_shape(self, specimen, _=None):
-        if self.tabs.specimen.specimens[specimen]["dimensions"].circular.isChecked():
+    def set_circular_shape(self, specimen, checked):
+        if checked:
             self.configuration["shearbox"]["Specimens"][specimen]["Shape"] = "circular"
 
             self.tabs.specimen.specimens[specimen]["dimensions"].width_label1.setParent(None)
@@ -538,7 +600,7 @@ class TabUtilities:
         weight = float(self.tabs.specimen.specimens[specimen]["dimensions"].initial_weight.text())
         self.configuration["shearbox"]["Specimens"][specimen]["Initial Weight"] = weight
 
-        log.info(f'Set {specimen} initial weight to {weight}.')        
+        log.info(f'Set {specimen.lower()} initial weight to {weight}.')        
 
         volume = self.configuration["shearbox"]["Specimens"][specimen]["Initial Volume"]
         moisture = self.configuration["shearbox"]["Specimens"][specimen]["Initial Moisture"]
@@ -548,14 +610,14 @@ class TabUtilities:
             self.configuration["shearbox"]["Specimens"][specimen]["Initial Bulk Density"] = bulk_density
             self.tabs.specimen.specimens[specimen]["dimensions"].initial_bulk_density.setText(str(round(bulk_density, 3)))
         
-            log.info(f'Set {specimen} initial bulk density to {bulk_density}.')
+            log.info(f'Set {specimen.lower()} initial bulk density to {bulk_density}.')
         
             if not (None in [moisture, bulk_density]):
                 dry_density = bulk_density / (1 + moisture/100)
                 self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = dry_density
                 self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText(str(round(dry_density, 3)))
             
-                log.info(f'Set {specimen} initial dry density to {dry_density}.')
+                log.info(f'Set {specimen.lower()} initial dry density to {dry_density}.')
             else:
                 self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = None
                 self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText("")
@@ -566,7 +628,7 @@ class TabUtilities:
         height = float(self.tabs.specimen.specimens[specimen]["dimensions"].initial_height.text())
         self.configuration["shearbox"]["Specimens"][specimen]["Initial Height"] = height
 
-        log.info(f'Set {specimen} initial height to {height}.')
+        log.info(f'Set {specimen.lower()} initial height to {height}.')
 
         weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Weight"]
         width = self.configuration["shearbox"]["Specimens"][specimen]["Initial Width"]
@@ -585,21 +647,21 @@ class TabUtilities:
                 self.configuration["shearbox"]["Specimens"][specimen]["Initial Volume"] = volume
                 self.tabs.specimen.specimens[specimen]["dimensions"].initial_volume.setText(str(round(volume, 3)))
             
-            log.info(f'Set {specimen} initial volume to {volume}.')
+            log.info(f'Set {specimen.lower()} initial volume to {volume}.')
 
             if not (None in [weight, volume]):
                 bulk_density = weight / volume
                 self.configuration["shearbox"]["Specimens"][specimen]["Initial Bulk Density"] = bulk_density
                 self.tabs.specimen.specimens[specimen]["dimensions"].initial_bulk_density.setText(str(round(bulk_density, 3)))
             
-                log.info(f'Set {specimen} initial bulk density to {bulk_density}.')
+                log.info(f'Set {specimen.lower()} initial bulk density to {bulk_density}.')
         
                 if not (None in [moisture, bulk_density]):
                     dry_density = bulk_density / (1 + moisture/100)
                     self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = dry_density
                     self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText(str(round(dry_density, 3)))
                 
-                    log.info(f'Set {specimen} initial dry density to {dry_density}.')
+                    log.info(f'Set {specimen.lower()} initial dry density to {dry_density}.')
                 else:
                     self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = None
                     self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText("")
@@ -609,7 +671,7 @@ class TabUtilities:
         width = float(self.tabs.specimen.specimens[specimen]["dimensions"].initial_width.text())
         self.configuration["shearbox"]["Specimens"][specimen]["Initial Width"] = width
 
-        log.info(f'Set {specimen} initial width to {width}.')
+        log.info(f'Set {specimen.lower()} initial width to {width}.')
 
         weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Weight"]
         height = self.configuration["shearbox"]["Specimens"][specimen]["Initial Height"]
@@ -621,27 +683,27 @@ class TabUtilities:
             self.configuration["shearbox"]["Specimens"][specimen]["Initial Area"] = area
             self.tabs.specimen.specimens[specimen]["dimensions"].initial_area.setText(str(round(area, 3)))
 
-            log.info(f'Set {specimen} initial area to {area}.')
+            log.info(f'Set {specimen.lower()} initial area to {area}.')
         if not (None in [height, width, depth]):
             volume = height * width * depth / 1000
             self.configuration["shearbox"]["Specimens"][specimen]["Initial Volume"] = volume
             self.tabs.specimen.specimens[specimen]["dimensions"].initial_volume.setText(str(round(volume, 3)))
 
-            log.info(f'Set {specimen} initial volume to {volume}.')
+            log.info(f'Set {specimen.lower()} initial volume to {volume}.')
 
             if not (None in [weight, volume]):
                 bulk_density = weight / volume
                 self.configuration["shearbox"]["Specimens"][specimen]["Initial Bulk Density"] = bulk_density
                 self.tabs.specimen.specimens[specimen]["dimensions"].initial_bulk_density.setText(str(round(bulk_density, 3)))
             
-                log.info(f'Set {specimen} initial bulk density to {bulk_density}.')
+                log.info(f'Set {specimen.lower()} initial bulk density to {bulk_density}.')
         
                 if not (None in [moisture, bulk_density]):
                     dry_density = bulk_density / (1 + moisture/100)
                     self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = dry_density
                     self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText(str(round(dry_density, 3)))
                 
-                    log.info(f'Set {specimen} initial dry density to {dry_density}.')
+                    log.info(f'Set {specimen.lower()} initial dry density to {dry_density}.')
                 else:
                     self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = None
                     self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText("")
@@ -651,7 +713,7 @@ class TabUtilities:
         depth = float(self.tabs.specimen.specimens[specimen]["dimensions"].initial_depth.text())
         self.configuration["shearbox"]["Specimens"][specimen]["Initial Depth"] = depth
 
-        log.info(f'Set {specimen} initial depth to {depth}.')
+        log.info(f'Set {specimen.lower()} initial depth to {depth}.')
 
         weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Weight"]
         height = self.configuration["shearbox"]["Specimens"][specimen]["Initial Height"]
@@ -663,27 +725,27 @@ class TabUtilities:
             self.configuration["shearbox"]["Specimens"][specimen]["Initial Area"] = area
             self.tabs.specimen.specimens[specimen]["dimensions"].initial_area.setText(str(round(area, 3)))
 
-            log.info(f'Set {specimen} initial area to {area}.')
+            log.info(f'Set {specimen.lower()} initial area to {area}.')
         if not (None in [height, width, depth]):
             volume = height * width * depth / 1000
             self.configuration["shearbox"]["Specimens"][specimen]["Initial Volume"] = volume
             self.tabs.specimen.specimens[specimen]["dimensions"].initial_volume.setText(str(round(volume, 3)))
 
-            log.info(f'Set {specimen} initial volume to {volume}.')
+            log.info(f'Set {specimen.lower()} initial volume to {volume}.')
 
             if not (None in [weight, volume]):
                 bulk_density = weight / volume
                 self.configuration["shearbox"]["Specimens"][specimen]["Initial Bulk Density"] = bulk_density
                 self.tabs.specimen.specimens[specimen]["dimensions"].initial_bulk_density.setText(str(round(bulk_density, 3)))
             
-                log.info(f'Set {specimen} initial bulk density to {bulk_density}.')
+                log.info(f'Set {specimen.lower()} initial bulk density to {bulk_density}.')
         
                 if not (None in [moisture, bulk_density]):
                     dry_density = bulk_density / (1 + moisture/100)
                     self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = dry_density
                     self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText(str(round(dry_density, 3)))
                 
-                    log.info(f'Set {specimen} initial dry density to {dry_density}.')
+                    log.info(f'Set {specimen.lower()} initial dry density to {dry_density}.')
                 else:
                     self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = None
                     self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText("")
@@ -693,7 +755,7 @@ class TabUtilities:
         radius = float(self.tabs.specimen.specimens[specimen]["dimensions"].initial_radius.text())
         self.configuration["shearbox"]["Specimens"][specimen]["Initial Radius"] = radius
 
-        log.info(f'Set {specimen} initial radius to {radius}.')
+        log.info(f'Set {specimen.lower()} initial radius to {radius}.')
 
         weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Weight"]
         height = self.configuration["shearbox"]["Specimens"][specimen]["Initial Height"]
@@ -704,28 +766,28 @@ class TabUtilities:
             self.configuration["shearbox"]["Specimens"][specimen]["Initial Area"] = area
             self.tabs.specimen.specimens[specimen]["dimensions"].initial_area.setText(str(round(area, 3)))
 
-            log.info(f'Set {specimen} initial area to {area}.')
+            log.info(f'Set {specimen.lower()} initial area to {area}.')
 
         if not (None in [height, radius]):
             volume = height * np.pi * radius**2 / 1000
             self.configuration["shearbox"]["Specimens"][specimen]["Initial Volume"] = volume
             self.tabs.specimen.specimens[specimen]["dimensions"].initial_volume.setText(str(round(volume, 3)))
 
-            log.info(f'Set {specimen} initial volume to {volume}.')
+            log.info(f'Set {specimen.lower()} initial volume to {volume}.')
 
             if not (None in [weight, volume]):
                 bulk_density = weight / volume
                 self.configuration["shearbox"]["Specimens"][specimen]["Initial Bulk Density"] = bulk_density
                 self.tabs.specimen.specimens[specimen]["dimensions"].initial_bulk_density.setText(str(round(bulk_density, 3)))
             
-                log.info(f'Set {specimen} initial bulk density to {bulk_density}.')
+                log.info(f'Set {specimen.lower()} initial bulk density to {bulk_density}.')
         
                 if not (None in [moisture, bulk_density]):
                     dry_density = bulk_density / (1 + moisture/100)
                     self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = dry_density
                     self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText(str(round(dry_density, 3)))
                 
-                    log.info(f'Set {specimen} initial dry density to {dry_density}.')
+                    log.info(f'Set {specimen.lower()} initial dry density to {dry_density}.')
                 else:
                     self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = None
                     self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText("")
@@ -735,14 +797,14 @@ class TabUtilities:
         particle_density = float(self.tabs.specimen.specimens[specimen]["dimensions"].particle_density.text())
         self.configuration["shearbox"]["Specimens"][specimen]["Particle Density"] = particle_density
 
-        log.info(f'Set {specimen} particle density to {particle_density}.')
+        log.info(f'Set {specimen.lower()} particle density to {particle_density}.')
             
     @Slot(str)
     def set_wet_weight(self, specimen):
         wet_weight = float(self.tabs.specimen.specimens[specimen]["moisture"].initial_wet_weight.text())
         self.configuration["shearbox"]["Specimens"][specimen]["Initial Wet Weight"] = wet_weight
 
-        log.info(f'Set {specimen} initial wet weight to {wet_weight}.')
+        log.info(f'Set {specimen.lower()} initial wet weight to {wet_weight}.')
 
         bulk_density = self.configuration["shearbox"]["Specimens"][specimen]["Initial Bulk Density"]
         dry_weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Weight"]
@@ -754,14 +816,14 @@ class TabUtilities:
             self.configuration["shearbox"]["Specimens"][specimen]["Initial Moisture"] = moisture
             self.tabs.specimen.specimens[specimen]["moisture"].initial_moisture.setText(str(round(moisture, 1)))
         
-            log.info(f'Set {specimen} initial moisture to {moisture}.')
+            log.info(f'Set {specimen.lower()} initial moisture to {moisture}.')
         
             if not (None in [moisture, bulk_density]):
                 dry_density = bulk_density / (1 + moisture/100)
                 self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = dry_density
                 self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText(str(round(dry_density, 3)))
             
-                log.info(f'Set {specimen} initial dry density to {dry_density}.')
+                log.info(f'Set {specimen.lower()} initial dry density to {dry_density}.')
             else:
                 self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = None
                 self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText("") 
@@ -777,21 +839,21 @@ class TabUtilities:
             self.configuration["shearbox"]["Specimens"][specimen]["Initial Voids Ratio"] = voids_ratio
             self.tabs.specimen.specimens[specimen]["moisture"].initial_voids_ratio.setText(str(round(voids_ratio, 3)))
         
-            log.info(f'Set {specimen} initial voids ratio to {voids_ratio}.')
+            log.info(f'Set {specimen.lower()} initial voids ratio to {voids_ratio}.')
             
         if not (None in [moisture, bulk_density]):
             deg_of_sat = 2
             self.configuration["shearbox"]["Specimens"][specimen]["Initial Degree of Saturation"] = deg_of_sat
             self.tabs.specimen.specimens[specimen]["moisture"].initial_deg_of_sat.setText(str(round(deg_of_sat, 1)))
         
-            log.info(f'Set {specimen} initial degree of saturation to {deg_of_sat}.')
+            log.info(f'Set {specimen.lower()} initial degree of saturation to {deg_of_sat}.')
             
     @Slot(str)
     def set_dry_weight(self, specimen):
         dry_weight = float(self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_weight.text())
         self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Weight"] = dry_weight
 
-        log.info(f'Set {specimen} initial dry weight to {dry_weight}.')
+        log.info(f'Set {specimen.lower()} initial dry weight to {dry_weight}.')
 
         bulk_density = self.configuration["shearbox"]["Specimens"][specimen]["Initial Bulk Density"]
         wet_weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Wet Weight"]
@@ -803,14 +865,14 @@ class TabUtilities:
                 self.configuration["shearbox"]["Specimens"][specimen]["Initial Moisture"] = moisture
                 self.tabs.specimen.specimens[specimen]["moisture"].initial_moisture.setText(str(round(moisture, 1)))
             
-                log.info(f'Set {specimen} initial moisture to {moisture}.')
+                log.info(f'Set {specimen.lower()} initial moisture to {moisture}.')
             
                 if not (None in [moisture, bulk_density]):
                     dry_density = bulk_density / (1 + moisture/100)
                     self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = dry_density
                     self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText(str(round(dry_density, 3)))
                 
-                    log.info(f'Set {specimen} initial dry density to {dry_density}.')
+                    log.info(f'Set {specimen.lower()} initial dry density to {dry_density}.')
             else:
                 moisture = None
                 self.tabs.specimen.specimens[specimen]["moisture"].initial_moisture.setText("")
@@ -825,21 +887,21 @@ class TabUtilities:
             self.configuration["shearbox"]["Specimens"][specimen]["Initial Voids Ratio"] = voids_ratio
             self.tabs.specimen.specimens[specimen]["moisture"].initial_voids_ratio.setText(str(round(voids_ratio, 3)))
         
-            log.info(f'Set {specimen} initial voids ratio to {voids_ratio}.')
+            log.info(f'Set {specimen.lower()} initial voids ratio to {voids_ratio}.')
             
         if not (None in [moisture, bulk_density]):
             deg_of_sat = 2
             self.configuration["shearbox"]["Specimens"][specimen]["Initial Degree of Saturation"] = deg_of_sat
             self.tabs.specimen.specimens[specimen]["moisture"].initial_deg_of_sat.setText(str(round(deg_of_sat, 1)))
         
-            log.info(f'Set {specimen} initial degree of saturation to {deg_of_sat}.')
+            log.info(f'Set {specimen.lower()} initial degree of saturation to {deg_of_sat}.')
             
     @Slot(str)
     def set_tin_weight(self, specimen):
         tin_weight = float(self.tabs.specimen.specimens[specimen]["moisture"].tin_initial_weight.text())
         self.configuration["shearbox"]["Specimens"][specimen]["Tin (initial) Weight"] = tin_weight
 
-        log.info(f'Set {specimen} tin (initial) weight to {tin_weight}.')
+        log.info(f'Set {specimen.lower()} tin (initial) weight to {tin_weight}.')
 
         bulk_density = self.configuration["shearbox"]["Specimens"][specimen]["Initial Bulk Density"]
         wet_weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Wet Weight"]
@@ -851,14 +913,14 @@ class TabUtilities:
                 self.configuration["shearbox"]["Specimens"][specimen]["Initial Moisture"] = moisture
                 self.tabs.specimen.specimens[specimen]["moisture"].initial_moisture.setText(str(round(moisture, 1)))
             
-                log.info(f'Set {specimen} initial moisture to {moisture}.')
+                log.info(f'Set {specimen.lower()} initial moisture to {moisture}.')
             
                 if not (None in [moisture, bulk_density]):
                     dry_density = bulk_density / (1 + moisture/100)
                     self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Density"] = dry_density
                     self.tabs.specimen.specimens[specimen]["moisture"].initial_dry_density.setText(str(round(dry_density, 3)))
                 
-                    log.info(f'Set {specimen} initial dry density to {dry_density}.')
+                    log.info(f'Set {specimen.lower()} initial dry density to {dry_density}.')
             else:
                 moisture = None
                 self.tabs.specimen.specimens[specimen]["moisture"].initial_moisture.setText("")
@@ -873,44 +935,44 @@ class TabUtilities:
             self.configuration["shearbox"]["Specimens"][specimen]["Initial Voids Ratio"] = voids_ratio
             self.tabs.specimen.specimens[specimen]["moisture"].initial_voids_ratio.setText(str(round(voids_ratio, 3)))
         
-            log.info(f'Set {specimen} initial voids ratio to {voids_ratio}.')
+            log.info(f'Set {specimen.lower()} initial voids ratio to {voids_ratio}.')
             
         if not (None in [moisture, bulk_density]):
             deg_of_sat = 2
             self.configuration["shearbox"]["Specimens"][specimen]["Initial Degree of Saturation"] = deg_of_sat
             self.tabs.specimen.specimens[specimen]["moisture"].initial_deg_of_sat.setText(str(round(deg_of_sat, 1)))
         
-            log.info(f'Set {specimen} initial degree of saturation to {deg_of_sat}.')
+            log.info(f'Set {specimen.lower()} initial degree of saturation to {deg_of_sat}.')
 
     @Slot(str)
     def set_platen_weight(self, specimen):
         platen_weight = float(self.tabs.specimen.specimens[specimen]["additional"].platen_weight.text())
         self.configuration["shearbox"]["Specimens"][specimen]["platen_weight"] = platen_weight
 
-        log.info(f'Set {specimen} platen weight to {platen_weight}.')
+        log.info(f'Set {specimen.lower()} platen weight to {platen_weight}.')
 
     @Slot(str)
     def set_platen_corr(self, specimen):
         platen_corr = float(self.tabs.specimen.specimens[specimen]["additional"].platen_corr.text())
         self.configuration["shearbox"]["Specimens"][specimen]["Platen Correction"] = platen_corr
 
-        log.info(f'Set {specimen} platen correction to {platen_corr}.')
+        log.info(f'Set {specimen.lower()} platen correction to {platen_corr}.')
 
     @Slot(str)
     def set_est_strain_at_fail(self, specimen):
         est_strain_at_fail = float(self.tabs.specimen.specimens[specimen]["additional"].est_strain_at_fail.text())
         self.configuration["shearbox"]["Specimens"][specimen]["Estimated Strain at Shear Failure"] = est_strain_at_fail
 
-        log.info(f'Set {specimen} estimated strain at shear failure to {est_strain_at_fail}.')
+        log.info(f'Set {specimen.lower()} estimated strain at shear failure to {est_strain_at_fail}.')
 
     def consolidation_selections(self):
-        self.set_consolidation_trigger_stress_select()
-        self.set_consolidation_trigger_disp_select()
-        self.set_consolidation_logging_method_rate()
-        self.set_consolidation_logging_method_timetable()
-        self.set_consolidation_logging_method_change()
-        self.set_consolidation_stop_rate_select()
-        self.set_consolidation_stop_time_select()
+        self.set_consolidation_trigger_stress_select(self.tabs.consolidation_trigger_stress_select.isChecked())
+        self.set_consolidation_trigger_disp_select(self.tabs.consolidation_trigger_disp_select.isChecked())
+        self.set_consolidation_log_rate_radio(self.tabs.consolidation_log_rate_radio.isChecked())
+        self.set_consolidation_log_timetable_radio(self.tabs.consolidation_log_timetable_radio.isChecked())
+        self.set_consolidation_log_change_radio(self.tabs.consolidation_log_change_radio.isChecked())
+        self.set_consolidation_stop_rate_select(self.tabs.consolidation_stop_rate_select.isChecked())
+        self.set_consolidation_stop_time_select(self.tabs.consolidation_stop_time_select.isChecked())
 
     @Slot()
     def set_consolidation_start_stress(self):
@@ -919,19 +981,18 @@ class TabUtilities:
 
         log.info(f'Set consolidation stage initial stress to {stress}.')
 
-    @Slot()
-    def set_consolidation_trigger_stress_select(self):
-        bool = self.tabs.consolidation_trigger_stress_select.isChecked()
-        self.configuration["shearbox"]["Consolidation"]["Trigger Logging at Stress"] = bool
+    @Slot(bool)
+    def set_consolidation_trigger_stress_select(self, checked):
+        self.configuration["shearbox"]["Consolidation"]["Trigger Logging at Stress"] = checked
 
-        self.tabs.consolidation_trigger_stress.setEnabled(bool)
+        self.tabs.consolidation_trigger_stress.setEnabled(checked)
 
-        if not (bool or self.tabs.consolidation_trigger_disp_select.isChecked()):
+        if not (checked or self.tabs.consolidation_trigger_disp_select.isChecked()):
             self.tabs.consolidation_trigger_disp.setEnabled(True)
             self.tabs.consolidation_trigger_disp_select.setChecked(True)
             self.configuration["shearbox"]["Consolidation"]["Trigger Logging at Displacement"] = True
 
-        log.info(f'Set consolidation stage trigger logging at stress to {bool}.')
+        log.info(f'Set consolidation stage trigger logging at stress to {checked}.')
     
     @Slot()
     def set_consolidation_trigger_stress(self):
@@ -940,19 +1001,18 @@ class TabUtilities:
 
         log.info(f'Set consolidation stage trigger stress to {stress}.')
 
-    @Slot()
-    def set_consolidation_trigger_disp_select(self):
-        bool = self.tabs.consolidation_trigger_disp_select.isChecked()
-        self.configuration["shearbox"]["Consolidation"]["Trigger Logging at Displacement"] = bool
+    @Slot(bool)
+    def set_consolidation_trigger_disp_select(self, checked):
+        self.configuration["shearbox"]["Consolidation"]["Trigger Logging at Displacement"] = checked
 
-        self.tabs.consolidation_trigger_disp.setEnabled(bool)
+        self.tabs.consolidation_trigger_disp.setEnabled(checked)
 
-        if not (bool or self.tabs.consolidation_trigger_stress_select.isChecked()):
+        if not (checked or self.tabs.consolidation_trigger_stress_select.isChecked()):
             self.tabs.consolidation_trigger_stress.setEnabled(True)
             self.tabs.consolidation_trigger_stress_select.setChecked(True)
             self.configuration["shearbox"]["Consolidation"]["Trigger Logging at Stress"] = True
 
-        log.info(f'Set consolidation stage trigger logging at displacement to {bool}.')
+        log.info(f'Set consolidation stage trigger logging at displacement to {checked}.')
 
     @Slot()
     def set_consolidation_trigger_disp(self):
@@ -961,41 +1021,37 @@ class TabUtilities:
 
         log.info(f'Set consolidation stage trigger displacement to {disp}.')
 
-    @Slot()
-    def set_consolidation_in_water(self):
-        bool = self.tabs.consolidation_in_water.isChecked()
-        self.configuration["shearbox"]["Consolidation"]["Sample in Water"] = bool
+    @Slot(bool)
+    def set_consolidation_in_water(self, checked):
+        self.configuration["shearbox"]["Consolidation"]["Sample in Water"] = checked
 
-        log.info(f'Set consolidation stage sample in water to {bool}.')
+        log.info(f'Set consolidation stage sample in water to {checked}.')
 
 
-    @Slot()
-    def set_consolidation_logging_method_rate(self):
-        if self.tabs.consolidation_log_rate_radio.isChecked():
+    @Slot(bool)
+    def set_consolidation_log_rate_radio(self, checked):
+        self.tabs.consolidation_log_rate_val.setEnabled(checked)
+
+        if checked:
             self.configuration["shearbox"]["Consolidation"]["Logging Method"] = "rate"
-            self.tabs.consolidation_log_rate_val.setEnabled(True)
-            self.tabs.consolidation_log_timetable_opt.setEnabled(False)
-            self.tabs.consolidation_log_change_val.setEnabled(False)
 
             log.info('Set consolidation stage logging method to "rate".')
         
-    @Slot()
-    def set_consolidation_logging_method_timetable(self):
-        if self.tabs.consolidation_log_timetable_radio.isChecked():
+    @Slot(bool)
+    def set_consolidation_log_timetable_radio(self, checked):
+        self.tabs.consolidation_log_timetable_opt.setEnabled(checked)
+
+        if checked:
             self.configuration["shearbox"]["Consolidation"]["Logging Method"] = "timetable"
-            self.tabs.consolidation_log_rate_val.setEnabled(False)
-            self.tabs.consolidation_log_timetable_opt.setEnabled(True)
-            self.tabs.consolidation_log_change_val.setEnabled(False)
 
             log.info('Set consolidation stage logging method to "timetable".')
 
-    @Slot()
-    def set_consolidation_logging_method_change(self):
-        if self.tabs.consolidation_log_change_radio.isChecked():
+    @Slot(bool)
+    def set_consolidation_log_change_radio(self, checked):
+        self.tabs.consolidation_log_change_val.setEnabled(checked)
+
+        if checked:
             self.configuration["shearbox"]["Consolidation"]["Logging Method"] = "change"
-            self.tabs.consolidation_log_rate_val.setEnabled(False)
-            self.tabs.consolidation_log_timetable_opt.setEnabled(False)
-            self.tabs.consolidation_log_change_val.setEnabled(True)
 
             log.info('Set consolidation stage logging method to "change".')
 
@@ -1004,10 +1060,10 @@ class TabUtilities:
         time = 0
         split_time = self.tabs.consolidation_log_rate_val.text().split(":")
         for i in range(len(split_time)):
-            time = time*60 + split_time[i]
+            time = time*60 + int(split_time[i])
         self.configuration["shearbox"]["Consolidation"]["Logging Rate"] = time
 
-        log.info(f'Set consolidation stage logging rate to {self.tabs.consolidation_log_rate_val.text()}.')
+        log.info(f'Set consolidation stage logging rate to "{self.tabs.consolidation_log_rate_val.text()}".')
 
     @Slot()
     def set_consolidation_log_timetable_opt(self, text):
@@ -1023,20 +1079,19 @@ class TabUtilities:
         log.info(f'Set consolidation stage logging channel change to {val}.')
 
 
-    @Slot()
-    def set_consolidation_stop_rate_select(self):
-        bool = self.tabs.consolidation_stop_rate_select.isChecked()
-        self.configuration["shearbox"]["Consolidation"]["Stop on Rate of Change"] = bool
+    @Slot(bool)
+    def set_consolidation_stop_rate_select(self, checked):
+        self.configuration["shearbox"]["Consolidation"]["Stop on Rate of Change"] = checked
 
-        self.tabs.consolidation_stop_rate_disp.setEnabled(bool)
-        self.tabs.consolidation_stop_rate_time.setEnabled(bool)
+        self.tabs.consolidation_stop_rate_disp.setEnabled(checked)
+        self.tabs.consolidation_stop_rate_time.setEnabled(checked)
 
-        if not (bool or self.tabs.consolidation_stop_time_select.isChecked()):
+        if not (checked or self.tabs.consolidation_stop_time_select.isChecked()):
             self.tabs.consolidation_stop_time_opt.setEnabled(True)
             self.tabs.consolidation_stop_time_select.setChecked(True)
             self.configuration["shearbox"]["Consolidation"]["Stop after Time"] = True
 
-        log.info(f'Set consolidation stage stop on rate of change to {bool}.')
+        log.info(f'Set consolidation stage stop on rate of change to {checked}.')
 
     @Slot()
     def set_consolidation_stop_rate_disp(self):
@@ -1050,39 +1105,238 @@ class TabUtilities:
         time = 0
         split_time = self.tabs.consolidation_stop_rate_time.text().split(":")
         for i in range(len(split_time)):
-            time = time*60 + split_time[i]
+            time = time*60 + int(split_time[i])
         self.configuration["shearbox"]["Consolidation"]["Stopping Time Change"] = time
 
-        log.info(f'Set consolidation stage stopping time change to {self.tabs.consolidation_stop_rate_time.text()}.')
+        log.info(f'Set consolidation stage stopping time change to "{self.tabs.consolidation_stop_rate_time.text()}".')
 
-    @Slot()
-    def set_consolidation_stop_time_select(self):
-        bool = self.tabs.consolidation_stop_time_select.isChecked()
-        self.configuration["shearbox"]["Consolidation"]["Stop after Time"] = bool
+    @Slot(bool)
+    def set_consolidation_stop_time_select(self, checked):
+        self.configuration["shearbox"]["Consolidation"]["Stop after Time"] = checked
 
-        self.tabs.consolidation_stop_time_opt.setEnabled(bool)
+        self.tabs.consolidation_stop_time_opt.setEnabled(checked)
 
-        if not (bool or self.tabs.consolidation_stop_rate_select.isChecked()):
+        if not (checked or self.tabs.consolidation_stop_rate_select.isChecked()):
             self.tabs.consolidation_stop_rate_disp.setEnabled(True)
             self.tabs.consolidation_stop_rate_time.setEnabled(True)
             self.tabs.consolidation_stop_rate_select.setChecked(True)
             self.configuration["shearbox"]["Consolidation"]["Stop on Rate of Change"] = True
 
-        log.info(f'Set consolidation stage stop after time to {bool}.')
+        log.info(f'Set consolidation stage stop after time to {checked}.')
 
     @Slot()
     def set_consolidation_stop_time_opt(self):
         time = 0
         split_time = self.tabs.consolidation_stop_time_opt.text().split(":")
         for i in range(len(split_time)):
-            time = time*60 + split_time[i]
+            time = time*60 + int(split_time[i])
         self.configuration["shearbox"]["Consolidation"]["Stop Time"] = time
 
-        log.info(f'Set consolidation stage stop time to {self.tabs.consolidation_stop_rate_time.text()}.')
+        log.info(f'Set consolidation stage stop time to "{self.tabs.consolidation_stop_time_opt.text()}".')
 
-    @Slot()
-    def set_consolidation_stop_buzz(self):
-        bool = self.tabs.consolidation_stop_buzz.isChecked()
-        self.configuration["shearbox"]["Consolidation"]["Buzz on Finish"] = bool
+    @Slot(bool)
+    def set_consolidation_stop_buzz(self, checked):
+        self.configuration["shearbox"]["Consolidation"]["Buzz on Finish"] = checked
 
-        log.info(f'Set consolidation stage buzz on finish to {bool}.')
+        log.info(f'Set consolidation stage buzz on finish to {checked}.')
+
+
+    def shear_selections(self):
+        for i in range(1,11):
+            cycle = f"Cycle {i}"
+
+            self.set_shear_trigger_speed_select(cycle, self.tabs.shear.cycles[cycle]["trigger_speed_select"].isChecked())
+            self.set_shear_trigger_calc_select(cycle, self.tabs.shear.cycles[cycle]["trigger_calc_select"].isChecked())
+            self.set_shear_trigger_load_select(cycle, self.tabs.shear.cycles[cycle]["trigger_load_select"].isChecked())
+
+            self.set_shear_store_rate_radio(cycle, self.tabs.shear.cycles[cycle]["store_rate_radio"].isChecked())
+            self.set_shear_store_strain_radio(cycle, self.tabs.shear.cycles[cycle]["store_strain_radio"].isChecked())
+            self.set_shear_store_disp_radio(cycle, self.tabs.shear.cycles[cycle]["store_disp_radio"].isChecked())
+
+            self.set_shear_stop_drop_select(cycle, self.tabs.shear.cycles[cycle]["stop_drop_select"].isChecked())
+            self.set_shear_stop_strain_select(cycle, self.tabs.shear.cycles[cycle]["stop_strain_select"].isChecked())
+
+            self.set_shear_reverse_rate_radio(cycle, self.tabs.shear.cycles[cycle]["reverse_rate_radio"].isChecked())
+            self.set_shear_reverse_same(cycle, self.tabs.shear.cycles[cycle]["reverse_same"].isChecked())
+    
+    @Slot(str, bool)
+    def set_shear_trigger_speed_select(self, cycle, checked):
+        self.tabs.shear.cycles[cycle]["trigger_speed"].setEnabled(checked)
+
+        if checked:
+            self.configuration["shearbox"]["Shear"][cycle]["Shear Speed Selection"] = "manual"
+
+            log.info(f'Set shear {cycle.lower()} shear speed selection to "manual".')
+
+    @Slot(str)
+    def set_shear_trigger_speed(self, cycle):
+        val = float(self.tabs.shear.cycles[cycle]["trigger_speed"].text())
+        self.configuration["shearbox"]["Shear"][cycle]["Shear Speed"] = val
+
+        log.info(f'Set shear {cycle.lower()} shear speed to {val}.')
+
+    @Slot(str, bool)
+    def set_shear_trigger_calc_select(self, cycle, checked):
+        self.tabs.shear.cycles[cycle]["trigger_calc_opt"].setEnabled(checked)
+
+        if checked:
+            self.configuration["shearbox"]["Shear"][cycle]["Shear Speed Selection"] = "calculated"
+
+            log.info(f'Set shear {cycle.lower()} shear speed selection to "calculated".')
+
+    @Slot(str)
+    def set_shear_trigger_calc_opt(self, cycle, opt):
+        self.configuration["shearbox"]["Shear"][cycle]["Speed Calculation"] = opt
+
+        log.info(f'Set shear {cycle.lower()} speed calculation to "{opt}".')
+
+    @Slot(str, bool)
+    def set_shear_trigger_load_select(self, cycle, checked):
+        self.configuration["shearbox"]["Shear"][cycle]["Trigger on Load Change"] = checked
+        self.tabs.shear.cycles[cycle]["trigger_load_change"].setEnabled(checked)
+
+        log.info(f'Set shear {cycle.lower()} trigger on load change to {checked}.')
+
+    @Slot(str)
+    def set_shear_trigger_load_change(self, cycle):
+        val = float(self.tabs.shear.cycles[cycle]["trigger_load_change"].text())
+        self.configuration["shearbox"]["Shear"][cycle]["Load Change Rate"] = val
+
+        log.info(f'Set shear {cycle.lower()} load change rate to {val}.')
+
+    
+    @Slot(str, bool)
+    def set_shear_store_rate_radio(self, cycle, checked):
+        self.tabs.shear.cycles[cycle]["store_rate_val"].setEnabled(checked)
+
+        if checked:
+            self.configuration["shearbox"]["Shear"][cycle]["Logging Method"] = "rate"
+
+            log.info(f'Set shear {cycle.lower()} logging method to "rate".')
+
+    @Slot(str)
+    def set_shear_store_rate_val(self, cycle):
+        time = 0
+        split_time = self.tabs.shear.cycles[cycle]["store_rate_val"].text().split(":")
+        for i in range(len(split_time)):
+            time = time*60 + int(split_time[i])
+        self.configuration["shearbox"]["Shear"][cycle]["Logging rate"] = time
+
+        log.info(f'Set shear {cycle.lower()} logging rate to "{self.tabs.shear.cycles[cycle]["store_rate_val"].text()}".')
+
+    @Slot(str, bool)
+    def set_shear_store_strain_radio(self, cycle, checked):
+        self.tabs.shear.cycles[cycle]["store_strain_val"].setEnabled(checked)
+
+        if checked:
+            self.configuration["shearbox"]["Shear"][cycle]["Logging Method"] = "strain"
+
+            log.info(f'Set shear {cycle.lower()} logging method to "strain".')
+
+    @Slot(str)
+    def set_shear_store_strain_val(self, cycle):
+        val = float(self.tabs.shear.cycles[cycle]["store_strain_val"].text())
+        self.configuration["shearbox"]["Shear"][cycle]["Logging Strain"] = val
+
+        log.info(f'Set shear {cycle.lower()} logging strain to {val}.')
+
+    @Slot(str, bool)
+    def set_shear_store_disp_radio(self, cycle, checked):
+        self.tabs.shear.cycles[cycle]["store_disp_val"].setEnabled(checked)
+
+        if checked:
+            self.configuration["shearbox"]["Shear"][cycle]["Logging Method"] = "displacement"
+
+            log.info(f'Set shear {cycle.lower()} logging method to "displacement".')
+
+    @Slot(str)
+    def set_shear_store_disp_val(self, cycle):
+        val = float(self.tabs.shear.cycles[cycle]["store_disp_val"].text())
+        self.configuration["shearbox"]["Shear"][cycle]["Logging Displacement"] = val
+
+        log.info(f'Set shear {cycle.lower()} logging displacement to {val}.')
+
+    
+    @Slot(str, bool)
+    def set_shear_stop_drop_select(self, cycle, checked):
+        self.configuration["shearbox"]["Shear"][cycle]["Stop after Repeated Falls"] = checked
+        self.tabs.shear.cycles[cycle]["stop_drop"].setEnabled(checked)
+
+        if not (checked or self.tabs.shear.cycles[cycle]["stop_strain_select"].isChecked()):
+            self.configuration["shearbox"]["Shear"][cycle]["Stop on Maximum Strain"] = True
+            self.tabs.shear.cycles[cycle]["stop_strain_select"].setChecked(True)
+            self.tabs.shear.cycles[cycle]["stop_strain"].setEnabled(True)
+
+        log.info(f'Set shear {cycle.lower()} stop after repeated falls to {checked}.')
+
+    @Slot(str, int)
+    def set_shear_stop_drop(self, cycle, repeats):
+        self.configuration["shearbox"]["Shear"][cycle]["Number of Falls"] = repeats
+
+        log.info(f'Set shear {cycle.lower()} number of falls to {repeats}.')
+
+    @Slot(str, bool)
+    def set_shear_stop_strain_select(self, cycle, checked):
+        self.configuration["shearbox"]["Shear"][cycle]["Stop on Maximum Strain"] = True
+        self.tabs.shear.cycles[cycle]["stop_strain"].setEnabled(checked)
+
+        if not (checked or self.tabs.shear.cycles[cycle]["stop_drop_select"].isChecked()):
+            self.configuration["shearbox"]["Shear"][cycle]["Stop after Repeated Falls"] = True
+            self.tabs.shear.cycles[cycle]["stop_drop_select"].setChecked(True)
+            self.tabs.shear.cycles[cycle]["stop_drop"].setEnabled(True)
+
+        log.info(f'Set shear {cycle.lower()} stop on maximum strain to {checked}.')
+
+    @Slot(str)
+    def set_shear_stop_strain(self, cycle):
+        val = float(self.tabs.shear.cycles[cycle]["stop_strain"].text())
+        self.configuration["shearbox"]["Shear"][cycle]["Maximum Strain"] = val
+
+        log.info(f'Set shear {cycle.lower()} maximum strain to {val}.')
+
+    
+    @Slot(str, bool)
+    def set_shear_reverse_rate_radio(self, cycle, checked):
+        self.tabs.shear.cycles[cycle]["reverse_rate_val"].setEnabled(checked)
+        if checked:
+            self.configuration["shearbox"]["Shear"][cycle]["Reverse Method"] = "rate"
+
+            log.info(f'Set shear {cycle.lower()} reverse method to "rate".')
+
+    @Slot(str)
+    def set_shear_reverse_rate_val(self, cycle):
+        val = float(self.tabs.shear.cycles[cycle]["reverse_rate_val"].text())
+        self.configuration["shearbox"]["Shear"][cycle]["Reverse Speed"] = val
+
+        log.info(f'Set shear {cycle.lower()} reverse speed to {val}.')
+
+    @Slot(str, bool)
+    def set_shear_reverse_same(self, cycle, checked):
+        if checked:
+            self.configuration["shearbox"]["Shear"][cycle]["Reverse Method"] = "same"
+
+            log.info(f'Set shear {cycle.lower()} reverse method to "same".')
+
+    @Slot(str)
+    def set_shear_reverse_wait(self, cycle):
+        time = 0
+        split_time = self.tabs.shear.cycles[cycle]["reverse_wait"].text().split(":")
+        for i in range(len(split_time)):
+            time = time*60 + int(split_time[i])
+        self.configuration["shearbox"]["Shear"][cycle]["Wait before Reversing"] = time
+
+        log.info(f'Set shear {cycle.lower()} wait before reversing to "{self.tabs.shear.cycles[cycle]["reverse_wait"].text()}".')
+
+    @Slot(str)
+    def set_shear_reverse_disp(self, cycle):
+        val = float(self.tabs.shear.cycles[cycle]["reverse_disp"].text())
+        self.configuration["shearbox"]["Shear"][cycle]["Shear until Displacement"] = val
+
+        log.info(f'Set shear {cycle.lower()} shear until displacement to {val}.')
+
+    @Slot(str)
+    def set_shear_reverse_stress(self, cycle):
+        val = float(self.tabs.shear.cycles[cycle]["reverse_stress"].text())
+        self.configuration["shearbox"]["Shear"][cycle]["Repeat until Stress"] = val
+
+        log.info(f'Set shear {cycle.lower()} repeat until stress to {val}.')

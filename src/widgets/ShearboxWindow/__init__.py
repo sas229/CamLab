@@ -358,6 +358,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         self.consolidation_selections()
 
         self.tabs.shear.apply_configuration(configuration)
+        self.shear_selections()
 
         self.configuration = configuration
         self.configurationChanged.emit(configuration)
