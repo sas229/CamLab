@@ -903,6 +903,14 @@ class TabUtilities:
 
         log.info(f'Set {specimen} estimated strain at shear failure to {est_strain_at_fail}.')
 
+    def consolidation_selections(self):
+        self.set_consolidation_trigger_stress_select()
+        self.set_consolidation_trigger_disp_select()
+        self.set_consolidation_logging_method_rate()
+        self.set_consolidation_logging_method_timetable()
+        self.set_consolidation_logging_method_change()
+        self.set_consolidation_stop_rate_select()
+        self.set_consolidation_stop_time_select()
 
     @Slot()
     def set_consolidation_start_stress(self):

@@ -355,6 +355,8 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         self.tabs.consolidation_stop_time_opt.setText(num_to_str(configuration["shearbox"]["Consolidation"]["Stop Time"]))
         self.tabs.consolidation_stop_buzz.setChecked(configuration["shearbox"]["Consolidation"]["Buzz on Finish"])
 
+        self.consolidation_selections()
+
         self.tabs.shear.apply_configuration(configuration)
 
         self.configuration = configuration
