@@ -7,7 +7,7 @@ from widgets.ShearboxWindow._TabUtilities import TabUtilities
 from widgets.ShearboxWindow.Tabs import TabInterface
 from widgets.ShearboxWindow.ToolBar import ToolBar
 import logging
-from time import sleep
+from datetime import timedelta
 from pathlib import Path
 
 log = logging.getLogger(__name__)
@@ -17,6 +17,21 @@ def num_to_str(num):
         return str(num)
     else:
         return ""
+    
+def secs_to_time(s):
+    if s == None or s >= 86400 or s <= 0:
+        return None
+    
+    string = ""
+    if s < 10*60*60:
+        string = string + "0"
+    string = string + str(timedelta(seconds=s))
+
+    while len(string.split(".")) > 1 and string[-1] == "0":
+        string = string[:-1]
+        
+    return string
+    
 class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
     configurationChanged = Signal(dict)
     def __init__(self, configuration):
@@ -331,8 +346,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
             configuration["shearbox"]["Hardware"]["Vertical Control Channel"] = None
 
         self.tabs.specimen.apply_configuration(configuration)
-        for i in range(1,5):
-            self.shape_switch(f"Specimen {i}")
+        self.specimen_selections()
 
         self.tabs.consolidation_start_stress.setText(num_to_str(configuration["shearbox"]["Consolidation"]["Initial Stress"]))
         self.tabs.consolidation_trigger_stress_select.setChecked(configuration["shearbox"]["Consolidation"]["Trigger Logging at Stress"])
@@ -342,7 +356,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         self.tabs.consolidation_in_water.setChecked(configuration["shearbox"]["Consolidation"]["Sample in Water"])
 
         self.tabs.consolidation_log_rate_radio.setChecked(configuration["shearbox"]["Consolidation"]["Logging Method"]=="rate")
-        self.tabs.consolidation_log_rate_val.setText(num_to_str(configuration["shearbox"]["Consolidation"]["Logging Rate"]))
+        self.tabs.consolidation_log_rate_val.setText(secs_to_time(configuration["shearbox"]["Consolidation"]["Logging Rate"]))
         self.tabs.consolidation_log_timetable_radio.setChecked(configuration["shearbox"]["Consolidation"]["Logging Method"]=="timetable")
         self.tabs.consolidation_log_timetable_opt.setCurrentText(configuration["shearbox"]["Consolidation"]["Logging Timetable"])
         self.tabs.consolidation_log_change_radio.setChecked(configuration["shearbox"]["Consolidation"]["Logging Method"]=="change")
@@ -350,9 +364,9 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
 
         self.tabs.consolidation_stop_rate_select.setChecked(configuration["shearbox"]["Consolidation"]["Stop on Rate of Change"])
         self.tabs.consolidation_stop_rate_disp.setText(num_to_str(configuration["shearbox"]["Consolidation"]["Stopping Displacement Change"]))
-        self.tabs.consolidation_stop_rate_time.setText(num_to_str(configuration["shearbox"]["Consolidation"]["Stopping Time Change"]))
+        self.tabs.consolidation_stop_rate_time.setText(secs_to_time(configuration["shearbox"]["Consolidation"]["Stopping Time Change"]))
         self.tabs.consolidation_stop_time_select.setChecked(configuration["shearbox"]["Consolidation"]["Stop after Time"])
-        self.tabs.consolidation_stop_time_opt.setText(num_to_str(configuration["shearbox"]["Consolidation"]["Stop Time"]))
+        self.tabs.consolidation_stop_time_opt.setText(secs_to_time(configuration["shearbox"]["Consolidation"]["Stop Time"]))
         self.tabs.consolidation_stop_buzz.setChecked(configuration["shearbox"]["Consolidation"]["Buzz on Finish"])
 
         self.consolidation_selections()

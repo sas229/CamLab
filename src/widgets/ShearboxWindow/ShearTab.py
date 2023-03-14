@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QTabWidget, QTabBar, QGridLayout, QLineEdit, QLabel, QRadioButton, QGroupBox, QCheckBox, QComboBox, QSpinBox, QVBoxLayout, QWidget
 from PySide6.QtGui import QDoubleValidator, QRegularExpressionValidator
-import logging 
+import logging
+from datetime import timedelta
 
 log = logging.getLogger(__name__)
 
@@ -9,6 +10,20 @@ def num_to_str(num):
         return str(num)
     else:
         return ""
+    
+def secs_to_time(s):
+    if s == None or s >= 86400 or s <= 0:
+        return None
+    
+    string = ""
+    if s < 10*60*60:
+        string = string + "0"
+    string = string + str(timedelta(seconds=s))
+
+    while len(string.split(".")) > 1 and string[-1] == "0":
+        string = string[:-1]
+        
+    return string
 
 class ShearTabs(QTabWidget):
 
@@ -177,7 +192,7 @@ class ShearTabs(QTabWidget):
             self.cycles[cycle]["trigger_load_change"].setText(num_to_str(configuration["shearbox"]["Shear"][cycle]["Load Change Rate"]))
 
             self.cycles[cycle]["store_rate_radio"].setChecked(configuration["shearbox"]["Shear"][cycle]["Logging Method"]=="rate")
-            self.cycles[cycle]["store_rate_val"].setText(num_to_str(configuration["shearbox"]["Shear"][cycle]["Logging Rate"]))
+            self.cycles[cycle]["store_rate_val"].setText(secs_to_time(configuration["shearbox"]["Shear"][cycle]["Logging Rate"]))
             self.cycles[cycle]["store_strain_radio"].setChecked(configuration["shearbox"]["Shear"][cycle]["Logging Method"]=="strain")
             self.cycles[cycle]["store_strain_val"].setText(num_to_str(configuration["shearbox"]["Shear"][cycle]["Logging Strain"]))
             self.cycles[cycle]["store_disp_radio"].setChecked(configuration["shearbox"]["Shear"][cycle]["Logging Method"]=="displacement")
@@ -191,7 +206,7 @@ class ShearTabs(QTabWidget):
             self.cycles[cycle]["reverse_rate_radio"].setChecked(configuration["shearbox"]["Shear"][cycle]["Reverse Method"]=="rate")
             self.cycles[cycle]["reverse_rate_val"].setText(num_to_str(configuration["shearbox"]["Shear"][cycle]["Reverse Speed"]))
             self.cycles[cycle]["reverse_same"].setChecked(configuration["shearbox"]["Shear"][cycle]["Reverse Method"]=="same")
-            self.cycles[cycle]["reverse_wait"].setText(num_to_str(configuration["shearbox"]["Shear"][cycle]["Wait before Reversing"]))
+            self.cycles[cycle]["reverse_wait"].setText(secs_to_time(configuration["shearbox"]["Shear"][cycle]["Wait before Reversing"]))
             self.cycles[cycle]["reverse_disp"].setText(num_to_str(configuration["shearbox"]["Shear"][cycle]["Shear until Displacement"]))
             self.cycles[cycle]["reverse_stress"].setText(num_to_str(configuration["shearbox"]["Shear"][cycle]["Repeat until Stress"]))
 

@@ -507,9 +507,11 @@ class TabUtilities:
             self.configuration["shearbox"]["Vertical Control Channel"] = None
         self.configurationChanged.emit(self.configuration)
 
-    def shape_switch(self, specimen):
-        self.set_rectangular_shape(specimen, self.tabs.specimen.specimens[specimen]["dimensions"].rectangular.isChecked())
-        self.set_circular_shape(specimen, self.tabs.specimen.specimens[specimen]["dimensions"].circular.isChecked())
+    def specimen_selections(self):
+        for i in range(1,5):
+            specimen = f"Specimen {i}"
+            self.set_rectangular_shape(specimen, self.tabs.specimen.specimens[specimen]["dimensions"].rectangular.isChecked())
+            self.set_circular_shape(specimen, self.tabs.specimen.specimens[specimen]["dimensions"].circular.isChecked())
 
     @Slot(str)
     def set_rectangular_shape(self, specimen, checked):
