@@ -13,6 +13,7 @@ class TabUtilities:
         self.cycles.valueChanged.connect(self.residuals_number)
         self.make_hardware_tab_connections()
         self.make_specimen_tab_connections()
+        self.make_consolidation_tab_connections()
 
     def remove_connections(self):
         self.specimens.valueChanged.disconnect()
@@ -20,6 +21,7 @@ class TabUtilities:
         self.cycles.valueChanged.disconnect()
         self.remove_hardware_tab_connections()
         self.remove_specimen_tab_connections()
+        self.remove_consolidation_tab_connections()
     
     def make_hardware_tab_connections(self):
         """Connect hardware tab combobox signals to slots 
@@ -92,6 +94,52 @@ class TabUtilities:
             self.tabs.specimen.specimens[f"Specimen {i}"]["additional"].platen_weight.returnPressed.disconnect()
             self.tabs.specimen.specimens[f"Specimen {i}"]["additional"].platen_corr.returnPressed.disconnect()
             self.tabs.specimen.specimens[f"Specimen {i}"]["additional"].est_strain_at_fail.returnPressed.disconnect()
+
+    def make_consolidation_tab_connections(self):
+        """Connect consolidation tab signals to slots 
+        """
+        self.tabs.consolidation_start_stress.returnPressed.connect(self.set_consolidation_start_stress)
+        self.tabs.consolidation_trigger_stress_select.toggled.connect(self.set_consolidation_trigger_stress_select)
+        self.tabs.consolidation_trigger_stress.returnPressed.connect(self.set_consolidation_trigger_stress)
+        self.tabs.consolidation_trigger_disp_select.toggled.connect(self.set_consolidation_trigger_disp_select)
+        self.tabs.consolidation_trigger_disp.returnPressed.connect(self.set_consolidation_trigger_disp)
+        self.tabs.consolidation_in_water.toggled.connect(self.set_consolidation_in_water)
+
+        self.tabs.consolidation_log_rate_radio.toggled.connect(self.set_consolidation_logging_method_rate)
+        self.tabs.consolidation_log_rate_val.returnPressed.connect(self.set_consolidation_log_rate_val)
+        self.tabs.consolidation_log_timetable_radio.toggled.connect(self.set_consolidation_logging_method_timetable)
+        self.tabs.consolidation_log_timetable_opt.currentTextChanged.connect(self.set_consolidation_log_timetable_opt)
+        self.tabs.consolidation_log_change_radio.toggled.connect(self.set_consolidation_logging_method_change)
+        self.tabs.consolidation_log_change_val.returnPressed.connect(self.set_consolidation_log_change_val)
+
+        self.tabs.consolidation_stop_rate_select.toggled.connect(self.set_consolidation_stop_rate_select)
+        self.tabs.consolidation_stop_rate_disp.returnPressed.connect(self.set_consolidation_stop_rate_disp)
+        self.tabs.consolidation_stop_rate_time.returnPressed.connect(self.set_consolidation_stop_rate_time)
+        self.tabs.consolidation_stop_time_select.toggled.connect(self.set_consolidation_stop_time_select)
+        self.tabs.consolidation_stop_time_opt.returnPressed.connect(self.set_consolidation_stop_time_opt)
+        self.tabs.consolidation_stop_buzz.toggled.connect(self.set_consolidation_stop_buzz)
+
+    def remove_consolidation_tab_connections(self):
+        """Disconnect consolidation tab signals to slots 
+        """
+        self.tabs.consolidation_start_stress.returnPressed.disconnect()
+        self.tabs.consolidation_trigger_stress_select.toggled.disconnect()
+        self.tabs.consolidation_trigger_stress.returnPressed.disconnect()
+        self.tabs.consolidation_trigger_disp_select.toggled.disconnect()
+        self.tabs.consolidation_trigger_disp.returnPressed.disconnect()
+        self.tabs.consolidation_in_water.toggled.disconnect()
+
+        self.tabs.consolidation_log_rate_radio.toggled.disconnect()
+        self.tabs.consolidation_log_rate_val.returnPressed.disconnect()
+        self.tabs.consolidation_log_timetable_opt.currentTextChanged.disconnect()
+        self.tabs.consolidation_log_change_val.returnPressed.disconnect()
+
+        self.tabs.consolidation_stop_rate_select.toggled.disconnect()
+        self.tabs.consolidation_stop_rate_disp.returnPressed.disconnect()
+        self.tabs.consolidation_stop_rate_time.returnPressed.disconnect()
+        self.tabs.consolidation_stop_time_select.toggled.disconnect()
+        self.tabs.consolidation_stop_time_opt.returnPressed.disconnect()
+        self.tabs.consolidation_stop_buzz.toggled.disconnect()
 
     def get_devices_and_channels(self):
         """Get devices and channels of each device and store in self.devices
@@ -822,3 +870,179 @@ class TabUtilities:
         self.configuration["shearbox"]["Specimens"][specimen]["Estimated Strain at Shear Failure"] = est_strain_at_fail
 
         log.info(f'Set {specimen} estimated strain at shear failure to {est_strain_at_fail}.')
+
+
+    @Slot()
+    def set_consolidation_start_stress(self):
+        stress = float(self.tabs.consolidation_start_stress.text())
+        self.configuration["shearbox"]["Consolidation"]["Initial Stress"] = stress
+
+        log.info(f'Set consolidation stage initial stress to {stress}.')
+
+    @Slot()
+    def set_consolidation_trigger_stress_select(self):
+        bool = self.tabs.consolidation_trigger_stress_select.isChecked()
+        self.configuration["shearbox"]["Consolidation"]["Trigger Logging at Stress"] = bool
+
+        self.tabs.consolidation_trigger_stress.setEnabled(bool)
+
+        if not (bool or self.tabs.consolidation_trigger_disp_select.isChecked()):
+            self.tabs.consolidation_trigger_disp.setEnabled(True)
+            self.tabs.consolidation_trigger_disp_select.setChecked(True)
+            self.configuration["shearbox"]["Consolidation"]["Trigger Logging at Displacement"] = True
+
+        log.info(f'Set consolidation stage trigger logging at stress to {bool}.')
+    
+    @Slot()
+    def set_consolidation_trigger_stress(self):
+        stress = float(self.tabs.consolidation_trigger_stress.text())
+        self.configuration["shearbox"]["Consolidation"]["Trigger Stress"] = stress
+
+        log.info(f'Set consolidation stage trigger stress to {stress}.')
+
+    @Slot()
+    def set_consolidation_trigger_disp_select(self):
+        bool = self.tabs.consolidation_trigger_disp_select.isChecked()
+        self.configuration["shearbox"]["Consolidation"]["Trigger Logging at Displacement"] = bool
+
+        self.tabs.consolidation_trigger_disp.setEnabled(bool)
+
+        if not (bool or self.tabs.consolidation_trigger_stress_select.isChecked()):
+            self.tabs.consolidation_trigger_stress.setEnabled(True)
+            self.tabs.consolidation_trigger_stress_select.setChecked(True)
+            self.configuration["shearbox"]["Consolidation"]["Trigger Logging at Stress"] = True
+
+        log.info(f'Set consolidation stage trigger logging at displacement to {bool}.')
+
+    @Slot()
+    def set_consolidation_trigger_disp(self):
+        disp = float(self.tabs.consolidation_trigger_disp.text())
+        self.configuration["shearbox"]["Consolidation"]["Trigger Displacement"] = disp
+
+        log.info(f'Set consolidation stage trigger displacement to {disp}.')
+
+    @Slot()
+    def set_consolidation_in_water(self):
+        bool = self.tabs.consolidation_in_water.isChecked()
+        self.configuration["shearbox"]["Consolidation"]["Sample in Water"] = bool
+
+        log.info(f'Set consolidation stage sample in water to {bool}.')
+
+
+    @Slot()
+    def set_consolidation_logging_method_rate(self):
+        if self.tabs.consolidation_log_rate_radio.isChecked():
+            self.configuration["shearbox"]["Consolidation"]["Logging Method"] = "rate"
+            self.tabs.consolidation_log_rate_val.setEnabled(True)
+            self.tabs.consolidation_log_timetable_opt.setEnabled(False)
+            self.tabs.consolidation_log_change_val.setEnabled(False)
+
+            log.info('Set consolidation stage logging method to "rate".')
+        
+    @Slot()
+    def set_consolidation_logging_method_timetable(self):
+        if self.tabs.consolidation_log_timetable_radio.isChecked():
+            self.configuration["shearbox"]["Consolidation"]["Logging Method"] = "timetable"
+            self.tabs.consolidation_log_rate_val.setEnabled(False)
+            self.tabs.consolidation_log_timetable_opt.setEnabled(True)
+            self.tabs.consolidation_log_change_val.setEnabled(False)
+
+            log.info('Set consolidation stage logging method to "timetable".')
+
+    @Slot()
+    def set_consolidation_logging_method_change(self):
+        if self.tabs.consolidation_log_change_radio.isChecked():
+            self.configuration["shearbox"]["Consolidation"]["Logging Method"] = "change"
+            self.tabs.consolidation_log_rate_val.setEnabled(False)
+            self.tabs.consolidation_log_timetable_opt.setEnabled(False)
+            self.tabs.consolidation_log_change_val.setEnabled(True)
+
+            log.info('Set consolidation stage logging method to "change".')
+
+    @Slot()
+    def set_consolidation_log_rate_val(self):
+        time = 0
+        split_time = self.tabs.consolidation_log_rate_val.text().split(":")
+        for i in range(len(split_time)):
+            time = time*60 + split_time[i]
+        self.configuration["shearbox"]["Consolidation"]["Logging Rate"] = time
+
+        log.info(f'Set consolidation stage logging rate to {self.tabs.consolidation_log_rate_val.text()}.')
+
+    @Slot()
+    def set_consolidation_log_timetable_opt(self, text):
+        self.configuration["shearbox"]["Consolidation"]["Logging Timetable"] = text
+
+        log.info(f'Set consolidation stage logging timetable to {text}.')
+
+    @Slot()
+    def set_consolidation_log_change_val(self):
+        val = float(self.tabs.consolidation_log_change_val.text())
+        self.configuration["shearbox"]["Consolidation"]["Logging Channel Change"] = val
+
+        log.info(f'Set consolidation stage logging channel change to {val}.')
+
+
+    @Slot()
+    def set_consolidation_stop_rate_select(self):
+        bool = self.tabs.consolidation_stop_rate_select.isChecked()
+        self.configuration["shearbox"]["Consolidation"]["Stop on Rate of Change"] = bool
+
+        self.tabs.consolidation_stop_rate_disp.setEnabled(bool)
+        self.tabs.consolidation_stop_rate_time.setEnabled(bool)
+
+        if not (bool or self.tabs.consolidation_stop_time_select.isChecked()):
+            self.tabs.consolidation_stop_time_opt.setEnabled(True)
+            self.tabs.consolidation_stop_time_select.setChecked(True)
+            self.configuration["shearbox"]["Consolidation"]["Stop after Time"] = True
+
+        log.info(f'Set consolidation stage stop on rate of change to {bool}.')
+
+    @Slot()
+    def set_consolidation_stop_rate_disp(self):
+        disp = float(self.tabs.consolidation_stop_rate_disp.text())
+        self.configuration["shearbox"]["Consolidation"]["Stopping Displacement Change"] = disp
+
+        log.info(f'Set consolidation stage stopping displacement change to {disp}.')
+
+    @Slot()
+    def set_consolidation_stop_rate_time(self):
+        time = 0
+        split_time = self.tabs.consolidation_stop_rate_time.text().split(":")
+        for i in range(len(split_time)):
+            time = time*60 + split_time[i]
+        self.configuration["shearbox"]["Consolidation"]["Stopping Time Change"] = time
+
+        log.info(f'Set consolidation stage stopping time change to {self.tabs.consolidation_stop_rate_time.text()}.')
+
+    @Slot()
+    def set_consolidation_stop_time_select(self):
+        bool = self.tabs.consolidation_stop_time_select.isChecked()
+        self.configuration["shearbox"]["Consolidation"]["Stop after Time"] = bool
+
+        self.tabs.consolidation_stop_time_opt.setEnabled(bool)
+
+        if not (bool or self.tabs.consolidation_stop_rate_select.isChecked()):
+            self.tabs.consolidation_stop_rate_disp.setEnabled(True)
+            self.tabs.consolidation_stop_rate_time.setEnabled(True)
+            self.tabs.consolidation_stop_rate_select.setChecked(True)
+            self.configuration["shearbox"]["Consolidation"]["Stop on Rate of Change"] = True
+
+        log.info(f'Set consolidation stage stop after time to {bool}.')
+
+    @Slot()
+    def set_consolidation_stop_time_opt(self):
+        time = 0
+        split_time = self.tabs.consolidation_stop_time_opt.text().split(":")
+        for i in range(len(split_time)):
+            time = time*60 + split_time[i]
+        self.configuration["shearbox"]["Consolidation"]["Stop Time"] = time
+
+        log.info(f'Set consolidation stage stop time to {self.tabs.consolidation_stop_rate_time.text()}.')
+
+    @Slot()
+    def set_consolidation_stop_buzz(self):
+        bool = self.tabs.consolidation_stop_buzz.isChecked()
+        self.configuration["shearbox"]["Consolidation"]["Buzz on Finish"] = bool
+
+        log.info(f'Set consolidation stage buzz on finish to {bool}.')
