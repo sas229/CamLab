@@ -1,6 +1,6 @@
 from pathlib import Path
 import json
-from PySide6.QtCore import Slot
+from PySide6.QtCore import Slot, Qt
 from widgets.ShearboxWindow import ShearboxWindow
 import logging
 
@@ -62,6 +62,7 @@ class ShearboxUtilities:
             self.shearbox.configurationChanged.disconnect()
             self.shearbox.toolbar.saveConfiguration.disconnect()
             self.shearbox.toolbar.loadConfiguration.disconnect()
+            self.shearbox.GenericChannelsData.disconnect()
             if not external:
                 self.shearbox.remove_connections()
         except:
@@ -72,6 +73,7 @@ class ShearboxUtilities:
         self.shearbox.configurationChanged.connect(self.set_configuration)
         self.shearbox.toolbar.saveConfiguration.connect(self.manager.saveConfiguration)
         self.shearbox.toolbar.loadConfiguration.connect(self.manager.loadConfiguration)
+        self.shearbox.GenericChannelsData.connect(self.manager.getGenericChannelsDataPlotWidget, Qt.DirectConnection)
         if not external:
             self.shearbox.make_connections()
 

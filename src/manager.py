@@ -1060,6 +1060,11 @@ class Manager(QObject):
     def resetColourSelector(self):
         self.j = 0
         self.k = 4
+        
+    @Slot()
+    def getGenericChannelsDataPlotWidget(self):
+        self.configuration["shearbox"]["plot"]["channels"] = self.getGenericChannelsData()
+        self.configurationChanged.emit(self.configuration)
 
     def getGenericChannelsData(self):
         deviceList = self.deviceTableModel.enabledDevices()

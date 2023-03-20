@@ -1,9 +1,10 @@
 import os
-from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QRadioButton
-from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QRadioButton
+from PySide6.QtGui import QIcon, QScreen
 from PySide6.QtCore import Signal, Slot
 from local_qt_material import QtStyleTools
 from widgets.ShearboxWindow._TabUtilities import TabUtilities
+from widgets.ShearboxWindow._PlotUtilities import PlotUtilities
 from widgets.ShearboxWindow.Tabs import TabInterface
 from widgets.ShearboxWindow.ToolBar import ToolBar
 import logging
@@ -32,7 +33,7 @@ def secs_to_time(s):
         
     return string
     
-class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
+class ShearboxWindow(QMainWindow, TabUtilities, PlotUtilities, QtStyleTools):
     configurationChanged = Signal(dict)
     def __init__(self, configuration):
         """Main window containing shear box setup
@@ -43,6 +44,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         super().__init__()
         self.setWindowTitle("Shear Box")
         self.setMinimumSize(1000, 1048)
+        self.screenSize = QScreen.availableGeometry(QApplication.primaryScreen())
 
         self.configuration = configuration
         self.running = False
@@ -81,6 +83,8 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
         self.topbarlayout.addWidget(self.toolbar, 0)
         self.topbar.setLayout(self.topbarlayout)
 
+        self.toolbar.runButton.triggered.connect(self.open_plot)
+
         self.tabs = TabInterface()
 
         self.Layout.addWidget(self.topbar, 0)
@@ -103,7 +107,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, QtStyleTools):
 
     def resizeEvent(self, event):
         self.configuration["shearbox"]["width"] = self.size().width()
-        self.configuration["shearbox"]["width"] = self.size().height()
+        self.configuration["shearbox"]["height"] = self.size().height()
         # self.configurationChanged.emit(self.configuration)
         return super(ShearboxWindow, self).resizeEvent(event)
 
