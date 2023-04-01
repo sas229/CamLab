@@ -1,12 +1,13 @@
 import os
 from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QRadioButton
-from PySide6.QtGui import QIcon, QScreen
-from PySide6.QtCore import Signal, Slot
+from PySide6.QtGui import QScreen
+from PySide6.QtCore import Signal, Slot, Qt
 from local_qt_material import QtStyleTools
 from widgets.ShearboxWindow._TabUtilities import TabUtilities
 from widgets.ShearboxWindow._PlotUtilities import PlotUtilities
 from widgets.ShearboxWindow.Tabs import TabInterface
 from widgets.ShearboxWindow.ToolBar import ToolBar
+from widgets.ShearboxWindow.PlotWidget import PlotWidget
 import logging
 from datetime import timedelta
 from pathlib import Path
@@ -52,6 +53,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, PlotUtilities, QtStyleTools):
         self.Layout = QVBoxLayout()
         self.toolbar = ToolBar()
 
+        self.specimens_label = QLabel("Number of Specimens")
         self.specimens = QSpinBox()
         self.specimens.setMinimum(1)
         self.specimens.setMaximum(4)
@@ -74,7 +76,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, PlotUtilities, QtStyleTools):
 
         self.topbar = QWidget()
         self.topbarlayout = QHBoxLayout()
-        self.topbarlayout.addWidget(QLabel("Number of Specimens"), 0)
+        self.topbarlayout.addWidget(self.specimens_label, 0)
         self.topbarlayout.addWidget(self.specimens, 0)
         self.topbarlayout.addStretch(1)
         self.topbarlayout.addWidget(self.radiobuttons, 0)
@@ -83,9 +85,14 @@ class ShearboxWindow(QMainWindow, TabUtilities, PlotUtilities, QtStyleTools):
         self.topbarlayout.addWidget(self.toolbar, 0)
         self.topbar.setLayout(self.topbarlayout)
 
-        self.toolbar.runButton.triggered.connect(self.open_plot)
+        self.toolbar.runButton.triggered.connect(self.run_shear, Qt.UniqueConnection)
+        self.toolbar.setupButton.triggered.connect(self.change_setup, Qt.UniqueConnection)
+        self.toolbar.pauseButton.triggered.connect(self.pause_shear, Qt.UniqueConnection)
+        self.toolbar.stopButton.triggered.connect(self.stop_shear, Qt.UniqueConnection)
 
         self.tabs = TabInterface()
+
+        self.plotWidget = PlotWidget()
 
         self.Layout.addWidget(self.topbar, 0)
         self.Layout.addWidget(self.tabs, 2)
@@ -126,17 +133,6 @@ class ShearboxWindow(QMainWindow, TabUtilities, PlotUtilities, QtStyleTools):
         path_to_css = os.path.abspath(os.path.join(bundle_dir,"CamLab.css"))
         with open(path_to_css) as file:
             self.setStyleSheet(stylesheet + file.read().format(**os.environ))
-
-    def updateIcons(self, darkMode):
-        """Change appearance between light and dark modes.
-
-        Arguments:
-            darkMode -- if dark mode is selected
-        """
-        self.darkMode = darkMode
-        self.toolbar.runButton.setIcon(QIcon("icon:/secondaryText/pause_circle.svg" if self.running else "icon:/secondaryText/play_circle.svg"))
-        self.toolbar.loadConfigButton.setIcon(QIcon("icon:/secondaryText/file_upload.svg"))
-        self.toolbar.saveConfigButton.setIcon(QIcon("icon:/secondaryText/file_download.svg"))
 
     @Slot(int)    
     def specimens_number(self, num):
@@ -179,7 +175,6 @@ class ShearboxWindow(QMainWindow, TabUtilities, PlotUtilities, QtStyleTools):
         self.darkMode = self.configuration["global"]["darkMode"]
 
         self.set_theme()
-        self.updateIcons(self.darkMode)
 
         try:
             self.move(self.configuration["shearbox"]["x"], self.configuration["shearbox"]["y"])

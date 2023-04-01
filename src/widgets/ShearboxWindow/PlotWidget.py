@@ -229,16 +229,16 @@ class PlotWidget(QWidget, QtStyleTools):
         self.minimumSelectedAxisLineEdit.returnPressed.connect(self.setNewSelectedAxisRange)
         self.maximumSelectedAxisLineEdit.returnPressed.connect(self.setNewSelectedAxisRange)
 
-    def set_window(self):
-        x = int(self.configuration["shearbox"]["plot"]["x"])
-        y = int(self.configuration["shearbox"]["plot"]["y"])
-        w = int(self.configuration["shearbox"]["plot"]["width"])
-        h = int(self.configuration["shearbox"]["plot"]["height"])
-        self.setGeometry(x, y, w, h)
-        self.configuration["shearbox"]["plot"]["mode"] = "window"
+    # def set_window(self):
+    #     x = int(self.configuration["shearbox"]["plot"]["x"])
+    #     y = int(self.configuration["shearbox"]["plot"]["y"])
+    #     w = int(self.configuration["shearbox"]["plot"]["width"])
+    #     h = int(self.configuration["shearbox"]["plot"]["height"])
+    #     self.setGeometry(x, y, w, h)
+        # self.configuration["shearbox"]["plot"]["mode"] = "window"
 
-    def set_tab(self):
-        self.configuration["shearbox"]["plot"]["mode"] = "tab"
+    # def set_tab(self):
+        # self.configuration["shearbox"]["plot"]["mode"] = "tab"
         
     def resizeEvent(self, event):
         # Save updated size in configuration.

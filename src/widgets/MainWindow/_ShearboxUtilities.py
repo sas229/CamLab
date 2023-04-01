@@ -44,6 +44,9 @@ class ShearboxUtilities:
         except:
             self.shearbox = ShearboxWindow(self.manager.configuration)
             self.connect_shearbox()
+        
+        # self.shearbox.configuration = self.manager.configuration
+        # self.shearbox.plotWidget.configuration = self.manager.configuration
 
         self.shearbox.show()
         
@@ -68,11 +71,13 @@ class ShearboxUtilities:
         except:
             pass
 
-        self.manager.clear_shearbox_configuration.connect(self.disconnect_shearbox)
-        self.manager.configurationChanged.connect(self.shearbox.set_configuration)
-        self.shearbox.configurationChanged.connect(self.set_configuration)
-        self.shearbox.toolbar.saveConfiguration.connect(self.manager.saveConfiguration)
-        self.shearbox.toolbar.loadConfiguration.connect(self.manager.loadConfiguration)
+        self.manager.clear_shearbox_configuration.connect(self.disconnect_shearbox, Qt.UniqueConnection)
+        self.manager.configurationChanged.connect(self.shearbox.set_configuration, Qt.UniqueConnection)
+        self.manager.configurationChanged.connect(self.shearbox.plotWidget.set_configuration, Qt.UniqueConnection)
+        self.shearbox.configurationChanged.connect(self.set_configuration, Qt.UniqueConnection)
+        self.shearbox.plotWidget.configurationChanged.connect(self.set_configuration, Qt.UniqueConnection)
+        self.shearbox.toolbar.saveConfiguration.connect(self.manager.saveConfiguration, Qt.UniqueConnection)
+        self.shearbox.toolbar.loadConfiguration.connect(self.manager.loadConfiguration, Qt.UniqueConnection)
         self.shearbox.GenericChannelsData.connect(self.manager.getGenericChannelsDataPlotWidget, Qt.DirectConnection)
         if not external:
             self.shearbox.make_connections()
