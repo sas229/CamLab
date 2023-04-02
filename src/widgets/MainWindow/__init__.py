@@ -251,6 +251,9 @@ class MainWindow(TabUtilities, PlotUtilities, ShearboxUtilities, ControlUtilitie
         # Update the UI of plot windows if they exist.
         if self.plots and "plots" in self.manager.configuration: 
             self.update_plots()
+        
+        self.manager.shearboxConfigurationChanged.emit()
+        
 
     def moveEvent(self, event):
         """Method to store the current main window position i the configuration after a move event using a Qt moveEvent overide."""

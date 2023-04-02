@@ -35,7 +35,7 @@ def secs_to_time(s):
     return string
     
 class ShearboxWindow(QMainWindow, TabUtilities, PlotUtilities, QtStyleTools):
-    configurationChanged = Signal(dict)
+
     def __init__(self, configuration):
         """Main window containing shear box setup
 
@@ -104,18 +104,16 @@ class ShearboxWindow(QMainWindow, TabUtilities, PlotUtilities, QtStyleTools):
 
         self.set_theme()
 
-        self.apply_configuration(self.configuration)
+        self.apply_configuration()
 
     def moveEvent(self, event):
         self.configuration["shearbox"]["x"] = self.pos().x()
         self.configuration["shearbox"]["y"] = self.pos().y()
-        # self.configurationChanged.emit(self.configuration)
         return super(ShearboxWindow, self).moveEvent(event)
 
     def resizeEvent(self, event):
         self.configuration["shearbox"]["width"] = self.size().width()
         self.configuration["shearbox"]["height"] = self.size().height()
-        # self.configurationChanged.emit(self.configuration)
         return super(ShearboxWindow, self).resizeEvent(event)
 
     def set_theme(self):
@@ -161,18 +159,10 @@ class ShearboxWindow(QMainWindow, TabUtilities, PlotUtilities, QtStyleTools):
             for i in range(self.tabs.specimen.count(), num):
                 self.tabs.specimen.add_persistent_tab(self.tabs.specimen.specimens[f"Specimen {i+1}"]["tabs"], f"Specimen {i+1}")
         self.configuration["shearbox"]["Number of Specimens"] = num
-        self.configurationChanged.emit(self.configuration)
 
     @Slot(dict)
-    def set_configuration(self, configuration):
-        """Set the configuration
-
-        Arguments:
-            configuration -- the configuration to be set
-        """
-        
-        self.configuration = configuration
-        self.darkMode = self.configuration["global"]["darkMode"]
+    def set_configuration(self):
+        """Set the configuration"""
 
         self.set_theme()
 
@@ -231,7 +221,6 @@ class ShearboxWindow(QMainWindow, TabUtilities, PlotUtilities, QtStyleTools):
             self.tabs.shear.cycles["Cycle 1"]["reverse_layout"].addWidget(self.tabs.shear.cycles["Cycle 1"]["reverse_stress"], 4, 1)
             self.tabs.shear.cycles["Cycle 1"]["reverse_layout"].addWidget(self.tabs.shear.cycles["Cycle 1"]["reverse_stress_unit"], 4, 2)
 
-        self.configurationChanged.emit(self.configuration)
         log.info(f'Shear mode set to "{self.configuration["shearbox"]["Mode"]}".')
 
     @Slot(int)    
@@ -261,125 +250,201 @@ class ShearboxWindow(QMainWindow, TabUtilities, PlotUtilities, QtStyleTools):
             for i in range(self.tabs.shear.count(), num): 
                 self.tabs.shear.add_persistent_tab(self.tabs.shear.cycles[f"Cycle {i+1}"]["widget"], f"Cycle {i+1}")
         self.configuration["shearbox"]["Residual Cycles"] = num
-        self.configurationChanged.emit(self.configuration)
 
-    def apply_configuration(self, configuration):
-        """Apply configuration values to widgets
+    def apply_configuration(self):
+        """Apply configuration values to widgets"""
 
-        Arguments:
-            configuration -- configuration to apply
-        """
         self.get_devices_and_channels()
         self.addItemstoInstrumentComboboxes()
 
-        self.specimens.setValue(configuration["shearbox"]["Number of Specimens"])
-        self.specimens_number(configuration["shearbox"]["Number of Specimens"])
+        self.specimens.setValue(self.configuration["shearbox"]["Number of Specimens"])
+        self.specimens_number(self.configuration["shearbox"]["Number of Specimens"])
 
-        if configuration["shearbox"]["Mode"] == "direct":
+        if self.configuration["shearbox"]["Mode"] == "direct":
             self.direct_shear.setChecked(True)
         else:
             self.residual_shear.setChecked(True)
         self.shear_type()
 
-        self.cycles.setValue(configuration["shearbox"]["Residual Cycles"])
-        self.residuals_number(configuration["shearbox"]["Residual Cycles"])
+        self.cycles.setValue(self.configuration["shearbox"]["Residual Cycles"])
+        self.residuals_number(self.configuration["shearbox"]["Residual Cycles"])
 
-        self.tabs.horiz_load_ins.setCurrentText(configuration["shearbox"]["Hardware"]["Horizontal Load Instrument"])
+        self.tabs.horiz_load_ins.setCurrentText(self.configuration["shearbox"]["Hardware"]["Horizontal Load Instrument"])
         if self.tabs.horiz_load_ins.currentText() != "":
             self.set_horiz_load_ins(self.tabs.horiz_load_ins.currentText(), apply_config=True)
-            self.tabs.horiz_load_chan.setCurrentText(configuration["shearbox"]["Hardware"]["Horizontal Load Channel"])
+            self.tabs.horiz_load_chan.setCurrentText(self.configuration["shearbox"]["Hardware"]["Horizontal Load Channel"])
             if self.tabs.horiz_load_chan.currentText() == "":
-                configuration["shearbox"]["Hardware"]["Horizontal Load Channel"] = None
+                self.configuration["shearbox"]["Hardware"]["Horizontal Load Channel"] = None
         else:
-            configuration["shearbox"]["Hardware"]["Horizontal Load Instrument"] = None
-            configuration["shearbox"]["Hardware"]["Horizontal Load Channel"] = None
+            self.configuration["shearbox"]["Hardware"]["Horizontal Load Instrument"] = None
+            self.configuration["shearbox"]["Hardware"]["Horizontal Load Channel"] = None
 
-        self.tabs.horiz_disp_ins.setCurrentText(configuration["shearbox"]["Hardware"]["Horizontal Displacement Instrument"])
+        self.tabs.horiz_disp_ins.setCurrentText(self.configuration["shearbox"]["Hardware"]["Horizontal Displacement Instrument"])
         if self.tabs.horiz_disp_ins.currentText() != "":
             self.set_horiz_disp_ins(self.tabs.horiz_disp_ins.currentText(), apply_config=True)
-            self.tabs.horiz_disp_chan.setCurrentText(configuration["shearbox"]["Hardware"]["Horizontal Displacement Channel"])
+            self.tabs.horiz_disp_chan.setCurrentText(self.configuration["shearbox"]["Hardware"]["Horizontal Displacement Channel"])
             if self.tabs.horiz_disp_chan.currentText() == "":
-                configuration["shearbox"]["Hardware"]["Horizontal Displacement Channel"] = None
+                self.configuration["shearbox"]["Hardware"]["Horizontal Displacement Channel"] = None
         else:
-            configuration["shearbox"]["Hardware"]["Horizontal Displacement Instrument"] = None
-            configuration["shearbox"]["Hardware"]["Horizontal Displacement Channel"] = None
+            self.configuration["shearbox"]["Hardware"]["Horizontal Displacement Instrument"] = None
+            self.configuration["shearbox"]["Hardware"]["Horizontal Displacement Channel"] = None
 
-        self.tabs.vert_load_ins.setCurrentText(configuration["shearbox"]["Hardware"]["Vertical Load Instrument"])
+        self.tabs.vert_load_ins.setCurrentText(self.configuration["shearbox"]["Hardware"]["Vertical Load Instrument"])
         if self.tabs.vert_load_ins.currentText() != "":
             self.set_vert_load_ins(self.tabs.vert_load_ins.currentText(), apply_config=True)
-            self.tabs.vert_load_chan.setCurrentText(configuration["shearbox"]["Hardware"]["Vertical Load Channel"])
+            self.tabs.vert_load_chan.setCurrentText(self.configuration["shearbox"]["Hardware"]["Vertical Load Channel"])
             if self.tabs.vert_load_chan.currentText() == "":
-                configuration["shearbox"]["Hardware"]["Vertical Load Channel"] = None
+                self.configuration["shearbox"]["Hardware"]["Vertical Load Channel"] = None
         else:
-            configuration["shearbox"]["Hardware"]["Vertical Load Instrument"] = None
-            configuration["shearbox"]["Hardware"]["Vertical Load Channel"] = None
+            self.configuration["shearbox"]["Hardware"]["Vertical Load Instrument"] = None
+            self.configuration["shearbox"]["Hardware"]["Vertical Load Channel"] = None
 
-        self.tabs.vert_disp_ins.setCurrentText(configuration["shearbox"]["Hardware"]["Vertical Displacement Instrument"])
+        self.tabs.vert_disp_ins.setCurrentText(self.configuration["shearbox"]["Hardware"]["Vertical Displacement Instrument"])
         if self.tabs.vert_disp_ins.currentText() != "":
             self.set_vert_disp_ins(self.tabs.vert_disp_ins.currentText(), apply_config=True)
-            self.tabs.vert_disp_chan.setCurrentText(configuration["shearbox"]["Hardware"]["Vertical Displacement Channel"])
+            self.tabs.vert_disp_chan.setCurrentText(self.configuration["shearbox"]["Hardware"]["Vertical Displacement Channel"])
             if self.tabs.vert_disp_chan.currentText() == "":
-                configuration["shearbox"]["Hardware"]["Vertical Displacement Channel"] = None
+                self.configuration["shearbox"]["Hardware"]["Vertical Displacement Channel"] = None
         else:
-            configuration["shearbox"]["Hardware"]["Vertical Displacement Instrument"] = None
-            configuration["shearbox"]["Hardware"]["Vertical Displacement Channel"] = None
+            self.configuration["shearbox"]["Hardware"]["Vertical Displacement Instrument"] = None
+            self.configuration["shearbox"]["Hardware"]["Vertical Displacement Channel"] = None
 
-        self.tabs.horiz_cont_ins.setCurrentText(configuration["shearbox"]["Hardware"]["Horizontal Control Instrument"])
+        self.tabs.horiz_cont_ins.setCurrentText(self.configuration["shearbox"]["Hardware"]["Horizontal Control Instrument"])
         if self.tabs.horiz_cont_ins.currentText() != "":
             self.set_horiz_cont_ins(self.tabs.horiz_cont_ins.currentText(), apply_config=True)
-            self.tabs.horiz_cont_chan.setCurrentText(configuration["shearbox"]["Hardware"]["Horizontal Control Channel"])
+            self.tabs.horiz_cont_chan.setCurrentText(self.configuration["shearbox"]["Hardware"]["Horizontal Control Channel"])
             if self.tabs.horiz_cont_chan.currentText() == "":
-                configuration["shearbox"]["Hardware"]["Horizontal Control Channel"] = None
+                self.configuration["shearbox"]["Hardware"]["Horizontal Control Channel"] = None
         else:
-            configuration["shearbox"]["Hardware"]["Horizontal Control Instrument"] = None
-            configuration["shearbox"]["Hardware"]["Horizontal Control Channel"] = None
+            self.configuration["shearbox"]["Hardware"]["Horizontal Control Instrument"] = None
+            self.configuration["shearbox"]["Hardware"]["Horizontal Control Channel"] = None
 
-        self.tabs.vert_cont_ins.setCurrentText(configuration["shearbox"]["Hardware"]["Vertical Control Instrument"])
+        self.tabs.vert_cont_ins.setCurrentText(self.configuration["shearbox"]["Hardware"]["Vertical Control Instrument"])
         if self.tabs.vert_cont_ins.currentText() != "":
             self.set_vert_cont_ins(self.tabs.vert_cont_ins.currentText(), apply_config=True)
-            self.tabs.vert_cont_chan.setCurrentText(configuration["shearbox"]["Hardware"]["Vertical Control Channel"])
+            self.tabs.vert_cont_chan.setCurrentText(self.configuration["shearbox"]["Hardware"]["Vertical Control Channel"])
             if self.tabs.vert_cont_chan.currentText() == "":
-                configuration["shearbox"]["Hardware"]["Vertical Control Channel"] = None
+                self.configuration["shearbox"]["Hardware"]["Vertical Control Channel"] = None
         else:
-            configuration["shearbox"]["Hardware"]["Vertical Control Instrument"] = None
-            configuration["shearbox"]["Hardware"]["Vertical Control Channel"] = None
+            self.configuration["shearbox"]["Hardware"]["Vertical Control Instrument"] = None
+            self.configuration["shearbox"]["Hardware"]["Vertical Control Channel"] = None
 
-        self.tabs.specimen.apply_configuration(configuration)
+        self.tabs.specimen.apply_configuration(self.configuration)
         self.specimen_selections()
 
-        self.tabs.consolidation_start_stress.setText(num_to_str(configuration["shearbox"]["Consolidation"]["Initial Stress"]))
-        self.tabs.consolidation_trigger_stress_select.setChecked(configuration["shearbox"]["Consolidation"]["Trigger Logging at Stress"])
-        self.tabs.consolidation_trigger_stress.setText(num_to_str(configuration["shearbox"]["Consolidation"]["Trigger Stress"]))
-        self.tabs.consolidation_trigger_disp_select.setChecked(configuration["shearbox"]["Consolidation"]["Trigger Logging at Displacement"])
-        self.tabs.consolidation_trigger_disp.setText(num_to_str(configuration["shearbox"]["Consolidation"]["Trigger Displacement"]))
-        self.tabs.consolidation_in_water.setChecked(configuration["shearbox"]["Consolidation"]["Sample in Water"])
+        self.tabs.consolidation_start_stress.setText(num_to_str(self.configuration["shearbox"]["Consolidation"]["Initial Stress"]))
+        self.tabs.consolidation_trigger_stress_select.setChecked(self.configuration["shearbox"]["Consolidation"]["Trigger Logging at Stress"])
+        self.tabs.consolidation_trigger_stress.setText(num_to_str(self.configuration["shearbox"]["Consolidation"]["Trigger Stress"]))
+        self.tabs.consolidation_trigger_disp_select.setChecked(self.configuration["shearbox"]["Consolidation"]["Trigger Logging at Displacement"])
+        self.tabs.consolidation_trigger_disp.setText(num_to_str(self.configuration["shearbox"]["Consolidation"]["Trigger Displacement"]))
+        self.tabs.consolidation_in_water.setChecked(self.configuration["shearbox"]["Consolidation"]["Sample in Water"])
 
-        self.tabs.consolidation_log_rate_radio.setChecked(configuration["shearbox"]["Consolidation"]["Logging Method"]=="rate")
-        self.tabs.consolidation_log_rate_val.setText(secs_to_time(configuration["shearbox"]["Consolidation"]["Logging Rate"]))
-        self.tabs.consolidation_log_timetable_radio.setChecked(configuration["shearbox"]["Consolidation"]["Logging Method"]=="timetable")
-        self.tabs.consolidation_log_timetable_opt.setCurrentText(configuration["shearbox"]["Consolidation"]["Logging Timetable"])
-        self.tabs.consolidation_log_change_radio.setChecked(configuration["shearbox"]["Consolidation"]["Logging Method"]=="change")
-        self.tabs.consolidation_log_change_val.setText(num_to_str(configuration["shearbox"]["Consolidation"]["Logging Channel Change"]))
+        self.tabs.consolidation_log_rate_radio.setChecked(self.configuration["shearbox"]["Consolidation"]["Logging Method"]=="rate")
+        self.tabs.consolidation_log_rate_val.setText(secs_to_time(self.configuration["shearbox"]["Consolidation"]["Logging Rate"]))
+        self.tabs.consolidation_log_timetable_radio.setChecked(self.configuration["shearbox"]["Consolidation"]["Logging Method"]=="timetable")
+        self.tabs.consolidation_log_timetable_opt.setCurrentText(self.configuration["shearbox"]["Consolidation"]["Logging Timetable"])
+        self.tabs.consolidation_log_change_radio.setChecked(self.configuration["shearbox"]["Consolidation"]["Logging Method"]=="change")
+        self.tabs.consolidation_log_change_val.setText(num_to_str(self.configuration["shearbox"]["Consolidation"]["Logging Channel Change"]))
 
-        self.tabs.consolidation_stop_rate_select.setChecked(configuration["shearbox"]["Consolidation"]["Stop on Rate of Change"])
-        self.tabs.consolidation_stop_rate_disp.setText(num_to_str(configuration["shearbox"]["Consolidation"]["Stopping Displacement Change"]))
-        self.tabs.consolidation_stop_rate_time.setText(secs_to_time(configuration["shearbox"]["Consolidation"]["Stopping Time Change"]))
-        self.tabs.consolidation_stop_time_select.setChecked(configuration["shearbox"]["Consolidation"]["Stop after Time"])
-        self.tabs.consolidation_stop_time_opt.setText(secs_to_time(configuration["shearbox"]["Consolidation"]["Stop Time"]))
-        self.tabs.consolidation_stop_buzz.setChecked(configuration["shearbox"]["Consolidation"]["Buzz on Finish"])
+        self.tabs.consolidation_stop_rate_select.setChecked(self.configuration["shearbox"]["Consolidation"]["Stop on Rate of Change"])
+        self.tabs.consolidation_stop_rate_disp.setText(num_to_str(self.configuration["shearbox"]["Consolidation"]["Stopping Displacement Change"]))
+        self.tabs.consolidation_stop_rate_time.setText(secs_to_time(self.configuration["shearbox"]["Consolidation"]["Stopping Time Change"]))
+        self.tabs.consolidation_stop_time_select.setChecked(self.configuration["shearbox"]["Consolidation"]["Stop after Time"])
+        self.tabs.consolidation_stop_time_opt.setText(secs_to_time(self.configuration["shearbox"]["Consolidation"]["Stop Time"]))
+        self.tabs.consolidation_stop_buzz.setChecked(self.configuration["shearbox"]["Consolidation"]["Buzz on Finish"])
 
         self.consolidation_selections()
 
-        self.tabs.shear.apply_configuration(configuration)
+        self.tabs.shear.apply_configuration(self.configuration)
         self.shear_selections()
-
-        self.configuration = configuration
-        self.configurationChanged.emit(configuration)
 
         log.info("Configuration applied.")
 
+    def block_signals(self, block):
+        """Block/Unblock all signals from emitting
+
+        Arguments:
+            block -- bool (Block if True/Unblock if False)
+        """
+        self.blockSignals(block)
+        self.tabs.blockSignals(block)
+        self.tabs.horiz_load_ins.blockSignals(block)
+        self.tabs.horiz_load_chan.blockSignals(block)
+        self.tabs.horiz_disp_ins.blockSignals(block)
+        self.tabs.horiz_disp_chan.blockSignals(block)
+        self.tabs.vert_load_ins.blockSignals(block)
+        self.tabs.vert_load_chan.blockSignals(block)
+        self.tabs.vert_disp_ins.blockSignals(block)
+        self.tabs.vert_disp_chan.blockSignals(block)
+        self.tabs.horiz_cont_ins.blockSignals(block)
+        self.tabs.horiz_cont_chan.blockSignals(block)
+        self.tabs.vert_cont_ins.blockSignals(block)
+        self.tabs.vert_cont_chan.blockSignals(block)
+
+        for i in range(1,5):
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].rectangular.blockSignals(block)
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].initial_weight.blockSignals(block)
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].initial_height.blockSignals(block)
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].initial_width.blockSignals(block)
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].initial_depth.blockSignals(block)
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].initial_radius.blockSignals(block)
+            self.tabs.specimen.specimens[f"Specimen {i}"]["dimensions"].particle_density.blockSignals(block)
+            
+            self.tabs.specimen.specimens[f"Specimen {i}"]["moisture"].initial_wet_weight.blockSignals(block)
+            self.tabs.specimen.specimens[f"Specimen {i}"]["moisture"].initial_dry_weight.blockSignals(block)
+            self.tabs.specimen.specimens[f"Specimen {i}"]["moisture"].tin_initial_weight.blockSignals(block)
+            
+            self.tabs.specimen.specimens[f"Specimen {i}"]["additional"].platen_weight.blockSignals(block)
+            self.tabs.specimen.specimens[f"Specimen {i}"]["additional"].platen_corr.blockSignals(block)
+            self.tabs.specimen.specimens[f"Specimen {i}"]["additional"].est_strain_at_fail.blockSignals(block)
+
+        self.tabs.consolidation_start_stress.blockSignals(block)
+        self.tabs.consolidation_trigger_stress_select.blockSignals(block)
+        self.tabs.consolidation_trigger_stress.blockSignals(block)
+        self.tabs.consolidation_trigger_disp_select.blockSignals(block)
+        self.tabs.consolidation_trigger_disp.blockSignals(block)
+        self.tabs.consolidation_in_water.blockSignals(block)
+
+        self.tabs.consolidation_log_rate_radio.blockSignals(block)
+        self.tabs.consolidation_log_rate_val.blockSignals(block)
+        self.tabs.consolidation_log_timetable_opt.blockSignals(block)
+        self.tabs.consolidation_log_change_val.blockSignals(block)
+
+        self.tabs.consolidation_stop_rate_select.blockSignals(block)
+        self.tabs.consolidation_stop_rate_disp.blockSignals(block)
+        self.tabs.consolidation_stop_rate_time.blockSignals(block)
+        self.tabs.consolidation_stop_time_select.blockSignals(block)
+        self.tabs.consolidation_stop_time_opt.blockSignals(block)
+        self.tabs.consolidation_stop_buzz.blockSignals(block)
+
+        for i in range(1,11): 
+            self.tabs.shear.cycles[f"Cycle {i}"]["trigger_speed_select"].blockSignals(block)
+            self.tabs.shear.cycles[f"Cycle {i}"]["trigger_speed"].blockSignals(block)
+            self.tabs.shear.cycles[f"Cycle {i}"]["trigger_calc_select"].blockSignals(block)
+            self.tabs.shear.cycles[f"Cycle {i}"]["trigger_calc_opt"].blockSignals(block)
+            self.tabs.shear.cycles[f"Cycle {i}"]["trigger_load_select"].blockSignals(block)
+            self.tabs.shear.cycles[f"Cycle {i}"]["trigger_load_change"].blockSignals(block)
+
+            self.tabs.shear.cycles[f"Cycle {i}"]["store_rate_radio"].blockSignals(block)
+            self.tabs.shear.cycles[f"Cycle {i}"]["store_rate_val"].blockSignals(block)
+            self.tabs.shear.cycles[f"Cycle {i}"]["store_strain_radio"].blockSignals(block)
+            self.tabs.shear.cycles[f"Cycle {i}"]["store_strain_val"].blockSignals(block)
+            self.tabs.shear.cycles[f"Cycle {i}"]["store_disp_radio"].blockSignals(block)
+            self.tabs.shear.cycles[f"Cycle {i}"]["store_disp_val"].blockSignals(block)
+
+            self.tabs.shear.cycles[f"Cycle {i}"]["stop_drop_select"].blockSignals(block)
+            self.tabs.shear.cycles[f"Cycle {i}"]["stop_drop"].blockSignals(block)
+            self.tabs.shear.cycles[f"Cycle {i}"]["stop_strain_select"].blockSignals(block)
+            self.tabs.shear.cycles[f"Cycle {i}"]["stop_strain"].blockSignals(block)
+
+            self.tabs.shear.cycles[f"Cycle {i}"]["reverse_rate_radio"].blockSignals(block)
+            self.tabs.shear.cycles[f"Cycle {i}"]["reverse_rate_val"].blockSignals(block)
+            self.tabs.shear.cycles[f"Cycle {i}"]["reverse_same"].blockSignals(block)
+            self.tabs.shear.cycles[f"Cycle {i}"]["reverse_wait"].blockSignals(block)
+            self.tabs.shear.cycles[f"Cycle {i}"]["reverse_disp"].blockSignals(block)
+            self.tabs.shear.cycles[f"Cycle {i}"]["reverse_stress"].blockSignals(block)
+
     def closeEvent(self, event):
-        self.remove_connections()
 
         if "shearbox" in self.configuration.keys():
             self.configuration["shearbox"]["x"] = self.frameGeometry().x()
@@ -388,7 +453,6 @@ class ShearboxWindow(QMainWindow, TabUtilities, PlotUtilities, QtStyleTools):
             self.configuration["shearbox"]["height"] = self.frameGeometry().height()
             self.configuration["shearbox"]["active"] = False
 
-            self.configurationChanged.emit(self.configuration)
 
         log.info("Closing ShearBox")
         return super().closeEvent(event)

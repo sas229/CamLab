@@ -251,9 +251,8 @@ class PlotWidget(QWidget, QtStyleTools):
         self.configuration["shearbox"]["plot"]["x"] = int(position.x())
         self.configuration["shearbox"]["plot"]["y"] = int(position.y())
 
-    def set_configuration(self, configuration):
+    def set_configuration(self):
         # Set the configuration.
-        self.configuration = configuration
         if "plot" in self.configuration["shearbox"]:
             self.alphaSlider.setValue(int(self.configuration["shearbox"]["plot"]["alpha"]))
             self.autoCheckBox.setChecked(bool(self.configuration["shearbox"]["plot"]["auto"]))
@@ -312,7 +311,6 @@ class PlotWidget(QWidget, QtStyleTools):
             self.setSwap()
             self.setAxesLabels()
             self.updatePlot()
-            self.darkMode = self.configuration["global"]["darkMode"]
             self.setDarkMode()
             # log.info("Configuration set.")
 
@@ -789,6 +787,7 @@ class PlotWidget(QWidget, QtStyleTools):
 
     def setDarkMode(self):
         # Set dark mode.
+        self.darkMode = self.configuration["global"]["darkMode"]
         if self.darkMode == True:
             self.apply_stylesheet(self, theme='dark_blue.xml')
         else:

@@ -6,6 +6,13 @@ import logging
 
 log = logging.getLogger(__name__)
 
+def direct_connect(signal, slot):
+    try:
+        signal.disconnect(slot)
+    except RuntimeError: # signal not already connected
+        pass 
+    signal.connect(slot, Qt.DirectConnection)
+
 class ShearboxUtilities:
 
     @Slot()
@@ -37,16 +44,19 @@ class ShearboxUtilities:
         
         try:
             self.shearbox.activateWindow()
-            self.shearbox.remove_connections()
-            self.shearbox.set_configuration(self.manager.configuration)
-            self.shearbox.apply_configuration(self.manager.configuration)
-            self.connect_shearbox()
+            self.shearbox.block_signals(True)
+            self.shearbox.configuration = self.manager.configuration
+            self.shearbox.plotWidget.configuration = self.manager.configuration
+            self.shearbox.set_configuration()
+            self.shearbox.apply_configuration()
+            self.shearbox.block_signals(False)
         except:
             self.shearbox = ShearboxWindow(self.manager.configuration)
-            self.connect_shearbox()
+            self.configuration = self.shearbox.configuration
+            self.manager.configuration = self.shearbox.configuration
+            self.shearbox.plotWidget.configuration = self.shearbox.configuration
         
-        # self.shearbox.configuration = self.manager.configuration
-        # self.shearbox.plotWidget.configuration = self.manager.configuration
+        self.connect_shearbox()
 
         self.shearbox.show()
         
@@ -58,27 +68,13 @@ class ShearboxUtilities:
         Keyword Arguments:
             external -- if shearbox internal connections are to be omitted (default: {False})
         """
-        try:
-            # disconnect everything to ensure no duplicate connections
-            self.manager.clear_shearbox_configuration.disconnect(self.disconnect_shearbox)
-            self.manager.configurationChanged.disconnect(self.shearbox.set_configuration)
-            self.shearbox.configurationChanged.disconnect()
-            self.shearbox.toolbar.saveConfiguration.disconnect()
-            self.shearbox.toolbar.loadConfiguration.disconnect()
-            self.shearbox.GenericChannelsData.disconnect()
-            if not external:
-                self.shearbox.remove_connections()
-        except:
-            pass
 
         self.manager.clear_shearbox_configuration.connect(self.disconnect_shearbox, Qt.UniqueConnection)
-        self.manager.configurationChanged.connect(self.shearbox.set_configuration, Qt.UniqueConnection)
-        self.manager.configurationChanged.connect(self.shearbox.plotWidget.set_configuration, Qt.UniqueConnection)
-        self.shearbox.configurationChanged.connect(self.set_configuration, Qt.UniqueConnection)
-        self.shearbox.plotWidget.configurationChanged.connect(self.set_configuration, Qt.UniqueConnection)
+        self.manager.shearboxConfigurationChanged.connect(self.shearbox.set_configuration, Qt.UniqueConnection)
+        self.manager.shearboxConfigurationChanged.connect(self.shearbox.plotWidget.set_configuration, Qt.UniqueConnection)
         self.shearbox.toolbar.saveConfiguration.connect(self.manager.saveConfiguration, Qt.UniqueConnection)
         self.shearbox.toolbar.loadConfiguration.connect(self.manager.loadConfiguration, Qt.UniqueConnection)
-        self.shearbox.GenericChannelsData.connect(self.manager.getGenericChannelsDataPlotWidget, Qt.DirectConnection)
+        direct_connect(self.shearbox.GenericChannelsData, self.manager.getGenericChannelsDataPlotWidget)
         if not external:
             self.shearbox.make_connections()
 
@@ -88,6 +84,7 @@ class ShearboxUtilities:
     @Slot()
     def disconnect_shearbox(self):
         self.manager.clear_shearbox_configuration.disconnect(self.disconnect_shearbox)
+        self.manager.shearboxConfigurationChanged.disconnect()
         try:
             self.manager.configurationChanged.disconnect(self.shearbox.set_configuration)
         except:

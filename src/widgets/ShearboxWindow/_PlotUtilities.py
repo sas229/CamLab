@@ -101,7 +101,7 @@ class PlotUtilities:
 # NEED TO CHANGE         self.manager.setColourNewPlot(plotNumber)
 
         # Show the plot.
-        self.plotWidget.set_configuration(self.configuration)
+        self.plotWidget.set_configuration()
         self.tabs.setParent(None)
         self.Layout.addWidget(self.plotWidget, 2)
 
@@ -131,12 +131,12 @@ class PlotUtilities:
     @Slot()
     def create_existing_plots(self):
         # Show the plot.
-        self.plotWidget.set_configuration(self.configuration)
+        self.plotWidget.set_configuration()
         self.tabs.setParent(None)
         self.Layout.addWidget(self.plotWidget, 2)
 
         # Connections.
-        self.configurationChanged.connect(self.plotWidget.set_configuration)
+        # self.configurationChanged.connect(self.plotWidget.set_configuration)
 # NEED TO CHANGE        self.manager.assembly.plotDataChanged.connect(self.plotWidget.update_output_data)
 # NEED TO CHANGE        self.plotWidget.plotWidgetClosed.connect(self.window_to_tab)
         self.plotWidget.colourUpdated.connect(self.update_channel_colours)
@@ -152,7 +152,7 @@ class PlotUtilities:
     def update_plots(self):
         # If plots exist update the configuration.
         if "plot" in self.configuration["shearbox"]:
-            self.plotWidget.set_configuration(self.configuration)
+            self.plotWidget.set_configuration()
                  
 # NEED TO CHANGE     @Slot(str)
 # NEED TO CHANGE     def remove_plot(self, plotNumber):
@@ -167,7 +167,7 @@ class PlotUtilities:
 # NEED TO CHANGE                 del self.configuration["shearbox"]["plots"]
 # NEED TO CHANGE     
     def close_plot(self):
-        self.configurationChanged.disconnect(self.plotWidget.set_configuration)
+        # self.configurationChanged.disconnect(self.plotWidget.set_configuration)
         self.plotWidget.setParent(None)
         self.plotWidget.close()
         self.Layout.addWidget(self.tabs, 2)
@@ -179,5 +179,5 @@ class PlotUtilities:
         self.update_plots()
 
     def getGenericChannelsData(self):
-        self.configurationChanged.emit(self.configuration)
+        # self.configurationChanged.emit(self.configuration)
         self.GenericChannelsData.emit()

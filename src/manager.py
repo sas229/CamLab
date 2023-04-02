@@ -31,6 +31,7 @@ class Manager(QObject):
     outputText = Signal(str)
     finishedRefreshingDevices = Signal()
     initialisePressFeedbackSettings = Signal()
+    shearboxConfigurationChanged = Signal()
 
     def __init__(self):
         super().__init__()
