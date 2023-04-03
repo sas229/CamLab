@@ -344,6 +344,13 @@ class PlotWidget(QWidget, QtStyleTools):
 
     @Slot()
     def setSwap(self):
+        lockCommonAxis = bool(self.lockCommonAxisCheckBox.checkState())
+        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.checkState())
+        swap = bool(self.swapCheckBox.checkState())
+        if swap:
+            self.plot.setMouseEnabled(not lockSelectedAxis, not lockCommonAxis)
+        else:
+            self.plot.setMouseEnabled(not lockCommonAxis, not lockSelectedAxis)
         self.updateConfiguration()
         self.updatePlot()
 
@@ -377,6 +384,7 @@ class PlotWidget(QWidget, QtStyleTools):
         lockCommonAxis = bool(self.lockCommonAxisCheckBox.checkState())
         lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.checkState())
         manualCommonAxis = bool(self.manualCommonAxisCheckBox.checkState())
+        swap = bool(self.swapCheckBox.checkState())
         if lockCommonAxis == True:
             self.minCommonAxisLock = float(self.minimumCommonAxisLineEdit.text())
             self.maxCommonAxisLock = float(self.maximumCommonAxisLineEdit.text())
@@ -388,7 +396,11 @@ class PlotWidget(QWidget, QtStyleTools):
             self.lockCheckBox.setChecked(False)
             if manualCommonAxis == True:
                 self.minimumCommonAxisLineEdit.setEnabled(True)
-                self.maximumCommonAxisLineEdit.setEnabled(True)   
+                self.maximumCommonAxisLineEdit.setEnabled(True)
+        if swap:
+            self.plot.setMouseEnabled(not lockSelectedAxis, not lockCommonAxis)
+        else:
+            self.plot.setMouseEnabled(not lockCommonAxis, not lockSelectedAxis)
         self.updateCommonAxisRange()
         self.updateConfiguration()
 
@@ -398,6 +410,7 @@ class PlotWidget(QWidget, QtStyleTools):
         lockCommonAxis = bool(self.lockCommonAxisCheckBox.checkState())
         lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.checkState())
         manualSelectedAxis = bool(self.manualSelectedAxisCheckBox.checkState())
+        swap = bool(self.swapCheckBox.checkState())
         if lockSelectedAxis == True:
             self.minSelectedAxisLock = float(self.minimumSelectedAxisLineEdit.text())
             self.maxSelectedAxisLock = float(self.maximumSelectedAxisLineEdit.text())
@@ -410,6 +423,10 @@ class PlotWidget(QWidget, QtStyleTools):
             if manualSelectedAxis == True:
                 self.minimumSelectedAxisLineEdit.setEnabled(True)
                 self.maximumSelectedAxisLineEdit.setEnabled(True)
+        if swap:
+            self.plot.setMouseEnabled(not lockSelectedAxis, not lockCommonAxis)
+        else:
+            self.plot.setMouseEnabled(not lockCommonAxis, not lockSelectedAxis)
         self.updateSelectedAxisRange()
         self.updateConfiguration()
 
