@@ -1,4 +1,9 @@
-from PySide6.QtCore import Signal, Slot, QModelIndex
+from PySide6.QtWidgets import QFileDialog
+from PySide6.QtCore import Signal, Slot, QModelIndex, Qt
+import numpy as np
+import pandas as pd
+import sqlite3
+from pathlib import Path
 import copy
 import logging
 
@@ -108,7 +113,7 @@ class PlotUtilities:
         # Connections.
 # NEED TO CHANGE        self.manager.assembly.plotDataChanged.connect(self.plotWidget.update_output_data)
 # NEED TO CHANGE        self.plotWidget.plotWidgetClosed.connect(self.window_to_tab)
-        self.plotWidget.colourUpdated.connect(self.update_channel_colours)
+        self.plotWidget.colourUpdated.connect(self.update_channel_colours, Qt.UniqueConnection)
 
         # Update all plot windows to reset configuration.
         self.update_plots()
@@ -129,24 +134,93 @@ class PlotUtilities:
         self.topbarlayout.addWidget(self.toolbar)
 
     @Slot()
-    def create_existing_plots(self):
-        # Show the plot.
-        self.plotWidget.set_configuration()
-        self.tabs.setParent(None)
-        self.Layout.addWidget(self.plotWidget, 2)
+    def load_existing_results(self):
+        """Open the plots from a previous test
+        """
+        if not self.plotWidget.isVisible():
+            self.show_plot()
 
-        # Connections.
-        # self.configurationChanged.connect(self.plotWidget.set_configuration)
-# NEED TO CHANGE        self.manager.assembly.plotDataChanged.connect(self.plotWidget.update_output_data)
-# NEED TO CHANGE        self.plotWidget.plotWidgetClosed.connect(self.window_to_tab)
-        self.plotWidget.colourUpdated.connect(self.update_channel_colours)
+        camlab_folder = Path(__file__).parents[3]
+        if camlab_folder.joinpath("results").is_dir():
+            filename, _ = QFileDialog.getOpenFileName(self, "Open results file", str(camlab_folder.joinpath("results")), "CSV files (*.csv);;Text files (*.txt);;Excel files (*.xlsx *.xls);;Pickle files (*.pkl);;JSON files (*.json);;SQL files (*.db)")
+        else:
+            filename, _ = QFileDialog.getOpenFileName(self, "Open results file", str(camlab_folder), "CSV files (*.csv);;Text files (*.txt);;Excel files (*.xlsx *.xls);;Pickle files (*.pkl);;JSON files (*.json);;SQL files (*.db)")
 
-        # Convert tab to window if required by configuration.
-        if self.configuration["shearbox"]["plot"]["mode"] == "window":
-            self.tab_to_window(self.plotWidget)    
+        filetype = Path(filename).suffix[1:]
+        if filetype == "csv":
+            df = pd.read_csv(filename)
+        elif filetype == "txt":
+            df = pd.read_csv(filename, sep="\t")
+        elif filetype in ["xlsx", "xls"]:
+            df = pd.read_excel(filename)
+        elif filetype == "pkl":
+            df = pd.read_pickle(open(filename, 'rb'))
+        elif filetype == "json":
+            df = pd.read_json(filename)
+        else: # if filetype == "db":
+            conn = sqlite3.connect(filename)
+            df = pd.read_sql_query('SELECT * FROM table_name', conn)
+
+    def save_results(self):
+        """Save results data to file
+        """
+        df = pd.DataFrame()
+
+        camlab_folder = Path(__file__).parents[3]
+        if camlab_folder.joinpath("results").is_dir():
+            filename, _ = QFileDialog.getSaveFileName(self, "Save results file", str(camlab_folder.joinpath("results")), "CSV files (*.csv);;Text files (*.txt);;Excel files (*.xlsx *.xls);;Pickle files (*.pkl);;JSON files (*.json);;SQL files (*.db)")
+        else:
+            filename, _ = QFileDialog.getSaveFileName(self, "Save results file", str(camlab_folder), "CSV files (*.csv);;Text files (*.txt);;Excel files (*.xlsx *.xls);;Pickle files (*.pkl);;JSON files (*.json);;SQL files (*.db)")
+
+        filetype = Path(filename).suffix[1:]
+        if filetype == "csv":
+            df.to_csv(filename)
+        elif filetype == "txt":
+            df.to_csv(filename, sep="\t")
+        elif filetype in ["xlsx", "xls"]:
+            df.to_excel(filename)
+        elif filetype == "pkl":
+            df.to_pickle(open(filename, 'wb'))
+        elif filetype == "json":
+            df.to_json(filename, orient='records')
+        else: # if filetype == "db":
+            conn = sqlite3.connect(filename)
+            df.to_sql(Path(filename).stem, conn, if_exists='replace')
+
+    # def save_test_results(self):
+    #     """Save results data to file
+    #     """
+    #     data = {
+    #         'Horizontal Load': np.sort(np.random.rand(200)),
+    #         'Horizontal Displacement': np.sort(np.random.rand(200)),
+    #         'Vertical Load': np.sort(np.random.rand(200)),
+    #         'Vertical Displacement': np.sort(np.random.rand(200)),
+    #         'Horizontal Control': np.sort(np.random.rand(200)),
+    #         'Vertical Control': np.sort(np.random.rand(200))
+    #     }
+    #     df = pd.DataFrame(data)
+
+    #     df.index.name = 'Time'
+    #     print(df.head())
+
+    #     camlab_folder = Path(__file__).parents[3]
+    #     filename = camlab_folder.joinpath("results", "test.")
+
+    #     for filetype in ["csv", "txt", "xlsx", "pkl", "json", "db"]:
+    #         if filetype == "csv":
+    #             df.to_csv(str(filename) + filetype)
+    #         elif filetype == "txt":
+    #             df.to_csv(str(filename) + filetype, sep="\t")
+    #         elif filetype in ["xlsx", "xls"]:
+    #             df.to_excel(str(filename) + filetype)
+    #         elif filetype == "pkl":
+    #             df.to_pickle(open(str(filename) + filetype, 'wb'))
+    #         elif filetype == "json":
+    #             df.to_json(str(filename) + filetype, orient='records')
+    #         else: # if filetype == "db":
+    #             conn = sqlite3.connect(str(filename) + filetype)
+    #             df.to_sql(filename.stem, conn, if_exists='replace')
         
-        # Update all plot windows to reset configuration.
-        self.update_plots()
          
     @Slot()
     def update_plots(self):
@@ -167,7 +241,6 @@ class PlotUtilities:
 # NEED TO CHANGE                 del self.configuration["shearbox"]["plots"]
 # NEED TO CHANGE     
     def close_plot(self):
-        # self.configurationChanged.disconnect(self.plotWidget.set_configuration)
         self.plotWidget.setParent(None)
         self.plotWidget.close()
         self.Layout.addWidget(self.tabs, 2)
@@ -179,5 +252,4 @@ class PlotUtilities:
         self.update_plots()
 
     def getGenericChannelsData(self):
-        # self.configurationChanged.emit(self.configuration)
         self.GenericChannelsData.emit()

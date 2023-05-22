@@ -134,3 +134,6 @@ CamLab.log
 *.yaml
 Pipfile.lock
 Test.png
+
+# Results folder
+results/**

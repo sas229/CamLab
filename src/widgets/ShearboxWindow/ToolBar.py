@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QToolBar, QFileDialog, QWidget, QSizePolicy
 from PySide6.QtGui import QAction, QIcon
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, Qt
 import logging
 
 log = logging.getLogger(__name__)
@@ -31,19 +31,31 @@ class ToolBar(QToolBar):
         self.spacer.setVisible(True)
         self.addWidget(self.spacer)
 
+        # Load previous results.
+        self.loadResultsButton = QAction()
+        self.loadResultsButton.setToolTip("Click to load previous results.")
+        self.loadResultsButton.setVisible(True)
+        self.addAction(self.loadResultsButton)
+
+        # Save results.
+        self.saveResultsButton = QAction()
+        self.saveResultsButton.setToolTip("Click to save results.")
+        self.saveResultsButton.setVisible(True)
+        self.addAction(self.saveResultsButton)
+
         self.addSeparator()
 
-        # Load configuration QAction.
-        self.loadConfigButton = QAction()
-        self.loadConfigButton.setToolTip("Click to load a configuration.")
-        self.loadConfigButton.setVisible(True)
-        self.addAction(self.loadConfigButton)
+        # Load configuration.
+        self.loadButton = QAction()
+        self.loadButton.setToolTip("Click to load a configuration.")
+        self.loadButton.setVisible(True)
+        self.addAction(self.loadButton)
 
-        # Save configuration QAction.
-        self.saveConfigButton = QAction()
-        self.saveConfigButton.setToolTip("Click to save the current configuration.")
-        self.saveConfigButton.setVisible(True)
-        self.addAction(self.saveConfigButton)
+        # Save configuration.
+        self.saveButton = QAction()
+        self.saveButton.setToolTip("Click to save the current configuration.")
+        self.saveButton.setVisible(True)
+        self.addAction(self.saveButton)
 
         self.addSeparator()
 
@@ -67,16 +79,18 @@ class ToolBar(QToolBar):
 
         self.setIcons()
 
-        self.saveConfigButton.triggered.connect(self.emitSaveConfiguration)
-        self.loadConfigButton.triggered.connect(self.emitLoadConfiguration)
+        self.saveButton.triggered.connect(self.emitSaveConfiguration, Qt.UniqueConnection)
+        self.loadButton.triggered.connect(self.emitLoadConfiguration, Qt.UniqueConnection)
 
     def setIcons(self):
         self.setupButton.setIcon(QIcon("icon:/secondaryText/settings.svg"))
         self.runButton.setIcon(QIcon("icon:/secondaryText/play_circle.svg"))
         self.pauseButton.setIcon(QIcon("icon:/secondaryText/pause_circle.svg"))
         self.stopButton.setIcon(QIcon("icon:/secondaryText/stop.svg"))
-        self.loadConfigButton.setIcon(QIcon("icon:/secondaryText/file_upload.svg"))
-        self.saveConfigButton.setIcon(QIcon("icon:/secondaryText/file_download.svg"))
+        self.loadResultsButton.setIcon(QIcon("icon:/secondaryText/stacked_line_chart.svg"))
+        self.saveResultsButton.setIcon(QIcon("icon:/secondaryText/save_alt.svg"))
+        self.loadButton.setIcon(QIcon("icon:/secondaryText/file_upload.svg"))
+        self.saveButton.setIcon(QIcon("icon:/secondaryText/file_download.svg"))
 
     def emitLoadConfiguration(self):
         # Method to select a configuration file to load and emit it as a signal.

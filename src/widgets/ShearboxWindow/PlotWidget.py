@@ -401,6 +401,10 @@ class PlotWidget(QWidget, QtStyleTools):
             self.plot.setMouseEnabled(not lockSelectedAxis, not lockCommonAxis)
         else:
             self.plot.setMouseEnabled(not lockCommonAxis, not lockSelectedAxis)
+        self.autoCommonAxisCheckBox.setEnabled(not lockCommonAxis)
+        self.manualCommonAxisCheckBox.setEnabled(not lockCommonAxis)
+        self.invertCommonAxisCheckBox.setEnabled(not lockCommonAxis)
+        self.logCommonAxisCheckBox.setEnabled(not lockCommonAxis)
         self.updateCommonAxisRange()
         self.updateConfiguration()
 
@@ -427,6 +431,10 @@ class PlotWidget(QWidget, QtStyleTools):
             self.plot.setMouseEnabled(not lockSelectedAxis, not lockCommonAxis)
         else:
             self.plot.setMouseEnabled(not lockCommonAxis, not lockSelectedAxis)
+        self.autoSelectedAxisCheckBox.setEnabled(not lockSelectedAxis)
+        self.manualSelectedAxisCheckBox.setEnabled(not lockSelectedAxis)
+        self.invertSelectedAxisCheckBox.setEnabled(not lockSelectedAxis)
+        self.logSelectedAxisCheckBox.setEnabled(not lockSelectedAxis)
         self.updateSelectedAxisRange()
         self.updateConfiguration()
 

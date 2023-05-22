@@ -79,7 +79,7 @@ class ShearboxUtilities:
             self.shearbox.make_connections()
 
         log.info("ShearBox connected.")
-        self.manager.configurationChanged.emit(self.manager.configuration)
+        # self.manager.configurationChanged.emit(self.manager.configuration)
 
     @Slot()
     def disconnect_shearbox(self):
