@@ -10,6 +10,7 @@ class DimensionTab(QWidget):
         super().__init__()
         # num_validator = QDoubleValidator(bottom=0)
         num_validator = QRegularExpressionValidator("^([1-9][0-9]*(\.[0-9]+)?|0+\.[0-9]*[1-9][0-9]*)$")
+        height_validator = QRegularExpressionValidator("^([1-9][0-9]*(\.[0-9]+)?|0+\.[0-9]*[1-9][0-9]*)(\,\s?([1-9][0-9]*(\.[0-9]+)?|0+\.[0-9]*[1-9][0-9]*))*$")
         
         self.initial_weight = QLineEdit()
         self.initial_height = QLineEdit()
@@ -24,7 +25,7 @@ class DimensionTab(QWidget):
         self.initial_bulk_density = QLineEdit()
         
         self.initial_weight.setValidator(num_validator)
-        self.initial_height.setValidator(num_validator)
+        self.initial_height.setValidator(height_validator)
         self.initial_width.setValidator(num_validator)
         self.initial_depth.setValidator(num_validator)
         self.initial_radius.setValidator(num_validator)

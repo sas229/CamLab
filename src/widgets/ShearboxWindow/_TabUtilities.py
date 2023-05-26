@@ -627,8 +627,10 @@ class TabUtilities:
             
     @Slot(str)
     def set_height(self, specimen):
-        height = float(self.tabs.specimen.specimens[specimen]["dimensions"].initial_height.text())
-        self.configuration["shearbox"]["Specimens"][specimen]["Initial Height"] = height
+        text = self.tabs.specimen.specimens[specimen]["dimensions"].initial_height.text()
+        heights = text.replace(" ", "").split(",")
+        height = np.mean([float(h) for h in heights])
+        self.configuration["shearbox"]["Specimens"][specimen]["Initial Height"] = np.mean(height)
 
         log.info(f'Set {specimen.lower()} initial height to {height}.')
 

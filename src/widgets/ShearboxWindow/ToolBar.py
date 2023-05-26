@@ -40,7 +40,7 @@ class ToolBar(QToolBar):
         # Save results.
         self.saveResultsButton = QAction()
         self.saveResultsButton.setToolTip("Click to save results.")
-        self.saveResultsButton.setVisible(True)
+        self.saveResultsButton.setVisible(False)
         self.addAction(self.saveResultsButton)
 
         self.addSeparator()
