@@ -51,7 +51,8 @@ class LineSegments:
 
         all_finite = True
         if finiteCheck or connect == 'finite':
-            mask = np.isfinite(x) & np.isfinite(y)
+            # print(x,y, type(x), type(y))
+            mask = np.array([np.isfinite(x[i]) & np.isfinite(y[i]) for i in range(len(x))])
             all_finite = np.all(mask)
 
         if connect == 'all':

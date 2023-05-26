@@ -54,7 +54,7 @@ class PlotDataset(object):
             xmin = np.min( self.x ) # find minimum of all values
             xmax = np.max( self.x ) # find maximum of all values
         else: # This may contain NaN values and infinites.
-            selection = np.isfinite(self.y)    # We are looking for the bounds of the plottable data set. Infinite and Nan are ignored. 
+            selection = np.array([np.isfinite(y) for y in self.y])    # We are looking for the bounds of the plottable data set. Infinite and Nan are ignored. 
             all_y_are_finite = selection.all() # False if all values are finite, True if there are any non-finites
             try:
                 ymin = np.min( self.y[selection] ) # find minimum of all finite values
@@ -62,7 +62,7 @@ class PlotDataset(object):
             except ValueError: # is raised when there are no finite values
                 ymin = np.nan
                 ymax = np.nan
-            selection = np.isfinite(self.x) # We are looking for the bounds of the plottable data set. Infinite and Nan are ignored. 
+            selection = np.array([np.isfinite(x) for x in self.x]) # We are looking for the bounds of the plottable data set. Infinite and Nan are ignored. 
             all_x_are_finite = selection.all() # False if all values are finite, True if there are any non-finites
             try:
                 xmin = np.min( self.x[selection] ) # find minimum of all finite values
@@ -98,7 +98,7 @@ class PlotDataset(object):
         if logMode[0]:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", RuntimeWarning)
-                self.x = np.log10(self.x)
+                self.x = np.array([np.nan if x<=0 else np.log10(x) for x in self.x])
             nonfinites = ~np.isfinite( self.x )
             if nonfinites.any():
                 self.x[nonfinites] = np.nan # set all non-finite values to NaN
@@ -109,7 +109,7 @@ class PlotDataset(object):
         if logMode[1]:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", RuntimeWarning)
-                self.y = np.log10(self.y)
+                self.y = np.array([np.nan if y<=0 else np.log10(y) for y in self.y])
             nonfinites = ~np.isfinite( self.y )
             if nonfinites.any():
                 self.y[nonfinites] = np.nan # set all non-finite values to NaN
