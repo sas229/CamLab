@@ -49,6 +49,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, PlotUtilities, QtStyleTools):
 
         self.configuration = configuration
         self.running = False
+        self.simulating = False
 
         self.Layout = QVBoxLayout()
         self.toolbar = ToolBar()
@@ -85,11 +86,11 @@ class ShearboxWindow(QMainWindow, TabUtilities, PlotUtilities, QtStyleTools):
         self.topbarlayout.addWidget(self.toolbar, 0)
         self.topbar.setLayout(self.topbarlayout)
 
-        self.toolbar.runButton.triggered.connect(self.run_shear, Qt.UniqueConnection)
+        self.toolbar.runButton.triggered.connect(self.run, Qt.UniqueConnection)
         self.toolbar.setupButton.triggered.connect(self.change_setup, Qt.UniqueConnection)
-        self.toolbar.pauseButton.triggered.connect(self.pause_shear, Qt.UniqueConnection)
+        self.toolbar.pauseButton.triggered.connect(self.pause, Qt.UniqueConnection)
         self.toolbar.stopButton.triggered.connect(self.stop_shear, Qt.UniqueConnection)
-        self.toolbar.loadResultsButton.triggered.connect(self.load_existing_results, Qt.UniqueConnection)
+        self.toolbar.loadResultsButton.triggered.connect(self.simulate, Qt.UniqueConnection)
         self.toolbar.saveResultsButton.triggered.connect(self.save_results, Qt.UniqueConnection)
 
         self.tabs = TabInterface()
@@ -454,7 +455,10 @@ class ShearboxWindow(QMainWindow, TabUtilities, PlotUtilities, QtStyleTools):
             self.configuration["shearbox"]["width"] = self.frameGeometry().width()
             self.configuration["shearbox"]["height"] = self.frameGeometry().height()
             self.configuration["shearbox"]["active"] = False
-
+        try:
+            self.simulation.stopped = True
+        except:
+            pass
 
         log.info("Closing ShearBox")
         return super().closeEvent(event)

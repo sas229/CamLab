@@ -1,7 +1,8 @@
 from PySide6.QtWidgets import QItemDelegate
-from PySide6.QtCore import Qt, QEvent, QRect
+from PySide6.QtCore import Qt, QEvent, QRect, Signal
 
 class CheckBoxDelegate(QItemDelegate):
+    CheckboxChanged = Signal()
     """
     A delegate that places a fully functioning QCheckBox cell into the column to which it's applied.
     """
@@ -45,6 +46,7 @@ class CheckBoxDelegate(QItemDelegate):
         if event.type() == QEvent.MouseButtonRelease and event.button() == Qt.LeftButton:
             # Change the checkbox-state.
             self.setModelData(None, model, index)
+            self.CheckboxChanged.emit()
             return True
 
         return False

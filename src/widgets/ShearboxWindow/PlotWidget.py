@@ -21,9 +21,14 @@ class PlotWidget(QWidget, QtStyleTools):
         super().__init__()
         log.info("Plot instantiated.")
         self.setWhatsThis("plot")
-        self.defaultChannelsData = [{"plot": False, "name": "Time", "device": "ALL", "colour": "#35e3e3", "value": "0.00", "unit": "s"}]
+        self.defaultChannelsData = [
+            {"plot": False, "name": "Time", "device": "", "colour": "#35e3e3", "value": "0.00", "unit": "s"},
+            {"plot": True, "name": "Horizontal Load", "device": "", "colour": "#ff7700", "value": "0.00", "unit": "N"},
+            {"plot": False, "name": "Horizontal Displacement", "device": "", "colour": "#ff0077", "value": "0.00", "unit": "m"},
+            {"plot": False, "name": "Vertical Load", "device": "", "colour": "#0077ff", "value": "0.00", "unit": "N"},
+            {"plot": False, "name": "Vertical Displacement", "device": "", "colour": "#7700ff", "value": "0.00", "unit": "m"}]
         self.setMinimumSize(850, 550)
-        self.alpha = 50
+        self.alpha = 100
         self.opacity = 50
         self.commonChannel = 0
         self.colourPickerDialog = ColourPickerDialog(self)
@@ -191,6 +196,8 @@ class PlotWidget(QWidget, QtStyleTools):
         self.minimumSelectedAxisLineEdit.setText(str('%.2f' % rangeSelectedAxis['viewRange'][1][0]))
         self.maximumSelectedAxisLineEdit.setText(str('%.2f' % rangeSelectedAxis['viewRange'][1][1]))
 
+        self.selectedChannelsTableView.channelCheckBoxDelegate.CheckboxChanged.connect(self.updatePlot)
+
         self.invertCommonAxisCheckBox.clicked.connect(self.setInvertCommonAxis)
         self.logCommonAxisCheckBox.clicked.connect(self.setLogCommonAxis)
         self.invertSelectedAxisCheckBox.clicked.connect(self.setInvertSelectedAxis)
@@ -309,7 +316,8 @@ class PlotWidget(QWidget, QtStyleTools):
             self.setInvertSelectedAxis()
             self.fillCommonChannelComboBox()
             self.setSwap()
-            self.setAxesLabels()
+            # self.setAxesLabels()
+            self.setAxesLabels(common_channel = self.channelsModel._data[self.commonChannel])
             self.updatePlot()
             self.setDarkMode()
             # log.info("Configuration set.")
@@ -354,15 +362,23 @@ class PlotWidget(QWidget, QtStyleTools):
         self.updateConfiguration()
         self.updatePlot()
 
-    def setAxesLabels(self):
+    def setAxesLabels(self, common_channel=None):
         swap = bool(self.swapCheckBox.checkState())
         styles = self.setStyle()
-        if swap == True:
-            self.plot.setLabel('bottom', 'Selected channels', **styles)
-            self.plot.setLabel('left', 'Common channel', **styles)
-        elif swap == False:
-            self.plot.setLabel('left', 'Selected channels', **styles)
-            self.plot.setLabel('bottom', 'Common channel', **styles)
+        if common_channel != None:
+            if swap == True:
+                self.plot.setLabel('bottom', 'Selected channels', **styles)
+                self.plot.setLabel('left', common_channel["name"], units=common_channel["unit"], **styles)
+            elif swap == False:
+                self.plot.setLabel('left', 'Selected channels', **styles)
+                self.plot.setLabel('bottom', common_channel["name"], units=common_channel["unit"], **styles)
+        else:
+            if swap == True:
+                self.plot.setLabel('bottom', 'Selected channels', **styles)
+                self.plot.setLabel('left', 'Common channel', **styles)
+            elif swap == False:
+                self.plot.setLabel('left', 'Selected channels', **styles)
+                self.plot.setLabel('bottom', 'Common channel', **styles)
 
     @Slot()
     def setLock(self):
@@ -663,10 +679,10 @@ class PlotWidget(QWidget, QtStyleTools):
         # Format channels table columns.
         self.selectedChannelsTableView.setColumnWidth(0, 30)
         self.selectedChannelsTableView.setColumnWidth(1, 30)
-        self.selectedChannelsTableView.setColumnWidth(2, 95)
-        self.selectedChannelsTableView.setColumnWidth(3, 75)
-        self.selectedChannelsTableView.setColumnWidth(4, 55)
-        self.selectedChannelsTableView.setColumnWidth(5, 40)
+        self.selectedChannelsTableView.setColumnWidth(2, 158)
+        self.selectedChannelsTableView.setColumnWidth(3, 0)
+        self.selectedChannelsTableView.setColumnWidth(4, 60)
+        self.selectedChannelsTableView.setColumnWidth(5, 28)
 
     def fillCommonChannelComboBox(self):
         # Fill the common channel combobox.
@@ -676,7 +692,7 @@ class PlotWidget(QWidget, QtStyleTools):
             channel = self.channelsModel._data[i]
             name = channel["name"]
             device = channel["device"]
-            info = name + " " + device
+            info = name # + " " + device
             self.commonChannelComboBox.addItem(info)
 
     def createLines(self):
@@ -695,6 +711,8 @@ class PlotWidget(QWidget, QtStyleTools):
     def setCommonChannel(self, index):
         # Set common channel.
         self.commonChannel = index
+        self.setAxesLabels(common_channel = self.channelsModel._data[self.commonChannel])
+        self.updatePlot()
 
     @Slot(np.ndarray)
     def updatePlot(self):
@@ -751,7 +769,8 @@ class PlotWidget(QWidget, QtStyleTools):
                 self.setNewCommonAxisRange()
                 self.setNewSelectedAxisRange()
 
-            self.setAxesLabels()
+            # self.setAxesLabels()
+            self.setAxesLabels(common_channel = self.channelsModel._data[self.commonChannel])
                 
     def setStyle(self):
         return {'color': os.environ['QTMATERIAL_SECONDARYTEXTCOLOR'], 'font-size': '16px'}
@@ -860,3 +879,4 @@ class PlotWidget(QWidget, QtStyleTools):
         if bool(self.gridCheckBox.checkState()) == True:
             self.setGrid()
         self.updateConfiguration()
+        self.updatePlot
