@@ -980,7 +980,7 @@ class TabUtilities:
 
     @Slot()
     def set_consolidation_start_stress(self):
-        stress = float(self.tabs.consolidation_start_stress.text())
+        stress = self.tabs.consolidation_start_stress.text()
         self.configuration["shearbox"]["Consolidation"]["Initial Stress"] = stress
 
         log.info(f'Set consolidation stage initial stress to {stress}.')

@@ -123,7 +123,7 @@ class TabInterface(QTabWidget):
         # num_validator = QDoubleValidator(bottom=0)
         num_validator = QRegularExpressionValidator("^([1-9][0-9]*(\.[0-9]+)?|0+\.[0-9]*[1-9][0-9]*)$")
 
-        self.consolidation_start_stress.setValidator(num_validator)
+        # self.consolidation_start_stress.setValidator(num_validator)
         self.consolidation_trigger_stress.setValidator(num_validator)
         self.consolidation_trigger_disp.setValidator(num_validator)
         self.consolidation_log_rate_val.setValidator(time_validator)
@@ -132,7 +132,7 @@ class TabInterface(QTabWidget):
         self.consolidation_stop_rate_time.setValidator(time_validator)
         self.consolidation_stop_time_opt.setValidator(time_validator)
 
-        self.consolidation_start_layout.addWidget(QLabel("Apply the following vertical stress"), 0, 0)
+        self.consolidation_start_layout.addWidget(QLabel("Apply the following vertical stress (value or pythonic function of t)"), 0, 0)
         self.consolidation_start_layout.addWidget(self.consolidation_start_stress, 0, 1)
         self.consolidation_start_layout.addWidget(QLabel("kPa"), 0, 2)
         self.consolidation_start_layout.addWidget(self.consolidation_trigger_stress_select, 1, 0)
