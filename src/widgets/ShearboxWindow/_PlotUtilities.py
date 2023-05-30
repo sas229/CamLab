@@ -39,6 +39,7 @@ class PlotUtilities:
                 self.Layout.insertWidget(0, self.toolbar, 0)
                 self.toolbar.pauseButton.setVisible(True)
                 self.toolbar.stopButton.setVisible(True)
+                self.toolbar.stopButton.setEnabled(True)
                 self.toolbar.runButton.setVisible(False)
                 self.toolbar.setupButton.setVisible(True)
                 self.toolbar.setupButton.setEnabled(False)
@@ -81,8 +82,9 @@ class PlotUtilities:
         self.running = False
         self.toolbar.setupButton.setEnabled(True)
         self.toolbar.pauseButton.setVisible(False)
-        self.toolbar.stopButton.setVisible(False)
+        self.toolbar.stopButton.setEnabled(False)
         self.toolbar.runButton.setVisible(True)
+        self.toolbar.runButton.setEnabled(False)
 
     @Slot()
     def skip_simulation(self):
@@ -188,6 +190,7 @@ class PlotUtilities:
         self.toolbar.pauseButton.setVisible(False)
         self.toolbar.stopButton.setVisible(False)
         self.toolbar.runButton.setVisible(True)
+        self.toolbar.runButton.setEnabled(True)
         self.toolbar.skipButton.setVisible(False)
         self.toolbar.setupButton.setVisible(False)
         self.toolbar.saveButton.setVisible(True)
