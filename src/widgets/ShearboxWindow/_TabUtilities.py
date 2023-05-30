@@ -863,7 +863,7 @@ class TabUtilities:
         wet_weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Wet Weight"]
         tin_weight = self.configuration["shearbox"]["Specimens"][specimen]["Tin (initial) Weight"]
 
-        if not (None in [dry_weight, tin_weight]):
+        if not (None in [wet_weight, tin_weight]):
             moisture = ((wet_weight - tin_weight) / (dry_weight - tin_weight) - 1) * 100
             if moisture >= 0 and moisture <= 100:
                 self.configuration["shearbox"]["Specimens"][specimen]["Initial Moisture"] = moisture
@@ -911,7 +911,7 @@ class TabUtilities:
         wet_weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Wet Weight"]
         dry_weight = self.configuration["shearbox"]["Specimens"][specimen]["Initial Dry Weight"]
 
-        if not (None in [dry_weight, tin_weight]):
+        if not (None in [dry_weight, wet_weight]):
             moisture = ((wet_weight - tin_weight) / (dry_weight - tin_weight) - 1) * 100
             if moisture >= 0 and moisture <= 100:
                 self.configuration["shearbox"]["Specimens"][specimen]["Initial Moisture"] = moisture
@@ -980,7 +980,7 @@ class TabUtilities:
 
     @Slot()
     def set_consolidation_start_stress(self):
-        stress = self.tabs.consolidation_start_stress.text()
+        stress = self.tabs.consolidation_start_stress.text().replace(" ","")
         self.configuration["shearbox"]["Consolidation"]["Initial Stress"] = stress
 
         log.info(f'Set consolidation stage initial stress to {stress}.')

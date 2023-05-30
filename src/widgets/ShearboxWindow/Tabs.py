@@ -132,7 +132,7 @@ class TabInterface(QTabWidget):
         self.consolidation_stop_rate_time.setValidator(time_validator)
         self.consolidation_stop_time_opt.setValidator(time_validator)
 
-        self.consolidation_start_layout.addWidget(QLabel("Apply the following vertical stress (value or pythonic function of t)"), 0, 0)
+        self.consolidation_start_layout.addWidget(QLabel("Apply the following vertical stress (value or pythonic function of t (time in seconds))"), 0, 0)
         self.consolidation_start_layout.addWidget(self.consolidation_start_stress, 0, 1)
         self.consolidation_start_layout.addWidget(QLabel("kPa"), 0, 2)
         self.consolidation_start_layout.addWidget(self.consolidation_trigger_stress_select, 1, 0)
