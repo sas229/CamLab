@@ -90,6 +90,7 @@ class ShearboxWindow(QMainWindow, TabUtilities, PlotUtilities, QtStyleTools):
         self.toolbar.setupButton.triggered.connect(self.change_setup, Qt.UniqueConnection)
         self.toolbar.pauseButton.triggered.connect(self.pause, Qt.UniqueConnection)
         self.toolbar.stopButton.triggered.connect(self.stop_shear, Qt.UniqueConnection)
+        self.toolbar.skipButton.triggered.connect(self.skip_simulation, Qt.UniqueConnection)
         self.toolbar.loadResultsButton.triggered.connect(self.simulate, Qt.UniqueConnection)
         self.toolbar.saveResultsButton.triggered.connect(self.save_results, Qt.UniqueConnection)
 

@@ -18,6 +18,8 @@ class PlotUtilities:
         if self.simulating:
             self.resume_simulation()
         elif self.running:
+            self.toolbar.pauseButton.setVisible(True)
+            self.toolbar.runButton.setVisible(False)
             self.start_shear()
         elif self.check_settings():
             dlg = QMessageBox(self)
@@ -55,6 +57,7 @@ class PlotUtilities:
         self.simulationThread.start()
         self.toolbar.pauseButton.setVisible(True)
         self.toolbar.runButton.setVisible(False)
+        self.toolbar.skipButton.setEnabled(True)
 
     @Slot()
     def pause(self):
@@ -64,7 +67,7 @@ class PlotUtilities:
             self.pause_shear()
 
     def pause_simulation(self):
-        self.simulation.stopped=True
+        self.simulation.stopped = True
         self.toolbar.pauseButton.setVisible(False)
         self.toolbar.runButton.setVisible(True)
 
@@ -80,6 +83,20 @@ class PlotUtilities:
         self.toolbar.pauseButton.setVisible(False)
         self.toolbar.stopButton.setVisible(False)
         self.toolbar.runButton.setVisible(True)
+
+    @Slot()
+    def skip_simulation(self):
+        self.simulation.stopped = True
+        self.simulation.index = self.simulation.data.shape[0]-1
+        self.simulation.emit_data()
+        self.simulation.index = 0
+        self.toolbar.skipButton.setEnabled(False)
+        self.toolbar.pauseButton.setVisible(False)
+        self.toolbar.runButton.setVisible(True)
+
+    @Slot()
+    def deactivate_skipbutton(self):
+        self.toolbar.skipButton.setEnabled(False)
     
     def check_settings(self):
         log.info("Checking setup is acceptable.")
@@ -90,9 +107,10 @@ class PlotUtilities:
             return False
         
         try:
-            assert True
-        except AssertionError:
-            log.error("Setting ... not set to an acceptable value! Please ensure it is in the range ...")
+            stress = [eval(self.configuration["shearbox"]["Consolidation"]["Initial Stress"]) for t in np.arange(300)]
+            stress = np.array(stress).astype(float)
+        except Exception as e:
+            log.error("Function for vertical stress not a valid pythonic function.")
             return False
         
         log.info("Setup accepted.")
@@ -136,12 +154,13 @@ class PlotUtilities:
             "swap": False,
             "x": x,
             "y": y,
+            "channels": self.plotWidget.defaultChannelsData,
         }
 
         # Add the plot and set the colour for the new plot window.        
         self.configuration["shearbox"]["plot"] = copy.deepcopy(defaultProperties)
-        self.getGenericChannelsData()
-# NEED TO CHANGE         self.manager.setColourNewPlot(plotNumber)
+        
+        self.plotWidget.setChannelsModel(self.plotWidget.defaultChannelsData)
 
         # Show the plot.
         self.plotWidget.set_configuration()
@@ -169,6 +188,7 @@ class PlotUtilities:
         self.toolbar.pauseButton.setVisible(False)
         self.toolbar.stopButton.setVisible(False)
         self.toolbar.runButton.setVisible(True)
+        self.toolbar.skipButton.setVisible(False)
         self.toolbar.setupButton.setVisible(False)
         self.toolbar.saveButton.setVisible(True)
         self.toolbar.loadButton.setVisible(True)
@@ -214,6 +234,8 @@ class PlotUtilities:
             self.toolbar.pauseButton.setVisible(True)
             self.toolbar.stopButton.setVisible(False)
             self.toolbar.runButton.setVisible(False)
+            self.toolbar.skipButton.setVisible(True)
+            self.toolbar.skipButton.setEnabled(True)
             self.toolbar.setupButton.setVisible(True)
             self.toolbar.setupButton.setEnabled(True)
             self.toolbar.saveButton.setVisible(False)
@@ -231,6 +253,7 @@ class PlotUtilities:
 
             self.simulation = Simulation(df)
             self.simulation.emitData.connect(self.plotWidget.update_output_data, Qt.UniqueConnection)
+            self.simulation.simulationComplete.connect(self.deactivate_skipbutton, Qt.UniqueConnection)
             self.simulationThread = threading.Thread(target=self.simulation.start)
             self.simulationThread.start()
             

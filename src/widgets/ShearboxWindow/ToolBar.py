@@ -77,6 +77,12 @@ class ToolBar(QToolBar):
         self.stopButton.setVisible(False)
         self.addAction(self.stopButton)
 
+        # Stop test.
+        self.skipButton = QAction()
+        self.skipButton.setToolTip("Skip simulation.")
+        self.skipButton.setVisible(False)
+        self.addAction(self.skipButton)
+
         self.setIcons()
 
         self.saveButton.triggered.connect(self.emitSaveConfiguration, Qt.UniqueConnection)
@@ -87,6 +93,7 @@ class ToolBar(QToolBar):
         self.runButton.setIcon(QIcon("icon:/secondaryText/play_circle.svg"))
         self.pauseButton.setIcon(QIcon("icon:/secondaryText/pause_circle.svg"))
         self.stopButton.setIcon(QIcon("icon:/secondaryText/stop.svg"))
+        self.skipButton.setIcon(QIcon("icon:/secondaryText/skip_forward.svg"))
         self.loadResultsButton.setIcon(QIcon("icon:/secondaryText/stacked_line_chart.svg"))
         self.saveResultsButton.setIcon(QIcon("icon:/secondaryText/save_alt.svg"))
         self.loadButton.setIcon(QIcon("icon:/secondaryText/file_upload.svg"))

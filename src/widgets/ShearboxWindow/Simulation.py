@@ -5,6 +5,7 @@ import pandas as pd
 
 class Simulation(QObject):
     emitData = Signal(np.ndarray)
+    simulationComplete = Signal()
 
     def __init__(self, data):
         super().__init__()
@@ -22,13 +23,15 @@ class Simulation(QObject):
         start_time = time.time_ns() - self.data["Timedelta"].iloc[initial_index].total_seconds()*(10**9)
 
         for index in range(initial_index, self.data.shape[0]):
-        # for index in range(10):
             self.index = index
-            self.emitData.emit(self.data.values[: index+1, :5])
+            self.emit_data()
             self.elapsed_time = time.time_ns() - start_time
             if index != self.data.shape[0]-1:
                 time.sleep(max(0, (self.data["Timedelta"].iloc[index+1]-pd.Timedelta(nanoseconds=time.time_ns()-start_time)).total_seconds()))
             else:
                 self.index = 0
+                self.simulationComplete.emit()
             if self.stopped:
                 break
+    def emit_data(self):
+        self.emitData.emit(self.data.values[: self.index+1, :5])
