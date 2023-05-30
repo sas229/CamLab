@@ -1,0 +1,13 @@
+global:
+  darkMode: true
+  controlRate: 10.0
+  skipSamples: 1
+  averageSamples: 1
+  path: C:\Users\scott
+  filename: junk
+mainWindow:
+  x: 0
+  y: 0
+devices: {}
+shearbox:
+  active: False

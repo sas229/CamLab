@@ -94,7 +94,7 @@ class ToolBar(QToolBar):
 
     def emitLoadConfiguration(self):
         # Method to select a configuration file to load and emit it as a signal.
-        filename, _ = QFileDialog.getOpenFileName(self,"Open CamLab configuration file", "","Yaml files (*.yaml)")
+        filename, _ = QFileDialog.getOpenFileName(self,"Open CamLab configuration file", "defaults","Yaml files (*.yaml)")
         self.loadConfiguration.emit(filename)
 
     def emitSaveConfiguration(self):

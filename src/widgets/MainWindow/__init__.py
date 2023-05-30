@@ -108,7 +108,7 @@ class MainWindow(TabUtilities, PlotUtilities, ShearboxUtilities, ControlUtilitie
         self.toolbar.run.connect(self.start_acquisition)
         self.toolbar.run.connect(self.statusGroupBox.setInitialTimeDate)
         self.toolbar.addPlotButton.triggered.connect(self.add_plot)
-        self.toolbar.shearboxButton.clicked.connect(self.initialise_shearbox)
+        self.toolbar.shearboxButton.triggered.connect(self.initialise_shearbox)
         self.toolbar.refreshButton.triggered.connect(self.refresh_devices)
         self.toolbar.loadConfiguration.connect(self.manager.loadConfiguration)
         self.toolbar.saveConfiguration.connect(self.manager.saveConfiguration)

@@ -26,6 +26,17 @@ QTabBar::close-button:hover {{
   image: url(icon:/primary/close.svg);
 }}
 
+QTableView::item {{
+  border-left: 0px;
+  border-right: 0px;
+  padding-left: 0px;
+  padding-right: 0px;
+}}
+
+QToolButton {{
+  color: transparent;
+}}
+
 CameraSettings QGroupBox {{
   background-color: {QTMATERIAL_SECONDARYDARKCOLOR};
 }} 

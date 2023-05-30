@@ -131,7 +131,7 @@ dmypy.json
 
 # Development files
 CamLab.log
-*.yaml
+# *.yaml
 Pipfile.lock
 Test.png
 

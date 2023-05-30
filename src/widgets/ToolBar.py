@@ -30,12 +30,15 @@ class ToolBar(QToolBar):
         self.addAction(self.addPlotButton)
 
         # Set up extensions menu
-        self.extensionsMenu = QMenu()
-        self.extensionsMenuLayout = QGridLayout()
-        self.shearboxButton = QPushButton("Shearbox")
+        self.extensionsMenu = QMenu(parent=self)
+        # self.extensionsMenuLayout = QGridLayout()
+        # self.shearboxButton = QPushButton("Shearbox")
 
-        self.extensionsMenuLayout.addWidget(self.shearboxButton, 0, 0)
-        self.extensionsMenu.setLayout(self.extensionsMenuLayout)
+        # self.extensionsMenuLayout.addWidget(self.shearboxButton, 0, 0)
+        # self.extensionsMenu.setLayout(self.extensionsMenuLayout)
+        self.shearboxButton = QAction("Shear Box")
+        self.shearboxButton.setToolTip("Click to setup shear box test.")
+        self.extensionsMenu.addAction(self.shearboxButton)
 
         # Open extension QToolButton.
         self.extensionButton = QToolButton()
@@ -151,7 +154,7 @@ class ToolBar(QToolBar):
 
     def emitLoadConfiguration(self):
         # Method to select a configuration file to load and emit it as a signal.
-        filename, _ = QFileDialog.getOpenFileName(self,"Open CamLab configuration file", "","Yaml files (*.yaml)")
+        filename, _ = QFileDialog.getOpenFileName(self,"Open CamLab configuration file", "defaults", "Yaml files (*.yaml)")
         self.loadConfiguration.emit(filename)
 
     def emitSaveConfiguration(self):

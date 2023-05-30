@@ -679,10 +679,10 @@ class PlotWidget(QWidget, QtStyleTools):
         # Format channels table columns.
         self.selectedChannelsTableView.setColumnWidth(0, 30)
         self.selectedChannelsTableView.setColumnWidth(1, 30)
-        self.selectedChannelsTableView.setColumnWidth(2, 158)
+        self.selectedChannelsTableView.setColumnWidth(2, 150)
         self.selectedChannelsTableView.setColumnWidth(3, 0)
-        self.selectedChannelsTableView.setColumnWidth(4, 60)
-        self.selectedChannelsTableView.setColumnWidth(5, 28)
+        self.selectedChannelsTableView.setColumnWidth(4, 65)
+        self.selectedChannelsTableView.setColumnWidth(5, 15)
 
     def fillCommonChannelComboBox(self):
         # Fill the common channel combobox.
@@ -718,8 +718,7 @@ class PlotWidget(QWidget, QtStyleTools):
     def updatePlot(self):
         # Update plot.
         alphaValue = int(self.alphaSlider.value())
-        manualCommonAxis = bool(self.manualCommonAxisCheckBox.checkState())
-        manualSelectedAxis = bool(self.manualSelectedAxisCheckBox.checkState())
+        auto = bool(self.autoCheckBox.checkState())
         lockCommon = bool(self.lockCommonAxisCheckBox.checkState())
         lockSelected = bool(self.lockSelectedAxisCheckBox.checkState())
         swap = bool(self.swapCheckBox.checkState())
@@ -736,7 +735,7 @@ class PlotWidget(QWidget, QtStyleTools):
             colour = self.channelsModel._data[i]["colour"]
             pen = pg.mkPen(colour, width=2)
             index = self.channelsModel.index(i,4)
-            self.channelsModel.setData(index, "{:.2f}".format(self.plotData[-1,i]), role=Qt.EditRole)
+            self.channelsModel.setData(index, "{:.2e}".format(self.plotData[-1,i]), role=Qt.EditRole)
             if self.channelsModel._data[i]["plot"] == False:
                 self.lines[i].setData([],[])
             elif swap == False:
@@ -762,11 +761,9 @@ class PlotWidget(QWidget, QtStyleTools):
                 elif logSelectedAxis == False:
                     self.plot.setLogMode(x=False)
 
-            if manualCommonAxis == True and lockCommon == True:
+            if (not auto) or lockCommon:
                 self.setNewCommonAxisRange()
-                self.setNewSelectedAxisRange()
-            if manualSelectedAxis == True and lockSelected == True:
-                self.setNewCommonAxisRange()
+            if (not auto) or lockSelected:
                 self.setNewSelectedAxisRange()
 
             # self.setAxesLabels()
