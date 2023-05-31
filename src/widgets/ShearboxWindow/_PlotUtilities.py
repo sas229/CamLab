@@ -45,6 +45,7 @@ class PlotUtilities:
                 self.toolbar.setupButton.setEnabled(False)
                 self.toolbar.saveButton.setVisible(True)
                 self.toolbar.loadButton.setVisible(False)
+                self.toolbar.loadResultsButton.setEnabled(False)
                 self.toolbar.saveResultsButton.setVisible(True)
                 self.toolbar.spacer.setVisible(True)
 
@@ -85,6 +86,7 @@ class PlotUtilities:
         self.toolbar.stopButton.setEnabled(False)
         self.toolbar.runButton.setVisible(True)
         self.toolbar.runButton.setEnabled(False)
+        self.toolbar.loadResultsButton.setEnabled(True)
 
     @Slot()
     def skip_simulation(self):
@@ -203,7 +205,6 @@ class PlotUtilities:
     def simulate(self):
         """Open the plots from a previous test
         """
-        self.simulating = True
         camlab_folder = Path(__file__).parents[3]
         if camlab_folder.joinpath("results").is_dir():
             filename, _ = QFileDialog.getOpenFileName(self, "Open results file", str(camlab_folder.joinpath("results")), "CSV files (*.csv);;Text files (*.txt);;Excel files (*.xlsx *.xls);;Pickle files (*.pkl);;JSON files (*.json)")
@@ -226,6 +227,8 @@ class PlotUtilities:
 
             df["Horizontal Displacement"] = df["Horizontal Displacement"]/1000
             df["Vertical Displacement"] = df["Vertical Displacement"]/1000
+
+            self.simulating = True
                 
             if not self.plotWidget.isVisible():
                 self.show_plot()
