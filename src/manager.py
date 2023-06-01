@@ -550,7 +550,7 @@ class Manager(QObject):
                             # If the connection is successful, set the device status to true.
                             handle = ljm.open(7, int(deviceInformation["connection"]), int(deviceInformation["id"]))
                             name = ljm.eReadNameString(handle, "DEVICE_NAME_DEFAULT")
-                            print(name, '-', device)
+                            
                             if name != device:
                                 log.warning("LabJack T7 device has incorrect name set in register.")
                                 
