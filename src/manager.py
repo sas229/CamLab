@@ -479,7 +479,6 @@ class Manager(QObject):
                 self.devices[name].updateOffsets.connect(self.updateDeviceOffsets)
                 
                 if "VJT" in self.devices:
-                    print(self.devices)
                     self.devices[name].device_disconnected.connect(self.devices["VJT"].stop_command_lost_device_connection)
 
             elif self.devices[name].type == "Camera":
