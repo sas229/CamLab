@@ -377,7 +377,7 @@ class LinearAxis(QWidget):
     def emitFeedbackRightLimitChanged(self, value):
         self.feedbackRightLimitChanged.emit(value)
         self.controlConfiguration["settings"]["feedbackRightLimit"] = round(self.feedbackStatus.getRightLimit(), 2)
-
+        
     @Slot()
     def emitFeedbackMinimumRangeChanged(self, value):
         self.feedbackMinimumRangeChanged.emit(value)

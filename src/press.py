@@ -409,6 +409,7 @@ class Press(QObject):
                     self.updateEnablePIDControlC1.emit(False)
                     # self.set_PID_control_C1(False)
                 self.limit_C1 = True
+                log.warning("Poistion left limit exceeded on {device}.".format(device=self.name))
                 
             if self.position_process_variable_C1 >= self.position_right_limit_C1 and self.is_stopped == False and self.direction_C1 == 1:
                 self.stop_command_C1()
@@ -416,14 +417,34 @@ class Press(QObject):
                     self.updateEnablePIDControlC1.emit(False)
                     # self.set_PID_control_C1(False)
                 self.limit_C1 = True
+                log.warning("Poistion right limit exceeded on {device}.".format(device=self.name))
 
             # Check feedback limits.
-            if self.feedback_process_variable_C1 <= self.feedback_left_limit_C1 and self.is_stopped == False and self.direction_C1 == -1:
-                self.stop_command_C1()
-                self.limit_C1 = True
-            if self.feedback_process_variable_C1 >= self.feedback_right_limit_C1 and self.is_stopped == False and self.direction_C1 == 1:
-                self.stop_command_C1()
-                self.limit_C1 = True
+
+            if self.status_PID_C1 == True:
+
+                if self.feedback_process_variable_C1 <= self.feedback_left_limit_C1 and self.is_stopped == False:
+                    self.stop_command_C1()
+                    self.updateEnablePIDControlC1.emit(False)
+                    self.limit_C1 = True
+                    log.warning("PID stopped on {device} as feedback left limit exceeded.".format(device=self.name))
+
+                if self.feedback_process_variable_C1 >= self.feedback_right_limit_C1 and self.is_stopped == False:
+                    self.stop_command_C1()
+                    self.updateEnablePIDControlC1.emit(False)
+                    self.limit_C1 = True
+                    log.warning("PID stopped on {device} as feedback right limit exceeded.".format(device=self.name))
+
+            elif self.status_PID_C1 == False:
+                if self.feedback_process_variable_C1 <= self.feedback_left_limit_C1 and self.is_stopped == False and self.direction_C1 == -1:
+                    self.stop_command_C1()
+                    self.limit_C1 = True
+                    log.warning("Feedback left limit exceeded on {device}.".format(device=self.name))
+
+                if self.feedback_process_variable_C1 >= self.feedback_right_limit_C1 and self.is_stopped == False and self.direction_C1 == 1:
+                    self.stop_command_C1()
+                    self.limit_C1 = True
+                    log.warning("Feedback right limit exceeded on {device}.".format(device=self.name))
 
             # Set indicator.
             if self.limit_C1 == True:
@@ -450,6 +471,12 @@ class Press(QObject):
         self.running = running
         self.updateRunningIndicator.emit(self.running)
         self.updatePIDControlButtonEnable.emit(self.running)
+
+    @Slot()
+    def stop_command_lost_device_connection(self):
+        self.stop_command_C1()
+        if self.status_PID_C1 == True:
+           self.updateEnablePIDControlC1.emit(False)
 
     @Slot()
     def stop_command_C1(self):

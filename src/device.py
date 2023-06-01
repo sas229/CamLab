@@ -30,6 +30,7 @@ class Device(QObject):
     updateSpeedC2 = Signal(float)
     updateEnablePIDControlC1 = Signal(bool)
     updateEnablePIDControlC2 = Signal(bool)
+    device_disconnected = Signal()
 
     def __init__(self, name, id, connection):
         super().__init__()
@@ -643,9 +644,11 @@ class Device(QObject):
         except ljm.LJMError:
             ljme = sys.exc_info()[1]
             log.warning(ljme) 
+            
         except Exception:
             e = sys.exc_info()[1]
             log.warning(e)
+           
 
     def set_position_C1(self, value):
         """Set position for control C1."""
@@ -1489,9 +1492,11 @@ class Device(QObject):
             # Concatenate output data.
             self.send_data()
         except ljm.LJMError:
+            self.device_disconnected.emit()
             ljme = sys.exc_info()[1]
             log.warning(ljme) 
         except Exception:
+            
             e = sys.exc_info()[1]
             log.warning(e)
 

@@ -470,12 +470,17 @@ class Manager(QObject):
 
         if connect == True:
             # Connections.
+            
             if self.devices[name].type == "Hub":
 
                 self.timing.controlDevices.connect(self.devices[name].process)
                 self.assembly.autozeroDevices.connect(self.devices[name].recalculate_offsets)
                 self.devices[name].emitData.connect(self.assembly.update_new_data)
                 self.devices[name].updateOffsets.connect(self.updateDeviceOffsets)
+                
+                if "VJT" in self.devices:
+                    print(self.devices)
+                    self.devices[name].device_disconnected.connect(self.devices["VJT"].stop_command_lost_device_connection)
 
             elif self.devices[name].type == "Camera":
                 self.devices[name].emitData.connect(self.assembly.update_new_data)
@@ -490,7 +495,6 @@ class Manager(QObject):
                 self.devices[name].emitData.connect(self.assembly.update_new_data)
                 self.devices[name].updateOffsets.connect(self.updateDeviceOffsets)
 
-
             self.deviceToggled.emit(name, connect)
             log.info("Basic signals connected to device {name}.".format(name=name))
 
@@ -501,6 +505,7 @@ class Manager(QObject):
                 self.assembly.autozeroDevices.disconnect(self.devices[name].recalculate_offsets)
                 self.devices[name].emitData.disconnect(self.assembly.update_new_data)
                 self.devices[name].updateOffsets.disconnect(self.updateDeviceOffsets)
+                self.devices[name].device_disconnected.disconnect(self.devices["VJT"].stop_command_lost_device_connection)
 
             elif self.devices[name].type == "Camera":
                 self.devices[name].stop_stream = True
@@ -522,7 +527,13 @@ class Manager(QObject):
     def loadDevicesFromConfiguration(self):
         # Find all devices listed in the configuration file.
         if "devices" in self.configuration:
-            for device in self.configuration["devices"].keys():
+
+            if "VJT" in (self.configuration["devices"].keys()):
+                device_keys = list(self.configuration["devices"].keys()).copy()
+                device_keys.remove("VJT")
+                device_keys.insert(0, "VJT")
+
+            for device in device_keys:
                 deviceInformation = {}
                 deviceInformation["connect"] = True
                 deviceInformation["name"] = device
@@ -539,8 +550,10 @@ class Manager(QObject):
                             # If the connection is successful, set the device status to true.
                             handle = ljm.open(7, int(deviceInformation["connection"]), int(deviceInformation["id"]))
                             name = ljm.eReadNameString(handle, "DEVICE_NAME_DEFAULT")
+                            print(name, '-', device)
                             if name != device:
                                 log.warning("LabJack T7 device has incorrect name set in register.")
+                                
                             ljm.close(handle)
                             deviceInformation["status"] = True     
                             
