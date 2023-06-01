@@ -504,7 +504,8 @@ class Manager(QObject):
                 self.assembly.autozeroDevices.disconnect(self.devices[name].recalculate_offsets)
                 self.devices[name].emitData.disconnect(self.assembly.update_new_data)
                 self.devices[name].updateOffsets.disconnect(self.updateDeviceOffsets)
-                self.devices[name].device_disconnected.disconnect(self.devices["VJT"].stop_command_lost_device_connection)
+                if "VJT" in self.devices:
+                    self.devices[name].device_disconnected.disconnect(self.devices["VJT"].stop_command_lost_device_connection)
 
             elif self.devices[name].type == "Camera":
                 self.devices[name].stop_stream = True
