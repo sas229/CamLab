@@ -527,9 +527,9 @@ class Manager(QObject):
     def loadDevicesFromConfiguration(self):
         # Find all devices listed in the configuration file.
         if "devices" in self.configuration:
-
+            device_keys = list(self.configuration["devices"].keys()).copy()
             if "VJT" in (self.configuration["devices"].keys()):
-                device_keys = list(self.configuration["devices"].keys()).copy()
+                
                 device_keys.remove("VJT")
                 device_keys.insert(0, "VJT")
 
