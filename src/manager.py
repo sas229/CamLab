@@ -563,7 +563,8 @@ class Manager(QObject):
                             self.controlTableModels[device] = ControlTableModel(device, self.configuration["devices"][device]["control"])
                             self.feedbackChannelLists[device] = self.setFeedbackChannelList(device)
                             self.createDeviceThread(name=device, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True, address = deviceInformation["address"])
-                            self.toggleDeviceConnection(device, deviceInformation["connect"])       
+                            self.toggleDeviceConnection(device, deviceInformation["connect"])
+                                 
                         except ljm.LJMError:
                             # Otherwise log the exception and set the device status to false.
                             ljme = sys.exc_info()[1]

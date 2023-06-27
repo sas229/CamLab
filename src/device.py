@@ -593,17 +593,18 @@ class Device(QObject):
             self.maximumLimitC2 = bool(ljm.eReadName(self.handle, "CIO1"))
             
             #  Check if motor moving and stop if moving in the direction of the hard limit for C1.
-            moving = ljm.eReadName(self.handle, "DIO4_EF_ENABLE")
-            if moving == 1 and self.direction_C1 == -1 and self.minimumLimitC1 == True:
-                self.stop_command_C1()
-            elif moving == 1 and self.direction_C1 == 1 and self.maximumLimitC1 == True:
+            movingC1 = ljm.eReadName(self.handle, "DIO4_EF_ENABLE")
+            if movingC1 == 1 and self.direction_C1 == -1 and self.minimumLimitC1 == True:
+                self.stop_command_C1()     
+
+            elif movingC1 == 1 and self.direction_C1 == 1 and self.maximumLimitC1 == True:
                 self.stop_command_C1()
 
             #  Check if motor moving and stop if moving in the direction of the hard limit for C2.
-            moving = ljm.eReadName(self.handle, "DIO5_EF_ENABLE")
-            if moving == 1 and self.direction_C2 == -1 and self.minimumLimitC2 == True:
+            movingC2 = ljm.eReadName(self.handle, "DIO5_EF_ENABLE")
+            if movingC2 == 1 and self.direction_C2 == -1 and self.minimumLimitC2 == True:
                 self.stop_command_C2()
-            elif moving == 1 and self.direction_C2 == 1 and self.maximumLimitC2 == True:
+            elif movingC2 == 1 and self.direction_C2 == 1 and self.maximumLimitC2 == True:
                 self.stop_command_C2()
 
             # Turn on indicator if on limits.
@@ -615,22 +616,72 @@ class Device(QObject):
             # Check position limits.
             if self.position_process_variable_C1 <= self.position_left_limit_C1:
                 self.limit_C1 = True
+                if self.status_PID_C1 == True:
+                    self.updateEnablePIDControlC1.emit(False)
+                log.warning("Poistion left limit exceeded on C1 {device}.".format(device=self.name))
+
             if self.position_process_variable_C1 >= self.position_right_limit_C1:
                 self.limit_C1 = True
+                if self.status_PID_C1 == True:
+                    self.updateEnablePIDControlC1.emit(False)
+                log.warning("Poistion right limit exceeded on C1 {device}.".format(device=self.name))
+
             if self.position_process_variable_C2 <= self.position_left_limit_C2:
                 self.limit_C2 = True
+                if self.status_PID_C2 == True:
+                    self.updateEnablePIDControlC2.emit(False)
+                log.warning("Poistion left limit exceeded on C2 {device}.".format(device=self.name))
+
             if self.position_process_variable_C2 >= self.position_right_limit_C2:
                 self.limit_C2 = True
+                if self.status_PID_C2 == True:
+                    self.updateEnablePIDControlC2.emit(False)
+                log.warning("Poistion right limit exceeded on C2 {device}.".format(device=self.name))
 
             # Check feedback limits.
             if self.feedback_process_variable_C1 <= self.feedback_left_limit_C1:
                 self.limit_C1 = True
+                if self.direction_C1 == -1 and movingC1 == 1:
+                    self.stop_command_C1()
+                
+                if self.status_PID_C1 == True and movingC1 == 1:
+                    self.stop_command_C1()
+                    self.updateEnablePIDControlC1.emit(False)
+
+                log.warning("Feedback left limit exceeded on C1 {device}.".format(device=self.name))
+
             if self.feedback_process_variable_C1 >= self.feedback_right_limit_C1:
                 self.limit_C1 = True
+                if self.direction_C1 == 1 and movingC1 == 1:
+                    self.stop_command_C1()
+
+                if self.status_PID_C1 == True and movingC1 == 1:
+                    self.stop_command_C1()
+                    self.updateEnablePIDControlC1.emit(False)
+
+                log.warning("Feedback right limit exceeded on C1 {device}.".format(device=self.name))
+
             if self.feedback_process_variable_C2 <= self.feedback_left_limit_C2:
                 self.limit_C2 = True
+                if self.direction_C2 == -1 and movingC2 == 1:
+                    self.stop_command_C2()
+
+                if self.status_PID_C2 == True and movingC2 == 1:
+                    self.stop_command_C2()
+                    self.updateEnablePIDControlC2.emit(False)
+
+                log.warning("Feedback left limit exceeded on C2 {device}.".format(device=self.name))
+
             if self.feedback_process_variable_C2 >= self.feedback_right_limit_C2:
                 self.limit_C2 = True
+                if self.direction_C2 == 1 and movingC2 == 1:
+                    self.stop_command_C2()
+
+                if self.status_PID_C2 == True and movingC2 == 1:
+                    self.stop_command_C2()
+                    self.updateEnablePIDControlC2.emit(False)
+                    
+                log.warning("Feedback right limit exceeded on C2 {device}.".format(device=self.name))
 
             # Set indicator.
             if self.limit_C1 == True:
@@ -890,7 +941,8 @@ class Device(QObject):
         """Turn positive jog on for control channel C1."""
         self.handle = ljm.open(7, self.connection, self.id)
         if self.running == True and self.maximumLimitC1 == False and self.motor_enabled_C1 == True:
-            if self.position_process_variable_C1 <= self.position_right_limit_C1:
+            
+            if self.position_process_variable_C1 <= self.position_right_limit_C1 and self.feedback_process_variable_C1 <= self.feedback_right_limit_C1:
                 # Set direction.
                 self.direction_C1 = 1
                 self.jog_C1 = True
@@ -910,7 +962,7 @@ class Device(QObject):
         """Turn positive jog on for control channel C2."""
         self.handle = ljm.open(7, self.connection, self.id)
         if self.running == True and self.maximumLimitC2 == False and self.motor_enabled_C2 == True:
-            if self.position_process_variable_C2 <= self.position_right_limit_C2:
+            if self.position_process_variable_C2 <= self.position_right_limit_C2 and self.feedback_process_variable_C2 <= self.feedback_right_limit_C2:
                 # Set direction.
                 self.direction_C2 = 1
                 self.jog_C2 = True
@@ -930,7 +982,7 @@ class Device(QObject):
         """Turn negative jog on for control channel C1."""
         self.handle = ljm.open(7, self.connection, self.id)
         if self.running == True and self.maximumLimitC1 == False and self.motor_enabled_C1 == True:
-            if self.position_process_variable_C1 >= self.position_left_limit_C1:
+            if self.position_process_variable_C1 >= self.position_left_limit_C1 and self.feedback_process_variable_C1 >= self.feedback_left_limit_C1:
                 # Set direction.
                 self.direction_C1 = -1
                 self.jog_C1 = True
@@ -950,7 +1002,7 @@ class Device(QObject):
         """Turn negative jog on for control channel C2."""
         self.handle = ljm.open(7, self.connection, self.id)
         if self.running == True and self.maximumLimitC2 == False and self.motor_enabled_C2 == True:
-            if self.position_process_variable_C2 >= self.position_left_limit_C2:
+            if self.position_process_variable_C2 >= self.position_left_limit_C2 and self.feedback_process_variable_C2 >= self.feedback_left_limit_C2:
                 # Set direction.
                 self.direction_C2 = -1
                 self.jog_C2 = True

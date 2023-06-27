@@ -107,7 +107,6 @@ class ControlUtilities:
                 self.manager.devices[name].updateFeedbackProcessVariableC2.connect(controlWidget.setFeedbackProcessVariable)
                 self.manager.devices[name].updateEnablePIDControlC2.connect(controlWidget.emitStopCommand)
 
-
             # Set the configuration and initial position.
             controlWidget.set_configuration(configuration=self.manager.configuration)
             self.manager.devices[name].check_connections()
@@ -134,7 +133,7 @@ class ControlUtilities:
             for control in enabledControls:
                 if control["channel"] == controlChannel:
                     self.tabs.setTabVisible(index, True)
-
+        
         # Convert tab to window if required by configuration.
         if self.manager.configuration["devices"][name]["control"][channel]["settings"]["mode"] == "window":
             self.tab_to_window(self.controls[controlID], index)
@@ -142,7 +141,6 @@ class ControlUtilities:
             for control in enabledControls:
                 if control["channel"] == controlChannel: 
                     self.controls[controlID].setVisible(True)
-
         log.info("Device control tab added for {id}.".format(id=controlID))
 
     @Slot(str, bool)

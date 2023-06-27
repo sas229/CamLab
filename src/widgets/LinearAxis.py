@@ -547,10 +547,12 @@ class LinearAxis(QWidget):
         self.controlConfiguration = self.configuration["devices"][self.device]["control"][self.control]
         self.setWindowTitle(self.controlConfiguration["name"])
 
-        self.positionStatus.setMinimumRange(self.controlConfiguration["settings"]["primaryMinimum"])
-        self.positionStatus.setMaximumRange(self.controlConfiguration["settings"]["primaryMaximum"])
+        self.setPositionSetPoint(self.controlConfiguration["settings"]["primarySetPoint"])
         self.positionStatus.setLeftLimit(self.controlConfiguration["settings"]["primaryLeftLimit"])
         self.positionStatus.setRightLimit(self.controlConfiguration["settings"]["primaryRightLimit"])
+        self.positionStatus.setMinimumRange(self.controlConfiguration["settings"]["primaryMinimum"])
+        self.positionStatus.setMaximumRange(self.controlConfiguration["settings"]["primaryMaximum"])
+
         
         self.setPositionProcessVariable(self.controlConfiguration["settings"]["primaryProcessVariable"])
         self.feedbackStatus.setMinimumRange(self.controlConfiguration["settings"]["feedbackMinimum"])
@@ -559,7 +561,6 @@ class LinearAxis(QWidget):
         self.feedbackStatus.setRightLimit(self.controlConfiguration["settings"]["feedbackRightLimit"])
         self.setFeedbackProcessVariable(self.controlConfiguration["settings"]["feedbackProcessVariable"])
 
-        self.setPositionSetPoint(self.controlConfiguration["settings"]["primarySetPoint"])
         self.jog.setSpeed(self.controlConfiguration["settings"]["secondarySetPoint"])
         self.setFeedbackSetPoint(self.controlConfiguration["settings"]["feedbackSetPoint"])
         

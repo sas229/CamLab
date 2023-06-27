@@ -52,7 +52,6 @@ class ConfigurationUtilities:
 
         # Add the control tab.
         self.add_control_tab(name, 0)
-
         log.info("Device configuration tab added for {device}.".format(device=name))
 
     @Slot()
@@ -151,6 +150,7 @@ class ConfigurationUtilities:
         self.controlTableViews[name].setFixedHeight(89)
         self.deviceConfigurationLayout[name].addWidget(self.controlTableViews[name])
 
+        
         # Connections for control table.
         self.manager.controlTableModels[name].controlChannelToggled.connect(self.toggle_control_channel)
         self.manager.controlTableModels[name].controlChannelToggled.connect(self.manager.updatePlotWindowChannelsData)
@@ -188,6 +188,8 @@ class ConfigurationUtilities:
                 self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.setTabVisible(index, False)
         
         # Instantiate the control widgets and add tabs.
+        
+
         for channel in range(self.manager.controlTableModels[name].rowCount()):
             self.add_control_tab(name, channel)
 

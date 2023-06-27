@@ -143,6 +143,7 @@ class SliderGroupBox(QGroupBox):
         # self.setPointChanged.emit(value)
 
     def get_setpoint(self):
+        
         return self.axisSlider.setPoint
 
     @Slot()
@@ -179,12 +180,13 @@ class SliderGroupBox(QGroupBox):
             self.axisSlider.minimumRange = value
             self.leftLimitLineEdit.setText("{value:.2f}".format(value=value))
             self.minimumRangeLineEdit.setText("{value:.2f}".format(value=value))
+            self.leftLimitChanged.emit(value)
         elif value >= self.axisSlider.setPoint:
             value = self.axisSlider.setPoint
             self.axisSlider.leftLimit = value
             self.axisSlider.minimumRange = value
             self.leftLimitLineEdit.setText("{value:.2f}".format(value=value))
-            self.minimumRangeLineEdit.setText("{value:.2f}".format(value=value))
+            self.minimumRangeLineEdit.setText("{value:.2f}".format(value=value))            
         self.axisSlider.update()
         self.minimumRangeChanged.emit(value)
 
@@ -204,6 +206,7 @@ class SliderGroupBox(QGroupBox):
             self.axisSlider.maximumRange = value
             self.rightLimitLineEdit.setText("{value:.2f}".format(value=value))
             self.maximumRangeLineEdit.setText("{value:.2f}".format(value=value))
+            self.rightLimitChanged.emit(value)
         elif value <= self.axisSlider.setPoint:
             value = self.axisSlider.setPoint
             self.axisSlider.rightLimit = value
