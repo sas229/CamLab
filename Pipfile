@@ -12,13 +12,15 @@ scipy = "*"
 simple-pid = "*"
 pillow = "*"
 opencv-contrib-python = "*"
-pyside6 = "*"
+pyside6 = "==6.3.2"
 jinja2 = "*"
 pyinstaller = "*"
 pyqtgraph = "*"
 sphinx = "*"
 matplotlib = "*"
 pyserial = "*"
+serial = "*"
+serial-tool = "*"
 
 [dev-packages]
 

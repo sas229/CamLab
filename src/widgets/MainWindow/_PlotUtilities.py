@@ -131,10 +131,11 @@ class PlotUtilities:
         tabs = self.tabs.count()
         for index in reversed(range(tabs)):
             widget = self.tabs.widget(index)
-            text = self.tabs.tabText(index)
             if isinstance(widget, PlotWindow):
                 self.tabs.removeTab(index)
+
                 widget.setParent(None)
+
                 widget.deleteLater()
         self.plots = {}
 

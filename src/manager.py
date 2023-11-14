@@ -3,15 +3,18 @@ from models import DeviceTableModel, AcquisitionTableModel, ControlTableModel
 from device import Device
 from assembly import Assembly
 from timing import Timing
-from camera import Camera
 from press import Press
 import ruamel.yaml
 from labjack import ljm
 import os, sys, re, serial, time, copy, logging
 from datetime import datetime
-import local_gxipy as gx
 from serial.tools import list_ports
 from time import sleep
+import config as global_config
+
+if global_config.camera_enabled:
+    from camera import Camera
+    import local_gxipy as gx
 
 log = logging.getLogger(__name__)
 
@@ -444,7 +447,7 @@ class Manager(QObject):
         if name not in self.devices:
             if deviceType == "Hub":
                 self.devices[name] = Device(name, id, connection)
-            elif deviceType == "Camera":
+            elif deviceType == "Camera" and global_config.camera_enabled:
                 self.devices[name] = Camera(name, id, connection)
             elif deviceType == "Press":
                 self.devices[name] = Press(name, id, connection, address)
@@ -572,7 +575,7 @@ class Manager(QObject):
                         except Exception:
                             e = sys.exc_info()[1]
                             log.warning(e)
-                elif deviceInformation["type"] == "Camera":
+                elif deviceInformation["type"] == "Camera" and global_config.camera_enabled:
                     try:
                         # If the connection is successful, set the device status to true.
                         device_manager = gx.DeviceManager()
@@ -641,8 +644,9 @@ class Manager(QObject):
         self.addLJDevices("USB")
         self.addLJDevices("TCP")
 
-        # Add Galaxy camera devices.
-        self.addGalaxyDevices()
+        # Add Galaxy camera devices if camera is enabled.
+        if global_config.camera_enabled:
+            self.addGalaxyDevices()
 
         # Add VJTech TriScan devices.
         self.addTriScanDevices()
@@ -872,7 +876,9 @@ class Manager(QObject):
                         "type": deviceInformation["type"],
                         "connection": deviceInformation["connection"],
                         "address": deviceInformation["address"],
+
                         "control": [{"channel": "TS", "name": "VJT", "enable": True, "type": "Digital", "control": "Linear", "deviceFeedback": "N/A", "feedback": "N/A", "settings": copy.deepcopy(self.defaultControlSettings)}],
+
                     }
 
                     # If no previous devices are configured, add the "devices" key to the configuration.
@@ -1074,6 +1080,7 @@ class Manager(QObject):
         self.acquisitionTableModels = {}
         self.acquisitionTables = {}
         self.controlTableModels = {}
+        self.feedbackChannelLists = {}
 
         # Initialise the basic default configuration.
         self.initialiseDefaultConfiguration()
