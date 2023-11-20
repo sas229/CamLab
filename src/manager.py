@@ -753,7 +753,12 @@ class Manager(QObject):
                         handle = ljm.open(7, 1, ID[i])
                     elif mode == "TCP":
                         handle = ljm.open(7, 2, ID[i])
-                    deviceInformation["name"] = ljm.eReadNameString(handle, "DEVICE_NAME_DEFAULT")
+                    # DEV MODE
+                    temp_name = ljm.eReadNameString(handle, "DEVICE_NAME_DEFAULT")
+                    if temp_name == "\r":
+                        temp_name = "DEF"
+                    deviceInformation["name"] = temp_name
+                    # DEV MODE
                     ljm.close(handle)
                     deviceInformation["id"] = ID[i]
                     deviceInformation["model"] = "LabJack T7"
