@@ -132,6 +132,24 @@ class Device(QObject):
             self.updatePositionSetPointC1.emit(self.current_setpoint)
             log.info("Running sequence.")
 
+    @Slot()
+    def run_sequence_debug(self):
+        # For debugging purposes only.
+        print("IN FUNCTION")
+        self.set_running(True)
+        self.set_enable_C1(True)
+        if self.running == True and self.motor_enabled_C1 == True:
+            print("IN IF STATEMENT")
+            self.sequenceChannel = "C1"
+            self.setpoint_list = [50, 0, 50, 0, 50, 0, 50, 0, 50, 0]
+            self.setpoint_index = 0
+            self.sequence_running = True
+            self.current_setpoint = self.setpoint_list[self.setpoint_index]
+            self.direction_C1 = np.sign(self.position_process_variable_C1 - self.current_setpoint)
+            self.move_to_position_C1(self.current_setpoint)
+            self.updatePositionSetPointC1.emit(self.current_setpoint)
+            log.info("Running sequence.")
+
     def check_setpoint_C1(self):
         try:
             completed = ljm.eReadName(self.handle, "DIO4_EF_READ_A")
