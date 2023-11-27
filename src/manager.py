@@ -756,6 +756,7 @@ class Manager(QObject):
                     # DEV MODE
                     temp_name = ljm.eReadNameString(handle, "DEVICE_NAME_DEFAULT")
                     if temp_name == "\r":
+                        log.warning("LabJack T7 device has incorrect name. Setting to default name 'DEF'. Programme may not run as expected. Please stop execution, unplug the device, and plug the device in again before running CAMLAB.")
                         temp_name = "DEF"
                     deviceInformation["name"] = temp_name
                     # DEV MODE

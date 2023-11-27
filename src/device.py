@@ -1362,6 +1362,7 @@ class Device(QObject):
     def load_lua_script(self):
         """Method to load the Lua failsafe script into the device."""
         try:
+            sleep(1)
             lua =(
                 "-- Declarations.\n"
                 "failsafe = 0\n"
@@ -1412,6 +1413,7 @@ class Device(QObject):
             # Execute the Lua script.
             ljm.eWriteName(self.handle, "LUA_RUN", 1)
             log.info("Lua script executed.")
+            sleep(2)
         except ljm.LJMError:
             ljme = sys.exc_info()[1]
             log.warning(ljme) 
