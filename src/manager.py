@@ -12,6 +12,14 @@ from datetime import datetime
 import local_gxipy as gx
 from serial.tools import list_ports
 from time import sleep
+import requests
+import getmac
+import io
+import socket
+import networkscan
+import json
+import ipaddress
+
 
 log = logging.getLogger(__name__)
 
@@ -646,6 +654,9 @@ class Manager(QObject):
         # Add VJTech TriScan devices.
         self.addTriScanDevices()
 
+        # Add PicoW device
+        self.addPicoW()
+
         # Boolean to indicate that the device list has finished refreshing.
         self.refreshing = False
         self.finishedRefreshingDevices.emit()
@@ -895,6 +906,91 @@ class Manager(QObject):
         except Exception:
             e = sys.exc_info()[1]
             log.warning(e)
+
+
+    def addPicoW(self):
+
+        try:
+            
+            network = "192.168.0.0/24"
+            picoWs_list = self.scanNetwork(network)
+            ID_Existing = []
+
+            for picoW in picoWs_list:
+                if picoW["id"] not in ID_Existing:
+
+                    deviceInformation = {}
+                    deviceInformation["connect"] = False
+                    deviceInformation["name"] = "RPi"
+                    deviceInformation["id"] = picoW["id"]
+                    deviceInformation["model"] = "PicoW"
+                    deviceInformation["type"] = "Hub"
+                    deviceInformation["connection"] = 5
+                    deviceInformation["status"] = True
+                    deviceInformation["address"] = picoW["IP"]
+                    self.deviceTableModel.appendRow(deviceInformation)
+                    self.configurationChanged.emit(self.configuration)
+                    
+                    # Make a deep copy to avoid references in the YAML output.
+                    acquisitionTable = copy.deepcopy(self.defaultAcquisitionTable)
+                    
+
+
+
+        except Exception:
+            e = sys.exc_info()[1]
+            log.warning(e)
+
+
+    def scanNetwork(self, network: str = None):
+
+        if network == None:
+            mask = '255.255.255.0'
+            ip = self._get_ip()
+            address = ip + '/' + mask
+            itf = ipaddress.ip_interface(address)
+            network = itf.network
+
+
+        print("Searching network: {network}".format(network=network))
+        scan = networkscan.Networkscan(network)
+        scan.run()
+
+        picoWs_list = []
+        print(scan.list_of_hosts_found)
+        for ip_addr in scan.list_of_hosts_found:
+            
+        
+            url = "http://" + ip_addr + "/WhoAmI" 
+
+            try:
+                response = requests.get(url)
+
+                if response.headers["Server"] == "Picow":
+                    log.info("PicoW found on IP address:" + ip_addr)
+                    pico_dict = json.load(io.StringIO(response.text))
+                    pico_dict["IP"] = ip_addr
+                    pico_dict["MAC"] = getmac.get_mac_address(ip = ip_addr)
+                    picoWs_list.append(pico_dict)
+
+            except Exception:
+                e = sys.exc_info()[1]
+                log.warning(e)
+
+        return picoWs_list
+    
+    def _get_ip(self) -> str:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(0)
+        try:
+            # Doesn't even have to be reachable.
+            s.connect(('10.254.254.254', 1))
+            ip = s.getsockname()[0]
+        except Exception:
+            ip = '127.0.0.1'
+        finally:
+            s.close()
+        return ip
 
     def addControlSettings(self, name):
         #  Configure control settings.

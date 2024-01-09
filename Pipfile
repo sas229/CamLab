@@ -21,6 +21,9 @@ matplotlib = "*"
 pyserial = "*"
 serial = "*"
 serial-tool = "*"
+networkscan = "*"
+getmac = "*"
+requests = "*"
 
 [dev-packages]
 

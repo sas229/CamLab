@@ -70,8 +70,11 @@ class PlotWindow(QWidget, QtStyleTools):
         self.gridCheckBox = QCheckBox("Grid")
         self.alphaLabel = QLabel("Alpha:")
         self.alphaSlider = QSlider(Qt.Horizontal)
+        self.alphaSlider.setValue(self.alpha)
+        
         self.opacityLabel = QLabel("Opacity:")
         self.opacitySlider = QSlider(Qt.Horizontal)
+        self.opacitySlider.setValue(self.opacity)
 
         validator = QDoubleValidator(self, decimals=3)
         validator.setNotation(QDoubleValidator.StandardNotation)
