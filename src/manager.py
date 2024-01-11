@@ -944,7 +944,7 @@ class Manager(QObject):
 
                 deviceInformation = {}
                 deviceInformation["connect"] = False
-                deviceInformation["name"] = "RPi"
+                deviceInformation["name"] = "FHA"
                 deviceInformation["id"] = picoW_FHA_info["id"]
                 deviceInformation["model"] = "PicoW"
                 deviceInformation["type"] = "RPi-PicoW-FHA"
