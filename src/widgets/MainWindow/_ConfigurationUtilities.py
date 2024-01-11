@@ -3,6 +3,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QGridLayout, QLabel, QCheckB
 from views import AcquisitionTableView, ControlTableView
 from widgets.CameraSettings import CameraSettings
 from widgets.PressSettings import PressSettings
+from widgets.PicoW_FHA_Settings import PicoW_FHA_Settings
 import logging
 from time import sleep
 
@@ -18,6 +19,26 @@ class ConfigurationUtilities:
             self.add_camera_configuration_tab(name)
         elif deviceType == "Press":
            self.add_press_configuration_tab(name)
+        elif deviceType == "RPi-PicoW-FHA":
+            self.add_rpi_picoW_fha_configuration_tab(name)
+
+    def add_rpi_picoW_fha_configuration_tab(self, name):
+
+        self.deviceConfigurationWidget[name] = PicoW_FHA_Settings(name)
+        # Add the tab and show if device connected boolean is true.
+        self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.addTab(self.deviceConfigurationWidget[name], name)
+        index = self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.indexOf(self.deviceConfigurationWidget[name])
+        enabledDevices = self.manager.deviceTableModel.enabledDevices()
+        for device in enabledDevices:
+            if device["name"] == name:
+                self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.setTabVisible(index, True)
+            else:
+                self.configurationTab.deviceConfigurationGroupBox.deviceConfigurationTabWidget.setTabVisible(index, False)
+
+        # Connections
+        self.manager.deviceTableModel.deviceConnectStatusUpdated.connect(self.manager.updatePlotWindowChannelsData)
+
+        log.info("Device configuration tab added for {device}.".format(device=name))
 
     def add_press_configuration_tab(self, name):
         # Instantiate widget.

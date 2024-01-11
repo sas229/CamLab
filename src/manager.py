@@ -1385,9 +1385,26 @@ class Manager(QObject):
                     genericChannelsData.append(
                     {"plot": False, "name": "Feedback PV" , "device": "VJT", "colour": self.setColourDefault(),
                     "value": "0.00", "unit": feedbackUnit})
-            
+
+            elif self.devices[name].type == "RPi-PicoW-FHA":
+                
+                for i in range(20):
+
+                    if i<10:
+
+                        name = "T" + str(i+1)
+                        genericChannelsData.append(
+                            {"plot": False, "name": name, "device": "FHA", "colour": self.setColourDefault(),
+                            "value": "0.00", "unit": "C"})
                     
-                         
+                    else:
+
+                        name = "P" + str(i-10+1)
+                        genericChannelsData.append(
+                            {"plot": False, "name": name, "device": "FHA", "colour": self.setColourDefault(),
+                            "value": "0.00", "unit": "kPa"})
+                       
+  
         return genericChannelsData
 
     @Slot()

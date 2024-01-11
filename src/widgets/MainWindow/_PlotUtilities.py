@@ -20,7 +20,7 @@ class PlotUtilities:
         x = self.screenSize.width()/2 - width/2
         y = self.screenSize.height()/2 - height/2
         defaultProperties = {
-            "alpha": 50,
+            "alpha": 100,
             "auto": True,
             "autoCommonAxis": True,
             "autoSelectedAxis": True,
@@ -44,8 +44,8 @@ class PlotUtilities:
             "maxSelectedAxisRange": 1,
             "maxSelectedAxisRangeLock": 1,
             "mode": "tab",
-            "opacity": 50,
-            "setGrid": False,
+            "opacity": 100,
+            "setGrid": True,
             "swap": False,
             "x": x,
             "y": y,
