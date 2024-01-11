@@ -5,6 +5,7 @@ from assembly import Assembly
 from timing import Timing
 from camera import Camera
 from press import Press
+from picoW_FHA import PicoW_FHA
 import ruamel.yaml
 from labjack import ljm
 import os, sys, re, serial, time, copy, logging
@@ -19,6 +20,10 @@ import socket
 import networkscan
 import json
 import ipaddress
+import netifaces
+from sys import platform
+import winreg
+import concurrent.futures
 
 
 log = logging.getLogger(__name__)
@@ -456,6 +461,9 @@ class Manager(QObject):
                 self.devices[name] = Camera(name, id, connection)
             elif deviceType == "Press":
                 self.devices[name] = Press(name, id, connection, address)
+            elif deviceType == "RPi-PicoW":
+                self.devices[name] = PicoW(name, id, address)
+
                 # Open connection.    
                 # self.devices["VJT"].open_connection(address)
             log.info("Device instance created for device named " + name + ".")
@@ -655,7 +663,7 @@ class Manager(QObject):
         self.addTriScanDevices()
 
         # Add PicoW device
-        self.addPicoW()
+        self.addPicoW_FHA()
 
         # Boolean to indicate that the device list has finished refreshing.
         self.refreshing = False
@@ -908,32 +916,64 @@ class Manager(QObject):
             log.warning(e)
 
 
-    def addPicoW(self):
+    def addPicoW_FHA(self):
 
         try:
+            subnets = self.get_subnets()
+            all_ip_addresses = []
+
+            for network in subnets:
+                ip_addresses = self.scanNetwork(network)
+                all_ip_addresses.extend(ip_addresses)
             
-            network = "192.168.0.0/24"
-            picoWs_list = self.scanNetwork(network)
-            ID_Existing = []
+            with concurrent.futures.ThreadPoolExecutor() as executor:
 
-            for picoW in picoWs_list:
-                if picoW["id"] not in ID_Existing:
+                results = executor.map(self.send_WhoAmI_get_request, all_ip_addresses)
 
-                    deviceInformation = {}
-                    deviceInformation["connect"] = False
-                    deviceInformation["name"] = "RPi"
-                    deviceInformation["id"] = picoW["id"]
-                    deviceInformation["model"] = "PicoW"
-                    deviceInformation["type"] = "Hub"
-                    deviceInformation["connection"] = 5
-                    deviceInformation["status"] = True
-                    deviceInformation["address"] = picoW["IP"]
-                    self.deviceTableModel.appendRow(deviceInformation)
-                    self.configurationChanged.emit(self.configuration)
+            picoW_FHA_info = None
+            for result in results:
+                if result:
+                    picoW_FHA_info = result
+
+
+            if picoW_FHA_info == None:
+
+                log.warning("No PicoW FHA found")
+            else:
+
+
+                deviceInformation = {}
+                deviceInformation["connect"] = False
+                deviceInformation["name"] = "RPi"
+                deviceInformation["id"] = picoW_FHA_info["id"]
+                deviceInformation["model"] = "PicoW"
+                deviceInformation["type"] = "RPi-PicoW-FHA"
+                deviceInformation["connection"] = 4
+                deviceInformation["status"] = True
+                deviceInformation["address"] = picoW_FHA_info["IP"]
+                self.deviceTableModel.appendRow(deviceInformation)
+                self.configurationChanged.emit(self.configuration)
                     
-                    # Make a deep copy to avoid references in the YAML output.
-                    acquisitionTable = copy.deepcopy(self.defaultAcquisitionTable)
-                    
+            #         # Make a deep copy to avoid references in the YAML output.
+            #         # acquisitionTable = copy.deepcopy(self.defaultAcquisitionTable)
+
+            #         newDevice = {
+            #             "id": deviceInformation["id"],
+            #             "model": deviceInformation["model"],
+            #             "type": deviceInformation["type"],
+            #             "connection": deviceInformation["connection"],
+            #             "address": deviceInformation["address"],                       
+            #         }
+                                        
+            #         name = deviceInformation["name"]
+            #         if "devices" not in self.configuration:
+            #             self.configuration["devices"] = {name: newDevice} 
+            #         else:
+            #             self.configuration["devices"][name] = newDevice 
+
+            #         log.info("Adding device to UI.")
+            #         self.createDeviceThread(name=name, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False, address = deviceInformation["address"])
+            #         self.configurationChanged.emit(self.configuration)
 
 
 
@@ -942,55 +982,75 @@ class Manager(QObject):
             log.warning(e)
 
 
-    def scanNetwork(self, network: str = None):
+    def send_WhoAmI_get_request(self, ip_addr):
 
-        if network == None:
-            mask = '255.255.255.0'
-            ip = self._get_ip()
-            address = ip + '/' + mask
-            itf = ipaddress.ip_interface(address)
-            network = itf.network
+        url = "http://" + ip_addr + "/WhoAmI" 
 
+        try:
+            response = requests.get(url)
 
-        print("Searching network: {network}".format(network=network))
+            if response.headers["Server"] == "Picow":
+                pico_dict = json.load(io.StringIO(response.text))
+                pico_dict["IP"] = ip_addr
+                # pico_dict["MAC"] = getmac.get_mac_address(ip = ip_addr)
+
+                log.info(f"{ip_addr} is a PicoW")
+                return pico_dict
+            else:
+                log.warning(f"{ip_addr} is NOT a PicoW")
+
+        except:
+            log.warning(f"{ip_addr} is NOT a PicoW")        
+
+    def get_subnets(self):
+        subnets = []
+        interfaces = netifaces.interfaces()
+        wifi_interfaces = []
+
+        if platform == 'win32':
+            interface_names =  self.get_connection_name_from_guid(interfaces)
+
+            for i in range(len(interface_names)):
+            
+                if interface_names[i] == "Wi-Fi":
+                    wifi_interfaces.append(interfaces[i])
+        else:
+            wifi_interfaces = interfaces
+
+        for interface in wifi_interfaces:
+            addrs = netifaces.ifaddresses(interface)
+
+            if netifaces.AF_INET in addrs:
+
+                for addr_info in addrs[netifaces.AF_INET]:
+                    ip = addr_info.get('addr')
+                    netmask = addr_info.get('netmask')
+
+                    if ip and netmask and not ip.startswith('127.'):
+                        itf = ipaddress.ip_interface(ip + "/" + netmask)
+                        network = itf.network
+                        subnets.append(network)
+
+        return subnets
+    
+    def scanNetwork(self, network):
         scan = networkscan.Networkscan(network)
         scan.run()
+        ip_addresses = scan.list_of_hosts_found
+        return ip_addresses
 
-        picoWs_list = []
-        print(scan.list_of_hosts_found)
-        for ip_addr in scan.list_of_hosts_found:
-            
-        
-            url = "http://" + ip_addr + "/WhoAmI" 
 
+    def get_connection_name_from_guid(self, iface_guids):
+        iface_names = ['(unknown)' for i in range(len(iface_guids))]
+        reg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
+        reg_key = winreg.OpenKey(reg, r'SYSTEM\\CurrentControlSet\\Control\\Network\{4d36e972-e325-11ce-bfc1-08002be10318}')
+        for i in range(len(iface_guids)):
             try:
-                response = requests.get(url)
-
-                if response.headers["Server"] == "Picow":
-                    log.info("PicoW found on IP address:" + ip_addr)
-                    pico_dict = json.load(io.StringIO(response.text))
-                    pico_dict["IP"] = ip_addr
-                    pico_dict["MAC"] = getmac.get_mac_address(ip = ip_addr)
-                    picoWs_list.append(pico_dict)
-
-            except Exception:
-                e = sys.exc_info()[1]
-                log.warning(e)
-
-        return picoWs_list
-    
-    def _get_ip(self) -> str:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.settimeout(0)
-        try:
-            # Doesn't even have to be reachable.
-            s.connect(('10.254.254.254', 1))
-            ip = s.getsockname()[0]
-        except Exception:
-            ip = '127.0.0.1'
-        finally:
-            s.close()
-        return ip
+                reg_subkey = winreg.OpenKey(reg_key, iface_guids[i] + r'\\Connection')
+                iface_names[i] = winreg.QueryValueEx(reg_subkey, 'Name')[0]
+            except FileNotFoundError:
+                pass
+        return iface_names
 
     def addControlSettings(self, name):
         #  Configure control settings.

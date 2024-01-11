@@ -24,6 +24,8 @@ serial-tool = "*"
 networkscan = "*"
 getmac = "*"
 requests = "*"
+netifaces = "*"
+
 
 [dev-packages]
 
