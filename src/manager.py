@@ -461,8 +461,8 @@ class Manager(QObject):
                 self.devices[name] = Camera(name, id, connection)
             elif deviceType == "Press":
                 self.devices[name] = Press(name, id, connection, address)
-            elif deviceType == "RPi-PicoW":
-                self.devices[name] = PicoW(name, id, address)
+            elif deviceType == "RPi-PicoW-FHA":
+                self.devices[name] = PicoW_FHA(name, id, address)
 
                 # Open connection.    
                 # self.devices["VJT"].open_connection(address)
@@ -954,26 +954,28 @@ class Manager(QObject):
                 self.deviceTableModel.appendRow(deviceInformation)
                 self.configurationChanged.emit(self.configuration)
                     
-            #         # Make a deep copy to avoid references in the YAML output.
-            #         # acquisitionTable = copy.deepcopy(self.defaultAcquisitionTable)
+                # Make a deep copy to avoid references in the YAML output.
+                # acquisitionTable = copy.deepcopy(self.defaultAcquisitionTable)
 
-            #         newDevice = {
-            #             "id": deviceInformation["id"],
-            #             "model": deviceInformation["model"],
-            #             "type": deviceInformation["type"],
-            #             "connection": deviceInformation["connection"],
-            #             "address": deviceInformation["address"],                       
-            #         }
+                newDevice = {
+                    "id": deviceInformation["id"],
+                    "model": deviceInformation["model"],
+                    "type": deviceInformation["type"],
+                    "connection": deviceInformation["connection"],
+                    "address": deviceInformation["address"],                       
+                }
                                         
-            #         name = deviceInformation["name"]
-            #         if "devices" not in self.configuration:
-            #             self.configuration["devices"] = {name: newDevice} 
-            #         else:
-            #             self.configuration["devices"][name] = newDevice 
+                name = deviceInformation["name"]
+                if "devices" not in self.configuration:
+                    self.configuration["devices"] = {name: newDevice} 
+                else:
+                    self.configuration["devices"][name] = newDevice 
 
-            #         log.info("Adding device to UI.")
-            #         self.createDeviceThread(name=name, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False, address = deviceInformation["address"])
-            #         self.configurationChanged.emit(self.configuration)
+                log.info("Adding device to UI.")
+                self.createDeviceThread(name=name, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False, address = deviceInformation["address"])
+                self.configurationChanged.emit(self.configuration)
+
+                log.info("PicoW-FHA found on IP: " + picoW_FHA_info["IP"])
 
 
 
@@ -994,15 +996,16 @@ class Manager(QObject):
                 pico_dict["IP"] = ip_addr
                 # pico_dict["MAC"] = getmac.get_mac_address(ip = ip_addr)
 
-                log.info(f"{ip_addr} is a PicoW")
+                log.info(f"{ip_addr} is a PicoW.")
                 return pico_dict
             else:
-                log.warning(f"{ip_addr} is NOT a PicoW")
+                log.warning(f"{ip_addr} is NOT a PicoW.")
 
         except:
-            log.warning(f"{ip_addr} is NOT a PicoW")        
+            log.warning(f"{ip_addr} is NOT a PicoW.")        
 
     def get_subnets(self):
+        log.info("Searching Wifi subnets.")
         subnets = []
         interfaces = netifaces.interfaces()
         wifi_interfaces = []
@@ -1029,11 +1032,15 @@ class Manager(QObject):
                     if ip and netmask and not ip.startswith('127.'):
                         itf = ipaddress.ip_interface(ip + "/" + netmask)
                         network = itf.network
+
+                        log.info("Wifi subnet found at " + str(network) + ".")
                         subnets.append(network)
 
+        
         return subnets
     
     def scanNetwork(self, network):
+        log.info("Scanning network " + str(network) + ".")
         scan = networkscan.Networkscan(network)
         scan.run()
         ip_addresses = scan.list_of_hosts_found
