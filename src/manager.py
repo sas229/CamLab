@@ -27,6 +27,8 @@ import concurrent.futures
 
 
 log = logging.getLogger(__name__)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("asyncio").setLevel(logging.WARNING)
 
 class Manager(QObject):
     configurationChanged = Signal(dict)
@@ -452,7 +454,7 @@ class Manager(QObject):
                     log.info("Feedback channel set to {feedback} for control channel {channel} on {device}.".format(feedback=control["feedback"], channel=control["channel"], device=name))
 
     @Slot(str, int, int, bool)
-    def createDeviceThread(self, name, deviceType, id, connection, connect, address):
+    def createDeviceThread(self, name, deviceType, id, connection, connect, address,):
         """Create device instance and move to thread if it doesn't already exist."""
         if name not in self.devices:
             if deviceType == "Hub":
@@ -462,7 +464,7 @@ class Manager(QObject):
             elif deviceType == "Press":
                 self.devices[name] = Press(name, id, connection, address)
             elif deviceType == "RPi-PicoW-FHA":
-                self.devices[name] = PicoW_FHA(name, id, address)
+                self.devices[name] = PicoW_FHA(name, id, connection, address)
 
                 # Open connection.    
                 # self.devices["VJT"].open_connection(address)
@@ -498,17 +500,27 @@ class Manager(QObject):
                     self.devices[name].device_disconnected.connect(self.devices["VJT"].stop_command_lost_device_connection)
 
             elif self.devices[name].type == "Camera":
+
                 self.devices[name].emitData.connect(self.assembly.update_new_data)
                 self.timing.controlDevices.connect(self.devices[name].save_image)
                 self.devices[name].saveImage.connect(self.assembly.save_image)
                 self.devices[name].stop_stream = False
 
             elif self.devices[name].type == "Press":
+
                 self.assembly.latestDataChanged.connect(self.devices[name].get_latest_data)
                 self.timing.controlDevices.connect(self.devices[name].process)
                 self.assembly.autozeroDevices.connect(self.devices[name].recalculate_offsets)
                 self.devices[name].emitData.connect(self.assembly.update_new_data)
                 self.devices[name].updateOffsets.connect(self.updateDeviceOffsets)
+
+            elif self.devices[name].type == "RPi-PicoW-FHA":
+
+                self.timing.controlDevices.connect(self.devices[name].process)
+                self.assembly.autozeroDevices.connect(self.devices[name].recalculate_offsets)
+                self.devices[name].emitData.connect(self.assembly.update_new_data)
+                self.devices[name].updateOffsets.connect(self.updateDeviceOffsets)
+
 
             self.deviceToggled.emit(name, connect)
             log.info("Basic signals connected to device {name}.".format(name=name))
@@ -531,6 +543,13 @@ class Manager(QObject):
 
             elif self.devices[name].type == "Press":
                 self.assembly.latestDataChanged.disconnect(self.devices[name].get_latest_data)
+                self.timing.controlDevices.disconnect(self.devices[name].process)
+                self.assembly.autozeroDevices.disconnect(self.devices[name].recalculate_offsets)
+                self.devices[name].emitData.disconnect(self.assembly.update_new_data)
+                self.devices[name].updateOffsets.disconnect(self.updateDeviceOffsets)
+
+            elif self.devices[name].type == "RPi-PicoW-FHA":
+
                 self.timing.controlDevices.disconnect(self.devices[name].process)
                 self.assembly.autozeroDevices.disconnect(self.devices[name].recalculate_offsets)
                 self.devices[name].emitData.disconnect(self.assembly.update_new_data)
@@ -1366,6 +1385,7 @@ class Manager(QObject):
                     genericChannelsData.append(
                     {"plot": False, "name": "Feedback PV" , "device": "VJT", "colour": self.setColourDefault(),
                     "value": "0.00", "unit": feedbackUnit})
+            
                     
                          
         return genericChannelsData

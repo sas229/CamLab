@@ -54,11 +54,11 @@ class Assembly(QObject):
     @Slot(str, np.ndarray)
     def update_new_data(self, name, data):
         """Method to add data to numpy array for the sending device."""
-
+        
         if np.shape(self.data[name])[0] > 0:
             self.data[name] = np.vstack((self.data[name], data))
         else:
-            self.data[name] = data        
+            self.data[name] = data    
 
     @Slot()
     def update_output_data(self):
@@ -68,6 +68,7 @@ class Assembly(QObject):
             
             for device in self.enabledDevices:
                 name = device["name"]
+                
                 numTimesteps.append(np.shape(self.data[name])[0])
                 
             numTimesteps = min(numTimesteps) # get the minimum timesteps for all the available data in self.data
@@ -298,6 +299,9 @@ class Assembly(QObject):
                 name = device["name"]
                 self.data[name] = np.array([])
             if device["type"] == "Press":
+                name = device["name"]
+                self.data[name] = np.array([])
+            if device["type"] == "RPi-PicoW-FHA":
                 name = device["name"]
                 self.data[name] = np.array([])
         log.info("Output arrays created.")
