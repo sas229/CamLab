@@ -311,8 +311,25 @@ class Manager(QObject):
                     nameline += "\t Speed " + str(secondaryUnit)
                     nameline += "\t Feedback SP " + str(feedbackUnit)
                     nameline += "\t Feedback PV " + str(feedbackUnit)
+                
+            elif deviceType == "RPi-PicoW-FHA":
 
-
+                for i in range(20):
+                    
+                    slopeline += "\t"
+                    slopeline += str(1)
+                    
+                    offsetline += "\t"
+                    offsetline += str(0)
+                    channelline += "\t"
+                    channelline += "FHA"
+                    
+                    nameline += "\t"
+                    if i < 10:
+                        nameline +=  "T" + str(i+1)      
+                    else:
+                        nameline += "P" + str(i-10+1)              
+                
         slopeline += "\n"
         offsetline += "\n\n"
         channelline += "\n\n"

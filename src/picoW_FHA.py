@@ -61,7 +61,6 @@ class PicoW_FHA(QObject):
 
             
             self.raw = self.get_request_to_take_readings()
-            print(self.raw)
             self.current_data = self.slopes*(self.raw - self.offsets)
 
             # Concatenate output data.
