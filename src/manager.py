@@ -671,6 +671,46 @@ class Manager(QObject):
                     self.controlTableModels[device] = ControlTableModel(device, self.configuration["devices"][device]["control"])
                     self.createDeviceThread(name=device, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True, address = deviceInformation["address"])
                     self.toggleDeviceConnection(device, deviceInformation["connect"])    
+                
+                elif deviceInformation["type"] == "RPi-PicoW-FHA":
+                    
+                    ip_addr = deviceInformation["address"]
+                    
+                    picoW_FHA_info = None
+                    picoW_FHA_info =  self.send_WhoAmI_get_request(ip_addr)
+
+                    #If you do  find pico in its last ip address add table row in device table of not then make a new scan of the network
+                    if picoW_FHA_info != None:
+                        deviceInformation["status"] = True   
+                        self.deviceTableModel.appendRow(deviceInformation)
+                        self.createDeviceThread(name=device, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True, address = deviceInformation["address"])
+                        self.toggleDeviceConnection(device, deviceInformation["connect"])    
+
+                    else:
+                        subnets = self.get_subnets()
+                        all_ip_addresses = []
+
+                        for network in subnets:
+                            ip_addresses = self.scanNetwork(network)
+                            all_ip_addresses.extend(ip_addresses)
+
+                        with concurrent.futures.ThreadPoolExecutor() as executor:
+                        
+                            results = executor.map(self.send_WhoAmI_get_request, all_ip_addresses)
+
+                        picoW_FHA_info = None
+                        for result in results:
+                            if result:
+                                picoW_FHA_info = result
+                        
+                        if picoW_FHA_info != None:
+                            deviceInformation["status"] = True   
+                            self.deviceTableModel.appendRow(deviceInformation)
+                            self.createDeviceThread(name=device, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=True, address = deviceInformation["address"])
+                            self.toggleDeviceConnection(device, deviceInformation["connect"])
+                        
+                        else:
+                            log.warning("No PicoW FHA found")
 
             # Update the feedback device and channels list in PressSettings.
             for device in self.configuration["devices"].keys():
@@ -1184,7 +1224,8 @@ class Manager(QObject):
                 try:
                     log.info("Loading configuration from " + loadConfigurationPath + " and saving location to QSettings.")
                     with open(loadConfigurationPath, "r") as file:
-                        self.configuration = ruamel.yaml.load(file, Loader=ruamel.yaml.Loader)
+                        yaml = ruamel.yaml.YAML(typ='rt')
+                        self.configuration = yaml.load(file)
                         log.info("Configuration file parsed.")
                         self.configurationPath = loadConfigurationPath
                         self.configurationChanged.emit(self.configuration)
