@@ -18,14 +18,12 @@ pyinstaller = "*"
 pyqtgraph = "*"
 sphinx = "*"
 matplotlib = "*"
-pyserial = "*"
-serial = "*"
 serial-tool = "*"
 networkscan = "*"
 getmac = "*"
 requests = "*"
 netifaces = "*"
-
+pyserial = "*"
 
 [dev-packages]
 

@@ -130,15 +130,17 @@ class Press(QObject):
         ser = self.connection
         ser.write(bytes(signal + '\r', "utf-8"))
         out = ''
-        time.sleep(0.02)
+        time.sleep(0.01)
 
-        while ser.inWaiting() > 0:
+        # while ser.inWaiting() > 0:
 
-            out += ser.read(1).decode("utf-8")
+        #     out += ser.read(1).decode("utf-8")
+        out = ser.read_until(b'\r').decode("utf-8")
 
         if out == '':
             out = "No response!"
 
+        print(out)
         return out
 
     @Slot(str)
@@ -955,7 +957,6 @@ class Press(QObject):
             
             status_press_signal = "I21TSF"
             status_press = self.get_press_response(status_press_signal)
-
             if status_press == "No response!":
                 print(status_press)
                 self.stop_press()
