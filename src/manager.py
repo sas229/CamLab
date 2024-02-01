@@ -933,14 +933,14 @@ class Manager(QObject):
                 # ser = self.ser
                 log.info("Trying to find VJTech TriScan device on port " + comport.device + ".")
                 ser.write(bytes("I" + str(address) + "TSF\r", "utf-8"))
-                time.sleep(0.01)
-                # ret = ''
+                time.sleep(0.05)
+                ret = ''
 
                 # Wait for return message.
-                # while ser.inWaiting() > 0:
-                #     ret += ser.read(1).decode("utf-8")
-                ret = ser.read_until(b'\r').decode("utf-8")
-                
+                while ser.inWaiting() > 0:
+                    ret += ser.read(1).decode("utf-8")
+                    # ret = ser.read_until(b'\r').decode("utf-8")
+                                
                 ser.close()
                 # If expected return message is receieved, add device to device list.
                
