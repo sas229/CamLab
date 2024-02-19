@@ -314,21 +314,38 @@ class Manager(QObject):
                 
             elif deviceType == "RPi-PicoW-FHA":
 
-                for i in range(20):
-                    
-                    slopeline += "\t"
-                    slopeline += str(1)
-                    
-                    offsetline += "\t"
-                    offsetline += str(0)
-                    channelline += "\t"
-                    channelline += "FHA"
-                    
-                    nameline += "\t"
-                    if i < 10:
+                if deviceName == "FHA":
+                    for i in range(20):
+
+                        slopeline += "\t"
+                        slopeline += str(1)
+
+                        offsetline += "\t"
+                        offsetline += str(0)
+                        channelline += "\t"
+                        channelline += deviceName
+
+                        nameline += "\t"
+                        if i < 10:
+                            nameline +=  "T" + str(i+1)      
+                        else:
+                            nameline += "P" + str(i-10+1)  
+
+                elif deviceName =="TEM": 
+                    for i in range(10):
+
+                        slopeline += "\t"
+                        slopeline += str(1)
+
+                        offsetline += "\t"
+                        offsetline += str(0)
+                        channelline += "\t"
+                        channelline += deviceName
+
+                        nameline += "\t"
                         nameline +=  "T" + str(i+1)      
-                    else:
-                        nameline += "P" + str(i-10+1)              
+
+
                 
         slopeline += "\n"
         offsetline += "\n\n"
@@ -1007,54 +1024,53 @@ class Manager(QObject):
 
                 results = executor.map(self.send_WhoAmI_get_request, all_ip_addresses)
 
-            picoW_FHA_info = None
+            picoW_FHA_info = []
             for result in results:
+                
                 if result:
-                    picoW_FHA_info = result
+                    picoW_FHA_info.append(result)
 
-
-            if picoW_FHA_info == None:
+            if not picoW_FHA_info:
 
                 log.warning("No PicoW FHA found")
+
             else:
 
+                for i in range(len(picoW_FHA_info)):
+                    deviceInformation = {}
+                    deviceInformation["connect"] = False
+                    deviceInformation["name"] = picoW_FHA_info[i]["name"]
+                    deviceInformation["id"] = picoW_FHA_info[i]["id"]
+                    deviceInformation["model"] = "PicoW"
+                    deviceInformation["type"] = "RPi-PicoW-FHA"
+                    deviceInformation["connection"] = 4
+                    deviceInformation["status"] = True
+                    deviceInformation["address"] = picoW_FHA_info[i]["IP"]
+                    self.deviceTableModel.appendRow(deviceInformation)
+                    self.configurationChanged.emit(self.configuration)
 
-                deviceInformation = {}
-                deviceInformation["connect"] = False
-                deviceInformation["name"] = "FHA"
-                deviceInformation["id"] = picoW_FHA_info["id"]
-                deviceInformation["model"] = "PicoW"
-                deviceInformation["type"] = "RPi-PicoW-FHA"
-                deviceInformation["connection"] = 4
-                deviceInformation["status"] = True
-                deviceInformation["address"] = picoW_FHA_info["IP"]
-                self.deviceTableModel.appendRow(deviceInformation)
-                self.configurationChanged.emit(self.configuration)
-                    
-                # Make a deep copy to avoid references in the YAML output.
-                # acquisitionTable = copy.deepcopy(self.defaultAcquisitionTable)
+                    # Make a deep copy to avoid references in the YAML output.
+                    # acquisitionTable = copy.deepcopy(self.defaultAcquisitionTable)
 
-                newDevice = {
-                    "id": deviceInformation["id"],
-                    "model": deviceInformation["model"],
-                    "type": deviceInformation["type"],
-                    "connection": deviceInformation["connection"],
-                    "address": deviceInformation["address"],                       
-                }
-                                        
-                name = deviceInformation["name"]
-                if "devices" not in self.configuration:
-                    self.configuration["devices"] = {name: newDevice} 
-                else:
-                    self.configuration["devices"][name] = newDevice 
+                    newDevice = {
+                        "id": deviceInformation["id"],
+                        "model": deviceInformation["model"],
+                        "type": deviceInformation["type"],
+                        "connection": deviceInformation["connection"],
+                        "address": deviceInformation["address"],                       
+                    }
 
-                log.info("Adding device to UI.")
-                self.createDeviceThread(name=name, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False, address = deviceInformation["address"])
-                self.configurationChanged.emit(self.configuration)
+                    name = deviceInformation["name"]
+                    if "devices" not in self.configuration:
+                        self.configuration["devices"] = {name: newDevice} 
+                    else:
+                        self.configuration["devices"][name] = newDevice 
 
-                log.info("PicoW-FHA found on IP: " + picoW_FHA_info["IP"])
+                    log.info("Adding device to UI.")
+                    self.createDeviceThread(name=name, deviceType=deviceInformation["type"], id=deviceInformation["id"], connection=deviceInformation["connection"], connect=False, address = deviceInformation["address"])
+                    self.configurationChanged.emit(self.configuration)
 
-
+                    log.info("PicoW-FHA found on IP: " + picoW_FHA_info[i]["IP"])
 
         except Exception:
             e = sys.exc_info()[1]
@@ -1071,10 +1087,21 @@ class Manager(QObject):
             if response.headers["Server"] == "Picow":
                 pico_dict = json.load(io.StringIO(response.text))
                 pico_dict["IP"] = ip_addr
+                pico_dict["name"] = "FHA"
                 # pico_dict["MAC"] = getmac.get_mac_address(ip = ip_addr)
 
                 log.info(f"{ip_addr} is a PicoW.")
                 return pico_dict
+            
+            elif response.headers["Server"] == "ds18b20":
+                pico_dict = json.load(io.StringIO(response.text))
+                pico_dict["IP"] = ip_addr
+                pico_dict["name"] = "TEM"
+                # pico_dict["MAC"] = getmac.get_mac_address(ip = ip_addr)
+
+                log.info(f"{ip_addr} is a PicoW DS18B20.")
+                return pico_dict
+            
             else:
                 log.warning(f"{ip_addr} is NOT a PicoW.")
 
@@ -1446,23 +1473,35 @@ class Manager(QObject):
                     "value": "0.00", "unit": feedbackUnit})
 
             elif self.devices[name].type == "RPi-PicoW-FHA":
+
+                if name == "FHA":
                 
-                for i in range(20):
+                    for i in range(20):
 
-                    if i<10:
+                        if i<10:
 
-                        name = "T" + str(i+1)
-                        genericChannelsData.append(
-                            {"plot": False, "name": name, "device": "FHA", "colour": self.setColourDefault(),
-                            "value": "0.00", "unit": "C"})
+                            name_channel = "T" + str(i+1)
+                            genericChannelsData.append(
+                                {"plot": False, "name": name_channel, "device": name, "colour": self.setColourDefault(),
+                                "value": "0.00", "unit": "C"})
+
+                        else:
+
+                            name = "P" + str(i-10+1)
+                            genericChannelsData.append(
+                                {"plot": False, "name": name_channel, "device": name, "colour": self.setColourDefault(),
+                                "value": "0.00", "unit": "kPa"})
+                
+                elif name == "TEM":
                     
-                    else:
+                    for i in range(10):
 
-                        name = "P" + str(i-10+1)
-                        genericChannelsData.append(
-                            {"plot": False, "name": name, "device": "FHA", "colour": self.setColourDefault(),
-                            "value": "0.00", "unit": "kPa"})
-                       
+                        if i<10:
+
+                            name_channel = "T" + str(i+1)
+                            genericChannelsData.append(
+                                {"plot": False, "name": name_channel, "device": name, "colour": self.setColourDefault(),
+                                "value": "0.00", "unit": "C"})
   
         return genericChannelsData
 
