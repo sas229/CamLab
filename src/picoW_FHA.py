@@ -12,6 +12,7 @@ class PicoW_FHA(QObject):
 
     emitData = Signal(str, np.ndarray)
     updateOffsets = Signal(str, list, list)
+    device_disconnected = Signal()
 
     def __init__(self, name, id, connection, ip):
         super().__init__()
@@ -67,6 +68,7 @@ class PicoW_FHA(QObject):
             self.send_data()
   
         except Exception:
+            self.device_disconnected.emit()
             e = sys.exc_info()[1]
             log.warning(e)
 

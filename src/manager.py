@@ -554,6 +554,8 @@ class Manager(QObject):
                 self.assembly.autozeroDevices.connect(self.devices[name].recalculate_offsets)
                 self.devices[name].emitData.connect(self.assembly.update_new_data)
                 self.devices[name].updateOffsets.connect(self.updateDeviceOffsets)
+                if "VJT" in self.devices:
+                    self.devices[name].device_disconnected.connect(self.devices["VJT"].stop_command_lost_device_connection)
 
 
             self.deviceToggled.emit(name, connect)
@@ -588,6 +590,8 @@ class Manager(QObject):
                 self.assembly.autozeroDevices.disconnect(self.devices[name].recalculate_offsets)
                 self.devices[name].emitData.disconnect(self.assembly.update_new_data)
                 self.devices[name].updateOffsets.disconnect(self.updateDeviceOffsets)
+                if "VJT" in self.devices:
+                    self.devices[name].device_disconnected.disconnect(self.devices["VJT"].stop_command_lost_device_connection)
 
 
             self.deviceToggled.emit(name, connect)
