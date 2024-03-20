@@ -343,7 +343,26 @@ class Manager(QObject):
                         channelline += deviceName
 
                         nameline += "\t"
-                        nameline +=  "T" + str(i+1)      
+                        nameline +=  "T" + str(i+1)   
+
+                elif deviceName =="TPL": 
+                    for i in range(3):
+
+                        slopeline += "\t"
+                        slopeline += str(1)
+
+                        offsetline += "\t"
+                        offsetline += str(0)
+                        channelline += "\t"
+                        channelline += deviceName
+
+                        nameline += "\t"
+
+                        if i<2:
+                            nameline +=  "T" + str(i+1) 
+
+                        else:
+                            nameline += "T_C"
 
 
                 
@@ -1106,8 +1125,15 @@ class Manager(QObject):
                 log.info(f"{ip_addr} is a PicoW DS18B20.")
                 return pico_dict
             
-            else:
-                log.warning(f"{ip_addr} is NOT a PicoW.")
+            elif response.headers["Server"] == "ds18b20_max31855":
+                pico_dict = json.load(io.StringIO(response.text))
+                pico_dict["IP"] = ip_addr
+                pico_dict["name"] = "TPL"
+                # pico_dict["MAC"] = getmac.get_mac_address(ip = ip_addr)
+
+                log.info(f"{ip_addr} is a PicoW DS18B20 and Thermostat for pile testing in FHA.")
+                return pico_dict
+
 
         except:
             log.warning(f"{ip_addr} is NOT a PicoW.")        
@@ -1137,14 +1163,19 @@ class Manager(QObject):
                     ip = addr_info.get('addr')
                     netmask = addr_info.get('netmask')
 
-                    if ip and netmask and not ip.startswith('127.'):
+                    network_bits = sum(bin(int(x)).count('1') for x in netmask.split('.'))                
+
+                    if network_bits < 23:
+                        log.warning("The subnet found is less than /23 meaning more than 510 IP addresses need to be checked. Please connect to smaller size network")
+                        return subnets
+                    
+                    elif ip and netmask and not ip.startswith('127.'):
                         itf = ipaddress.ip_interface(ip + "/" + netmask)
                         network = itf.network
 
                         log.info("Wifi subnet found at " + str(network) + ".")
                         subnets.append(network)
 
-        
         return subnets
     
     def scanNetwork(self, network):
@@ -1506,6 +1537,19 @@ class Manager(QObject):
                             genericChannelsData.append(
                                 {"plot": False, "name": name_channel, "device": name, "colour": self.setColourDefault(),
                                 "value": "0.00", "unit": "C"})
+                
+                elif name == "TPL":
+                    
+                    for i in range(2):
+
+                        name_channel = "T" + str(i+1)
+                        genericChannelsData.append(
+                            {"plot": False, "name": name_channel, "device": name, "colour": self.setColourDefault(),
+                            "value": "0.00", "unit": "C"})
+                    
+                    genericChannelsData.append(
+                        {"plot": False, "name": "T_C", "device": name, "colour": self.setColourDefault(),
+                        "value": "0.00", "unit": "C"})
   
         return genericChannelsData
 
