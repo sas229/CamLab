@@ -43,6 +43,15 @@ class CommandTree(QGroupBox):
         self.commandTreeModel.appendCommand(command)
         self.commandTreeView.setSpanningColumns()
 
+    def remove_command(self):
+        currentIndex = self.commandTreeView.currentIndex()  # This is a QModelIndex
+        if currentIndex.isValid():
+            # Convert QModelIndex to row number
+            row = currentIndex.row()
+            self.commandTreeModel.removeCommand(row)
+            self.commandTreeView.setSpanningColumns()
+
+
     def update_background(self):
         color = os.environ['QTMATERIAL_SECONDARYCOLOR']
         style = "background-color:" + color + ";"

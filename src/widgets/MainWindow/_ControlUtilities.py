@@ -33,8 +33,10 @@ class ControlUtilities:
             self.manager.devices[name].updateRunningIndicator.connect(controlWidget.setRunningIndicator)
             self.manager.devices[name].updatePIDControlButtonEnable.connect(controlWidget.setPIDControlButtonEnable)
 
-            # DEV MODE
-            self.statusTab.runSequence.clicked.connect(self.manager.devices[name].run_sequence_debug)
+            # TODO Might have to revert to test old jonathan's sequence
+            # self.statusTab.runSequence.clicked.connect(self.manager.devices[name].run_sequence)
+            self.statusTab.runSequence.clicked.connect(lambda: self.manager.sequence_manager.run(self.manager.devices[name]))
+            self.sequenceTab.commandTree.toolbar.saveSequenceButton.triggered.connect(lambda: self.manager.sequence_manager.run(self.manager.devices[name], self.sequenceTab.commandTree.commandTreeModel._data))
 
 
             if name == "VJT":

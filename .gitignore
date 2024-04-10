@@ -133,3 +133,5 @@ CamLab.log
 *.yaml
 Pipfile.lock
 Test.png
+.vscode/settings.json
+src/sequenceManagerTestData.py

@@ -48,6 +48,12 @@ class CommandPreview(QGroupBox):
     @Slot()
     def preview_command(self, command):
         self.command = command
+        if "command" not in self.command.keys():
+            return
+        if not command["amplitude"].isdigit():
+            return
+        else:
+            command["amplitude"] = float(command["amplitude"])
         if self.command["variable"] == "Position":
             unit = "mm"
         elif self.command["variable"] == "Feedback":
@@ -82,13 +88,13 @@ class CommandPreview(QGroupBox):
             self.update_preview(time, values, unit)
         elif self.command["command"] == "Sine":
             amplitude = self.command["amplitude"]
-            rate = self.command["rate"]
+            rate = self.command["period"]
             offset = self.command["offset"]
             repeat = self.command["repeat"]
-            elapsedTime = (abs(amplitude)/rate)*2*repeat
+            elapsedTime = rate*repeat
             time = np.arange(0, elapsedTime, self.dT)
-            values = np.sin(np.pi*time*1/(abs(amplitude)/rate))*amplitude/2 + offset
-            if offset != 0.0:
+            values = values = np.sin(2 * np.pi * time / rate) * amplitude + offset
+            if offset != 0.0 and abs(offset) < amplitude:
                 if offset < 0.0:
                     firstZeroIndex = np.where(values >= 0)[0][0]
                 elif offset > 0.0:

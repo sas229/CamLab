@@ -30,6 +30,7 @@ class SequenceTab(QWidget):
         self.commandBuilder.addCommandToSequence.connect(self.hide_builder)
 
         self.commandTree.toolbar.addButton.triggered.connect(self.show_builder)
+        self.commandTree.toolbar.removeButton.triggered.connect(self.commandTree.remove_command)
 
     def show_builder(self):
         self.commandBuilder.clear_command()

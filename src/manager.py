@@ -10,6 +10,7 @@ import os, sys, re, serial, time, copy, logging
 from datetime import datetime
 from serial.tools import list_ports
 from time import sleep
+from sequenceManager import SequenceManager
 import config as global_config
 
 if global_config.camera_enabled:
@@ -151,7 +152,12 @@ class Manager(QObject):
         log.info("Timing thread started.")   
 
         # Load default configuration initially.
-        self.initialiseDefaultConfiguration() 
+        self.initialiseDefaultConfiguration()
+
+        # Instantiate sequence manager.
+        self.sequence_manager = SequenceManager()
+
+        
 
     def checkForPreviousConfiguration(self):
         # Load last used configuration file.

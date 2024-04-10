@@ -31,6 +31,7 @@ class Device(QObject):
     updateEnablePIDControlC1 = Signal(bool)
     updateEnablePIDControlC2 = Signal(bool)
     device_disconnected = Signal()
+    command_completed = Signal()
 
     def __init__(self, name, id, connection):
         super().__init__()
@@ -108,6 +109,13 @@ class Device(QObject):
         self.rampPID_bool_C1 = False
         self.rampPID_bool_C2 = False
 
+        self.setpoint_list = []
+        self.setpoint_index = 0
+        self.speed_function_t = 0
+        self.speed_function_x = 0
+        self.speed_limit = 0
+        self.initial_time = None
+
         # Disable clock 0 and load Lua failsafe script to turn off PWM.
         self.open_connection()
         self.disable_clock_0()
@@ -118,12 +126,16 @@ class Device(QObject):
         self.PID_C1 = PID()
         self.PID_C2 = PID()
 
+        # Set speed limit
+        self.set_speed_limit()
+
+    '''
     @Slot()
-    def run_sequence(self):
+    def run_sequence(self, sequenceChannel, setpoint_list):
         # Hacky code to do a simple sequence on control channel C1 - only for Jonathan's usage!
         if self.running == True and self.motor_enabled_C1 == True:
-            self.sequenceChannel = "C1"
-            self.setpoint_list = [50, 0, 50, 0, 50, 0, 50, 0, 50, 0]
+            self.sequenceChannel = sequenceChannel
+            self.setpoint_list = setpoint_list
             self.setpoint_index = 0
             self.sequence_running = True
             self.current_setpoint = self.setpoint_list[self.setpoint_index]
@@ -131,24 +143,7 @@ class Device(QObject):
             self.move_to_position_C1(self.current_setpoint)
             self.updatePositionSetPointC1.emit(self.current_setpoint)
             log.info("Running sequence.")
-
-    @Slot()
-    def run_sequence_debug(self):
-        # For debugging purposes only.
-        print("IN FUNCTION")
-        self.set_running(True)
-        self.set_enable_C1(True)
-        if self.running == True and self.motor_enabled_C1 == True:
-            print("IN IF STATEMENT")
-            self.sequenceChannel = "C1"
-            self.setpoint_list = [50, 0, 50, 0, 50, 0, 50, 0, 50, 0]
-            self.setpoint_index = 0
-            self.sequence_running = True
-            self.current_setpoint = self.setpoint_list[self.setpoint_index]
-            self.direction_C1 = np.sign(self.position_process_variable_C1 - self.current_setpoint)
-            self.move_to_position_C1(self.current_setpoint)
-            self.updatePositionSetPointC1.emit(self.current_setpoint)
-            log.info("Running sequence.")
+    '''
 
     def check_setpoint_C1(self):
         try:
@@ -162,8 +157,8 @@ class Device(QObject):
                     self.move_to_position_C1(self.current_setpoint)
                     self.updatePositionSetPointC1.emit(self.current_setpoint)
                 else:
-                    log.info("Sequence finished.")
-                    self.sequence_running = False
+                    log.info("Command finished.")
+                    self.command_completed.emit()
         except ljm.LJMError:
             ljme = sys.exc_info()[1]
             log.warning(ljme) 
@@ -631,31 +626,34 @@ class Device(QObject):
             if self.minimumLimitC2 == True or self.maximumLimitC2 == True:
                 self.limit_C2 = True
 
-            # Check position limits.
-            if self.position_process_variable_C1 <= self.position_left_limit_C1:
-                self.limit_C1 = True
-                if self.status_PID_C1 == True:
-                    self.updateEnablePIDControlC1.emit(False)
-                log.warning("Poistion left limit exceeded on C1 {device}.".format(device=self.name))
+            # Check position limits if channel enabled.
+            if self.enabled_C1 == True:
+                if self.position_process_variable_C1 <= self.position_left_limit_C1:
+                    self.limit_C1 = True
+                    if self.status_PID_C1 == True:
+                        self.updateEnablePIDControlC1.emit(False)
+                    log.warning("Poistion left limit exceeded on C1 {device}.".format(device=self.name))
 
-            if self.position_process_variable_C1 >= self.position_right_limit_C1:
-                self.limit_C1 = True
-                if self.status_PID_C1 == True:
-                    self.updateEnablePIDControlC1.emit(False)
-                log.warning("Poistion right limit exceeded on C1 {device}.".format(device=self.name))
+                if self.position_process_variable_C1 >= self.position_right_limit_C1:
+                    self.limit_C1 = True
+                    if self.status_PID_C1 == True:
+                        self.updateEnablePIDControlC1.emit(False)
+                    log.warning("Poistion right limit exceeded on C1 {device}.".format(device=self.name))
 
-            if self.position_process_variable_C2 <= self.position_left_limit_C2:
-                self.limit_C2 = True
-                if self.status_PID_C2 == True:
-                    self.updateEnablePIDControlC2.emit(False)
-                log.warning("Poistion left limit exceeded on C2 {device}.".format(device=self.name))
-
-            if self.position_process_variable_C2 >= self.position_right_limit_C2:
-                self.limit_C2 = True
-                if self.status_PID_C2 == True:
-                    self.updateEnablePIDControlC2.emit(False)
-                log.warning("Poistion right limit exceeded on C2 {device}.".format(device=self.name))
-
+            if self.enabled_C2 == True:
+                if self.position_process_variable_C2 <= self.position_left_limit_C2:
+                    self.limit_C2 = True
+                    if self.status_PID_C2 == True:
+                        self.updateEnablePIDControlC2.emit(False)
+                    log.warning("Poistion left limit exceeded on C2 {device}.".format(device=self.name))
+                
+                    
+                if self.position_process_variable_C2 >= self.position_right_limit_C2:
+                    self.limit_C2 = True
+                    if self.status_PID_C2 == True:
+                        self.updateEnablePIDControlC2.emit(False)
+                    log.warning("Poistion right limit exceeded on C2 {device}.".format(device=self.name))
+            
             # Check feedback limits.
             if self.feedback_process_variable_C1 <= self.feedback_left_limit_C1:
                 self.limit_C1 = True
@@ -913,8 +911,9 @@ class Device(QObject):
             log.warning(e)
 
     @Slot(float)
-    def set_speed_C1(self, speed=0.0):
+    def set_speed_C1(self, speed=None):
         """Set speed on control channel C1."""
+        speed=min(speed, self.speed_limit)
         self.handle = ljm.open(7, self.connection, self.id)     
         target_frequency = int(speed*self.counts_per_unit_C1)
         self.freqC1, self.rollC1, self.width_C1 = self.set_clock(1, target_frequency)
@@ -922,8 +921,9 @@ class Device(QObject):
         #log.info("Speed on control channel C1 set to {speed}.".format(speed=speed))
 
     @Slot(float)
-    def set_speed_C2(self, speed=0.0):
+    def set_speed_C2(self, speed=None):
         """Set speed on control channel C2."""
+        speed=min(speed, self.speed_limit)
         self.handle = ljm.open(7, self.connection, self.id) 
         target_frequency = int(speed*self.counts_per_unit_C2)
         self.freqC2, self.rollC2, self.width_C2 = self.set_clock(2, target_frequency)
@@ -1489,6 +1489,8 @@ class Device(QObject):
             # Check setpoint.
             if self.sequence_running == True:
                 self.check_setpoint_C1()
+                if self.speed_function_t or self.speed_function_x:
+                    self.update_speed_C1()
             # If feedback is available.
             if self.feedback_C1 == True:
 
@@ -1582,5 +1584,16 @@ class Device(QObject):
         # Update the device configuration.
         self.updateOffsets.emit(self.name, self.channels, self.offsets.tolist())
         log.info("Autozero applied to device.")
+
+    def update_speed_C1(self):
+        if self.speed_function_x:
+            x = self.position_process_variable_C1
+            self.set_speed_C1(self.speed_function_x(x))
+        elif self.initial_time and self.speed_function_t:
+            self.t = time.time() - self.initial_time
+            self.set_speed_C1(self.speed_function_t(self.t))
+        else:
+            log.warning("No initial time passed for speed function")
+
 
         

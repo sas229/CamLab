@@ -29,7 +29,11 @@ class CommandTreeModel(QStandardItemModel):
 
     def appendCommand(self, command):
         self._data.append(command)
-        self.setModelData(self._data)   
+        self.setModelData(self._data)
+
+    def removeCommand(self, index):
+        self._data.pop(index)
+        self.setModelData(self._data)
 
     def flags(self, index):
         # Set flags.

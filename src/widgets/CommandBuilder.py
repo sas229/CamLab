@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QPushButton, QGridLayout, QLineEdit, QGroupBox, QLabel, QComboBox, QSpinBox
-from PySide6.QtGui import QIcon, QDoubleValidator
+from PySide6.QtGui import QIcon, QDoubleValidator, QRegularExpressionValidator
 from PySide6.QtCore import Slot, Signal, QSize
 
 class CommandBuilder(QGroupBox):
@@ -73,7 +73,9 @@ class CommandBuilder(QGroupBox):
         self.amplitudeLabel = QLabel("Value")
         self.amplitudeLabel.setVisible(False)
         self.amplitudeLineEdit = QLineEdit()
-        self.amplitudeLineEdit.setValidator(QDoubleValidator())
+        amplitude_regex = "(?:[a-zA-Z][a-zA-Z0-9]*|-?\d+)"
+        amplitude_validator = QRegularExpressionValidator(amplitude_regex, self.amplitudeLineEdit)
+        self.amplitudeLineEdit.setValidator(amplitude_validator)
         self.amplitudeLineEdit.setVisible(False)
         self.amplitudeLineEdit.setFixedWidth(100)
         self.amplitudeLineEdit.setWhatsThis("amplitude")
@@ -154,15 +156,15 @@ class CommandBuilder(QGroupBox):
         self.channelComboBox.addItems(channelList)
 
         # Variable list.
-        variableList = ["Select", "Position", "Speed", "Feedback"]
+        variableList = ["Select", "Position", "Feedback", "Create Label"]
         self.variableComboBox.addItems(variableList)
 
         # Command list.
-        commandList = ["Select", "Demand", "Ramp", "Triangle", "Sine", "File"]
+        commandList = ["Select", "Ramp", "Triangle", "Sine", "Custom"]
         self.commandComboBox.addItems(commandList)
 
         # Event list.
-        eventList = ["Select", "Completion", "Immediate", "Time", "Feedback", "Position"]
+        eventList = ["Select", "Completion", "Time", "Feedback", "Position"]
         self.triggerComboBox.addItems(eventList)
 
         # Layout.
@@ -278,6 +280,9 @@ class CommandBuilder(QGroupBox):
         elif self.commandComboBox.currentText() == "Sine":
             self.offsetLabel.setVisible(True)
             self.offsetLineEdit.setVisible(True)
+        elif self.commandComboBox.currentText() == "Ramp":
+            self.offsetLabel.setVisible(True)
+            self.offsetLineEdit.setVisible(True)
         else:
             self.triggerLabel.setVisible(True)
             self.triggerComboBox.setVisible(True)
@@ -374,8 +379,16 @@ class CommandBuilder(QGroupBox):
     def variable_selected(self, text):
         """Method to show next option when variable option has been selected."""
         if text != "Select":
-            self.commandLabel.setVisible(True)
-            self.commandComboBox.setVisible(True)
+            if text != "Create Label":
+                self.commandLabel.setVisible(True)
+                self.commandComboBox.setVisible(True)
+            else:
+                self.create_command()
+                self.triggerValueLabel.setVisible(False)
+                self.triggerValueLineEdit.setVisible(False)
+                self.finaliseLabel.setVisible(True)
+                self.clearButton.setVisible(True)
+                self.addButton.setVisible(True)
         else:
             currentIndex = self.commandLayout.indexOf(self.variableComboBox)
             self.resetBuilder(currentIndex)
@@ -391,12 +404,17 @@ class CommandBuilder(QGroupBox):
         currentIndex = self.commandLayout.indexOf(self.commandComboBox)
         self.resetBuilder(currentIndex)
         if text == "Ramp":
+            self.rateLabel.setText("Rate")
+            self.set_units()
+            self.rateLineEdit.setWhatsThis("rate")
             self.enable_rate_input()
         elif text == "Demand":
             self.enable_amplitude_input()
         elif text == "Triangle":
             self.enable_rate_input()
         elif text == "Sine":
+            self.rateLabel.setText("Period (s)")
+            self.rateLineEdit.setWhatsThis("period")
             self.enable_rate_input()
         elif text == "File":
             self.fileLoadLabel.setVisible(True)
@@ -481,11 +499,11 @@ class CommandBuilder(QGroupBox):
         for index in range(self.commandLayout.count()):
             widget = self.commandLayout.itemAt(index).widget()
             if widget.isVisible() == True and index % 2 != 0:  
-                name = widget.whatsThis() 
+                name = widget.whatsThis()
                 if isinstance(widget, QComboBox):
                     self.command[name] = str(widget.currentText())
                 if isinstance(widget, QLineEdit):
-                    if name == "name":
+                    if name == "name" or name == "amplitude":
                         self.command[name] = widget.text()
                     else:
                         self.command[name] = float(widget.text())
