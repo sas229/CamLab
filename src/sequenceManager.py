@@ -23,6 +23,7 @@ class SequenceManager(QObject):
         else:
             self.commands = copy.deepcopy(self.commands_default)
         log.info("SequenceManager initialised.")
+        log.warning(self.commands)
         self.command_index = 0
         if (
             device.running == True
@@ -54,7 +55,13 @@ class SequenceManager(QObject):
             self.create_label(command)
             return
         
-        command = self.check_labels(command)        
+        if command["command"] == "Feedback":
+            log.info("Running feedback command.")
+            self.execute_feedback_command(command)
+            return
+        
+        command = self.check_labels(command)
+        
 
         if command["command"] == "Ramp":
             log.info("Running RAMP command.")
@@ -285,12 +292,41 @@ class SequenceManager(QObject):
 
     def check_labels(self, command):
         if not command["amplitude"].lstrip("-").isdigit():
+            mult = 1.0
             label_name = command["amplitude"]
+            if label_name[0] == "-":
+                label_name = label_name[1:]
+                mult = -1.0
             if label_name in self.labels.keys():
-                command["amplitude"] = self.labels[label_name]
+                command["amplitude"] = mult*float(self.labels[label_name])
             else:
                 log.error(f"Label {label_name} not found.")
                 return command
         else:
             command["amplitude"] = float(command["amplitude"])
+        if not command["offset"].lstrip("-").isdigit():
+            mult = 1.0
+            label_name = command["offset"]
+            if label_name[0] == "-":
+                label_name = label_name[1:]
+                mult = -1.0
+            if label_name in self.labels.keys():
+                command["offset"] = mult*float(self.labels[label_name])
+            else:
+                log.error(f"Label {label_name} not found.")
+                return command
+        else:
+            command["offset"] = float(command["offset"])
         return command
+
+    def execute_feedback_command(self, command):
+        self.device.setpoint_list = []
+        self.device.sequence_feedback_C1 = command["feedback"]
+        self.device.speed_function_x = 0
+        self.device.speed_function_t = 0
+        self.device.set_speed_C1(command["rate"])
+        self.device.direction_C1 = np.sign(
+            self.device.feedback_process_variable_C1
+            - self.device.sequence_feedback_C1
+        )
+        self.device.jog_positive_on_C1()

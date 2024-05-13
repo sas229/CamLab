@@ -50,6 +50,8 @@ class CommandPreview(QGroupBox):
         self.command = command
         if "command" not in self.command.keys():
             return
+        if "amplitude" not in self.command.keys():
+            return
         if not command["amplitude"].isdigit():
             return
         else:

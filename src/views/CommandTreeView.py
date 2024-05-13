@@ -1,5 +1,7 @@
 from PySide6.QtWidgets import QTreeView
 from PySide6.QtCore import Signal, QModelIndex, QItemSelectionModel
+import logging
+log = logging.getLogger(__name__)
 
 class CommandTreeView(QTreeView):
     commandSelected = Signal(int)
@@ -17,6 +19,7 @@ class CommandTreeView(QTreeView):
         model = index.model()
         # If a model is found (i.e. if the click was within the tree).
         if model != None:
+            log.warning("CLICKED")
             item = model.itemFromIndex(index)
             parent = item.parent()  
             self.setCurrentIndex(index)

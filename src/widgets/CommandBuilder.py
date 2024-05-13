@@ -19,6 +19,7 @@ class CommandBuilder(QGroupBox):
         self.feedbackRateUnit = "N/s" 
         self.speedUnit = "mm/s"
         self.speedRateUnit = "mm/s<sup>2</sup>" 
+        self.label_regex = "(?:-?[a-zA-Z][a-zA-Z0-9]*|-?\d+)"
 
         # Name widgets.
         self.nameLabel = QLabel("Name")
@@ -64,7 +65,8 @@ class CommandBuilder(QGroupBox):
         self.offsetLabel = QLabel("Offset")
         self.offsetLabel.setVisible(False)
         self.offsetLineEdit = QLineEdit()
-        self.offsetLineEdit.setValidator(QDoubleValidator())
+        label_validator_offset = QRegularExpressionValidator(self.label_regex, self.offsetLineEdit)
+        self.offsetLineEdit.setValidator(label_validator_offset)
         self.offsetLineEdit.setVisible(False)
         self.offsetLineEdit.setFixedWidth(100)
         self.offsetLineEdit.setWhatsThis("offset")
@@ -73,9 +75,8 @@ class CommandBuilder(QGroupBox):
         self.amplitudeLabel = QLabel("Value")
         self.amplitudeLabel.setVisible(False)
         self.amplitudeLineEdit = QLineEdit()
-        amplitude_regex = "(?:[a-zA-Z][a-zA-Z0-9]*|-?\d+)"
-        amplitude_validator = QRegularExpressionValidator(amplitude_regex, self.amplitudeLineEdit)
-        self.amplitudeLineEdit.setValidator(amplitude_validator)
+        label_validator_amplitude = QRegularExpressionValidator(self.label_regex, self.amplitudeLineEdit)
+        self.amplitudeLineEdit.setValidator(label_validator_amplitude)
         self.amplitudeLineEdit.setVisible(False)
         self.amplitudeLineEdit.setFixedWidth(100)
         self.amplitudeLineEdit.setWhatsThis("amplitude")
@@ -160,7 +161,7 @@ class CommandBuilder(QGroupBox):
         self.variableComboBox.addItems(variableList)
 
         # Command list.
-        commandList = ["Select", "Ramp", "Triangle", "Sine", "Custom"]
+        commandList = ["Select", "Ramp", "Triangle", "Sine", "Feedback", "Custom"]
         self.commandComboBox.addItems(commandList)
 
         # Event list.
@@ -274,6 +275,7 @@ class CommandBuilder(QGroupBox):
     @Slot()
     def amplitude_selected(self):
         """Method to show next option when amplitude option has been selected."""
+        self.offsetLineEdit.setWhatsThis("offset")
         if self.commandComboBox.currentText() == "Triangle":
             self.offsetLabel.setVisible(True)
             self.offsetLineEdit.setVisible(True)
@@ -347,10 +349,11 @@ class CommandBuilder(QGroupBox):
         else:
             text = "Rate"
         self.rateLabel.setText(text)
-        if self.variableComboBox.currentText() == "Position":
+        if self.commandComboBox.currentText() == "Feedback":
+            text = "Feedback Limit " + "(" +self.feedbackUnit + ")"
+            self.offsetLineEdit.setWhatsThis("feedback")
+        elif self.variableComboBox.currentText() == "Position":
             text = "Offset " + "(" +self.positionUnit + ")"
-        elif self.variableComboBox.currentText() == "Feedback":
-            text = "Offset " + "(" +self.feedbackUnit + ")"
         elif self.variableComboBox.currentText() == "Speed":
             text = "Offset " + "(" +self.speedUnit + ")"
         else:
@@ -421,11 +424,18 @@ class CommandBuilder(QGroupBox):
             self.fileLoadButton.setVisible(True)
             self.filePathLabel.setVisible(True)
             self.filePathLineEdit.setVisible(True)
+        elif text == "Feedback":
+            self.rateLabel.setText("Rate")
+            self.set_units()
+            self.rateLineEdit.setWhatsThis("rate")
+            self.enable_rate_input()
     
     @Slot(str)
     def offset_selected(self):
         """Method to show next option when offset option has been selected."""
-        self.offset = float(self.offsetLineEdit.text())
+        if self.commandComboBox.currentText() == "Feedback":
+            self.show_options()
+            return
         self.enable_repeat_input()
         self.show_options()
 
@@ -462,7 +472,7 @@ class CommandBuilder(QGroupBox):
             self.clearButton.setVisible(False)
             self.addButton.setVisible(False)
         self.preview_command()
-        self.set_units() 
+        self.set_units()
 
     @Slot()
     def enable_repeat_input(self):
@@ -488,6 +498,11 @@ class CommandBuilder(QGroupBox):
     @Slot()
     def enable_amplitude_input(self):
         """Method to enable amplitude input."""
+        if self.commandComboBox.currentText() == "Feedback":
+            self.offsetLabel.setVisible(True)
+            self.offsetLineEdit.setVisible(True)
+            self.set_units()
+            return
         self.amplitudeLabel.setVisible(True)
         self.amplitudeLineEdit.setVisible(True)
         self.preview_command()
@@ -503,7 +518,7 @@ class CommandBuilder(QGroupBox):
                 if isinstance(widget, QComboBox):
                     self.command[name] = str(widget.currentText())
                 if isinstance(widget, QLineEdit):
-                    if name == "name" or name == "amplitude":
+                    if name == "name" or name == "amplitude" or name == "offset":
                         self.command[name] = widget.text()
                     else:
                         self.command[name] = float(widget.text())

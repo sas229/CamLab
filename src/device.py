@@ -115,6 +115,7 @@ class Device(QObject):
         self.speed_function_x = 0
         self.speed_limit = 0
         self.initial_time = None
+        self.sequence_feedback_C1 = None
 
         # Disable clock 0 and load Lua failsafe script to turn off PWM.
         self.open_connection()
@@ -1488,9 +1489,18 @@ class Device(QObject):
             self.check_position_C2()
             # Check setpoint.
             if self.sequence_running == True:
-                self.check_setpoint_C1()
-                if self.speed_function_t or self.speed_function_x:
-                    self.update_speed_C1()
+                if self.sequence_feedback_C1:
+                    current_feedback = self.feedback_process_variable_C1
+                    log.warning(f"Current feedback is {current_feedback} and setpoint is {self.sequence_feedback_C1}")
+                    if current_feedback >= self.sequence_feedback_C1:
+                        log.info("Command finished.")
+                        self.jog_positive_off_C1()
+                        self.sequence_feedback_C1 = None
+                        self.command_completed.emit()
+                else:
+                    self.check_setpoint_C1()
+                    if self.speed_function_t or self.speed_function_x:
+                        self.update_speed_C1()
             # If feedback is available.
             if self.feedback_C1 == True:
 
