@@ -21,6 +21,7 @@ dependencies = [
     "sphinx",
     "python-dateutil",
     "pyserial",
+    "matplotlib",
 ]
 
 [project.optional-dependencies]
