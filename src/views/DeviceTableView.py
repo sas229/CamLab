@@ -1,12 +1,12 @@
-from PySide6.QtWidgets import QTableView, QHeaderView
+from PySide6.QtWidgets import QTableView, QHeaderView, QAbstractItemView
 from delegates import CheckBoxDelegate, ConnectionIconDelegate, StatusIconDelegate, StringDelegate, DeviceIconDelegate
 
 class DeviceTableView(QTableView):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setSelectionBehavior(self.SelectRows)
-        self.setSelectionMode(self.SingleSelection)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.setSelectionMode(QAbstractItemView.SingleSelection)
         self.setShowGrid(False)
         self.setAlternatingRowColors(True)
         

@@ -96,8 +96,14 @@ class WaitingIndicator(QWidget):
             color = self.currentLineColor(distance, self.mNumberOfLines,
                                           self.mTrailFadePercentage, self.mMinimumTrailOpacity, self.mColor)
             painter.setBrush(color)
-            painter.drawRoundedRect(QRect(0, -self.mLineWidth // 2, self.mLineLength, self.mLineLength),
-                                    self.mRoundness, Qt.RelativeSize)
+            # painter.drawRoundedRect(QRect(0, -self.mLineWidth // 2, self.mLineLength, self.mLineLength),
+            #                         self.mRoundness, Qt.RelativeSize)
+            painter.drawRoundedRect(
+                QRect(0, -self.mLineWidth // 2, self.mLineLength, self.mLineLength),
+                self.mLineWidth,  # x-radius
+                self.mLineWidth,  # y-radius
+                Qt.AbsoluteSize  # or the appropriate SizeMode if needed
+            )
             painter.restore()
 
     def start(self):

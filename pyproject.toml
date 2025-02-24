@@ -1,0 +1,36 @@
+[project]
+name = "CamLab"
+version = "0.1.0"
+description = ""
+readme = "README.md"  # Optional, adjust if you have a README file
+requires-python = ">=3.0"
+dependencies = [
+    "colorlog",
+    "ruamel.yaml",
+    "labjack-ljm",
+    "numpy",
+    "scipy",
+    "simple-pid",
+    "pillow",
+    "opencv-contrib-python",
+    "pyside6",
+    "jinja2",
+    "pyinstaller",
+    "pyparsing",
+    "pyqtgraph",
+    "sphinx",
+    "python-dateutil",
+    "pyserial",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Add development dependencies here if needed.
+]
+
+[build-system]
+requires = [
+    "setuptools>=61.0",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"

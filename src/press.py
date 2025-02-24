@@ -1324,19 +1324,22 @@ class Press(QObject):
                 self.current_data = self.slopes*(self.raw - self.offsets)
             else: 
                 self.current_data = np.empty(0)
-            # Check position.
-            self.get_position_C1()
-            self.get_position_C2()
-            self.check_position_C1()
-            self.check_position_C2()
+            # Check positions and update PID if control channel enabled
+            if self.enabled_C1:
+                print("Control channel C1 is enabled...!")
+                self.get_position_C1()
+                self.check_position_C1()
+                if self.status_PID_C1 and self.feedback_C1:
+                    self.update_PID_C1()
+            if self.enabled_C2:
+                print("Control channel C2 is enabled...!")
+                self.get_position_C2()
+                self.check_position_C2()
+                if self.status_PID_C2 and self.feedback_C2:
+                    self.update_PID_C2()
             # Check setpoint.
             if self.sequence_running == True:
                 self.check_setpoint_C1()
-            # If feedback is available.
-            if self.feedback_C1 == True:
-                self.update_PID_C1()
-            if self.feedback_C2 == True:
-                self.update_PID_C2()
             # Concatenate output data.
             self.send_data()
         except ljm.LJMError:

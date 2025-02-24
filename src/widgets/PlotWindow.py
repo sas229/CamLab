@@ -276,17 +276,17 @@ class PlotWindow(QWidget, QtStyleTools):
             self.maxCommonAxisLock = self.configuration["plots"][self.plotNumber]["maxCommonAxisRangeLock"]
             self.minSelectedAxisLock = self.configuration["plots"][self.plotNumber]["minSelectedAxisRangeLock"]
             self.maxSelectedAxisLock = self.configuration["plots"][self.plotNumber]["maxSelectedAxisRangeLock"]
-            if bool(self.lockCommonAxisCheckBox.checkState()) == False and bool(self.lockSelectedAxisCheckBox.checkState()) == False:
+            if bool(self.lockCommonAxisCheckBox.isChecked()) == False and bool(self.lockSelectedAxisCheckBox.isChecked()) == False:
                 self.maximumCommonAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["maxCommonAxisRange"]))
                 self.maximumSelectedAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["maxSelectedAxisRange"]))
                 self.minimumCommonAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["minCommonAxisRange"]))
                 self.minimumSelectedAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["minSelectedAxisRange"]))
-            elif bool(self.lockCommonAxisCheckBox.checkState()) == True and bool(self.lockSelectedAxisCheckBox.checkState()) == False:
+            elif bool(self.lockCommonAxisCheckBox.isChecked()) == True and bool(self.lockSelectedAxisCheckBox.isChecked()) == False:
                 self.maximumCommonAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["maxCommonAxisRangeLock"]))
                 self.maximumSelectedAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["maxSelectedAxisRangeLock"]))
                 self.minimumCommonAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["minCommonAxisRange"]))
                 self.minimumSelectedAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["minSelectedAxisRange"]))
-            elif bool(self.lockCommonAxisCheckBox.checkState()) == False and bool(self.lockSelectedAxisCheckBox.checkState()) == True:
+            elif bool(self.lockCommonAxisCheckBox.isChecked()) == False and bool(self.lockSelectedAxisCheckBox.isChecked()) == True:
                 self.maximumCommonAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["maxCommonAxisRange"]))
                 self.maximumSelectedAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["maxSelectedAxisRange"]))
                 self.minimumCommonAxisLineEdit.setText(str(self.configuration["plots"][self.plotNumber]["minCommonAxisRangeLock"]))
@@ -319,18 +319,18 @@ class PlotWindow(QWidget, QtStyleTools):
     def updateConfiguration(self):
         # Update the configuration based on current GUI settings.
         self.configuration["plots"][self.plotNumber]["alpha"] = int(self.alphaSlider.value())
-        self.configuration["plots"][self.plotNumber]["auto"] = bool(self.autoCheckBox.checkState())
-        self.configuration["plots"][self.plotNumber]["autoCommonAxis"] = bool(self.autoCommonAxisCheckBox.checkState())
-        self.configuration["plots"][self.plotNumber]["autoSelectedAxis"] = bool(self.autoSelectedAxisCheckBox.checkState())
-        self.configuration["plots"][self.plotNumber]["invertCommonAxis"] = bool(self.invertCommonAxisCheckBox.checkState())
-        self.configuration["plots"][self.plotNumber]["invertSelectedAxis"] = bool(self.invertSelectedAxisCheckBox.checkState())
-        self.configuration["plots"][self.plotNumber]["lock"] = bool(self.lockCheckBox.checkState())
-        self.configuration["plots"][self.plotNumber]["lockCommonAxis"] = bool(self.lockCommonAxisCheckBox.checkState())
-        self.configuration["plots"][self.plotNumber]["lockSelectedAxis"] = bool(self.lockSelectedAxisCheckBox.checkState())
-        self.configuration["plots"][self.plotNumber]["logCommonAxis"] = bool(self.logCommonAxisCheckBox.checkState())
-        self.configuration["plots"][self.plotNumber]["logSelectedAxis"] = bool(self.logSelectedAxisCheckBox.checkState())
-        self.configuration["plots"][self.plotNumber]["manualCommonAxis"] = bool(self.manualCommonAxisCheckBox.checkState())
-        self.configuration["plots"][self.plotNumber]["manualSelectedAxis"] = bool(self.manualSelectedAxisCheckBox.checkState())
+        self.configuration["plots"][self.plotNumber]["auto"] = bool(self.autoCheckBox.isChecked())
+        self.configuration["plots"][self.plotNumber]["autoCommonAxis"] = bool(self.autoCommonAxisCheckBox.isChecked())
+        self.configuration["plots"][self.plotNumber]["autoSelectedAxis"] = bool(self.autoSelectedAxisCheckBox.isChecked())
+        self.configuration["plots"][self.plotNumber]["invertCommonAxis"] = bool(self.invertCommonAxisCheckBox.isChecked())
+        self.configuration["plots"][self.plotNumber]["invertSelectedAxis"] = bool(self.invertSelectedAxisCheckBox.isChecked())
+        self.configuration["plots"][self.plotNumber]["lock"] = bool(self.lockCheckBox.isChecked())
+        self.configuration["plots"][self.plotNumber]["lockCommonAxis"] = bool(self.lockCommonAxisCheckBox.isChecked())
+        self.configuration["plots"][self.plotNumber]["lockSelectedAxis"] = bool(self.lockSelectedAxisCheckBox.isChecked())
+        self.configuration["plots"][self.plotNumber]["logCommonAxis"] = bool(self.logCommonAxisCheckBox.isChecked())
+        self.configuration["plots"][self.plotNumber]["logSelectedAxis"] = bool(self.logSelectedAxisCheckBox.isChecked())
+        self.configuration["plots"][self.plotNumber]["manualCommonAxis"] = bool(self.manualCommonAxisCheckBox.isChecked())
+        self.configuration["plots"][self.plotNumber]["manualSelectedAxis"] = bool(self.manualSelectedAxisCheckBox.isChecked())
         self.configuration["plots"][self.plotNumber]["maxCommonAxisRange"] = float(self.maximumCommonAxisLineEdit.text())
         self.configuration["plots"][self.plotNumber]["maxSelectedAxisRange"] = float(self.maximumSelectedAxisLineEdit.text())
         self.configuration["plots"][self.plotNumber]["minCommonAxisRange"] = float(self.minimumCommonAxisLineEdit.text())
@@ -340,8 +340,8 @@ class PlotWindow(QWidget, QtStyleTools):
         self.configuration["plots"][self.plotNumber]["minCommonAxisRangeLock"] = float(self.minCommonAxisLock)
         self.configuration["plots"][self.plotNumber]["minSelectedAxisRangeLock"] = float(self.minSelectedAxisLock)
         self.configuration["plots"][self.plotNumber]["opacity"] = int(self.opacitySlider.value())
-        self.configuration["plots"][self.plotNumber]["setGrid"] = bool(self.gridCheckBox.checkState())
-        self.configuration["plots"][self.plotNumber]["swap"] = bool(self.swapCheckBox.checkState())
+        self.configuration["plots"][self.plotNumber]["setGrid"] = bool(self.gridCheckBox.isChecked())
+        self.configuration["plots"][self.plotNumber]["swap"] = bool(self.swapCheckBox.isChecked())
         # log.info("Configuration updated.")
 
     @Slot()
@@ -350,7 +350,7 @@ class PlotWindow(QWidget, QtStyleTools):
         self.updatePlot()
 
     def setAxesLabels(self):
-        swap = bool(self.swapCheckBox.checkState())
+        swap = bool(self.swapCheckBox.isChecked())
         styles = self.setStyle()
         if swap == True:
             self.plot.setLabel('bottom', 'Selected channels', **styles)
@@ -362,7 +362,7 @@ class PlotWindow(QWidget, QtStyleTools):
     @Slot()
     def setLock(self):
         # Set lock boolean in GUI and configuration.
-        lock = bool(self.lockCheckBox.checkState())
+        lock = bool(self.lockCheckBox.isChecked())
         if lock == True:
             self.lockCommonAxisCheckBox.setChecked(True)
             self.lockSelectedAxisCheckBox.setChecked(True)
@@ -376,9 +376,9 @@ class PlotWindow(QWidget, QtStyleTools):
     @Slot()
     def setLockCommonAxis(self):
         # Set common axis lock boolean in GUI and configuration.
-        lockCommonAxis = bool(self.lockCommonAxisCheckBox.checkState())
-        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.checkState())
-        manualCommonAxis = bool(self.manualCommonAxisCheckBox.checkState())
+        lockCommonAxis = bool(self.lockCommonAxisCheckBox.isChecked())
+        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.isChecked())
+        manualCommonAxis = bool(self.manualCommonAxisCheckBox.isChecked())
         if lockCommonAxis == True:
             self.minCommonAxisLock = float(self.minimumCommonAxisLineEdit.text())
             self.maxCommonAxisLock = float(self.maximumCommonAxisLineEdit.text())
@@ -397,9 +397,9 @@ class PlotWindow(QWidget, QtStyleTools):
     @Slot()
     def setLockSelectedAxis(self):
         # Set selected axis lock boolean in GUI and configuration.
-        lockCommonAxis = bool(self.lockCommonAxisCheckBox.checkState())
-        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.checkState())
-        manualSelectedAxis = bool(self.manualSelectedAxisCheckBox.checkState())
+        lockCommonAxis = bool(self.lockCommonAxisCheckBox.isChecked())
+        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.isChecked())
+        manualSelectedAxis = bool(self.manualSelectedAxisCheckBox.isChecked())
         if lockSelectedAxis == True:
             self.minSelectedAxisLock = float(self.minimumSelectedAxisLineEdit.text())
             self.maxSelectedAxisLock = float(self.maximumSelectedAxisLineEdit.text())
@@ -420,9 +420,9 @@ class PlotWindow(QWidget, QtStyleTools):
         # When auto is True, enable the autoRange function on both axes, set 
         # autoCommonAxisCheckBox and autoSelectedAxisCheckBox to True and 
         # manualCommonAxisCheckBox and manualSelectedAxisCheckBox to False. 
-        auto = bool(self.autoCheckBox.checkState())
-        lockCommonAxis = bool(self.lockCommonAxisCheckBox.checkState())
-        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.checkState())
+        auto = bool(self.autoCheckBox.isChecked())
+        lockCommonAxis = bool(self.lockCommonAxisCheckBox.isChecked())
+        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.isChecked())
         if auto == True:
             self.plot.enableAutoRange()
             self.autoCommonAxisCheckBox.setChecked(True)
@@ -454,9 +454,9 @@ class PlotWindow(QWidget, QtStyleTools):
     def setAutoCommonAxisMode(self):
         # Check the boolean and if True set auto mode on common axis, 
         # otherwise if False set manual mode on common axis.
-        autoCommonAxis = bool(self.autoCommonAxisCheckBox.checkState())
-        autoSelectedAxis = bool(self.autoSelectedAxisCheckBox.checkState())
-        swap = bool(self.swapCheckBox.checkState())
+        autoCommonAxis = bool(self.autoCommonAxisCheckBox.isChecked())
+        autoSelectedAxis = bool(self.autoSelectedAxisCheckBox.isChecked())
+        swap = bool(self.swapCheckBox.isChecked())
         if autoCommonAxis == True:
             self.manualCommonAxisCheckBox.setChecked(False)
             if swap == True:
@@ -478,9 +478,9 @@ class PlotWindow(QWidget, QtStyleTools):
     def setAutoSelectedAxisMode(self):
         # Check the boolean and if True set auto mode on selected axis, 
         # otherwise if False set manual mode on common axis.
-        autoCommonAxis = bool(self.autoCommonAxisCheckBox.checkState())
-        autoSelectedAxis = bool(self.autoSelectedAxisCheckBox.checkState())
-        swap = bool(self.swapCheckBox.checkState())
+        autoCommonAxis = bool(self.autoCommonAxisCheckBox.isChecked())
+        autoSelectedAxis = bool(self.autoSelectedAxisCheckBox.isChecked())
+        swap = bool(self.swapCheckBox.isChecked())
         if autoSelectedAxis == True:
             self.manualSelectedAxisCheckBox.setChecked(False)
             if swap == True:
@@ -502,9 +502,9 @@ class PlotWindow(QWidget, QtStyleTools):
     def setManualCommonAxisMode(self):
         # Check the boolean and if True set manual mode on common axis, 
         # otherwise if False set auto mode on common axis.
-        manualCommonAxis = bool(self.manualCommonAxisCheckBox.checkState())
-        lockCommonAxis = bool(self.lockCommonAxisCheckBox.checkState())
-        swap = bool(self.swapCheckBox.checkState())
+        manualCommonAxis = bool(self.manualCommonAxisCheckBox.isChecked())
+        lockCommonAxis = bool(self.lockCommonAxisCheckBox.isChecked())
+        swap = bool(self.swapCheckBox.isChecked())
         if manualCommonAxis == True:
             if swap == True:        
                 self.plot.disableAutoRange(axis='y')
@@ -525,9 +525,9 @@ class PlotWindow(QWidget, QtStyleTools):
     def setManualSelectedAxisMode(self):
         # Check the boolean and if True set auto mode on selected axis, 
         # otherwise if False set auto mode on commoself.minCommonAxisLockn axis.
-        manualSelectedAxis = bool(self.manualSelectedAxisCheckBox.checkState())
-        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.checkState())
-        swap = bool(self.swapCheckBox.checkState())
+        manualSelectedAxis = bool(self.manualSelectedAxisCheckBox.isChecked())
+        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.isChecked())
+        swap = bool(self.swapCheckBox.isChecked())
         if manualSelectedAxis == True:
             if swap == True:
                 self.plot.disableAutoRange(axis='x')
@@ -548,7 +548,7 @@ class PlotWindow(QWidget, QtStyleTools):
     def updateCommonAxisRange(self):
         # Store current minCommon and maxCommon values.
         rangeCommonAxis = self.plot.getViewBox().state
-        swap = bool(self.swapCheckBox.checkState())
+        swap = bool(self.swapCheckBox.isChecked())
         if swap == True:
             self.minCommonAxis = float('%.2f' % rangeCommonAxis['viewRange'][1][0])
             self.maxCommonAxis = float('%.2f' % rangeCommonAxis['viewRange'][1][1])
@@ -557,7 +557,7 @@ class PlotWindow(QWidget, QtStyleTools):
             self.maxCommonAxis = float('%.2f' % rangeCommonAxis['viewRange'][0][1])
 
         # If lock is False update the lineedit text.
-        lockCommonAxis = bool(self.lockCommonAxisCheckBox.checkState())
+        lockCommonAxis = bool(self.lockCommonAxisCheckBox.isChecked())
         if lockCommonAxis == True:
             self.minimumCommonAxisLineEdit.setText(str(self.minCommonAxisLock))
             self.maximumCommonAxisLineEdit.setText(str(self.maxCommonAxisLock))
@@ -570,7 +570,7 @@ class PlotWindow(QWidget, QtStyleTools):
     def updateSelectedAxisRange(self):
         # Store current minSelected and maxSelected values.
         rangeSelectedAxis = self.plot.getViewBox().state
-        swap = bool(self.swapCheckBox.checkState())
+        swap = bool(self.swapCheckBox.isChecked())
         if swap == True:
             self.minSelectedAxis = float('%.2f' % rangeSelectedAxis['viewRange'][0][0])
             self.maxSelectedAxis = float('%.2f' % rangeSelectedAxis['viewRange'][0][1])
@@ -579,7 +579,7 @@ class PlotWindow(QWidget, QtStyleTools):
             self.maxSelectedAxis = float('%.2f' % rangeSelectedAxis['viewRange'][1][1])
 
         # If lock is False update the lineedit text.
-        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.checkState())
+        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.isChecked())
         if lockSelectedAxis == True:
             self.minimumSelectedAxisLineEdit.setText(str(self.minSelectedAxisLock))
             self.maximumSelectedAxisLineEdit.setText(str(self.maxSelectedAxisLock))
@@ -591,8 +591,8 @@ class PlotWindow(QWidget, QtStyleTools):
     @Slot()
     def setNewCommonAxisRange(self):
         # Set the new range for the common axis.
-        swap = bool(self.swapCheckBox.checkState())
-        lockCommonAxis = bool(self.lockCommonAxisCheckBox.checkState())
+        swap = bool(self.swapCheckBox.isChecked())
+        lockCommonAxis = bool(self.lockCommonAxisCheckBox.isChecked())
         self.minCommonAxis = float(self.minimumCommonAxisLineEdit.text())
         self.maxCommonAxis = float(self.maximumCommonAxisLineEdit.text())
         if swap == True and lockCommonAxis == True:
@@ -607,8 +607,8 @@ class PlotWindow(QWidget, QtStyleTools):
     @Slot()
     def setNewSelectedAxisRange(self):
         # Set the new range for the selected axis.
-        swap = bool(self.swapCheckBox.checkState())
-        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.checkState())
+        swap = bool(self.swapCheckBox.isChecked())
+        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.isChecked())
         self.minSelectedAxis = float(self.minimumSelectedAxisLineEdit.text())
         self.maxSelectedAxis = float(self.maximumSelectedAxisLineEdit.text())
         if swap == True and lockSelectedAxis == True:
@@ -623,8 +623,8 @@ class PlotWindow(QWidget, QtStyleTools):
     @Slot()
     def switchOffAuto(self):
         # Switch off auto mode on scroll wheel event.
-        lockCommonAxis = bool(self.lockCommonAxisCheckBox.checkState())
-        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.checkState())
+        lockCommonAxis = bool(self.lockCommonAxisCheckBox.isChecked())
+        lockSelectedAxis = bool(self.lockSelectedAxisCheckBox.isChecked())
         self.autoCheckBox.setChecked(False)
         self.autoCommonAxisCheckBox.setChecked(False)
         self.autoSelectedAxisCheckBox.setChecked(False)
@@ -681,16 +681,16 @@ class PlotWindow(QWidget, QtStyleTools):
     def updatePlot(self):
         # Update plot.
         alphaValue = int(self.alphaSlider.value())
-        manualCommonAxis = bool(self.manualCommonAxisCheckBox.checkState())
-        manualSelectedAxis = bool(self.manualSelectedAxisCheckBox.checkState())
-        lockCommon = bool(self.lockCommonAxisCheckBox.checkState())
-        lockSelected = bool(self.lockSelectedAxisCheckBox.checkState())
-        swap = bool(self.swapCheckBox.checkState())
-        logCommonAxis = bool(self.logCommonAxisCheckBox.checkState())
-        logSelectedAxis = bool(self.logSelectedAxisCheckBox.checkState())
+        manualCommonAxis = bool(self.manualCommonAxisCheckBox.isChecked())
+        manualSelectedAxis = bool(self.manualSelectedAxisCheckBox.isChecked())
+        lockCommon = bool(self.lockCommonAxisCheckBox.isChecked())
+        lockSelected = bool(self.lockSelectedAxisCheckBox.isChecked())
+        swap = bool(self.swapCheckBox.isChecked())
+        logCommonAxis = bool(self.logCommonAxisCheckBox.isChecked())
+        logSelectedAxis = bool(self.logSelectedAxisCheckBox.isChecked())
         
         # Do this if statement for the first time the plot is run.
-        if bool(self.autoCheckBox.checkState()) == True:
+        if bool(self.autoCheckBox.isChecked()) == True:
             self.setAutoMode()
         self.plot.clear()
         self.createLines()
@@ -739,8 +739,8 @@ class PlotWindow(QWidget, QtStyleTools):
 
     def setLogCommonAxis(self):
         # Set log scale on common axis.
-        swap = bool(self.swapCheckBox.checkState())
-        logCommonAxis = bool(self.logCommonAxisCheckBox.checkState())
+        swap = bool(self.swapCheckBox.isChecked())
+        logCommonAxis = bool(self.logCommonAxisCheckBox.isChecked())
         if swap == True:
             self.plot.setLogMode(x=None, y=logCommonAxis)
         else:
@@ -749,8 +749,8 @@ class PlotWindow(QWidget, QtStyleTools):
 
     def setLogSelectedAxis(self):
         # Set log scale on selected axis.
-        swap = bool(self.swapCheckBox.checkState())
-        logSelectedAxis = bool(self.logSelectedAxisCheckBox.checkState())
+        swap = bool(self.swapCheckBox.isChecked())
+        logSelectedAxis = bool(self.logSelectedAxisCheckBox.isChecked())
         if swap == True:
             self.plot.setLogMode(x=logSelectedAxis, y=None)
         else:
@@ -759,8 +759,8 @@ class PlotWindow(QWidget, QtStyleTools):
 
     def setInvertCommonAxis(self):
         # Set invert on common axis.
-        swap = bool(self.swapCheckBox.checkState())
-        invertCommonAxis = bool(self.invertCommonAxisCheckBox.checkState())
+        swap = bool(self.swapCheckBox.isChecked())
+        invertCommonAxis = bool(self.invertCommonAxisCheckBox.isChecked())
         if swap == True:
             self.plot.getPlotItem().invertY(invertCommonAxis)
         else:
@@ -770,8 +770,8 @@ class PlotWindow(QWidget, QtStyleTools):
 
     def setInvertSelectedAxis(self):
         # Set invert on selected axis.
-        swap = bool(self.swapCheckBox.checkState())
-        invertSelectedAxis = bool(self.invertSelectedAxisCheckBox.checkState())
+        swap = bool(self.swapCheckBox.isChecked())
+        invertSelectedAxis = bool(self.invertSelectedAxisCheckBox.isChecked())
         if swap == True:
             self.plot.getPlotItem().invertX(invertSelectedAxis)
         else:
@@ -780,8 +780,9 @@ class PlotWindow(QWidget, QtStyleTools):
 
     def setGrid(self):
         # Set grid.
-        grid = self.gridCheckBox.checkState()
-        self.plot.showGrid(x = grid, y = grid, alpha = self.opacity/100)
+        grid = self.gridCheckBox.isChecked()
+        grid_bool = bool(grid)  # or explicitly check against Qt.Checked, e.g., grid == Qt.Checked
+        self.plot.showGrid(x=grid_bool, y=grid_bool, alpha=self.opacity/100)
         self.updateConfiguration()
 
     def update_UI(self, newConfiguration):
@@ -837,7 +838,7 @@ class PlotWindow(QWidget, QtStyleTools):
 
     def setOpacity(self):
         self.opacity = int(self.opacitySlider.value())
-        if bool(self.gridCheckBox.checkState()) == True:
+        if bool(self.gridCheckBox.isChecked()) == True:
             self.setGrid()
         self.updateConfiguration()
 

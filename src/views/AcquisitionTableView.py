@@ -1,11 +1,11 @@
-from PySide6.QtWidgets import QTableView, QHeaderView
+from PySide6.QtWidgets import QTableView, QHeaderView, QAbstractItemView
 from delegates import CheckBoxDelegate, FloatValidatorDelegate, StringDelegate
 
 class AcquisitionTableView(QTableView):
 
     def __init__(self, data=[], parent=None):
         super().__init__(parent)
-        self.setSelectionMode(self.SingleSelection)
+        self.setSelectionMode(QAbstractItemView.SingleSelection)
         self.setShowGrid(False)
         self.setAlternatingRowColors(True)
         
