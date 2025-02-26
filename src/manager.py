@@ -5,7 +5,7 @@ from assembly import Assembly
 from timing import Timing
 from camera import Camera
 from press import Press
-import ruamel.yaml
+from ruamel.yaml import YAML
 from labjack import ljm
 import os, sys, re, serial, time, copy, logging
 from datetime import datetime
@@ -783,7 +783,8 @@ class Manager(QObject):
                 try:
                     log.info("Loading configuration from " + loadConfigurationPath + " and saving location to QSettings.")
                     with open(loadConfigurationPath, "r") as file:
-                        self.configuration = ruamel.yaml.load(file, Loader=ruamel.yaml.Loader)
+                        yaml = YAML()
+                        self.configuration = yaml.load(file)
                         log.info("Configuration file parsed.")
                         self.configurationPath = loadConfigurationPath
                         self.configurationChanged.emit(self.configuration)
