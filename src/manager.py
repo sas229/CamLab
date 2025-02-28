@@ -821,9 +821,9 @@ class Manager(QObject):
                         channel['value'] = 0.00
 
             # Save the yaml file and its path to QSettings.
-            ruamel.yaml.representer.RoundTripRepresenter.ignore_aliases = lambda x, y: True
+            yaml = YAML()              
+            yaml.representer.ignore_aliases = lambda x, y: True
             with open(saveConfigurationPath, "w") as file:
-                yaml = ruamel.yaml.YAML()
                 yaml.dump(configuration, file)
             self.settings.setValue("configurationPath", saveConfigurationPath)
             log.info("Saved configuration saved at " + saveConfigurationPath)
@@ -845,6 +845,7 @@ class Manager(QObject):
         self.acquisitionTables = {}
         self.controlTableModels = {}
         self.feedbackChannelLists = {}
+        self.devices = {}
 
         # Initialise the basic default configuration.
         currentDarkMode = copy.deepcopy(self.configuration["global"]["darkMode"])
