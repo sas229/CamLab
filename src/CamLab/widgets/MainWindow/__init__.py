@@ -2,20 +2,20 @@ import os, sys
 from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QGridLayout, QDialog
 from PySide6.QtGui import QScreen
 from PySide6.QtCore import Signal, Slot, QThread, QTimer
-from local_qt_material import QtStyleTools
-from widgets.MainWindow._TabUtilities import TabUtilities
-from widgets.MainWindow._PlotUtilities import PlotUtilities
-from widgets.MainWindow._ControlUtilities import ControlUtilities
-from widgets.MainWindow._ConfigurationUtilities import ConfigurationUtilities
-from widgets.MainWindow._CameraUtilities import CameraUtilities
-from manager import Manager
-from widgets.ToolBar import ToolBar
-from widgets.TabInterface import TabInterface
-from widgets.ConfigurationTab import ConfigurationTab
-from widgets.SequenceTab import SequenceTab
-from widgets.StatusTab import StatusTab
-from widgets.StatusGroupBox import StatusGroupBox
-from dialogs import BusyDialog
+from ...local_qt_material import QtStyleTools
+from ._TabUtilities import TabUtilities
+from ._PlotUtilities import PlotUtilities
+from ._ControlUtilities import ControlUtilities
+from ._ConfigurationUtilities import ConfigurationUtilities
+from ._CameraUtilities import CameraUtilities
+from .manager import Manager
+from ..widgets.ToolBar import ToolBar
+from ..widgets.TabInterface import TabInterface
+from ..widgets.ConfigurationTab import ConfigurationTab
+from ..widgets.SequenceTab import SequenceTab
+from ..widgets.StatusTab import StatusTab
+from ..widgets.StatusGroupBox import StatusGroupBox
+from .dialogs import BusyDialog
 import logging
 from time import sleep
 from pathlib import Path
@@ -91,8 +91,8 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         self.statusTab = StatusTab()
 
         self.tabs.add_persistent_tab(self.configurationTab, "Configuration")
-        # self.tabs.add_persistent_tab(self.sequenceTab, "Sequence")
-        # self.tabs.add_persistent_tab(self.statusTab, "Status")
+        self.tabs.add_persistent_tab(self.sequenceTab, "Sequence")
+        self.tabs.add_persistent_tab(self.statusTab, "Status")
 
         # Set the central widget of the main window.
         self.centralWidget = QWidget()

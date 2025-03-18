@@ -5,7 +5,7 @@ from assembly import Assembly
 from timing import Timing
 from camera import Camera
 from press import Press
-import ruamel.yaml
+from ruamel.yaml import YAML
 from labjack import ljm
 import os, sys, re, serial, time, copy, logging
 from datetime import datetime
@@ -783,7 +783,8 @@ class Manager(QObject):
                 try:
                     log.info("Loading configuration from " + loadConfigurationPath + " and saving location to QSettings.")
                     with open(loadConfigurationPath, "r") as file:
-                        self.configuration = ruamel.yaml.load(file, Loader=ruamel.yaml.Loader)
+                        yaml=YAML()
+                        self.configuration=yaml.load(file)
                         log.info("Configuration file parsed.")
                         self.configurationPath = loadConfigurationPath
                         self.configurationChanged.emit(self.configuration)
@@ -820,9 +821,9 @@ class Manager(QObject):
                         channel['value'] = 0.00
 
             # Save the yaml file and its path to QSettings.
-            ruamel.yaml.representer.RoundTripRepresenter.ignore_aliases = lambda x, y: True
+            yaml = YAML()
+            yaml.representer.ignore_aliases = lambda *args: True
             with open(saveConfigurationPath, "w") as file:
-                yaml = ruamel.yaml.YAML()
                 yaml.dump(configuration, file)
             self.settings.setValue("configurationPath", saveConfigurationPath)
             log.info("Saved configuration saved at " + saveConfigurationPath)
@@ -838,6 +839,7 @@ class Manager(QObject):
         # Next clear the device list and configuration tabs.
         self.deviceTableModel.clearData()
         self.clear_device_configuration_tabs.emit()
+        self.devices = {}
         
         # Clear all underlying models and tables. 
         self.acquisitionTableModels = {}

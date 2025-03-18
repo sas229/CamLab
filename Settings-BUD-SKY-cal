@@ -1,0 +1,287 @@
+global:
+  darkMode: true
+  controlRate: 0.5
+  skipSamples: 1
+  averageSamples: 1
+  path: /home/nrfis
+  filename: Calibration-water-tank
+mainWindow:
+  x: 0
+  y: 0
+devices:
+  SKY:
+    id: 470019453
+    model: LabJack T7
+    type: Hub
+    connection: 1
+    address: N/A
+    acquisition:
+    - channel: AIN0
+      name: P4
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: true
+      autozero: false
+    - channel: AIN1
+      name: P3
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: true
+      autozero: false
+    - channel: AIN2
+      name: P2
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: true
+      autozero: false
+    - channel: AIN3
+      name: Pw
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: true
+      autozero: false
+    - channel: AIN4
+      name: P1
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: true
+      autozero: false
+    - channel: AIN5
+      name: Ch_6
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: false
+      autozero: false
+    - channel: AIN6
+      name: Ch_7
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: false
+      autozero: false
+    - channel: AIN7
+      name: Ch_8
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: false
+      autozero: false
+    control:
+    - channel: C1
+      name: SKY C1
+      enable: false
+      type: N/A
+      control: N/A
+      feedback: N/A
+      settings:
+        mode: tab
+        x: 0
+        y: 0
+        width: 1200
+        height: 300
+        primaryMinimum: -100.0
+        primaryMaximum: 100.0
+        primaryLeftLimit: -80.0
+        primaryRightLimit: 80.0
+        primarySetPoint: 0.0
+        primaryProcessVariable: 0.0
+        primaryUnit: mm
+        secondarySetPoint: 3.0
+        secondaryUnit: mm/s
+        feedbackMinimum: -20.0
+        feedbackMaximum: 100.0
+        feedbackLeftLimit: -10.0
+        feedbackRightLimit: 90.0
+        feedbackSetPoint: 0.0
+        feedbackProcessVariable: 0.0
+        feedbackUnit: N
+        feedbackIndex: 0
+        KP: 0.0
+        KI: 0.0
+        KD: 0.0
+        proportionalOnMeasurement: false
+        maxRPM: 4000
+        CPR: 6400
+        PPR: 32
+        ratio: 5
+    - channel: C2
+      name: SKY C2
+      enable: false
+      type: N/A
+      control: N/A
+      feedback: N/A
+      settings:
+        mode: tab
+        x: 0
+        y: 0
+        width: 1200
+        height: 300
+        primaryMinimum: -100.0
+        primaryMaximum: 100.0
+        primaryLeftLimit: -80.0
+        primaryRightLimit: 80.0
+        primarySetPoint: 0.0
+        primaryProcessVariable: 0.0
+        primaryUnit: mm
+        secondarySetPoint: 3.0
+        secondaryUnit: mm/s
+        feedbackMinimum: -20.0
+        feedbackMaximum: 100.0
+        feedbackLeftLimit: -10.0
+        feedbackRightLimit: 90.0
+        feedbackSetPoint: 0.0
+        feedbackProcessVariable: 0.0
+        feedbackUnit: N
+        feedbackIndex: 0
+        KP: 0.0
+        KI: 0.0
+        KD: 0.0
+        proportionalOnMeasurement: false
+        maxRPM: 4000
+        CPR: 6400
+        PPR: 32
+        ratio: 5
+  BUD:
+    id: 470019433
+    model: LabJack T7
+    type: Hub
+    connection: 1
+    address: N/A
+    acquisition:
+    - channel: AIN0
+      name: Ch_1
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: false
+      autozero: false
+    - channel: AIN1
+      name: Ch_2
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: false
+      autozero: false
+    - channel: AIN2
+      name: Ch_3
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: false
+      autozero: false
+    - channel: AIN3
+      name: P9
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: true
+      autozero: false
+    - channel: AIN4
+      name: P8
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: true
+      autozero: false
+    - channel: AIN5
+      name: P7
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: true
+      autozero: false
+    - channel: AIN6
+      name: P6
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: true
+      autozero: false
+    - channel: AIN7
+      name: P5
+      unit: V
+      slope: 1.0
+      offset: 0.0
+      connect: true
+      autozero: false
+    control:
+    - channel: C1
+      name: BUD C1
+      enable: false
+      type: N/A
+      control: N/A
+      feedback: N/A
+      settings:
+        mode: tab
+        x: 0
+        y: 0
+        width: 1200
+        height: 300
+        primaryMinimum: -100.0
+        primaryMaximum: 100.0
+        primaryLeftLimit: -80.0
+        primaryRightLimit: 80.0
+        primarySetPoint: 0.0
+        primaryProcessVariable: 0.0
+        primaryUnit: mm
+        secondarySetPoint: 3.0
+        secondaryUnit: mm/s
+        feedbackMinimum: -20.0
+        feedbackMaximum: 100.0
+        feedbackLeftLimit: -10.0
+        feedbackRightLimit: 90.0
+        feedbackSetPoint: 0.0
+        feedbackProcessVariable: 0.0
+        feedbackUnit: N
+        feedbackIndex: 0
+        KP: 0.0
+        KI: 0.0
+        KD: 0.0
+        proportionalOnMeasurement: false
+        maxRPM: 4000
+        CPR: 6400
+        PPR: 32
+        ratio: 5
+    - channel: C2
+      name: BUD C2
+      enable: false
+      type: N/A
+      control: N/A
+      feedback: N/A
+      settings:
+        mode: tab
+        x: 0
+        y: 0
+        width: 1200
+        height: 300
+        primaryMinimum: -100.0
+        primaryMaximum: 100.0
+        primaryLeftLimit: -80.0
+        primaryRightLimit: 80.0
+        primarySetPoint: 0.0
+        primaryProcessVariable: 0.0
+        primaryUnit: mm
+        secondarySetPoint: 3.0
+        secondaryUnit: mm/s
+        feedbackMinimum: -20.0
+        feedbackMaximum: 100.0
+        feedbackLeftLimit: -10.0
+        feedbackRightLimit: 90.0
+        feedbackSetPoint: 0.0
+        feedbackProcessVariable: 0.0
+        feedbackUnit: N
+        feedbackIndex: 0
+        KP: 0.0
+        KI: 0.0
+        KD: 0.0
+        proportionalOnMeasurement: false
+        maxRPM: 4000
+        CPR: 6400
+        PPR: 32
+        ratio: 5

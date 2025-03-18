@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=CamLab
+Comment=University of Cambridge Laboratory Acquisition Software
+Exec=/home/nrfis/.pyenv/versions/3.11.6/bin/python /home/nrfis/CamLab/src/main.py
+Icon=/home/nrfis/CamLab/src/assets/NRFIS.png
+Terminal=false
+Categories=Utility;

@@ -34,6 +34,7 @@ class Device(QObject):
         self.id = id 
         self.connection = connection
         self.handle = None
+        self.addresses = []
 
         # Variables
         self.data = np.zeros(2)
