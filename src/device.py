@@ -598,6 +598,8 @@ class Device(QObject):
     @Slot()
     def stop_command_C1(self):
         """Stop command for control channel C1."""
+        if not self.enabled_C1:  # Only process if channel is enabled
+            return
         try:
             self.handle = ljm.open(7, self.connection, self.id)
             self.turn_off_PWM_C1()
@@ -616,6 +618,8 @@ class Device(QObject):
     @Slot()
     def stop_command_C2(self):
         """Stop command for control channel C2."""
+        if not self.enabled_C2:  # Only process if channel is enabled
+            return
         try:
             self.handle = ljm.open(7, self.connection, self.id)
             self.turn_off_PWM_C2()
@@ -1325,38 +1329,44 @@ class Device(QObject):
             # Read from the device and apply slope and offsets.
             self.handle = ljm.open(7, self.connection, self.id)
             ljm.eWriteName(self.handle, "USER_RAM0_U16", 1) 
+            
+            # Only check limits if any channel is enabled
             if self.enabled_C1 or self.enabled_C2:
                 self.check_limits()
+                
+            # Read analog inputs if configured
             if len(self.addresses) > 0:
                 self.raw = np.asarray(ljm.eReadAddresses(self.handle, self.numFrames, self.addresses, self.dataTypes))
                 self.current_data = self.slopes*(self.raw - self.offsets)
             else: 
                 self.current_data = np.empty(0)
-            # Check positions and update PID if control channel enabled
+
+            # Only process enabled channels
             if self.enabled_C1:
-                print("Control channel C1 is enabled...!")
                 self.get_position_C1()
                 self.check_position_C1()
                 if self.status_PID_C1 and self.feedback_C1:
                     self.update_PID_C1()
             if self.enabled_C2:
-                print("Control channel C2 is enabled...!")
                 self.get_position_C2()
                 self.check_position_C2()
                 if self.status_PID_C2 and self.feedback_C2:
                     self.update_PID_C2()
-            # Check setpoint.
-            if self.sequence_running == True:
+
+            # Check sequence only if running
+            if self.sequence_running:
                 self.check_setpoint_C1()
-            # Concatenate output data.
+
+            # Send data
             self.send_data()
+
         except ljm.LJMError:
             ljme = sys.exc_info()[1]
             log.warning(ljme) 
         except Exception:
             e = sys.exc_info()[1]
             log.warning(e)
-
+            
     @Slot()
     def recalculate_offsets(self):
         """Method to autozero channels as required by the configuration."""
