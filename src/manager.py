@@ -89,7 +89,7 @@ class Manager(QObject):
             {"channel": "C2", "name": "C2", "enable": False, "type": "N/A", "control": "N/A", "feedback": "N/A", "settings": copy.deepcopy(self.defaultControlSettings)}
         ]
         self.controlModeList = ["N/A", "Digital"]
-        self.controlActuatorList = ["N/A", "Linear"]
+        self.controlActuatorList = ["N/A", "Linear", "Speed"]
         self.defaultFeedbackChannelList = ["N/A"]
         self.defaultCameraSettings = {
             "acquisitionMode": "Maximum",

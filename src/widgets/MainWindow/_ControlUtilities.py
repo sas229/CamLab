@@ -20,12 +20,13 @@ class ControlUtilities:
         # Instantiate the appropriate widget.
         if control == "N/A" or controlType == "N/A":
             controlWidget = QWidget()
-        elif control == "Linear" and controlType == "Digital":
+        elif (control == "Linear" or control == "Speed") and controlType == "Digital":
             if controlFeedback != "N/A": 
                 feedback = True
             else:
                 feedback = False
             controlWidget = LinearAxis(controlID, feedback)
+            controlWidget.controlType = control  # Store control type for reference
 
             # Connections. 
             controlWidget.axisWindowClosed.connect(self.window_to_tab)
