@@ -82,7 +82,11 @@ class Manager(QObject):
             "maxRPM": 4000,
             "CPR": 6400,
             "PPR": 32,
-            "ratio": 5
+            "ratio": 5,
+            "radius": 10.0,
+            "maxRPM": 3000,
+            "speedUnit": "RPM",
+            "secondarySetPoint": 0.0,
         }
         self.defaultControlTable = [
             {"channel": "C1", "name": "C1", "enable": False, "type": "N/A", "control": "N/A", "feedback": "N/A", "settings": copy.deepcopy(self.defaultControlSettings)},

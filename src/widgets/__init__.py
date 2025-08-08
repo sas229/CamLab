@@ -27,3 +27,4 @@ from .SequenceToolBar import SequenceToolBar
 from .CameraSettings import CameraSettings
 from .CameraTab import CameraTab
 from .PressSettings import PressSettings
+from .JogGroupBoxSpeed import JogGroupBox as JogGroupBoxSpeed
