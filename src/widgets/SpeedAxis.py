@@ -123,10 +123,8 @@ class SpeedAxis(QWidget):
 
         # Update jog connections to use RPM signals
         self.jog.speedLineEdit.returnPressed.connect(self.emitSecondarySetPointChanged)
-        self.jog.jogPlusButton.pressed.connect(self.emitPositiveJogRPMEnabled)
-        self.jog.jogPlusButton.released.connect(self.emitPositiveJogRPMDisabled)
-        self.jog.jogMinusButton.pressed.connect(self.emitNegativeJogRPMEnabled)
-        self.jog.jogMinusButton.released.connect(self.emitNegativeJogRPMDisabled)
+        self.jog.jogPlusButton.toggled.connect(self.handlePositiveJogRPM)
+        self.jog.jogMinusButton.toggled.connect(self.handleNegativeJogRPM)
 
         self.globalControls.enableButton.toggled.connect(self.emitEnable)
         self.globalControls.stopButton.pressed.connect(self.emitStopCommand)
@@ -293,11 +291,21 @@ class SpeedAxis(QWidget):
 
     @Slot()
     def emitSecondarySetPointChanged(self):
-        """Handle speed input in RPM and convert to mm/s for backend"""
+        """Handle speed input in RPM"""
         rpm_value = float(self.jog.speedLineEdit.text())
-        linear_speed = self.rpm_to_linear(rpm_value)
-        self.secondarySetPointChanged.emit(linear_speed)
-        self.controlConfiguration["settings"]["secondarySetPoint"] = round(linear_speed, 3)
+        
+        # Check if either jog button is active
+        if self.jog.jogPlusButton.isChecked():
+            # Update positive jog with new RPM value
+            self.positiveJogRPMEnabled.emit(rpm_value)
+        elif self.jog.jogMinusButton.isChecked():
+            # Update negative jog with new RPM value
+            self.negativeJogRPMEnabled.emit(-rpm_value)
+        else:
+            # No jog active, convert to mm/s for normal speed control
+            linear_speed = self.rpm_to_linear(rpm_value)
+            self.secondarySetPointChanged.emit(linear_speed)
+            self.controlConfiguration["settings"]["secondarySetPoint"] = round(linear_speed, 3)
 
     @Slot()
     def emitPositiveJogEnabled(self):
@@ -600,3 +608,21 @@ class SpeedAxis(QWidget):
     def emitNegativeJogRPMDisabled(self):
         """Stop negative RPM jogging"""
         self.negativeJogRPMDisabled.emit()
+
+    def handlePositiveJogRPM(self, checked):
+        """Handle positive direction jog button toggle"""
+        if checked:
+            rpm_speed = float(self.jog.speedLineEdit.text())
+            self.positiveJogRPMEnabled.emit(rpm_speed)
+        else:
+            self.positiveJogRPMDisabled.emit()
+        self.globalControls.PIDControlButton.setChecked(False)
+
+    def handleNegativeJogRPM(self, checked):
+        """Handle negative direction jog button toggle"""
+        if checked:
+            rpm_speed = float(self.jog.speedLineEdit.text())
+            self.negativeJogRPMEnabled.emit(-rpm_speed)
+        else:
+            self.negativeJogRPMDisabled.emit()
+        self.globalControls.PIDControlButton.setChecked(False)

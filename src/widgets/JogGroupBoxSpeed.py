@@ -42,8 +42,11 @@ class JogGroupBox(QGroupBox):
         self.speedLineEdit = QLineEdit()
         self.speedLineEdit.setValidator(self.doubleValidator)
         self.jogDirectionLabel = QLabel("Direction")
+        # Make buttons checkable for continuous rotation
         self.jogPlusButton = QPushButton("+")
         self.jogMinusButton = QPushButton("-")
+        self.jogPlusButton.setCheckable(True)
+        self.jogMinusButton.setCheckable(True)
 
     def create_layouts(self):
         """Set up the widget layouts"""
@@ -68,11 +71,9 @@ class JogGroupBox(QGroupBox):
     def create_connections(self):
         """Set up signal connections"""
         self.speedLineEdit.returnPressed.connect(self.setSpeed)
-        # Add jog button connections
-        self.jogPlusButton.pressed.connect(self.emitPositiveJogRPM)
-        self.jogPlusButton.released.connect(self.emitPositiveJogRPMDisabled)
-        self.jogMinusButton.pressed.connect(self.emitNegativeJogRPM)
-        self.jogMinusButton.released.connect(self.emitNegativeJogRPMDisabled)
+        # Use toggled instead of clicked for checkable buttons
+        self.jogPlusButton.toggled.connect(self.handlePositiveJog)
+        self.jogMinusButton.toggled.connect(self.handleNegativeJog)
 
     def emitPositiveJogRPM(self):
         """Emit current speed in RPM for positive jogging"""
@@ -139,3 +140,27 @@ class JogGroupBox(QGroupBox):
         self.unit = "RPM"
         self.speedLabel.setText(f"Speed ({self.unit})")
         self.speedUnitChanged.emit()
+
+    def handlePositiveJog(self, checked):
+        """Handle positive direction jog button toggle"""
+        if checked:
+            # Button is pressed down - start continuous rotation
+            self.jogMinusButton.setEnabled(False)  # Disable other button
+            rpm_speed = self.getSpeed()
+            self.positiveJogRPMEnabled.emit(rpm_speed)
+        else:
+            # Button is released - stop rotation
+            self.jogMinusButton.setEnabled(True)  # Enable other button
+            self.positiveJogRPMDisabled.emit()
+
+    def handleNegativeJog(self, checked):
+        """Handle negative direction jog button toggle"""
+        if checked:
+            # Button is pressed down - start continuous rotation
+            self.jogPlusButton.setEnabled(False)  # Disable other button  
+            rpm_speed = -self.getSpeed()
+            self.negativeJogRPMEnabled.emit(rpm_speed)
+        else:
+            # Button is released - stop rotation
+            self.jogPlusButton.setEnabled(True)  # Enable other button
+            self.negativeJogRPMDisabled.emit()
