@@ -87,10 +87,10 @@ class SpeedAxis(QWidget):
         self.gridLayout.addWidget(self.settings, 0, 0, 1, 4)
         self.gridLayout.addWidget(self.jog, 1, 0)
         self.gridLayout.addWidget(self.adjust, 1, 1)
-        self.gridLayout.addWidget(self.positionDemand, 1, 2)
+        # Hidden: self.gridLayout.addWidget(self.positionDemand, 1, 2)
         # Hidden: self.gridLayout.addWidget(self.positionStatus, 1, 3)
         self.gridLayout.addWidget(self.PID, 2, 0, 1, 2)
-        self.gridLayout.addWidget(self.feedbackDemand, 2, 2)
+        # Hidden: self.gridLayout.addWidget(self.feedbackDemand, 2, 2)
         self.gridLayout.addWidget(self.feedbackStatus, 2, 3)        
         
         # Main layout.
@@ -101,6 +101,10 @@ class SpeedAxis(QWidget):
 
         # Hide position status widget so it is not shown in Speed tab
         self.positionStatus.hide()
+
+        # Hide Demand widget so it is not shown in Speed tab 
+        self.positionDemand.hide()
+        self.feedbackDemand.hide()
 
         # Connections.
         self.positionDemand.setPointLineEdit.returnPressed.connect(self.emitPrimarySetPointChanged)
