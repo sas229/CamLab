@@ -76,7 +76,7 @@ class SpeedAxis(QWidget):
         self.jog = JogGroupBox("Jog Speed")
         self.adjust = AdjustGroupBox("Adjust")
         self.positionDemand = DemandGroupBox("Demand")
-        self.positionStatus = SliderGroupBox("Position Status")
+        self.positionStatus = SliderGroupBox("Position Status")  # Kept for internal logic, hidden for Speed mode
         self.PID = PIDGroupBox("PID Feedback Control")
         self.feedbackDemand = DemandGroupBox("Demand")
         self.feedbackStatus = SliderGroupBox("Feedback Status")
@@ -88,7 +88,7 @@ class SpeedAxis(QWidget):
         self.gridLayout.addWidget(self.jog, 1, 0)
         self.gridLayout.addWidget(self.adjust, 1, 1)
         self.gridLayout.addWidget(self.positionDemand, 1, 2)
-        self.gridLayout.addWidget(self.positionStatus, 1, 3)
+        # Hidden: self.gridLayout.addWidget(self.positionStatus, 1, 3)
         self.gridLayout.addWidget(self.PID, 2, 0, 1, 2)
         self.gridLayout.addWidget(self.feedbackDemand, 2, 2)
         self.gridLayout.addWidget(self.feedbackStatus, 2, 3)        
@@ -98,6 +98,9 @@ class SpeedAxis(QWidget):
         self.layout.addLayout(self.gridLayout)
         self.layout.addStretch()  
         self.setLayout(self.layout)
+
+        # Hide position status widget so it is not shown in Speed tab
+        self.positionStatus.hide()
 
         # Connections.
         self.positionDemand.setPointLineEdit.returnPressed.connect(self.emitPrimarySetPointChanged)
