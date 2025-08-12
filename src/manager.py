@@ -79,12 +79,11 @@ class Manager(QObject):
             "KI": 0.00,
             "KD": 0.00,
             "proportionalOnMeasurement": False,
-            "maxRPM": 4000,
+            "maxRPM": 3000,
             "CPR": 6400,
             "PPR": 32,
             "ratio": 5,
             "radius": 10.0,
-            "maxRPM": 3000,
             "speedUnit": "RPM",
             "secondarySetPoint": 0.0,
         }

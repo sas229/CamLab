@@ -125,6 +125,7 @@ class SpeedAxis(QWidget):
         self.jog.speedLineEdit.returnPressed.connect(self.emitSecondarySetPointChanged)
         self.jog.jogPlusButton.toggled.connect(self.handlePositiveJogRPM)
         self.jog.jogMinusButton.toggled.connect(self.handleNegativeJogRPM)
+        self.jog.speedDialChanged.connect(self.handleSpeedChange)
 
         self.globalControls.enableButton.toggled.connect(self.emitEnable)
         self.globalControls.stopButton.pressed.connect(self.emitStopCommand)
@@ -248,7 +249,10 @@ class SpeedAxis(QWidget):
     def updateMaxRPM(self):
         value = int(self.settings.maxRPMLineEdit.text())
         self.controlConfiguration["settings"]["maxRPM"] = value
-        log.info("Maximum RPM updated for control channel {channel} on {device} to {value}.".format(channel=self.channel, device=self.device, value=value))
+        # Update the jog dial maximum
+        self.jog.setMaxRPM(value)
+        log.info("Maximum RPM updated for control channel {channel} on {device} to {value}.".format(
+            channel=self.channel, device=self.device, value=value))
 
     @Slot()
     def updateCPR(self):
@@ -626,3 +630,10 @@ class SpeedAxis(QWidget):
         else:
             self.negativeJogRPMDisabled.emit()
         self.globalControls.PIDControlButton.setChecked(False)
+
+    def handleSpeedChange(self, rpm_value):
+        """Handle real-time speed changes from dial"""
+        if self.jog.jogPlusButton.isChecked():
+            self.positiveJogRPMEnabled.emit(rpm_value)
+        elif self.jog.jogMinusButton.isChecked():
+            self.negativeJogRPMEnabled.emit(-rpm_value)
