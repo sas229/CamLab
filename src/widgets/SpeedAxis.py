@@ -51,7 +51,7 @@ class SpeedAxis(QWidget):
 
     def __init__(self, ID, feedback=False, *args, **kwargs):
         super().__init__(*args, **kwargs)              
-        log.info("Linear axis instantiated.")
+        log.info("Speed instantiated.")
 
         # Add radius parameter (in mm)
         self.radius = 10.0  # Default radius in mm
@@ -59,7 +59,7 @@ class SpeedAxis(QWidget):
 
         # Inputs.
         self.ID = ID
-        self.controlType = "Linear"
+        self.controlType = "Speed"
         self.feedback = feedback
         self.device = self.ID[0:3]
         self.channel = self.ID[-2:]
@@ -568,6 +568,33 @@ class SpeedAxis(QWidget):
         self.settings.setSpeedUnit(self.controlConfiguration["settings"]["secondaryUnit"])
         self.settings.setFeedbackUnit(self.controlConfiguration["settings"]["feedbackUnit"])
         self.toggleFeedbackControl(self.feedback)
+        self.enableUnlimitedPositionRange()  # Add unlimited position range for Speed tab only
+
+    def enableUnlimitedPositionRange(self):
+        """
+        Expand position limits so the speed-controlled motor effectively has no travel limits.
+        This does NOT touch LinearAxis; only SpeedAxis invokes this.
+        """
+        if getattr(self, "_unlimited_range_applied", False):
+            return
+        huge = 1e12
+        self._unlimited_range_applied = True
+
+        # Update configuration store
+        self.controlConfiguration["settings"]["primaryMinimum"] = -huge
+        self.controlConfiguration["settings"]["primaryMaximum"] = huge
+        self.controlConfiguration["settings"]["primaryLeftLimit"] = -huge
+        self.controlConfiguration["settings"]["primaryRightLimit"] = huge
+
+        # Apply to UI components (order matters: set ranges before limits)
+        self.positionStatus.setMinimumRange(-huge)
+        self.positionStatus.setMaximumRange(huge)
+        self.positionStatus.setLeftLimit(-huge)
+        self.positionStatus.setRightLimit(huge)
+
+        # If current setpoint was clamped earlier, restore it unchanged (now always within range)
+        current_sp = self.positionStatus.get_setpoint()
+        self.positionStatus.set_setpoint(current_sp)
 
     def linear_to_rpm(self, speed_mm_s):
         """Convert linear speed (mm/s) to RPM"""
