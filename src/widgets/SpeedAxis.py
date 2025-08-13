@@ -10,6 +10,7 @@ from widgets.SliderGroupBox import SliderGroupBox
 import logging
 import math
 from widgets.JogGroupBoxSpeed import JogGroupBox
+from widgets.RunTimerGroupBox import RunTimerGroupBox
 
 log = logging.getLogger(__name__)
 
@@ -80,6 +81,7 @@ class SpeedAxis(QWidget):
         self.PID = PIDGroupBox("PID Feedback Control")
         self.feedbackDemand = DemandGroupBox("Demand")  # Kept for internal logic, hidden for Speed mode
         self.feedbackStatus = SliderGroupBox("Feedback Status")
+        self.runTimer = RunTimerGroupBox("Run Timer")
 
         # Grid layout.
         self.gridLayout = QGridLayout()
@@ -91,7 +93,8 @@ class SpeedAxis(QWidget):
         # Hidden: self.gridLayout.addWidget(self.positionStatus, 1, 3)
         self.gridLayout.addWidget(self.PID, 2, 0, 1, 2)
         # Hidden: self.gridLayout.addWidget(self.feedbackDemand, 2, 2)
-        self.gridLayout.addWidget(self.feedbackStatus, 2, 3)        
+        self.gridLayout.addWidget(self.feedbackStatus, 2, 3)    
+        self.gridLayout.addWidget(self.runTimer, 1, 1)    
         
         # Main layout.
         self.layout = QVBoxLayout()
@@ -116,6 +119,9 @@ class SpeedAxis(QWidget):
         self.positionStatus.rightLimitChanged.connect(self.emitPrimaryRightLimitChanged)
         self.positionStatus.minimumRangeChanged.connect(self.emitPrimaryMinimumRangeChanged)
         self.positionStatus.maximumRangeChanged.connect(self.emitPrimaryMaximumRangeChanged)
+        self.runTimer.durationChanged.connect(self.setRunDuration)
+        self.runTimer.countdownFinished.connect(self._onCountdownFinished)
+        self.runTimer.countdownCanceled.connect(self._onCountdownCanceled)
 
         self.feedbackDemand.setPointLineEdit.returnPressed.connect(self.emitFeedbackSetPointChanged)
         self.feedbackStatus.setPointChanged.connect(self.updateFeedbackSetPointLineEdit)
@@ -651,21 +657,29 @@ class SpeedAxis(QWidget):
         self.negativeJogRPMDisabled.emit()
 
     def handlePositiveJogRPM(self, checked):
-        """Handle positive direction jog button toggle"""
+        """Handle positive direction jog button toggle."""
         if checked:
             rpm_speed = float(self.jog.speedLineEdit.text())
             self.positiveJogRPMEnabled.emit(rpm_speed)
+            # Start countdown only if finite duration armed
+            if self.runTimer.get_duration_seconds() > 0:
+                self.runTimer.start_countdown()
         else:
             self.positiveJogRPMDisabled.emit()
+            # Stop countdown (not 'finished')
+            self.runTimer.stop_countdown(finished=False)
         self.globalControls.PIDControlButton.setChecked(False)
 
     def handleNegativeJogRPM(self, checked):
-        """Handle negative direction jog button toggle"""
+        """Handle negative direction jog button toggle."""
         if checked:
             rpm_speed = float(self.jog.speedLineEdit.text())
             self.negativeJogRPMEnabled.emit(-rpm_speed)
+            if self.runTimer.get_duration_seconds() > 0:
+                self.runTimer.start_countdown()
         else:
             self.negativeJogRPMDisabled.emit()
+            self.runTimer.stop_countdown(finished=False)
         self.globalControls.PIDControlButton.setChecked(False)
 
     def handleSpeedChange(self, rpm_value):
@@ -674,3 +688,30 @@ class SpeedAxis(QWidget):
             self.positiveJogRPMEnabled.emit(rpm_value)
         elif self.jog.jogMinusButton.isChecked():
             self.negativeJogRPMEnabled.emit(-rpm_value)
+
+    @Slot(int)
+    def setRunDuration(self, seconds):
+        """
+        Store selected duration (seconds). 0 => indefinite.
+        If a jog is active when a finite duration is (re)entered, restart countdown.
+        """
+        # Store only if other code still references it; otherwise you can omit this attribute.
+        self._run_duration_seconds = seconds
+        if seconds > 0 and (self.jog.jogPlusButton.isChecked() or self.jog.jogMinusButton.isChecked()):
+            # Restart countdown
+            self.runTimer.start_countdown()
+        else:
+            # Stop (shows armed value or 'Indefinite')
+            self.runTimer.stop_countdown(finished=False)
+
+    def _onCountdownFinished(self):
+        """Triggered when the run timer reaches zero."""
+        # Uncheck jog buttons to invoke existing stop logic
+        if self.jog.jogPlusButton.isChecked():
+            self.jog.jogPlusButton.setChecked(False)
+        if self.jog.jogMinusButton.isChecked():
+            self.jog.jogMinusButton.setChecked(False)
+
+    def _onCountdownCanceled(self):
+        """User canceled countdown. Do NOT force stop; just leave jog state."""
+        pass
