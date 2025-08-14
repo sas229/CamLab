@@ -139,6 +139,7 @@ class RunTimerGroupBox(QGroupBox):
     def cancel_countdown(self):
         active = self._timer.isActive()
         self.stop_countdown(finished=False)
+        self.clear_inputs()  # Clear all input fields and reset internal state to defaults
         if active:
             self.countdownCanceled.emit()
 
@@ -158,3 +159,16 @@ class RunTimerGroupBox(QGroupBox):
         if h > 0:
             return f"{h:02d}:{m:02d}:{s:02d}"
         return f"{m:02d}:{s:02d}"
+    
+    @Slot()
+    def clear_inputs(self):
+        """Clear HH:MM:SS inputs and reset to default 'Indefinite' state."""
+        self.hoursLineEdit.clear()
+        self.minutesLineEdit.clear()
+        self.secondsLineEdit.clear()
+        self._set_duration = 0
+        self._remaining = 0
+        self.countdownLabel.setText("Indefinite")
+        self.cancelButton.setEnabled(False)
+        # Notify listeners that duration is now zero (indefinite)
+        self.durationChanged.emit(0)
