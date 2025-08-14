@@ -1,5 +1,5 @@
-from PySide6.QtWidgets import QGroupBox, QLabel, QLineEdit, QGridLayout, QPushButton, QHBoxLayout, QVBoxLayout
-from PySide6.QtCore import Signal, Slot, QTimer
+from PySide6.QtWidgets import QGroupBox, QLabel, QLineEdit, QGridLayout, QPushButton, QHBoxLayout, QVBoxLayout, QSizePolicy
+from PySide6.QtCore import Signal, Slot, QTimer, Qt
 from PySide6.QtGui import QIntValidator
 
 class RunTimerGroupBox(QGroupBox):
@@ -31,17 +31,17 @@ class RunTimerGroupBox(QGroupBox):
 
         # Inputs
         self.hoursLineEdit = QLineEdit()
-        self.hoursLineEdit.setPlaceholderText("HH")
+        self.hoursLineEdit.setPlaceholderText("- -")
         self.hoursLineEdit.setValidator(QIntValidator(0, 999))
         self.hoursLineEdit.setMaxLength(3)
 
         self.minutesLineEdit = QLineEdit()
-        self.minutesLineEdit.setPlaceholderText("MM")
+        self.minutesLineEdit.setPlaceholderText("- -")
         self.minutesLineEdit.setValidator(QIntValidator(0, 999))
         self.minutesLineEdit.setMaxLength(3)
 
         self.secondsLineEdit = QLineEdit()
-        self.secondsLineEdit.setPlaceholderText("SS")
+        self.secondsLineEdit.setPlaceholderText("- -")
         self.secondsLineEdit.setValidator(QIntValidator(0, 999))
         self.secondsLineEdit.setMaxLength(3)
 
@@ -54,24 +54,42 @@ class RunTimerGroupBox(QGroupBox):
         self.cancelButton.clicked.connect(self.cancel_countdown)
         self.cancelButton.setEnabled(False)
 
-        # Layout
+        # Top grid layout
         topGrid = QGridLayout()
-        topGrid.addWidget(QLabel("Hours"), 0, 0)
-        topGrid.addWidget(QLabel("Minutes"), 0, 1)
-        topGrid.addWidget(QLabel("Seconds"), 0, 2)
-        topGrid.addWidget(self.hoursLineEdit, 1, 0)
-        topGrid.addWidget(self.minutesLineEdit, 1, 1)
-        topGrid.addWidget(self.secondsLineEdit, 1, 2)
+        topGrid.setContentsMargins(12, 12, 12, 0)
+        topGrid.setHorizontalSpacing(32)
+        topGrid.setVerticalSpacing(4)
 
+        # Labels (row 0)
+        topGrid.addWidget(QLabel("Hours"),   0, 0, alignment=Qt.AlignHCenter)
+        topGrid.addWidget(QLabel("Minutes"), 0, 1, alignment=Qt.AlignHCenter)
+        topGrid.addWidget(QLabel("Seconds"), 0, 2, alignment=Qt.AlignHCenter)
+
+        # Inputs (row 1)
+        topGrid.addWidget(self.hoursLineEdit,   1, 0, alignment=Qt.AlignHCenter)
+        topGrid.addWidget(self.minutesLineEdit, 1, 1, alignment=Qt.AlignHCenter)
+        topGrid.addWidget(self.secondsLineEdit, 1, 2, alignment=Qt.AlignHCenter)
+
+        for le in (self.hoursLineEdit, self.minutesLineEdit, self.secondsLineEdit):
+            le.setFixedWidth(100)
+            le.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+
+        # Bottom of the widget
         bottomRow = QHBoxLayout()
         bottomRow.addWidget(QLabel("Remaining:"))
         bottomRow.addWidget(self.countdownLabel, 1)
         bottomRow.addWidget(self.cancelButton)
 
+        # Main Layout
         outer = QVBoxLayout()
+        outer.addStretch(1)        # flexible space at the top
         outer.addLayout(topGrid)
+        outer.addStretch(1)        # flexible space between topGrid and bottomRow
         outer.addLayout(bottomRow)
         self.setLayout(outer)
+
+        # Size controls
+        self.setFixedSize(450, 320)
 
         # Enter key arms duration
         self.hoursLineEdit.returnPressed.connect(self._arm_from_fields)

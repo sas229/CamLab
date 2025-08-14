@@ -95,7 +95,7 @@ class JogGroupBox(QGroupBox):
     def set_geometry(self):
         """Set widget geometry"""
         self.setFixedHeight(320)
-        self.setFixedWidth(150)
+        self.setFixedWidth(170)
 
     def create_connections(self):
         """Set up signal connections"""

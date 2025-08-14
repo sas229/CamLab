@@ -85,6 +85,9 @@ class SpeedRampGroupBox(QGroupBox):
 
         self.setLayout(layout)
 
+        # Size controls
+        self.setFixedSize(330, 320)
+
     # Public API -------------------------------------------------------------
 
     def set_current_speed(self, speed: float):
