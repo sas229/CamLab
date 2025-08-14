@@ -1,8 +1,6 @@
 def get_color_for_rpm(rpm):
     """Get color based on RPM value with finer gradients every 50 RPM"""
     if rpm >= 1200:
-        return "#FF0000"    # Pure Red
-    elif rpm >= 1150:
         return "#FF1A1A"    # Bright Red
     elif rpm >= 1100:
         return "#FF3333"    # Light Red

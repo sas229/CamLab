@@ -11,6 +11,7 @@ import logging
 import math
 from widgets.JogGroupBoxSpeed import JogGroupBox
 from widgets.RunTimerGroupBox import RunTimerGroupBox
+from widgets.SpeedRampGroupBox import SpeedRampGroupBox
 
 log = logging.getLogger(__name__)
 
@@ -82,6 +83,19 @@ class SpeedAxis(QWidget):
         self.feedbackDemand = DemandGroupBox("Demand")  # Kept for internal logic, hidden for Speed mode
         self.feedbackStatus = SliderGroupBox("Feedback Status")
         self.runTimer = RunTimerGroupBox("Run Timer")
+        self.speedRamp = SpeedRampGroupBox("Speed Ramp Control")
+
+        # Keep ramp's internal "current speed" in sync with Jog speed
+        try:
+            self.speedRamp.set_current_speed(self.jog.getSpeed())
+        except Exception:
+            # Fallback if jog not fully initialized yet
+            self.speedRamp.set_current_speed(0.0)
+        # Initialize ramp max RPM from Settings (if available now)
+        try:
+            self.speedRamp.set_max_rpm(float(self.settings.maxRPMLineEdit.text()))
+        except Exception:
+            pass
 
         # Grid layout.
         self.gridLayout = QGridLayout()
@@ -94,7 +108,8 @@ class SpeedAxis(QWidget):
         self.gridLayout.addWidget(self.PID, 2, 0, 1, 2)
         # Hidden: self.gridLayout.addWidget(self.feedbackDemand, 2, 2)
         self.gridLayout.addWidget(self.feedbackStatus, 2, 3)    
-        self.gridLayout.addWidget(self.runTimer, 1, 1)    
+        self.gridLayout.addWidget(self.speedRamp, 1, 1)
+        self.gridLayout.addWidget(self.runTimer, 1, 2)    
         
         # Main layout.
         self.layout = QVBoxLayout()
@@ -122,6 +137,8 @@ class SpeedAxis(QWidget):
         self.runTimer.durationChanged.connect(self.setRunDuration)
         self.runTimer.countdownFinished.connect(self._onCountdownFinished)
         self.runTimer.countdownCanceled.connect(self._onCountdownCanceled)
+        self.speedRamp.speedStep.connect(self._applyRampSpeed)
+        self.speedRamp.rampFinished.connect(self._onRampFinished)
 
         self.feedbackDemand.setPointLineEdit.returnPressed.connect(self.emitFeedbackSetPointChanged)
         self.feedbackStatus.setPointChanged.connect(self.updateFeedbackSetPointLineEdit)
@@ -158,6 +175,15 @@ class SpeedAxis(QWidget):
         self.settings.positionUnitChanged.connect(self.updatePrimaryUnit)
         self.settings.speedUnitChanged.connect(self.updateSecondaryUnit)
         self.settings.feedbackUnitChanged.connect(self.updateFeedbackUnit)
+
+    # Sync ramp "current speed" whenever Jog speed changes
+        if hasattr(self.jog, "speedRPMChanged"):
+            self.jog.speedRPMChanged.connect(self.speedRamp.set_current_speed)
+        if hasattr(self.jog, "speedDialChanged"):
+            self.jog.speedDialChanged.connect(self.speedRamp.set_current_speed)
+
+        # When user toggles Start, re-read Jog speed so ramp always starts from it
+        self.speedRamp.toggleButton.toggled.connect(self._syncRampStartSpeed)
 
     @Slot(bool)
     def toggleFeedbackControl(self, feedback):
@@ -267,8 +293,9 @@ class SpeedAxis(QWidget):
         self.controlConfiguration["settings"]["maxRPM"] = value
         # Update the jog dial maximum
         self.jog.setMaxRPM(value)
-        log.info("Maximum RPM updated for control channel {channel} on {device} to {value}.".format(
-            channel=self.channel, device=self.device, value=value))
+        # Enforce same cap on ramp
+        self.speedRamp.set_max_rpm(value)
+        log.info("Maximum RPM updated for control channel {channel} on {device} to {value}.".format(channel=self.channel, device=self.device, value=value))
 
     @Slot()
     def updateCPR(self):
@@ -585,6 +612,7 @@ class SpeedAxis(QWidget):
         self.settings.setFeedbackUnit(self.controlConfiguration["settings"]["feedbackUnit"])
         self.toggleFeedbackControl(self.feedback)
         self.enableUnlimitedPositionRange()  # Add unlimited position range for Speed tab only
+        self.speedRamp.set_max_rpm(self.controlConfiguration["settings"]["maxRPM"])  # Apply cap to ramp from configuration
 
     def enableUnlimitedPositionRange(self):
         """
@@ -684,6 +712,8 @@ class SpeedAxis(QWidget):
 
     def handleSpeedChange(self, rpm_value):
         """Handle real-time speed changes from dial"""
+        # Keep ramp's start reference aligned with Jog speed at all times
+        self.speedRamp.set_current_speed(float(rpm_value))
         if self.jog.jogPlusButton.isChecked():
             self.positiveJogRPMEnabled.emit(rpm_value)
         elif self.jog.jogMinusButton.isChecked():
@@ -715,3 +745,34 @@ class SpeedAxis(QWidget):
     def _onCountdownCanceled(self):
         """User canceled countdown. Do NOT force stop; just leave jog state."""
         pass
+
+    def _applyRampSpeed(self, new_speed: float):
+        """
+        Keep the jog dial/line edit in sync with ramp-driven motor speed and
+        reuse the same pipeline as typing + pressing Enter in the jog input.
+        """
+        # Update jog widget via its public API so the dial and line edit sync together
+        try:
+            self.jog.blockSignals(True)  # avoid feedback loops while updating UI
+            self.jog.setSpeed(float(new_speed))  # updates dial + line edit
+        finally:
+            self.jog.blockSignals(False)
+
+        # Keep ramp reference aligned with latest actual speed
+        self.speedRamp.set_current_speed(float(new_speed))
+
+        # Simulate pressing Enter in the jog speed input to trigger the same logic
+        # that already updates the dial/motor when the user types a value.
+        self.jog.speedLineEdit.returnPressed.emit()
+
+    def _onRampFinished(self):
+        pass
+
+    def _syncRampStartSpeed(self, checked: bool):
+        """When the Ramp Start button is toggled on, snapshot the current Jog speed."""
+        if checked:
+            try:
+                self.speedRamp.set_current_speed(float(self.jog.speedLineEdit.text()))
+            except ValueError:
+                # If field is empty/invalid, keep previous value
+                pass
