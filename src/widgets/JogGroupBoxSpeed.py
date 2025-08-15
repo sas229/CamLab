@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QGroupBox, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout
+from PySide6.QtWidgets import QGroupBox, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QSizePolicy, QGridLayout
 from PySide6.QtGui import QDoubleValidator
 from PySide6.QtCore import Signal
 import math
@@ -73,6 +73,8 @@ class JogGroupBox(QGroupBox):
         """Set up the widget layouts"""
         # Button layout
         self.jogButtonsLayout = QHBoxLayout()
+        self.jogMinusButton.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.jogPlusButton.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.jogButtonsLayout.addWidget(self.jogMinusButton)
         self.jogButtonsLayout.addWidget(self.jogPlusButton)
 
@@ -83,18 +85,34 @@ class JogGroupBox(QGroupBox):
         self.dialContainer.setSpacing(10)  # Add some space between dial and value
 
         # Main layout
-        self.mainLayout = QVBoxLayout()
-        self.mainLayout.addWidget(self.speedLabel)
-        self.mainLayout.addWidget(self.speedLineEdit)
-        self.mainLayout.addWidget(self.jogDirectionLabel)
-        self.mainLayout.addLayout(self.jogButtonsLayout)
-        self.mainLayout.addLayout(self.dialContainer)
-        self.mainLayout.setAlignment(Qt.AlignTop)
-        self.setLayout(self.mainLayout)
+        self.speedLineEdit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+        speedSection = QVBoxLayout()
+        speedSection.setSpacing(4)
+        speedSection.addWidget(self.speedLabel, alignment=Qt.AlignLeft)
+        speedSection.addSpacing(8) 
+        speedSection.addWidget(self.speedLineEdit)
+
+        directionSection = QVBoxLayout()
+        directionSection.setSpacing(4)
+        directionSection.addWidget(self.jogDirectionLabel, alignment=Qt.AlignLeft)
+        directionSection.addSpacing(8) 
+        directionSection.addLayout(self.jogButtonsLayout)
+
+        mainCol = QVBoxLayout()
+        mainCol.setContentsMargins(8, 28, 8, 8)
+        mainCol.setSpacing(12)
+        mainCol.insertSpacing(0, 8)
+        mainCol.addLayout(speedSection)
+        mainCol.addSpacing(12)
+        mainCol.addLayout(directionSection)
+        mainCol.addStretch(1)
+
+        self.setLayout(mainCol)
 
     def set_geometry(self):
         """Set widget geometry"""
-        self.setFixedHeight(320)
+        self.setFixedHeight(280)
         self.setFixedWidth(170)
 
     def create_connections(self):
@@ -103,10 +121,6 @@ class JogGroupBox(QGroupBox):
         # Use toggled instead of clicked for checkable buttons
         self.jogPlusButton.toggled.connect(self.handlePositiveJog)
         self.jogMinusButton.toggled.connect(self.handleNegativeJog)
-
-        # Connect dial
-        self.speedDial.valueChanged.connect(self.handleDialChange)
-        self.speedLineEdit.returnPressed.connect(self.updateDialFromInput)
 
     def emitPositiveJogRPM(self):
         """Emit current speed in RPM for positive jogging"""

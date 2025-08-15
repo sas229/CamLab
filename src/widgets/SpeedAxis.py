@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QGroupBox, QLabel, QLineEdit, QCheckBox, QGridLayout, QVBoxLayout, QLayout
-from PySide6.QtCore import Signal, Slot
+from PySide6.QtCore import Signal, Slot, Qt
 from widgets.GlobalControlsGroupBox import GlobalControlsGroupBox
 from widgets.SettingsGroupBox import SettingsGroupBox
 from widgets.JogGroupBox import JogGroupBox
@@ -12,6 +12,7 @@ import math
 from widgets.JogGroupBoxSpeed import JogGroupBox
 from widgets.RunTimerGroupBox import RunTimerGroupBox
 from widgets.SpeedRampGroupBox import SpeedRampGroupBox
+from .SpeedDialGroupBox import SpeedDialGroupBox
 
 log = logging.getLogger(__name__)
 
@@ -84,6 +85,22 @@ class SpeedAxis(QWidget):
         self.feedbackStatus = SliderGroupBox("Feedback Status")
         self.runTimer = RunTimerGroupBox("Run Timer")
         self.speedRamp = SpeedRampGroupBox("Speed Ramp Control")
+        self.speedDial = SpeedDialGroupBox("Speed Dial")
+
+        # Hand the external dial/label to Jog so all existing dial logic is reused
+        self.jog.speedDial = self.speedDial.dial
+        self.jog.dialValueLabel = self.speedDial.valueLabel
+
+        # Initialize dial limits/value from Settings and Jog
+        try:
+            max_rpm = int(float(self.settings.maxRPMLineEdit.text()))
+            self.speedDial.dial.setMaximum(max_rpm)
+        except Exception:
+            pass
+        try:
+            self.speedDial.dial.setValue(int(round(self.jog.getSpeed())))
+        except Exception:
+            self.speedDial.dial.setValue(0)
 
         # Keep ramp's internal "current speed" in sync with Jog speed
         try:
@@ -99,18 +116,26 @@ class SpeedAxis(QWidget):
 
         # Grid layout.
         self.gridLayout = QGridLayout()
-        self.gridLayout.addWidget(self.globalControls, 0, 0, 1, 4)
-        self.gridLayout.addWidget(self.settings, 0, 0, 1, 4)
+        self.gridLayout.addWidget(self.globalControls, 0, 0, 1, 5)
+        self.gridLayout.addWidget(self.settings, 0, 0, 1, 5)
         self.gridLayout.addWidget(self.jog, 1, 0)
         # Hidden: self.gridLayout.addWidget(self.adjust, 1, 1)
         # Hidden: self.gridLayout.addWidget(self.positionDemand, 1, 2)
         # Hidden: self.gridLayout.addWidget(self.positionStatus, 1, 3)
         self.gridLayout.addWidget(self.PID, 2, 0, 1, 2)
         # Hidden: self.gridLayout.addWidget(self.feedbackDemand, 2, 2)
-        self.gridLayout.addWidget(self.feedbackStatus, 2, 3)    
-        self.gridLayout.addWidget(self.speedRamp, 1, 1)
-        self.gridLayout.addWidget(self.runTimer, 1, 2)    
-        
+        self.gridLayout.addWidget(self.feedbackStatus, 2, 3)  
+        self.gridLayout.addWidget(self.speedDial, 1, 1)  
+        self.gridLayout.addWidget(self.speedRamp, 1, 2)
+        self.gridLayout.addWidget(self.runTimer, 1, 3)    
+
+        # Make column 4 an expanding spacer so columns 0..3 stay flush-left
+        self.gridLayout.setColumnStretch(0, 0)
+        self.gridLayout.setColumnStretch(1, 0)
+        self.gridLayout.setColumnStretch(2, 0)
+        self.gridLayout.setColumnStretch(3, 0)
+        self.gridLayout.setColumnStretch(4, 1)
+       
         # Main layout.
         self.layout = QVBoxLayout()
         self.layout.addLayout(self.gridLayout)
@@ -139,6 +164,8 @@ class SpeedAxis(QWidget):
         self.runTimer.countdownCanceled.connect(self._onCountdownCanceled)
         self.speedRamp.speedStep.connect(self._applyRampSpeed)
         self.speedRamp.rampFinished.connect(self._onRampFinished)
+        self.jog.speedLineEdit.returnPressed.connect(lambda: self.speedDial.dial.setValue(int(round(self.jog.getSpeed()))))
+        self.speedDial.dial.valueChanged.connect(self.jog.handleDialChange)
 
         self.feedbackDemand.setPointLineEdit.returnPressed.connect(self.emitFeedbackSetPointChanged)
         self.feedbackStatus.setPointChanged.connect(self.updateFeedbackSetPointLineEdit)
@@ -291,9 +318,10 @@ class SpeedAxis(QWidget):
     def updateMaxRPM(self):
         value = int(self.settings.maxRPMLineEdit.text())
         self.controlConfiguration["settings"]["maxRPM"] = value
-        # Update the jog dial maximum
+        # Update external dial directly (Jog keeps full behavior)
+        self.speedDial.dial.setMaximum(value)
+        # Keep Jog/Ramp limits consistent
         self.jog.setMaxRPM(value)
-        # Enforce same cap on ramp
         self.speedRamp.set_max_rpm(value)
         log.info("Maximum RPM updated for control channel {channel} on {device} to {value}.".format(channel=self.channel, device=self.device, value=value))
 

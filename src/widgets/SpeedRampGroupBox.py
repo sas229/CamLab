@@ -86,7 +86,7 @@ class SpeedRampGroupBox(QGroupBox):
         self.setLayout(layout)
 
         # Size controls
-        self.setFixedSize(330, 320)
+        self.setFixedSize(330, 280)
 
     # Public API -------------------------------------------------------------
 

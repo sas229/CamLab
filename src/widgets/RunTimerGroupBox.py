@@ -59,6 +59,7 @@ class RunTimerGroupBox(QGroupBox):
         topGrid.setContentsMargins(12, 12, 12, 0)
         topGrid.setHorizontalSpacing(32)
         topGrid.setVerticalSpacing(4)
+        topGrid.setRowMinimumHeight(1, 45)  # add space (px) between titles (row 0) and inputs (row 1)
 
         # Labels (row 0)
         topGrid.addWidget(QLabel("Hours"),   0, 0, alignment=Qt.AlignHCenter)
@@ -89,7 +90,7 @@ class RunTimerGroupBox(QGroupBox):
         self.setLayout(outer)
 
         # Size controls
-        self.setFixedSize(450, 320)
+        self.setFixedSize(450, 280)
 
         # Enter key arms duration
         self.hoursLineEdit.returnPressed.connect(self._arm_from_fields)
