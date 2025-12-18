@@ -8,7 +8,7 @@ dependencies = [
     "colorlog",
     "ruamel.yaml",
     "labjack-ljm",
-    "numpy",
+    "numpy==1.26.4",
     "scipy",
     "simple-pid",
     "pillow",
