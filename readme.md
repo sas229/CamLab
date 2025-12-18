@@ -4,7 +4,11 @@ To install using pip:
 - Run the following commands:
 
 cd CamLab
+
 py -3.11 -m venv venv
+
 venv\Scripts\activate
+
 pip install .
+
 python src/main.py
