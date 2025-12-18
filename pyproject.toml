@@ -13,7 +13,7 @@ dependencies = [
     "simple-pid",
     "pillow",
     "opencv-contrib-python",
-    "pyside6",
+    "pyside6==6.4.2",
     "jinja2",
     "pyinstaller",
     "pyparsing",
