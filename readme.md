@@ -1,7 +1,10 @@
-To build with PyInstaller from Linux:
+To install using pip:
 
-pipenv run pyinstaller --onefile --clean --noconsole  --add-data "src:." src/main.py
+- Install Python 3.11.4
+- Run the following commands:
 
-From Windows:
-
-pipenv run pyinstaller --onefile --clean --noconsole --add-data "src;." src/main.py
+cd CamLab
+py -3.11 -m venv venv
+venv\Scripts\activate
+pip install .
+python src/main.py
