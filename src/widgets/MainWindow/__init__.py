@@ -90,8 +90,8 @@ class MainWindow(TabUtilities, PlotUtilities, ControlUtilities, ConfigurationUti
         # Status tab.
         self.statusTab = StatusTab()
 
-        self.tabs.add_persistent_tab(self.configurationTab, "Configuration")
-        self.tabs.add_persistent_tab(self.sequenceTab, "Sequence")
+        #self.tabs.add_persistent_tab(self.configurationTab, "Configuration")
+        #self.tabs.add_persistent_tab(self.sequenceTab, "Sequence")
         self.tabs.add_persistent_tab(self.statusTab, "Status")
 
         # Set the central widget of the main window.
