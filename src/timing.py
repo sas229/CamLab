@@ -26,7 +26,7 @@ class Timing(QObject):
         while self.running:
             self.cycles += 1
             self.controlDevices.emit()
-            if self.cycles%rate == 0:
+            if self.cycles%rate == 0 and self.cycles > 0:
                 endTime = time()
                 elapsed = endTime - startTime
                 actualRate = self.rate/elapsed
