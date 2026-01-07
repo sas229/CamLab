@@ -805,130 +805,106 @@ class Press(QObject):
     @Slot(str)
     def jog_positive_on_C1(self):
         """Turn positive jog on for control channel C1."""
-        self.handle = ljm.open(7, self.connection, self.id)
-        if self.running == True and self.maximumLimitC1 == False and self.motor_enabled_C1 == True:
+        # if self.running == True and self.maximumLimitC1 == False and self.motor_enabled_C1 == True:
+        if self.running == True and self.motor_enabled_C1 == True:
+        # Check status of press
             if self.position_process_variable_C1 <= self.position_right_limit_C1:
                 # Set direction.
                 self.direction_C1 = 1
                 self.jog_C1 = True
-                self.set_direction_C1(self.direction_C1)
-                # Reset counters.
-                self.count_C1 = 0
-                self.previous_count_C1 = 0
-                self.pulses_C1 = 0
-                self.previous_pulses_C1 = 0
-                self.reset_pulse_counter_C1()
-                # Turn on PWM.
-                self.turn_on_PWM_C1()
+                self.move_press_up()
+
                 log.info("Jog positive turned on for control channel C1 on {device}.".format(device=self.name))
 
     @Slot(str)
     def jog_positive_on_C2(self):
         """Turn positive jog on for control channel C2."""
-        self.handle = ljm.open(7, self.connection, self.id)
-        if self.running == True and self.maximumLimitC2 == False and self.motor_enabled_C2 == True:
+        # if self.running == True and self.maximumLimitC2 == False and self.motor_enabled_C2 == True:
+        if self.running == True and self.motor_enabled_C2 == True:
+        # Check status of press
             if self.position_process_variable_C2 <= self.position_right_limit_C2:
                 # Set direction.
                 self.direction_C2 = 1
                 self.jog_C2 = True
-                self.set_direction_C2(self.direction_C2)
-                # Reset counters.
-                self.count_C2 = 0
-                self.previous_count_C2 = 0
-                self.pulses_C2 = 0
-                self.previous_pulses_C2 = 0
-                self.reset_pulse_counter_C2()
-                # Turn on PWM.
-                self.turn_on_PWM_C2()
+                self.move_press_up()
+
                 log.info("Jog positive turned on for control channel C2 on {device}.".format(device=self.name))
 
     @Slot(str)
     def jog_negative_on_C1(self):
         """Turn negative jog on for control channel C1."""
-        self.handle = ljm.open(7, self.connection, self.id)
-        if self.running == True and self.maximumLimitC1 == False and self.motor_enabled_C1 == True:
+        # if self.running == True and self.maximumLimitC1 == False and self.motor_enabled_C1 == True:
+        if self.running == True and self.motor_enabled_C1 == True:
+            #Check status of press
             if self.position_process_variable_C1 >= self.position_left_limit_C1:
                 # Set direction.
                 self.direction_C1 = -1
                 self.jog_C1 = True
-                self.set_direction_C1(self.direction_C1)
-                # Reset counters.
-                self.count_C1 = 0
-                self.previous_count_C1 = 0
-                self.pulses_C1 = 0
-                self.previous_pulses_C1 = 0
-                self.reset_pulse_counter_C1()
-                # Turn on PWM.
-                self.turn_on_PWM_C1()
+                self.move_press_down()
+
                 log.info("Jog negative turned on for control channel C1 on {device}.".format(device=self.name))
 
     @Slot(str)
     def jog_negative_on_C2(self):
         """Turn negative jog on for control channel C2."""
-        self.handle = ljm.open(7, self.connection, self.id)
-        if self.running == True and self.maximumLimitC2 == False and self.motor_enabled_C2 == True:
+        # if self.running == True and self.maximumLimitC2 == False and self.motor_enabled_C2 == True:
+        if self.running == True and self.motor_enabled_C2 == True:
+            #Check status of press
             if self.position_process_variable_C2 >= self.position_left_limit_C2:
                 # Set direction.
                 self.direction_C2 = -1
                 self.jog_C2 = True
-                self.set_direction_C2(self.direction_C2)
-                # Reset counters.
-                self.count_C2 = 0
-                self.previous_count_C2 = 0
-                self.pulses_C2 = 0
-                self.previous_pulses_C2 = 0
-                self.reset_pulse_counter_C2()
-                # Turn on PWM.
-                self.turn_on_PWM_C2()
+                self.move_press_down()
+
                 log.info("Jog negative turned on for control channel C2 on {device}.".format(device=self.name))
 
     @Slot(str)
     def jog_positive_off_C1(self):
         """Turn positive jog off for control channel C1."""
         if self.jog_C1 == True:
-            self.handle = ljm.open(7, self.connection, self.id)
+            # self.handle = ljm.open(7, self.connection, self.id)
             self.jog_C1 = False
-            self.turn_off_PWM_C1()
-            sleep(0.1)
-            self.get_position_C1()
-            self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
+            self.stop_press()
+            # sleep(0.1)
+            # self.get_position_C1()
+            # self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
             log.info("Jog positive turned off for control channel C1 on {device}.".format(device=self.name))
 
     @Slot(str)
     def jog_positive_off_C2(self):
         """Turn positive jog off for control channel C2."""
         if self.jog_C2 == True:
-            self.handle = ljm.open(7, self.connection, self.id)
+            # self.handle = ljm.open(7, self.connection, self.id)
             self.jog_C2 = False
-            self.turn_off_PWM_C2()
-            sleep(0.1)
-            self.get_position_C2()
-            self.updatePositionSetPointC2.emit(self.position_process_variable_C2)
+            self.stop_press()
+            # sleep(0.1)
+            # self.get_position_C2()
+            # self.updatePositionSetPointC2.emit(self.position_process_variable_C2)
             log.info("Jog positive turned off for control channel C2 on {device}.".format(device=self.name))
 
     @Slot(str)
     def jog_negative_off_C1(self):
         """Turn negative jog off for control channel C1."""
         if self.jog_C1 == True:
-            self.handle = ljm.open(7, self.connection, self.id)
+            # self.handle = ljm.open(7, self.connection, self.id)
             self.jog_C1 = False
-            self.turn_off_PWM_C1()
-            sleep(0.1)
-            self.get_position_C1()
-            self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
-            log.info("Jog negative turned off for control channel C1 on {device}.".format(device=self.name))
+            self.stop_press()
+            # sleep(0.1)
+            # self.get_position_C1()
+            # self.updatePositionSetPointC1.emit(self.position_process_variable_C1)
+            log.info("Jog positive turned off for control channel C1 on {device}.".format(device=self.name))
 
     @Slot(str)
     def jog_negative_off_C2(self):
         """Turn negative jog off for control channel C2."""
         if self.jog_C2 == True:
-            self.handle = ljm.open(7, self.connection, self.id)
+            # self.handle = ljm.open(7, self.connection, self.id)
             self.jog_C2 = False
-            self.turn_off_PWM_C2()
-            sleep(0.1)
-            self.get_position_C2()
-            self.updatePositionSetPointC2.emit(self.position_process_variable_C2)
-            log.info("Jog negative turned off for control channel C2 on {device}.".format(device=self.name))
+            self.stop_press()
+            # sleep(0.1)
+            # self.get_position_C1()
+            # self.updatePositionSetPointC2.emit(self.position_process_variable_C2)
+            log.info("Jog positive turned off for control channel C2 on {device}.".format(device=self.name))
 
     @Slot()
     def updateControlPanelC1(self):

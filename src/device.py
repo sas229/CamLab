@@ -778,7 +778,7 @@ class Device(QObject):
         target_frequency = int(speed*self.counts_per_unit_C1)
         self.freqC1, self.rollC1, self.width_C1 = self.set_clock(1, target_frequency)
         self.speed_C1 = self.freqC1/self.counts_per_unit_C1
-        log.info("Speed on control channel C1 set to {speed}.".format(speed=speed))
+        log.info("Speed on control channel C1 set to {speed} mm/s.".format(speed=speed))
 
     @Slot(float)
     def set_speed_C2(self, speed=0.0):
@@ -787,7 +787,7 @@ class Device(QObject):
         target_frequency = int(speed*self.counts_per_unit_C2)
         self.freqC2, self.rollC2, self.width_C2 = self.set_clock(2, target_frequency)
         self.speed_C2 = self.freqC2/self.counts_per_unit_C2
-        log.info("Speed on control channel C2 set to {speed}.".format(speed=speed))
+        log.info("Speed on control channel C2 set to {speed} mm/s.".format(speed=speed))
 
     def reset_pulse_counter_C1(self):
         """Reste C1 pulse counter."""
@@ -1378,4 +1378,103 @@ class Device(QObject):
         self.updateOffsets.emit(self.name, self.channels, self.offsets.tolist())
         log.info("Autozero applied to device.")
 
-        
+    @Slot(float)
+    def jog_rpm_positive_on_C1(self, rpm_speed):
+        """Turn positive jog on for control channel C1 using RPM."""
+        self.handle = ljm.open(7, self.connection, self.id)
+        if self.running and not self.maximum_limit_C1 and self.motor_enabled_C1:
+            # Set direction first
+            self.direction_C1 = 1
+            self.jog_C1 = True
+            self.set_direction_C1(self.direction_C1)
+            
+            # Reset counters
+            self.count_C1 = 0
+            self.previous_count_C1 = 0
+            self.pulses_C1 = 0
+            self.previous_pulses_C1 = 0
+            self.reset_pulse_counter_C1()
+            
+            # Convert RPM to frequency
+            target_frequency = int(rpm_speed * self.CPR / 60.0)  # Use CPR (6400) for RPM
+            self.freqC1, self.rollC1, self.width_C1 = self.set_clock(1, target_frequency)
+            
+            # Turn on PWM - This is the key part that was missing!
+            self.turn_on_PWM_C1()
+            log.info(f"Jogging C1 at {rpm_speed} RPM")
+
+    @Slot(float)
+    def jog_rpm_negative_on_C1(self, rpm_speed):
+        """Turn negative jog on for control channel C1 using RPM."""
+        self.handle = ljm.open(7, self.connection, self.id)
+        if self.running and not self.minimum_limit_C1 and self.motor_enabled_C1:
+            # Set direction first
+            self.direction_C1 = -1
+            self.jog_C1 = True
+            self.set_direction_C1(self.direction_C1)
+            
+            # Reset counters
+            self.count_C1 = 0
+            self.previous_count_C1 = 0
+            self.pulses_C1 = 0
+            self.previous_pulses_C1 = 0
+            self.reset_pulse_counter_C1()
+            
+            # Convert RPM to frequency using absolute value
+            target_frequency = int(abs(rpm_speed) * self.CPR / 60.0)  # Use CPR (6400) for RPM
+            self.freqC1, self.rollC1, self.width_C1 = self.set_clock(1, target_frequency)
+            
+            # Turn on PWM - This is the key part that was missing!
+            self.turn_on_PWM_C1()
+            log.info(f"Jogging C1 at {rpm_speed} RPM")
+
+    @Slot(float)
+    def jog_rpm_positive_on_C2(self, rpm_speed):
+        """Turn positive jog on for control channel C2 using RPM."""
+        self.handle = ljm.open(7, self.connection, self.id)
+        if self.running and not self.maximum_limit_C2 and self.motor_enabled_C2:
+            # Set direction first
+            self.direction_C2 = 1
+            self.jog_C2 = True
+            self.set_direction_C2(self.direction_C2)
+            
+            # Reset counters
+            self.count_C2 = 0
+            self.previous_count_C2 = 0
+            self.pulses_C2 = 0
+            self.previous_pulses_C2 = 0
+            self.reset_pulse_counter_C2()
+            
+            # Convert RPM to frequency
+            target_frequency = int(rpm_speed * self.CPR / 60.0)  # Use CPR (6400) for RPM
+            self.freqC2, self.rollC2, self.width_C2 = self.set_clock(2, target_frequency)  # Changed from 1 to 2
+            
+            # Turn on PWM
+            self.turn_on_PWM_C2()
+            log.info(f"Jogging C2 at {rpm_speed} RPM")
+
+    @Slot(float)
+    def jog_rpm_negative_on_C2(self, rpm_speed):
+        """Turn negative jog on for control channel C2 using RPM."""
+        self.handle = ljm.open(7, self.connection, self.id)
+        if self.running and not self.minimum_limit_C2 and self.motor_enabled_C2:
+            # Set direction first
+            self.direction_C2 = -1
+            self.jog_C2 = True
+            self.set_direction_C2(self.direction_C2)
+            
+            # Reset counters
+            self.count_C2 = 0
+            self.previous_count_C2 = 0
+            self.pulses_C2 = 0
+            self.previous_pulses_C2 = 0
+            self.reset_pulse_counter_C2()
+            
+            # Convert RPM to frequency using absolute value
+            target_frequency = int(abs(rpm_speed) * self.CPR / 60.0)  # Use CPR (6400) for RPM
+            self.freqC2, self.rollC2, self.width_C2 = self.set_clock(2, target_frequency)  # Changed from 1 to 2
+            
+            # Turn on PWM
+            self.turn_on_PWM_C2()
+            log.info(f"Jogging C2 at {rpm_speed} RPM")
+            
