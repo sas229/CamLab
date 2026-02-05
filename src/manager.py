@@ -22,7 +22,6 @@ import json
 import ipaddress
 import netifaces
 from sys import platform
-import winreg
 import concurrent.futures
 
 
@@ -459,13 +458,22 @@ class Manager(QObject):
         indexPressFeedback = 0
         for device in enabledDevices:
 
+            if device["type"] == "RPi-PicoW-FHA":
+                name = device["name"]
+                if name == "FHA":
+                    indexPressFeedback += 20
+                elif name == "TEM":
+                    indexPressFeedback += 10
+                elif name == "TPL":
+                    indexPressFeedback += 3
+
             if device["type"] == "Hub":
                 name = device["name"]
                 channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[
                     name].acquisitionSettings()
 
                 for channel in channels:
-             
+
                     if channel == self.pressChannelFeedback and name == self.pressDeviceFeeback:
                         return int(indexPressFeedback)
 
@@ -475,11 +483,20 @@ class Manager(QObject):
         tot_chann = 0
 
         for device in enableDevices:
+            if device["type"] == "RPi-PicoW-FHA":
+                name = device["name"]
+                if name == "FHA":
+                    tot_chann += 20
+                elif name == "TEM":
+                    tot_chann += 10
+                elif name == "TPL":
+                    tot_chann += 3
+
             if device["type"] == "Hub":
                 name = device["name"]
                 channels, names, units, slopes, offsets, autozero = self.acquisitionTableModels[
                     name].acquisitionSettings()
-                
+
                 tot_chann += len(channels)
 
         return int(tot_chann)
@@ -681,13 +698,18 @@ class Manager(QObject):
                         log.warning(e)
 
                 elif deviceInformation["type"] == "Press":
-                   
+
                     # Check if press is connected in any COM ports.
                     address = 21
                     for comport in list_ports.comports():
                         # Configure the serial connection.
+                        port = comport.device
+
+                        if platform.startswith("linux") and "ttyS" in port:
+                            continue
+
                         ser = serial.Serial(
-                            port=comport.device,
+                            port=port,
                             baudrate=57600,
                             parity=serial.PARITY_NONE,
                             stopbits=serial.STOPBITS_ONE,
@@ -963,8 +985,13 @@ class Manager(QObject):
             address = 21
             for comport in list_ports.comports():
                 # Configure the serial connection.
+                port = comport.device
+
+                if platform.startswith("linux") and "ttyS" in port:
+                    continue
+
                 ser = serial.Serial(
-                    port=comport.device,
+                    port=port,
                     baudrate=115200,
                     parity=serial.PARITY_NONE,
                     stopbits=serial.STOPBITS_ONE,
@@ -1145,14 +1172,15 @@ class Manager(QObject):
         wifi_interfaces = []
 
         if platform == 'win32':
+            import winreg
             interface_names =  self.get_connection_name_from_guid(interfaces)
 
             for i in range(len(interface_names)):
-            
+
                 if interface_names[i] == "Wi-Fi":
                     wifi_interfaces.append(interfaces[i])
         else:
-            wifi_interfaces = interfaces
+            wifi_interfaces = [iface for iface in interfaces if iface.startswith("wlp")]
 
         for interface in wifi_interfaces:
             addrs = netifaces.ifaddresses(interface)
